@@ -28,6 +28,22 @@ contract BankrollVault420 is I420System {
     uint256 public activeWagerStakeEscrow;
     uint256 private _entered;
 
+    // Cumulative custody-derived counters; no caller can submit aggregate profits.
+    uint256 public grossSettledWagers;
+    uint256 public grossSettledPayouts;
+    uint256 public refundedStakes;
+    uint256 public totalDeposited;
+    uint256 public totalWithdrawn;
+    uint256 public unclassifiedEqualReturns;
+    mapping(bytes32 => bool) public profitSettlementRecorded;
+    mapping(bytes32 => bool) public refundClassified;
+    mapping(bytes32 => uint256) public equalReturnByWager;
+    mapping(bytes32 => address) private equalReturnResolver;
+
+    event ProfitSettlementRecorded(bytes32 indexed wagerId, uint256 stake, uint256 payout);
+    event ProfitRefundClassified(bytes32 indexed wagerId, uint256 amount, bool isRefund);
+
+
     error ZeroAddress();
     error InvalidId();
     error InvalidAmount();
@@ -108,6 +124,7 @@ contract BankrollVault420 is I420System {
 
         _mint(msg.sender, shares);
         accounting.recordDeposit(vaultId, amount);
+        totalDeposited += amount;
         emit Deposited(msg.sender, amount, shares);
     }
 
@@ -120,6 +137,7 @@ contract BankrollVault420 is I420System {
         shares = _previewDeposit(msg.value, equityBefore);
         _mint(msg.sender, shares);
         accounting.recordDeposit(vaultId, msg.value);
+        totalDeposited += msg.value;
         emit Deposited(msg.sender, msg.value, shares);
     }
 
@@ -128,7 +146,7 @@ contract BankrollVault420 is I420System {
         if (wagerId == bytes32(0)) revert InvalidId();
         if (player == address(0)) revert ZeroAddress();
         if (amount == 0) revert InvalidAmount();
-        if (wagerStakeEscrow[wagerId] != 0) revert StakeAlreadyEscrowed();
+        if (wagerStakeEscrow[wagerId] != 0 || profitSettlementRecorded[wagerId]) revert StakeAlreadyEscrowed();
         _requireRegisteredAsset();
         _requireSystemAuth(BetIds420.ACTION_VAULT_ESCROW_STAKE, amount);
 
@@ -155,7 +173,7 @@ contract BankrollVault420 is I420System {
         if (wagerId == bytes32(0)) revert InvalidId();
         if (player == address(0)) revert ZeroAddress();
         if (msg.value == 0) revert InvalidAmount();
-        if (wagerStakeEscrow[wagerId] != 0) revert StakeAlreadyEscrowed();
+        if (wagerStakeEscrow[wagerId] != 0 || profitSettlementRecorded[wagerId]) revert StakeAlreadyEscrowed();
         _requireRegisteredAsset();
         _requireSystemAuth(BetIds420.ACTION_VAULT_ESCROW_STAKE, msg.value);
         wagerStakeEscrow[wagerId] = msg.value;
@@ -183,10 +201,32 @@ contract BankrollVault420 is I420System {
         wagerStakeEscrow[wagerId] = 0;
         wagerPlayer[wagerId] = address(0);
         activeWagerStakeEscrow -= stake;
+        profitSettlementRecorded[wagerId] = true;
+        grossSettledWagers += stake;
+        grossSettledPayouts += grossPayout;
+        if (grossPayout == stake) {
+            equalReturnByWager[wagerId] = stake;
+            equalReturnResolver[wagerId] = msg.sender;
+            unclassifiedEqualReturns += stake;
+        }
         accounting.recordWagerSettlement(vaultId, stakeAbsorbed, bankrollOutflow);
+        emit ProfitSettlementRecorded(wagerId, stake, grossPayout);
         if (grossPayout != 0) _sendExact(player, grossPayout);
 
         emit WagerStakeResolved(wagerId, player, stake, grossPayout, stakeAbsorbed, bankrollOutflow);
+    }
+
+    /// @notice Classifies equal returns only by the same authorized settlement owner.
+    /// Unknown equal returns remain unresolved and cannot support revenue eligibility.
+    function classifyEqualReturn(bytes32 wagerId, bool isRefund) external nonReentrant {
+        uint256 amount = equalReturnByWager[wagerId];
+        if (amount == 0 || refundClassified[wagerId]) revert InvalidAmount();
+        if (msg.sender != equalReturnResolver[wagerId]) revert Unauthorized();
+        _requireSystemAuth(BetIds420.ACTION_VAULT_SETTLE_WAGER, amount);
+        refundClassified[wagerId] = true;
+        unclassifiedEqualReturns -= amount;
+        if (isRefund) refundedStakes += amount;
+        emit ProfitRefundClassified(wagerId, amount, isRefund);
     }
 
     function requestWithdrawal(uint256 shares) external nonReentrant returns (bytes32 requestId, uint256 assets) {
@@ -212,6 +252,7 @@ contract BankrollVault420 is I420System {
         _requireUserAuth(BetIds420.ACTION_LP_CLAIM_WITHDRAWAL, r.amount);
         assets = withdrawalQueue.consume(requestId, msg.sender);
         accounting.completeWithdrawal(vaultId, assets);
+        totalWithdrawn += assets;
         _sendExact(msg.sender, assets);
         emit WithdrawalClaimed(requestId, msg.sender, assets);
     }

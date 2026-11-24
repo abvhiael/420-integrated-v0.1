@@ -143,6 +143,45 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
           python3 scripts/bet/verify-ws8-inheritance.py
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - name: Fresh financial owner regressions at the candidate SHA
+        working-directory: contracts
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          FOUNDRY_PROFILE: pr
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          scope="$(mktemp -d "$PWD/.ws8-financial.XXXXXX")"
+          trap 'rm -rf "$scope"' EXIT
+          python3 ../scripts/bet/scope-foundry-suites.py "$scope" BetBankrollRisk420 BetEconomics420 BetSettlementEngine420 BetCasinoConvergence420 BetCasinoEmergencyConvergence420 BetCasinoSolvencyConvergence420 BetCasinoSettlementInvariant420 BetTerminalPathInvariant420 BetProfitAccounting420 BetGovernedProfitEpoch420 BetGenesisCapitalization420
+          export FOUNDRY_SRC="$scope/empty-src" FOUNDRY_TEST="$scope" FOUNDRY_SCRIPT="$scope/empty-script"
+          mkdir -p "$FOUNDRY_SRC" "$FOUNDRY_SCRIPT" ../artifacts/ws8-financial
+          forge test --match-contract '^(BetBankrollRisk420|BetEconomics420|BetSettlementEngine420|BetCasinoConvergence420|BetCasinoEmergencyConvergence420|BetCasinoSolvencyConvergence420|BetCasinoSettlementInvariant420|BetTerminalPathInvariant420|BetProfitAccounting420|BetGovernedProfitEpoch420|BetGenesisCapitalization420)Test$' --json > ../artifacts/ws8-financial/results.json
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          root = pathlib.Path('../artifacts/ws8-financial')
+          data = json.loads((root/'results.json').read_text())
+          expected = set(["BetBankrollRisk420Test","BetEconomics420Test","BetSettlementEngine420Test","BetCasinoConvergence420Test","BetCasinoEmergencyConvergence420Test","BetCasinoSolvencyConvergence420Test","BetCasinoSettlementInvariant420Test","BetTerminalPathInvariant420Test","BetProfitAccounting420Test","BetGovernedProfitEpoch420Test","BetGenesisCapitalization420Test"])
+          seen = {}
+          for key, suite in data.items():
+              name = key.split(':')[-1]
+              assert name in expected and name not in seen, key
+              tests = suite['test_results']
+              assert tests and all(t['status'] == 'Success' for t in tests.values()), key
+              seen[name] = len(tests)
+          assert set(seen) == expected, (expected-set(seen), set(seen)-expected)
+          assert subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip() == os.environ['EXPECTED_SHA']
+          assert not subprocess.check_output(['git','status','--porcelain','--untracked-files=no'], text=True).strip()
+          (root/'execution.json').write_text(json.dumps({'qualifiedSHA':os.environ['EXPECTED_SHA'],'suites':seen,'rawSHA256':hashlib.sha256((root/'results.json').read_bytes()).hexdigest()},indent=2)+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ws8-fresh-financial-execution
+          path: artifacts/ws8-financial/
+          if-no-files-found: error
   scoped-level1-cryptography:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -273,6 +312,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: ws8-fresh-financial-execution
+          path: artifacts/ws8-financial
       - name: Certify matching exact-SHA actual execution records
         env:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}

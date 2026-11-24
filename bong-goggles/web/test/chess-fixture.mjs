@@ -1,0 +1,5 @@
+import {createHash} from 'node:crypto';
+export const id='44444444-4444-4444-8444-444444444444',roomId='33333333-3333-4333-8333-333333333333',actor='11111111-1111-4111-8111-111111111111';
+export const hash=createHash('sha256').update('chess\nv1.1\nbc-chess-standard@1.1.0;orthodox;seat-0-white;seat-1-black;uci;san;exact-repetition;half-point-units;material-only-dead-position-and-flag-fall;resignation-is-loss').digest('hex');
+export const envelope=x=>({status:200,data:{onChain:false,wager:false,rewards:false,...x}});
+export function fixture(seat=0){return {id,roomId,gameId:'chess',rulesVersion:'v1.1',rulesHash:hash,seatCount:2,sequence:1,viewerSeat:seat,status:'active',turnSeat:0,winnerSeat:null,deadline:null,privateView:{gameId:'chess',ruleset:'bc-chess-standard@1.1.0',seat,color:seat?'black':'white',whiteSeat:0,blackSeat:1,board:'RNBQKBNRPPPPPPPP................................pppppppprnbqkbnr',turn:0,phase:'play',round:1,scores:[0,0],winner:null,terminal:false,reason:'',lastMove:'',lastSAN:'',castling:15,enPassant:-1,halfmove:0,check:false,drawOffer:-1,timing:null}};}

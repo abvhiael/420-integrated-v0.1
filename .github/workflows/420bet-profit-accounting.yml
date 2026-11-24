@@ -1,0 +1,67 @@
+name: 420Bet P5.4.3 Profit Accounting
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/420bet-profit-accounting.yml'
+      - 'contracts/src/bet/Bet*ProfitAccounting420.sol'
+      - 'contracts/src/bet/BankrollVault420.sol'
+      - 'contracts/src/bet/BetEconomics420.sol'
+      - 'contracts/src/bet/SettlementEngine420.sol'
+      - 'contracts/src/bet/VaultAccounting420.sol'
+      - 'contracts/src/bet/BetGenesisCapitalization420.sol'
+      - 'contracts/test/BetProfitAccounting420.t.sol'
+      - 'contracts/src/bet/BetGovernedProfitEpoch420.sol'
+      - 'contracts/src/bet/BetFantasyProfitEpochSource420.sol'
+      - 'contracts/src/revenue/**'
+      - 'contracts/test/BetGovernedProfitEpoch420.t.sol'
+      - 'contracts/src/bet/BetAuthorization420.sol'
+      - 'contracts/src/bet/BetIds420.sol'
+      - 'contracts/src/bet/WithdrawalQueue420.sol'
+      - 'contracts/src/interfaces/**'
+      - 'contracts/src/system/**'
+      - 'contracts/foundry.toml'
+permissions:
+  contents: read
+jobs:
+  accounting:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Exact-head accounting, adversarial, fuzz and invariant tests
+        working-directory: contracts
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          FOUNDRY_PROFILE: pr
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          scope="$(mktemp -d "$PWD/.profit.XXXXXX")"
+          trap 'rm -rf "$scope"' EXIT
+          cp test/BetGovernedProfitEpoch420.t.sol test/BetProfitAccounting420.t.sol test/BetEconomics420.t.sol "$scope/"
+          export FOUNDRY_SRC="$scope/empty-src" FOUNDRY_TEST="$scope" FOUNDRY_SCRIPT="$scope/empty-script"
+          mkdir -p "$FOUNDRY_SRC" "$FOUNDRY_SCRIPT"
+          forge test --match-contract '^(BetGovernedProfitEpoch420Test|BetProfitAccounting420Test|BetEconomics420Test)$' --json > "$RUNNER_TEMP/profit.json"
+          python3 - "$RUNNER_TEMP/profit.json" <<'PY'
+          import json,sys
+          data=json.load(open(sys.argv[1]))
+          suites={k.split(':')[-1]:v['test_results'] for k,v in data.items()}
+          assert set(suites)=={'BetGovernedProfitEpoch420Test','BetProfitAccounting420Test','BetEconomics420Test'}
+          assert len(suites['BetProfitAccounting420Test'])>=9
+          assert len(suites['BetGovernedProfitEpoch420Test'])>=4
+          assert any(k.startswith('testFuzz') for k in suites['BetProfitAccounting420Test'])
+          assert any(k.startswith('invariant_') for k in suites['BetProfitAccounting420Test'])
+          assert all(v['status']=='Success' for s in suites.values() for v in s.values())
+          print('PASS:',sum(map(len,suites.values())),'accounting and economics tests')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: profit-accounting-execution
+          path: ${{ runner.temp }}/profit.json
+          if-no-files-found: error

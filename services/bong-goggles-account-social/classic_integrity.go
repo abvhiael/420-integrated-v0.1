@@ -17,6 +17,9 @@ var classicPublicKeys=map[string]bool{
 }
 
 func validClassicPublicEvent(event ClassicSessionEvent,seats int)bool{
+ return validClassicPublicEventForSession(event,seats,false)
+}
+func validClassicPublicEventForSession(event ClassicSessionEvent,seats int,allowUntimed bool)bool{
  if event.Sequence<1||seats<2||seats>4||!validViewerState(event.PublicState)||
   !noDuplicateJSON(event.PublicState){return false}
  var state map[string]json.RawMessage
@@ -35,7 +38,7 @@ func validClassicPublicEvent(event ClassicSessionEvent,seats int)bool{
  if event.ActorSeat!=nil&&(*event.ActorSeat<0||*event.ActorSeat>=seats){return false}
  if decoded.Status=="active"{
   if (event.Kind!="started"&&event.Kind!="move")||decoded.TurnSeat==nil||
-   *decoded.TurnSeat<0||*decoded.TurnSeat>=seats||decoded.Deadline==nil||
+   *decoded.TurnSeat<0||*decoded.TurnSeat>=seats||(decoded.Deadline==nil&&!allowUntimed)||
    decoded.WinnerSeat!=nil||decoded.FinishedReason!=""{return false}
   return (event.Kind=="started")==(event.Sequence==1)&&
    (event.ActorSeat==nil)==(event.Kind=="started")
@@ -63,7 +66,9 @@ func (s *ClassicSessions) verifyClassicJournalTx(ctx context.Context,tx *sql.Tx,
  if count!=rec.Sequence||first!=1||last!=rec.Sequence{return ErrUnavailable}
  var kind string
  var same bool
- e=tx.QueryRowContext(ctx,`SELECT kind,public_state=$3::jsonb
+ e=tx.QueryRowContext(ctx,`SELECT kind,(public_state ? 'deadline') AND (public_state - 'deadline')=($3::jsonb - 'deadline')
+ AND (public_state->>'deadline')::timestamptz IS NOT DISTINCT FROM
+     ($3::jsonb->>'deadline')::timestamptz
  FROM bg_account_social.classic_session_events
  WHERE session_id=$1 AND sequence=$2`,rec.ID,rec.Sequence,string(classicPublicState(rec))).Scan(&kind,&same)
  if e!=nil||!same{return ErrUnavailable}

@@ -1,3 +1,4 @@
+import {renderChessScreen} from './chess-ui.js';
 import {card,emptyState,escapeHtml,button} from './design-system.js';
 import {GAME_TYPES,normalizeGameHub,normalizeGameDetail,gameActions,gameLink} from './games.js';
 import {CLASSIC_ROADMAP,ALL_CLASSICS,classicGameById} from './classics.js';
@@ -22,9 +23,10 @@ renderGameAccountPanel(accountIdentityState,{enabled:accountIdentityEnabled})+
 '<p class="games-catalogue__footnote"><a href="/games/rooms" data-route="classic-rooms">Browse multiplayer rooms</a> to create private/public 420ID lobbies and choose human or computer seats. No match starts until its game rules are qualified.</p>'+
 '<p class="games-catalogue__footnote">No wagers or rewards. Browse without a wallet. For existing wallet-independent two-player quick games, visit <a href="/account/games" data-route="account-games">Account Games</a>. Cross-Country Chaos uses private 420ID account rooms.</p></div>';
 }
-export function renderClassicGamePage(gameId,{screen='intro',view=null,cribbageState=null,labyrinthState=null,accountIdentityState=null,accountIdentityEnabled=false}={}){
+export function renderClassicGamePage(gameId,{screen='intro',view=null,cribbageState=null,labyrinthState=null,chessState=null,accountIdentityState=null,accountIdentityEnabled=false}={}){
 const game=classicGameById(gameId);
 if(!game)return card({title:'Game unavailable',body:emptyState({title:'Game not found',message:'Choose a title from the Games catalogue.'})});
+if(game.id==='chess'&&chessState&&chessState.status!=='disabled')return renderChessScreen(screen,chessState);
 if(game.id==='cribbage')return renderCribbageRoute({screen,state:cribbageState,identity:[accountIdentityState,accountIdentityEnabled]});
 const step=CLASSIC_ROADMAP.find(item=>item.id===gameId);
 const playLink=game.status==='account'?'<a class="ccc-link" href="/classics/cross-country-chaos" data-route="chaos-game">Play Cross-Country Chaos online</a> <a class="ccc-link" href="/classics/cross-country-chaos/practice" data-route="chaos-game">Play against computers</a>':game.status==='playable'?'<a class="ccc-link" href="/games/rooms" data-route="classic-rooms">Play in a room</a> <a class="ccc-link" href="/games/'+escapeHtml(game.id)+'/history" data-route="classic-game">My Games</a>':'';

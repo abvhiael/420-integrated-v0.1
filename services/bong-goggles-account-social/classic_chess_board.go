@@ -68,7 +68,9 @@ func(p chessBoard) apply(m chessMove)chessBoard{
  if p.Turn==1{p.Full++};p.Turn=1-p.Turn
  return p
 }
-func(p chessBoard) legal()[]chessMove{
+func(p chessBoard) legal()[]chessMove{return p.legalLimited(false)}
+// The same generator can stop after the first legal move for terminal checks.
+func(p chessBoard) legalLimited(first bool)[]chessMove{
  out:=[]chessMove{}
  for f,v:=range p.Squares{
   if chessColor(v)!=p.Turn{continue}
@@ -76,19 +78,21 @@ func(p chessBoard) legal()[]chessMove{
   add:=func(t int,special byte){
    if t<0||chessColor(p.Squares[t])==p.Turn||chessKind(p.Squares[t])=='K'{return}
    promos:=[]byte{0};if k=='P'&&(t/8==0||t/8==7){promos=[]byte{'Q','R','B','N'}}
-   for _,q:=range promos{m:=chessMove{f,t,q,special};if !p.apply(m).check(p.Turn){out=append(out,m)}}
+   for _,q:=range promos{m:=chessMove{f,t,q,special};if !p.apply(m).check(p.Turn){out=append(out,m);if first{return}}}
   }
   if k=='P'{
    d,start:=1,1;if p.Turn==1{d,start=-1,6}
    t:=chessSquare(f%8,f/8+d)
    if t>=0&&p.Squares[t]=='.'{add(t,0);if f/8==start&&p.Squares[t+8*d]=='.'{add(t+8*d,0)}}
    for _,dx:=range []int{-1,1}{t=chessSquare(f%8+dx,f/8+d);if t<0{continue};if chessColor(p.Squares[t])==1-p.Turn{add(t,0)}else if t==p.EP&&p.Squares[t]=='.'&&chessKind(p.Squares[t-8*d])=='P'&&chessColor(p.Squares[t-8*d])==1-p.Turn{add(t,'e')}}
+   if first&&len(out)>0{return out}
    continue
   }
   dirs:=chessAllDirs
   switch k{case 'N':dirs=chessKnight;case 'B':dirs=chessDiagonal;case 'R':dirs=chessOrthogonal}
   for _,d:=range dirs{for n:=1;n<=7;n++{
    t:=chessSquare(f%8+d[0]*n,f/8+d[1]*n);if t<0{break};add(t,0)
+   if first&&len(out)>0{return out}
    if p.Squares[t]!='.'||k=='K'||k=='N'{break}
   }}
   if k=='K'&&f==4+56*p.Turn&&!p.check(p.Turn){
@@ -97,7 +101,7 @@ func(p chessBoard) legal()[]chessMove{
     bit:=byte(1<<uint(2*p.Turn));rf:=f+3;if side==-1{bit<<=1;rf=f-4}
     if p.Castle&bit==0||p.Squares[rf]!=rook||p.Squares[f+side]!='.'||p.Squares[f+2*side]!='.'||(side==-1&&p.Squares[f-3]!='.'){continue}
     transit:=p.apply(chessMove{From:f,To:f+side})
-    if !transit.check(p.Turn){add(f+2*side,'c')}
+    if !transit.check(p.Turn){add(f+2*side,'c');if first&&len(out)>0{return out}}
    }
   }
  }

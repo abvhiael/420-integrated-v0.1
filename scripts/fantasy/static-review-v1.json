@@ -20,7 +20,7 @@
     "contracts/src/interfaces/genesis/IIdentityCredential420.sol": "74f96b43758ee97d3124e112d669e9ba9bccf9ce63be1e6c7dee8e1948f4f978",
     "contracts/src/interfaces/genesis/Types420.sol": "bee557da20b6ab622fc2e9cb779c27bb9efecfb9f7bc5d73f646446bab17f5ff",
     "contracts/src/revenue/DevelopmentCompensationIds420.sol": "5a7c4b05901c16194fc84c5f279ef2ea22e81a537516ccd156fe5e6f7feecdd3",
-    "contracts/src/revenue/DevelopmentCompensationVault420.sol": "45efdb4ca0073460ba9804f61cc3290cede19eb9b3b1a7ff7af7b467037a7d4c",
+    "contracts/src/revenue/DevelopmentCompensationVault420.sol": "17bb9b0bfbe3abd61b866113f88de6af265288e7ef564bdd75b26bdb5fd50380",
     "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223"
   },
   "dispositions": {
@@ -388,5 +388,11 @@
   "reviewedSignatureVariants": {
     "bef395a94fdc131fbf20440961775de935482bf3ecefd933e25c9880c2c34af8": "40f1c84b2272402fd87329e6822b747aafaf7d1206fc5702a5f7a87f55c75902"
   },
-  "signatureVariantReview": "Linux Slither 0.11.6 additionally reports p.netPrize = p.gross - p.fee in _startReview after _lockPool. Reviewed against unchanged source: every public mutator is nonReentrant, the host-created immutable dispute module cannot mutate this host through its read callbacks, and _lockPool cancellation cannot proceed past the LOCKED state guard. Windows omits this propagated alias write. Both exact raw reports retained; no severity or source assertion relaxed."
+  "signatureVariantReview": "Linux Slither 0.11.6 additionally reports p.netPrize = p.gross - p.fee in _startReview after _lockPool. Reviewed against unchanged source: every public mutator is nonReentrant, the host-created immutable dispute module cannot mutate this host through its read callbacks, and _lockPool cancellation cannot proceed past the LOCKED state guard. Windows omits this propagated alias write. Both exact raw reports retained; no severity or source assertion relaxed.",
+  "vaultSourceReview": {
+    "previousNormalizedSHA256": "45efdb4ca0073460ba9804f61cc3290cede19eb9b3b1a7ff7af7b467037a7d4c",
+    "reviewedCommit": "3897d40d64ff2f539f0d2c22703a8b756da27e7d",
+    "scope": "Two appended per-asset counters and two increments in contributeFantasy; reversing exactly those additions reproduces the previous reviewed digest.",
+    "rationale": "Counters update only after monotonic pool basis, nonzero rounded fee and scoped source authorization checks, under the existing shared mutex. Checked arithmetic and atomic revert preserve both counters on failed native/token delivery or callback. No new external calls, destinations, permissions or fee arithmetic. Existing divide-before-multiply disposition remains unchanged. All severe finding signatures must still match the existing review."
+  }
 }

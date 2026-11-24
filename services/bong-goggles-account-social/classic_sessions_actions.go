@@ -24,6 +24,9 @@ func (s *ClassicSessions) publish(ctx context.Context,tx *sql.Tx,r classicSessio
  return e
 }
 func (s *ClassicSessions) Start(ctx context.Context,viewer,roomID string)(ClassicSessionView,error){
+ return s.startWithClock(ctx,viewer,roomID,"")
+}
+func (s *ClassicSessions) startWithClock(ctx context.Context,viewer,roomID,profile string)(ClassicSessionView,error){
  var empty ClassicSessionView
  if !uuid.MatchString(viewer)||!uuid.MatchString(roomID){return empty,ErrInvalid}
  tx,e:=s.Store.DB.BeginTx(ctx,nil);if e!=nil{return empty,e};defer tx.Rollback()
@@ -82,7 +85,15 @@ func (s *ClassicSessions) Start(ctx context.Context,viewer,roomID string)(Classi
  id,e:=newID();if e!=nil{return empty,e}
  var now time.Time
  if e=tx.QueryRowContext(ctx,"SELECT clock_timestamp()").Scan(&now);e!=nil{return empty,e}
- deadline:=now.Add(classicTurnSeconds*time.Second)
+ var deadline *time.Time
+ if profile!=""&&!isClassicChess(rule){return empty,ErrInvalid}
+ if !isClassicChess(rule){d:=now.Add(classicTurnSeconds*time.Second);deadline=&d
+ }else if profile!=""&&profile!="untimed"{
+  clock,err:=chessClockForProfile(profile);if err!=nil{return empty,err}
+  timing:=chessTimedState{Profile:profile,Clock:clock,At:now.UnixMilli()}
+  state,err=chessFrameWithTime(adapter,state,&timing);if err!=nil{return empty,err}
+  deadline=timing.deadline(first)
+ }
  _,e=tx.ExecContext(ctx,"INSERT INTO bg_account_social.classic_sessions "+
   "(id,room_id,game_id,seat_count,status,rules_version,rules_hash,engine_state,sequence,turn_seat,turn_deadline) "+
   "VALUES($1,$2,$3,$4,'active',$5,$6,$7,1,$8,$9)",
@@ -96,7 +107,7 @@ func (s *ClassicSessions) Start(ctx context.Context,viewer,roomID string)(Classi
  if e!=nil{return empty,e}
  rec:=classicSessionRecord{ClassicSession:ClassicSession{
   ID:id,RoomID:roomID,GameID:room.GameID,SeatCount:room.SeatCount,Status:"active",
-  RulesVersion:version,RulesHash:hash,Sequence:1,TurnSeat:&first,Deadline:&deadline},State:state}
+  RulesVersion:version,RulesHash:hash,Sequence:1,TurnSeat:&first,Deadline:deadline},State:state}
  if e=s.publish(ctx,tx,rec,"started",nil);e!=nil{return empty,e}
  if e=tx.Commit();e!=nil{return empty,e}
  return s.Get(ctx,viewer,id)
@@ -127,6 +138,8 @@ func (s *ClassicSessions) Expire(ctx context.Context,id string)error{
 }
 func (s *ClassicSessions) expireLocked(ctx context.Context,tx *sql.Tx,r *classicSessionRecord,now time.Time)error{
  if r.Status!="active"||r.Deadline==nil||now.Before(*r.Deadline){return nil}
+ rule,err:=s.rule(r.GameID,r.RulesVersion,r.RulesHash);if err!=nil{return err}
+ if isClassicChess(rule){return s.expireChessLocked(ctx,tx,r,rule.(*RulesAdapter),now)}
  actor:=any(nil)
  if r.TurnSeat!=nil{actor=*r.TurnSeat}
  r.Sequence++;r.Status="timed_out";r.FinishedReason="timed_out";r.TurnSeat=nil;r.Deadline=nil
@@ -200,11 +213,22 @@ func (s *ClassicSessions) Act(ctx context.Context,viewer,id string,action Classi
  actor:=any(seat)
  var next any;var deadline any;var winner any;var reason any
  beforeState:=append(json.RawMessage(nil),rec.State...)
- if kind=="move"{
-  if rec.TurnSeat==nil||*rec.TurnSeat!=seat{return empty,ErrForbidden}
-  engine,e:=s.rule(rec.GameID,rec.RulesVersion,rec.RulesHash)
-  if e!=nil{return empty,e}
-  state,turn,finished,won,e:=engine.Apply(rec.State,seat,action.Move)
+ chess:=isClassicChess(rule)
+ if chess&&kind=="cancel"{return empty,ErrConflict}
+ ruleAction:=action.Move
+ if chess&&kind=="resign"{ruleAction=chessAction("resign","")}
+ if kind=="move"||chess&&kind=="resign"{
+  if rec.TurnSeat==nil{return empty,ErrUnavailable}
+  if *rec.TurnSeat!=seat&&!(chess&&chessNonTurnAction(ruleAction)){return empty,ErrForbidden}
+  var state json.RawMessage
+  var turn int
+  var finished bool
+  var won *int
+  if chess&&rec.Deadline!=nil{
+   event:=chessTimedEvent{At:now.UnixMilli(),Move:ruleAction}
+   state,turn,finished,won,e=replayAdapter.applyChessTime(rec.State,seat,event)
+   if e==nil{ruleAction,e=json.Marshal(event)}
+  }else{state,turn,finished,won,e=rule.Apply(rec.State,seat,ruleAction)}
   if e!=nil{return empty,e}
   if !validRuleState(state){return empty,ErrUnavailable}
   rec.State=state
@@ -222,7 +246,13 @@ func (s *ClassicSessions) Act(ctx context.Context,viewer,id string,action Classi
     if !difficulty.Valid{return empty,ErrUnavailable}
     if _,e=s.botPolicy(rec.GameID,difficulty.String);e!=nil{return empty,ErrUnavailable}
    }else if controller!="human"{return empty,ErrUnavailable}
-   rec.TurnSeat=&turn;next=turn;d:=now.Add(classicTurnSeconds*time.Second);rec.Deadline=&d;deadline=d
+   rec.TurnSeat=&turn;next=turn
+   if !chess{d:=now.Add(classicTurnSeconds*time.Second);rec.Deadline=&d;deadline=d
+   }else if rec.Deadline!=nil{
+    frame,err:=replayAdapter.decode(state);if err!=nil{return empty,err}
+    data,err:=chessDecode(frame);if err!=nil{return empty,err}
+    rec.Deadline=data.Timing.deadline(turn);deadline=rec.Deadline
+   }
   }
  }else{
   if kind=="cancel"&&viewer!=room.Host{return empty,ErrForbidden}
@@ -243,8 +273,8 @@ func (s *ClassicSessions) Act(ctx context.Context,viewer,id string,action Classi
   if e!=nil{return empty,e}
  }
  if e=s.publish(ctx,tx,rec,kind,actor);e!=nil{return empty,e}
- if versioned&&action.Action=="move"{
-  if e=s.saveRuleMove(ctx,tx,id,rec.Sequence,seat,action.Move,beforeState,rec.State,replayAdapter);e!=nil{return empty,e}
+ if versioned&&len(ruleAction)>0{
+  if e=s.saveRuleMove(ctx,tx,id,rec.Sequence,seat,ruleAction,beforeState,rec.State,replayAdapter);e!=nil{return empty,e}
  }
  _,e=tx.ExecContext(ctx,"INSERT INTO bg_account_social.classic_session_commands "+
  "(session_id,request_id,actor,digest,sequence) VALUES($1,$2,$3,$4,$5)",

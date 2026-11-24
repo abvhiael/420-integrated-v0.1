@@ -161,7 +161,7 @@ export function renderLabyrinthScreen({screen='intro',view=null,session=null,sel
  if(screen==='rules')return start+'<section aria-label="325-point Labyrinth rules">'+ruleContent+'</section>'+board+'</section>';
  if(screen==='setup')return start+'<form class="labyrinth-setup">'+previewSetup+'</form>'+board+'</section>';
  if(screen==='play')return start+error+recovery+outcome+matchControls+(v?renderLabyrinthTable({view:v,selection}):
-  '<p role="status">No active Labyrinth session. Create or join a multiplayer room. </p>')+'</section>';
+  '<p role="status">No verified 420ID Labyrinth session. Create or join a multiplayer room.</p>')+'</section>';
  if(screen==='table')return start+error+recovery+outcome+matchControls+(v?renderLabyrinthTable({view:v,selection}):
   '<p role="status">A server-authorized Labyrinth session is required to display a private hand.</p>')+'</section>';
  if(screen==='results')return start+error+recovery+outcome+matchControls+(ended?

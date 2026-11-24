@@ -5,6 +5,14 @@ on:
     paths:
       - '.github/workflows/420bet-mines-level1.yml'
       - 'contracts/src/bet/**'
+      - 'contracts/src/interfaces/**'
+      - 'contracts/src/libraries/**'
+      - 'contracts/src/system/**'
+      - 'contracts/foundry.toml'
+      - 'contracts/remappings.txt'
+      - 'contracts/lib/**'
+      - 'scripts/bet/scope-foundry-suites.py'
+      - 'contracts/test/Bet*.t.sol'
       - 'contracts/test/BetMines*.t.sol'
       - 'contracts/test/BetWagerAcceptance420.t.sol'
       - 'contracts/test/BetRandomness420.t.sol'
@@ -63,6 +71,11 @@ jobs:
         run: |
           set -euo pipefail
           regex='^(BetMinesV1420|BetMinesViewAdapter420|BetMinesSettlementAdapter420|BetMinesHardening420|BetWagerAcceptance420|BetRandomness420|BetRandomnessTerminal420|BetSettlementEngine420|BetBankrollRisk420|BetTerminalPathInvariant420|BetCasinoSettlementInvariant420|BetCasinoSolvencyConvergence420)Test$'
+          scope="$(mktemp -d "$PWD/.bet-qualification.XXXXXX")"
+          trap 'rm -rf "$scope"' EXIT
+          python3 ../scripts/bet/scope-foundry-suites.py "$scope" BetMinesV1420 BetMinesViewAdapter420 BetMinesSettlementAdapter420 BetMinesHardening420 BetWagerAcceptance420 BetRandomness420 BetRandomnessTerminal420 BetSettlementEngine420 BetBankrollRisk420 BetTerminalPathInvariant420 BetCasinoSettlementInvariant420 BetCasinoSolvencyConvergence420
+          export FOUNDRY_SRC="$scope/empty-src" FOUNDRY_TEST="$scope" FOUNDRY_SCRIPT="$scope/empty-script"
+          mkdir -p "$FOUNDRY_SRC" "$FOUNDRY_SCRIPT"
           set +e
           forge test --match-contract "$regex" --json > "$RUNNER_TEMP/mines-level1.json" 2> "$RUNNER_TEMP/mines-level1.stderr"
           forge_status=$?
@@ -98,7 +111,7 @@ jobs:
               if not tests:
                   continue
               for name in names:
-                  if f"test/{name}.t.sol:" in key:
+                  if key.endswith(f"/{name}.t.sol:{name}Test"):
                       seen.add(name)
               for test_name, result in tests.items():
                   total += 1

@@ -47,6 +47,10 @@ type RuleSeatPolicy interface {
 }
 // Non-default replay allowances are compiled into trusted operator modules.
 type RuleReplayCapacity interface { MaxReplayActions()int }
+// Only compiled chess modules may opt into larger bounded capacities and
+// separately enumerated non-turn commands. Default modules retain their limits.
+type RuleChessCapacity interface { ChessLegalCapacity() int; ChessDataCapacity() int }
+type RuleChessNonTurn interface { NonTurnLegal(RuleFrame,int,*RuleBudget)([]json.RawMessage,error) }
 type RuleModule interface {
  Definition() RuleDefinition
  Initial(seed [32]byte,seatCount int,budget *RuleBudget)(RuleFrame,error)
@@ -156,6 +160,14 @@ func (a *RulesAdapter)initialConfigured(seed [32]byte,count int,variant string)(
  y,e:=run();if e!=nil||!bytes.Equal(x,y){return nil,ErrUnavailable}
  return x,nil
 }
+func (a *RulesAdapter) legalCapacity() int {
+ if a.definition.GameID=="chess" {if c,ok:=a.module.(RuleChessCapacity);ok {if n:=c.ChessLegalCapacity();n>=maxRulesLegal&&n<=1024{return n}}}
+ return maxRulesLegal
+}
+func (a *RulesAdapter) dataCapacity() int {
+ if a.definition.GameID=="chess" {if c,ok:=a.module.(RuleChessCapacity);ok {if n:=c.ChessDataCapacity();n>=8192&&n<=classicMaxStateBytes-1024{return n}}}
+ return 8192
+}
 func (a *RulesAdapter)decode(raw json.RawMessage)(RuleFrame,error){
  var frame RuleFrame
  if a==nil||len(raw)==0||len(raw)>classicMaxStateBytes||!strictRuleJSON(raw,&frame){return frame,ErrInvalid}
@@ -163,7 +175,7 @@ func (a *RulesAdapter)decode(raw json.RawMessage)(RuleFrame,error){
   !classicSeatsValid(frame.GameID,frame.SeatCount)||frame.Round<1||frame.Round>1000000||
   !rulePhasePattern.MatchString(frame.Phase)||frame.Turn< -1||frame.Turn>=frame.SeatCount||
   (frame.Terminal!=(frame.Turn==-1))||(frame.Winner!=nil&&(!frame.Terminal||*frame.Winner<0||*frame.Winner>=frame.SeatCount))||
-  len(frame.Scores)!=frame.SeatCount||len(frame.Data)==0||len(frame.Data)>8192||!json.Valid(frame.Data){
+  len(frame.Scores)!=frame.SeatCount||len(frame.Data)==0||len(frame.Data)>a.dataCapacity()||!json.Valid(frame.Data){
   return frame,ErrInvalid
  }
  seed,e:=hex.DecodeString(frame.Seed)
@@ -226,14 +238,20 @@ func canonicalRuleAction(raw json.RawMessage)(json.RawMessage,error){
  return canon,nil
 }
 func (a *RulesAdapter)legal(frame RuleFrame,seat int)([]json.RawMessage,error){
- if frame.Terminal||frame.Turn!=seat{return nil,ErrForbidden}
+ if frame.Terminal||seat<0||seat>=frame.SeatCount{return nil,ErrForbidden}
+ nonTurn:=frame.Turn!=seat
+ policy,ok:=a.module.(RuleChessNonTurn)
+ if nonTurn&&(a.definition.GameID!="chess"||!ok){return nil,ErrForbidden}
  run:=func()([]json.RawMessage,error){
   budget:=NewRuleBudget(100000)
-  legal,e:=a.module.Legal(cloneRuleFrame(frame),seat,budget)
-  if e!=nil||budget.spent<1||len(legal)<1||len(legal)>maxRulesLegal{return nil,ErrUnavailable}
+  var legal []json.RawMessage;var e error
+  if nonTurn{legal,e=policy.NonTurnLegal(cloneRuleFrame(frame),seat,budget)}else{legal,e=a.module.Legal(cloneRuleFrame(frame),seat,budget)}
+  if e!=nil||budget.spent<1||len(legal)>a.legalCapacity(){return nil,ErrUnavailable}
+  if len(legal)==0{if nonTurn{return nil,ErrForbidden};return nil,ErrUnavailable}
   out:=make([]json.RawMessage,0,len(legal));seen:=map[string]bool{}
   for _,item:=range legal{
    b,e:=canonicalRuleAction(item);if e!=nil||seen[string(b)]{return nil,ErrUnavailable}
+   if nonTurn&&!chessNonTurnAction(b){return nil,ErrUnavailable}
    seen[string(b)]=true;out=append(out,b)
   }
   return out,nil
@@ -303,6 +321,7 @@ func (a *RulesAdapter)ChooseMoveBounded(raw json.RawMessage,seat int,difficulty 
  if !map[string]bool{"easy":true,"medium":true,"hard":true}[difficulty]||policy==nil||
   limit<1||limit>100000{return nil,ErrUnavailable}
  frame,e:=a.decode(raw);if e!=nil{return nil,e}
+ if frame.Turn!=seat{return nil,ErrForbidden}
  options,e:=a.legal(frame,seat);if e!=nil{return nil,e}
  view,e:=a.View(raw,seat);if e!=nil{return nil,e}
  // Run twice on isolated copies to reject nondeterministic decisions and
@@ -326,7 +345,8 @@ func (a *RulesAdapter)ChooseMoveBounded(raw json.RawMessage,seat int,difficulty 
 func (a *RulesAdapter) replayLimit()int{
  if a!=nil{
   if p,ok:=a.module.(RuleReplayCapacity);ok{
-   if cap:=p.MaxReplayActions();cap>=maxRulesMoves&&cap<=8192{return cap}
+   upper:=8192;if a.definition.GameID=="chess"{upper=20000}
+   if cap:=p.MaxReplayActions();cap>=maxRulesMoves&&cap<=upper{return cap}
   }
  }
  return maxRulesMoves

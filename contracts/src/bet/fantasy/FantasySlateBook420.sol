@@ -47,6 +47,24 @@ contract FantasySlateBook420 {
         oracle = IOracle420(oracle_);
     }
 
+    struct SettlementSlate {
+        bytes32 manifest;
+        bytes32 custodianUserKey;
+        uint256 lockAt;
+        uint256 cutoff;
+        uint256 resolvedAt;
+        uint256 earlyStart;
+        uint256 eligibleGames;
+    }
+
+    function settlementSlate(bytes32 id) external view returns (SettlementSlate memory) {
+        Slate storage slate = slates[id];
+        return SettlementSlate(
+            slate.manifest, slate.custodianUserKey, slate.lockAt, slate.cutoff,
+            slate.resolvedAt, slate.earlyStart, slate.eligibleGames
+        );
+    }
+
     function slateOf(bytes32 id) external view returns (Slate memory) {
         return slates[id];
     }

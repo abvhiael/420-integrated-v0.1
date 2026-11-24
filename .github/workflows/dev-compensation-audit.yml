@@ -9,6 +9,8 @@ on:
       - "contracts/test/DevelopmentCompensationAdversarial420.t.sol"
       - "contracts/test/DevelopmentCompensationGenesis420.t.sol"
       - "contracts/test/FounderWalletClaimsAndCompensation420.t.sol"
+      - "contracts/test/ExchangeFeeSettlement420.t.sol"
+      - "contracts/src/exchange/**"
       - "contracts/src/revenue/FoundingDeveloperCompensationSplitter420.sol"
       - "contracts/src/governance/FoundingWalletClaims420.sol"
       - "contracts/config/application-revenue-policy-v1.json"
@@ -92,7 +94,7 @@ jobs:
         run: |
           set -euo pipefail
           export DEVCOMP_SCOPE_ROOT="$RUNNER_TEMP/devcomp-scope"
-          python3 scripts/prepare-devcomp-foundry-scope.py --output "$DEVCOMP_SCOPE_ROOT"
+          python3 scripts/prepare-devcomp-foundry-scope.py --output "$DEVCOMP_SCOPE_ROOT" --include-exchange
           echo "DEVCOMP_SCOPE_ROOT=$DEVCOMP_SCOPE_ROOT" >> "$GITHUB_ENV"
 
       - name: Build revenue contract family
@@ -106,6 +108,9 @@ jobs:
 
       - name: Run founder claims and compensation lifecycle regressions
         run: forge test --root "$DEVCOMP_SCOPE_ROOT" --match-path 'test/FounderWalletClaimsAndCompensation420.t.sol' -vvvv
+
+      - name: Run authenticated Exchange fee settlement and founder claims
+        run: forge test --root "$DEVCOMP_SCOPE_ROOT" --match-path 'test/ExchangeFeeSettlement420.t.sol' -vv
 
   security:
     runs-on: ubuntu-latest

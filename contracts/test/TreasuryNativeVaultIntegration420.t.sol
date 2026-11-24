@@ -4,6 +4,9 @@ pragma solidity ^0.8.24;
 import "../src/system/CapabilityRegistry420.sol";
 import "../src/treasury/TreasuryVaultBinding420.sol";
 import "../src/treasury/TreasuryIds420.sol";
+import {BetTreasuryExpenseEpochSource420} from "../src/bet/BetTreasuryExpenseEpochSource420.sol";
+import {IBetProfitEpochSource420} from "../src/bet/BetGovernedProfitEpoch420.sol";
+import {TreasuryReleaseExecutor420} from "../src/treasury/TreasuryReleaseExecutor420.sol";
 
 interface VmTreasuryVault {
     function deal(address, uint256) external;
@@ -164,6 +167,39 @@ contract TreasuryNativeVaultIntegration420Test {
         require(record.committed == amount && record.executed == 0, "budget changed");
         require(disb.disbursement(id).state == TreasuryDisbursementRegistry420.State.SCHEDULED, "state changed");
         require(disb.epochSpent(record.asset, 10) == 0, "epoch changed");
+    }
+
+    function testCasinoExpensesRequireAnExecutedExactVaultRelease() public {
+        bytes32 budgetId = keccak256("420Bet operating expense budget");
+        TreasuryReleaseExecutor420 executor = new TreasuryReleaseExecutor420(address(registry), address(this));
+        _allow(address(0), 100);
+        _budget(budgetId, VAULT, address(0), 100);
+        BetTreasuryExpenseEpochSource420 source = new BetTreasuryExpenseEpochSource420(
+            address(0), disb, executor, budgetId, address(executor).codehash
+        );
+        _deposit(vault, 100);
+        bytes32 id = _schedule(budgetId, RECIPIENT, 30);
+        caps.createGrant(
+            keccak256("treasury casino release"), address(executor), TreasuryIds420.COMPONENT_TREASURY,
+            TreasuryIds420.ACTION_EXECUTE_DISBURSEMENT, treasuryAuth.scopeForDisbursement(id), 30, 0, 0, 0, 0
+        );
+        caps.createGrant(
+            keccak256("vault casino release"), address(executor), VaultIds420.COMPONENT_VAULT,
+            VaultIds420.ACTION_WITHDRAW, vaultAuth.scopeForRoute(VAULT, address(0), RECIPIENT, VaultIds420.ACTION_WITHDRAW),
+            30, 0, 0, 0, 0
+        );
+        IBetProfitEpochSource420.Totals memory totals = source.profitTotals();
+        require(totals.reconciled && totals.operatingExpenses == 0, "scheduled expense");
+        (, bytes32 commitment) = executor.preview(id);
+        executor.execute(id, commitment);
+        totals = source.profitTotals();
+        require(totals.reconciled && totals.operatingExpenses == 30 && totals.freeProtocolCash == 0, "paid expense");
+        require(RECIPIENT.balance == 30 && address(vault).balance == 70, "exact custody movement");
+
+        bytes32 alternate = _schedule(budgetId, address(0xFACE), 20);
+        _grant(alternate, VAULT, address(0), address(0xFACE), 20);
+        _release(alternate, keccak256("untracked operator release"));
+        require(!source.profitTotals().reconciled, "alternative release silently omitted");
     }
 
     function testNativeAndTokenDefaultDenyAndGovernanceAllowlist() public {

@@ -1,6 +1,9 @@
 package social
 
-import "encoding/json"
+import (
+ "encoding/json"
+ "sort"
+)
 
 // Three-valued result: exhausting a finite graph proves impossibility;
 // finding a legal mating sequence proves possibility. A resource limit is
@@ -12,6 +15,7 @@ const (
  chessMatePossible
 )
 const chessMateSearchLimit=4096
+const chessMateWitnessLimit=12000
 
 // These material exclusions are sound, including the one-sided cases
 // where the opponent has only pieces that cannot assist a mating net.
@@ -85,16 +89,77 @@ func chessDeadPosition(p chessBoard)bool{
  if !chessLockedCandidate(p)&&len(p.legal())>1{return false}
  return chessMateReach(p,0,chessMateSearchLimit)==chessMateImpossible&&chessMateReach(p,1,chessMateSearchLimit)==chessMateImpossible
 }
+// Search for an actual cooperative mate with a deterministic beam ordered
+// by proximity to the target king, checks and restricted escape squares.
+// Unlike breadth-first enumeration, this reaches deep witnesses without
+// retaining an exponentially growing frontier. Failure is not a proof.
+func chessMateWitness(p chessBoard,seat int)bool{
+ type candidate struct{board chessBoard;score int;order int}
+ abs:=func(n int)int{if n<0{return -n};return n}
+ score:=func(q chessBoard)int{
+  king:=byte('k');if seat==1{king='K'}
+  target:=0;for i,v:=range q.Squares{if v==king{target=i;break}}
+  file,rank:=target%8,target/8
+  edge:=file;if 7-file<edge{edge=7-file};if rank<edge{edge=rank};if 7-rank<edge{edge=7-rank}
+  n:=-edge*12
+  for _,d:=range chessAllDirs{t:=chessSquare(file+d[0],rank+d[1]);if t<0||q.attacked(t,seat){n+=8}}
+  if q.check(1-seat){n+=25}
+  for i,v:=range q.Squares{if chessColor(v)!=seat{continue};switch chessKind(v){
+   case 'Q','R':n+=35-2*(abs(i%8-file)+abs(i/8-rank))
+   case 'N','B':n+=15-abs(i%8-file)-abs(i/8-rank)
+   case 'P':advance:=i/8;if seat==1{advance=7-advance};n+=advance*3
+   case 'K':n-=abs(i%8-file)+abs(i/8-rank)
+  }}
+  return n
+ }
+ key:=func(q chessBoard)chessReachKey{return chessReachKey{q.Squares,q.Turn,q.Castle,q.EP}}
+ seen:=map[chessReachKey]bool{key(p):true}
+ frontier:=[]candidate{{board:p}}
+ expanded:=0
+ for depth:=0;depth<48&&len(frontier)>0&&expanded<chessMateWitnessLimit;depth++{
+  next:=[]candidate{}
+  for _,c:=range frontier{
+   if expanded>=chessMateWitnessLimit{break};expanded++
+   q:=c.board
+   moves:=q.legal()
+   if len(moves)==0{if q.Turn==1-seat&&q.check(q.Turn){return true};continue}
+   if chessMaterialCannotMate(q,seat){continue}
+   for _,m:=range moves{
+    v:=q.apply(m);k:=key(v);if seen[k]{continue};seen[k]=true
+    if v.Turn==1-seat&&v.check(v.Turn)&&len(v.legal())==0{return true}
+    next=append(next,candidate{v,score(v),len(next)})
+   }
+  }
+  sort.SliceStable(next,func(i,j int)bool{return next[i].score>next[j].score})
+  if len(next)>32{next=next[:32]};frontier=next
+ }
+ return false
+}
+// Known opening witnesses are validated through the same legal generator.
+// This also handles resignation/flag fall before the first board move.
+func chessOpeningMateWitness(p chessBoard,seat int)bool{
+ if p!=chessInitialBoard(){return false}
+ line:=[]string{"f2f3","e7e5","g2g4","d8h4"}
+ if seat==0{line=[]string{"e2e4","f7f6","d2d4","g7g5","d1h5"}}
+ for _,uci:=range line{
+  found:=false
+  for _,m:=range p.legal(){if m.UCI()==uci{p=p.apply(m);found=true;break}}
+  if !found{return false}
+ }
+ return p.Turn==1-seat&&p.check(p.Turn)&&len(p.legal())==0
+}
 func chessAdjudicateLoss(p chessBoard,loser int)(*int,error){
  if loser<0||loser>1{return nil,ErrInvalid}
  winner:=1-loser
  if chessMaterialCannotMate(p,winner){return nil,nil}
+ if chessOpeningMateWitness(p,winner){return &winner,nil}
  if chessLockedCandidate(p)||len(p.legal())<=1{
-  switch chessMateReach(p,winner,chessMateSearchLimit){case chessMateImpossible:return nil,nil;case chessMatePossible:return &winner,nil;default:return nil,ErrUnavailable}
+  switch chessMateReach(p,winner,chessMateSearchLimit){case chessMateImpossible:return nil,nil;case chessMatePossible:return &winner,nil}
+  if chessMateWitness(p,winner){return &winner,nil};return nil,ErrUnavailable
  }
  // Outside certified material exclusions and restricted reachability,
  // require a legal witness before recording an irreversible win.
- if chessMateReach(p,winner,chessMateSearchLimit)==chessMatePossible{return &winner,nil}
+ if chessMateWitness(p,winner)||chessMateReach(p,winner,chessMateSearchLimit)==chessMatePossible{return &winner,nil}
  return nil,ErrUnavailable
 }
 // Server-only reducer. No client action is registered for flag fall. The

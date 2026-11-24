@@ -6,12 +6,12 @@
     "contracts/src/bet/BetIds420.sol": "578e3ef0b71336be6030452defed6e26824beb8e268e420c2db89c407eccfab8",
     "contracts/src/bet/BetTypes420.sol": "f4feff47fe44c67ff0d0305a95d2e8063e78dc768140041234b484985bea741e",
     "contracts/src/bet/fantasy/FantasyAdmission420.sol": "77899c8b082bb69e4265a5e3abff4ad738586c2d3eb253b29385c98fa08d4749",
-    "contracts/src/bet/fantasy/FantasyContestEngine420.sol": "7283c6a09297c1b20ff4a923e55ddd31a230dea7eda4c211512b3a16bca5b19a",
-    "contracts/src/bet/fantasy/FantasyDisputeController420.sol": "55f45760830f07b351c3433f3e445ab3a627e6b2b6a9e492d6d535804d8cd5ef",
+    "contracts/src/bet/fantasy/FantasyContestEngine420.sol": "7ea986b9f8b467d08a4244456b968b41ba4e1b843adcc342b08cfc0d5df82fb9",
+    "contracts/src/bet/fantasy/FantasyDisputeController420.sol": "0d7673a3612e9b470fac2b192200d9308a0a3aa5fdfc43c91e8064003aa63953",
     "contracts/src/bet/fantasy/FantasyNHLScoring420.sol": "d3e4bb3a34fa00d1fd9409c7d933d052d9325b80c6816a64c7c9920fc778e269",
     "contracts/src/bet/fantasy/FantasyPayoutPolicy420.sol": "3414f49e3f158f89def9c4929615f98adbeadb990523cbea4eb38a9b62406530",
     "contracts/src/bet/fantasy/FantasyRankingBook420.sol": "f9e651b7edec826e81ccc8352ae3408da78ff5f88959ddab893564416e7e21d8",
-    "contracts/src/bet/fantasy/FantasySlateBook420.sol": "1007ffa2b5946c99fdbe6202e4c87114668a41d357e03f6f6eabced5cf0e6b4a",
+    "contracts/src/bet/fantasy/FantasySlateBook420.sol": "e920edfda93494edc87f3bef3e1b9ef011f2efe3f891b258b37abf4c322f2592",
     "contracts/src/bet/fantasy/FantasyTypes420.sol": "c9fe9a5df74fc931a1ad4f838a332c32e65314c2444631243b4f3e822429f068",
     "contracts/src/bet/fantasy/IFantasyDisputeHost420.sol": "09b9bd98ef9888a66a1aa8648d809ee26dd407d31684f362d1196ed1b2834740",
     "contracts/src/interfaces/I420System.sol": "02e1ef2bec417289bc13c53c3c7453b132442be6932162683099c301f624ed02",
@@ -259,17 +259,6 @@
         "testReentrantDevelopmentRecipientCannotWithdrawTwice"
       ]
     },
-    "d984bebeadd7f00a72b5aac8e3a438c5cc2a7429b230f3858faeef1cea09e725": {
-      "disposition": "reviewed contextual false positive",
-      "finding": "Reentrancy in FantasyContestEngine420.beginRevision(bytes32,FantasyTypes420.StatReport) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#453-470):",
-      "rationale": "Contextual false positive on immutable typed module calls: every external engine mutation acquires the same nonReentrant lock; internal lock/review/cancel helpers are reachable only under it. Ranking/policy/admission modules are constructor-created and not replaceable; oracle/profile reads are static calls. Controller cancellation/review/publication is fixed code, and current-candidate callbacks are read-only. No callback can mutate engine credit or settle a stale/unresolved candidate.",
-      "supportingTests": [
-        "testNewerAuthenticatedRevisionBlocksOldFinalityAndTimesOut",
-        "testActualDisputeTimeoutRefundsEntriesAndBonds",
-        "testMissingHostRegistrationAuthorityRollsBackFreePrizeAndManifest",
-        "testReentrantDevelopmentRecipientCannotWithdrawTwice"
-      ]
-    },
     "09dfbc1cb106025c5669f576178e40b56dbf0a6091d9ecee8734de785bc4f4d0": {
       "disposition": "reviewed contextual false positive",
       "finding": "Reentrancy in FantasyContestEngine420.publishLineup(bytes32,uint64,uint32[7],bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#363-382):",
@@ -376,23 +365,6 @@
         "testVerifiedCredentialAndCustodianReceiptDoNotReplaceEntryCapability"
       ]
     },
-    "b91ebe90365433dab67a1a62c245f0fcea67e4087e2d6eb498fead83df596ad4": {
-      "disposition": "reviewed contextual false positive",
-      "finding": "FantasyContestEngine420._forwardFantasy(bytes32,uint256) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#130-147) uses a weak PRNG: \"amount = (gross / 100) * 3 + (gross % 100) * 3 / 100 - ((prior / 100) * 3 + (prior % 100) * 3 / 100) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#132-133)\"",
-      "rationale": "The modulo operands are finalized accounting values and the constant 100. The expression computes a deterministic fee and neither generates entropy nor selects an outcome.",
-      "supportingTests": [
-        "testPaidTwoEntrantsWinnerTakeAllAndThreePercentFund"
-      ]
-    },
-    "0539ba643624a7a2fea01f6bf49a136eb235365a225e5ace858ef40889f0ca78": {
-      "disposition": "reviewed contextual false positive",
-      "finding": "FantasyContestEngine420._forwardFantasy(bytes32,uint256) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#130-147) performs a multiplication on the result of a division: - amount = (gross / 100) * 3 + (gross % 100) * 3 / 100 - ((prior / 100) * 3 + (prior % 100) * 3 / 100) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#132-133)",
-      "rationale": "For each gross basis, 3 * floor(gross / 100) + floor(3 * (gross % 100) / 100) is exactly floor(3 * gross / 100). Both multiplication operands are bounded, and subtracting the prior rounded amount preserves cumulative rounding.",
-      "supportingTests": [
-        "testMaximumFundedGrossPreservesExactFeeAndPrize",
-        "testFantasyCumulativeRoundingAndAuthenticatedFounderCredits"
-      ]
-    },
     "7490a37d27ef595fd72726063172ee1c49007610074d0ba9af92b39abb523489": {
       "disposition": "reviewed contextual false positive",
       "finding": "DevelopmentCompensationVault420._fantasyFee(uint256) (contracts/src/revenue/DevelopmentCompensationVault420.sol#274-278) performs a multiplication on the result of a division: - (gross / 100) * 3 + (gross % 100) * 3 / 100 (contracts/src/revenue/DevelopmentCompensationVault420.sol#277)",
@@ -401,21 +373,15 @@
         "testFantasyCumulativeRoundingAndAuthenticatedFounderCredits"
       ]
     },
-    "2259b5897d706175a6d0d09cd50824924d38ff8beaf7c3c4cac746d0bccb4ef0": {
+    "ebe07d011d6c84ed36b736583faa308b271001c0dd83b3be9db640d7d48d74b5": {
       "disposition": "reviewed contextual false positive",
-      "finding": "FantasyContestEngine420._forwardFantasy(bytes32,uint256) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#130-147) uses a dangerous strict equality: - amount == 0 (contracts/src/bet/fantasy/FantasyContestEngine420.sol#134)",
-      "rationale": "The zero test applies to the delta between ledger-derived rounded fee amounts. A zero delta means there is no amount to forward. External token balances do not determine the delta.",
+      "finding": "Reentrancy in FantasyContestEngine420.beginRevision(bytes32,FantasyTypes420.StatReport) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#487-504):",
+      "rationale": "Contextual false positive on immutable typed module calls: every external engine mutation acquires the same nonReentrant lock; internal lock/review/cancel helpers are reachable only under it. Ranking/policy/admission modules are constructor-created and not replaceable; oracle/profile reads are static calls. Controller cancellation/review/publication is fixed code, and current-candidate callbacks are read-only. No callback can mutate engine credit or settle a stale/unresolved candidate.",
       "supportingTests": [
-        "testPermissionlessDevelopmentForwardingUsesCanonicalBeneficiary"
-      ]
-    },
-    "1f7ab3ab592ae3b66a67356156f208a69eda60ee3894ce597c76ce238b783180": {
-      "disposition": "reviewed contextual false positive",
-      "finding": "FantasyContestEngine420._withdraw(address) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#607-614) uses a dangerous strict equality: - amount == 0 (contracts/src/bet/fantasy/FantasyContestEngine420.sol#609)",
-      "rationale": "The withdrawal uses internal credit less the development reserve. The equality tests whether the resulting spendable credit is empty. Token transfers and forced native transfers cannot change those ledger entries.",
-      "supportingTests": [
-        "testSeparatePoolsCannotSpendEachOthersEscrow",
-        "testTokenPoolUsesExactSameAssetForEntryPrizesAndDevelopment"
+        "testNewerAuthenticatedRevisionBlocksOldFinalityAndTimesOut",
+        "testActualDisputeTimeoutRefundsEntriesAndBonds",
+        "testMissingHostRegistrationAuthorityRollsBackFreePrizeAndManifest",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice"
       ]
     }
   },

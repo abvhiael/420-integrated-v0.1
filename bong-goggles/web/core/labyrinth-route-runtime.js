@@ -1,3 +1,4 @@
+import {startLabyrinthComputerGame} from './labyrinth-computer-start.js';
 import {resolveRoute} from './routes.js';
 import {LabyrinthSessionController} from './labyrinth-session.js';
 import {LabyrinthSocialController,bindLabyrinthSocial} from './labyrinth-social.js';
@@ -15,6 +16,7 @@ export function createLabyrinthRouteRuntime({enabled=false,onChange=()=>{},
  const social=new LabyrinthSocialController({enabled,fetchImpl,onChange:()=>{if(active())onChange();}});
  const matchId=()=>new URLSearchParams(windowObject.location.search).get('session');
  const socialScreen=()=>/\/(history|rematch|results)$/.test(windowObject.location.pathname);
+ let starting=false,startError='',startGeneration=0;
  let lastSocial=0;
  let lastList=0;
  let pegMap=null,pegMapRequested=false;
@@ -34,7 +36,7 @@ export function createLabyrinthRouteRuntime({enabled=false,onChange=()=>{},
  const refresh=(force=false)=>{
   if(!active())return;
   void loadPegMap();
-  if(!controller.client.enabled)return;
+  if(!controller.client.enabled||starting)return;
   if(socialScreen()&&(force||Date.now()-lastSocial>=15000)){
    lastSocial=Date.now();void social.refresh();
   }
@@ -50,6 +52,25 @@ export function createLabyrinthRouteRuntime({enabled=false,onChange=()=>{},
  documentObject.addEventListener('visibilitychange',visible);
  const bind=root=>{
   if(!active())return;
+  const form=root.querySelector('[data-lab-computer-start]');
+  if(form){
+   const field=form.querySelector('fieldset'),status=form.querySelector('[data-lab-computer-status]');
+   const sync=()=>{form.elements.format.disabled=form.elements.players.value!=='4';};
+   form.elements.players.addEventListener('change',sync);sync();
+   if(starting){field.disabled=true;status.textContent='Creating your private game…';}
+   else if(startError)status.textContent=startError;
+   form.addEventListener('submit',async e=>{
+    e.preventDefault();if(starting||!controller.client.enabled||field.disabled)return;
+    starting=true;startError='';field.disabled=true;status.textContent='Creating your private game…';
+    const gen=++startGeneration;
+    const config={players:Number(form.elements.players.value),difficulty:form.elements.difficulty.value,format:form.elements.format.value};
+    try{
+     const id=await startLabyrinthComputerGame(controller.client,config,()=>active()&&gen===startGeneration);
+     if(gen!==startGeneration)return;
+     windowObject.location.assign('/games/labyrinth-cribbage/play?session='+encodeURIComponent(id));
+    }catch(e){if(gen===startGeneration){startError=e.message;starting=false;onChange();}}
+   });
+  }
   bindLabyrinthSocial(root,social,id=>windowObject.location.assign('/games/rooms/'+id));
   bindLabyrinthTable(root,{view:controller.state.view,selection:controller.state.selection,
    onSelection:x=>controller.select(x),
@@ -109,10 +130,10 @@ export function createLabyrinthRouteRuntime({enabled=false,onChange=()=>{},
  };
  const interval=windowObject.setInterval(()=>{if(!documentObject.hidden)refresh();},3500);
  return Object.freeze({
-  get state(){return {...controller.state,social:social.state};},
+  get state(){return {...controller.state,social:social.state,computerEnabled:controller.client.enabled};},
   bind,refresh,
-  invalidate:()=>{pegMatch=null;pegScores=null;previousPegScores=null;controller.invalidate();social.invalidate();lastSocial=0;},
-  destroy:()=>{
+  invalidate:()=>{startGeneration++;starting=false;startError='';pegMatch=null;pegScores=null;previousPegScores=null;controller.invalidate();social.invalidate();lastSocial=0;},
+  destroy:()=>{startGeneration++;starting=false;
    windowObject.clearInterval(interval);
    windowObject.removeEventListener('online',online);
    documentObject.removeEventListener('visibilitychange',visible);

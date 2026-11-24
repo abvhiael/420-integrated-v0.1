@@ -22,6 +22,7 @@ ROOT_FILES = (
     "src/revenue/FoundingDeveloperCompensationSplitter420.sol",
     "test/DevelopmentCompensationVault420.t.sol",
     "test/DevelopmentCompensationGenesis420.t.sol",
+    "test/FounderWalletClaimsAndCompensation420.t.sol",
 )
 IMPORT = re.compile(r"""\bimport\s+(?:[^;]*?\bfrom\s+)?["']([^"']+)["']\s*;""")
 

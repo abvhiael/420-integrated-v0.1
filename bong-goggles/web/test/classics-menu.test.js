@@ -40,7 +40,7 @@ test('BC-0.2 public /games lists all games as clickable links without fake play 
  }
  assert.equal((html.match(/class="games-catalogue__tile"/g)||[]).length,ALL_CLASSICS.length);
  assert.match(html,/Registry only — not yet playable/);
- assert.doesNotMatch(html,/>Playable · 420ID</);
+ assert.match(html,/Playable · 420ID/);
  assert.match(html,/Planned — not yet playable/);
  assert.doesNotMatch(html,/data-action="game-invite"/);
 });

@@ -1,4 +1,14 @@
 {
   "schema": "bc-0-12-release-evidence-v1",
-  "games": {}
+  "games": {
+    "labyrinth-cribbage": {
+      "gameId": "labyrinth-cribbage",
+      "sourceSha": "c72a04a14df938be8c9466aa7cc71ac254353af0",
+      "rulesHash": "9eed3af244d95dd1757b2ce82c1f66d85581a9b0656e0f36eba825cf8ddbc791",
+      "deployedOrigin": "https://bonggoggles.420integrated.org",
+      "approval": "repository-owner",
+      "result": "developer-authorized-release",
+      "evidenceVersion": 2
+    }
+  }
 }

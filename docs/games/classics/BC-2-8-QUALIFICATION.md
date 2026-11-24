@@ -1,5 +1,8 @@
 # BC-2.8 — Deployed Labyrinth Cribbage acceptance and public-release gate
 
+**Policy update (23 November 2026):** The repository owner has removed mandatory two-account production acceptance and sequential release dependencies for all Classics. The owner explicitly authorized Labyrinth Cribbage public release and personal testing. Historical evidence below is retained as historical only; live match acceptance remains optional, not claimed. See the version-2 release manifest. Normal game authentication and rules remain unchanged.
+
+
 **Status: BLOCKED — production acceptance is not complete; public Play is NOT authorized.** This document records actual external state and qualifying source tooling. It is not a release certificate.
 
 ## Verified production state (23 November 2026)

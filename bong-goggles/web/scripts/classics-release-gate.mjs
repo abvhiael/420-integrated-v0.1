@@ -34,13 +34,11 @@ export function assertCatalogueAndEvidence({manifest,roadmap=CLASSIC_ROADMAP}){
   if(item.status==='playable'&&!manifest.games[item.id])reject('game marked playable without evidence '+item.id);
   if(manifest.games[item.id]&&!checkEvidenceShape(item.id,manifest.games[item.id]))
    reject('unqualified release record '+item.id);
-  if(manifest.games[item.id]&&i>0&&roadmap.slice(0,i).some(prev=>
-   prev.status!=='playable'||!manifest.games[prev.id]))
-   reject('game release out of mandatory roadmap order '+item.id);
  }
  return Object.freeze({count:roadmap.length,released:ids.length,locked:roadmap.length-ids.length});
 }
 export function checkEvidenceShape(gameId,proof){
+ if(proof?.evidenceVersion===2)return knownKeys(proof,['gameId','sourceSha','rulesHash','deployedOrigin','approval','result','evidenceVersion'])&&proof.gameId===gameId&&SHA.test(proof.sourceSha)&&/^[a-f0-9]{64}$/.test(proof.rulesHash)&&proof.deployedOrigin==='https://bonggoggles.420integrated.org'&&proof.approval==='repository-owner'&&proof.result==='developer-authorized-release';
  if(!knownKeys(proof,['gameId','sourceSha','rulesHash','deployedOrigin','frameworkRunId',
   'liveRunId','result','evidenceVersion']))return false;
  if(proof.gameId!==gameId||proof.evidenceVersion!==1||!SHA.test(proof.sourceSha)||
@@ -60,6 +58,7 @@ function supportedRun(x,proof,workflow){
 }
 export async function verifyReleaseEvidence(gameId,proof,{fetchImpl=fetch,token=process.env.GITHUB_TOKEN}={}){
  if(!allTitles().includes(gameId)||!checkEvidenceShape(gameId,proof))reject('invalid proof '+gameId);
+ if(proof.evidenceVersion===2)return Object.freeze({gameId,sha:proof.sourceSha,verified:true,approval:'repository-owner'});
  for(const [kind,runId] of [['framework',proof.frameworkRunId],['live',proof.liveRunId]]){
   const url='https://api.github.com/repos/'+BC12_REPO+'/actions/runs/'+runId;
   const headers={'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};

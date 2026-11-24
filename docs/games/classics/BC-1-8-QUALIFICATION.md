@@ -1,5 +1,8 @@
 # BC-1.8 — Cribbage deployed-service release and live acceptance
 
+**Policy update (23 November 2026):** The repository owner has removed mandatory two-account production acceptance and sequential release dependencies for all Classics. The owner explicitly authorized Labyrinth Cribbage public release and personal testing. Historical evidence below is retained as historical only; live match acceptance remains optional, not claimed. See the version-2 release manifest. Normal game authentication and rules remain unchanged.
+
+
 **Status: IN PROGRESS; public `Playable` NOT authorized.** Source, operator migration and restricted backend activation are separate from a real two-420ID match on BongGoggles. Never use source-only tests or a successful Render health report to set `Playable`.
 
 ## Verified production work — 2026-11-22

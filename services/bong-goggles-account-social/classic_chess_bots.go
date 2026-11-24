@@ -5,6 +5,7 @@ import (
  "encoding/binary"
  "encoding/json"
  "sort"
+ "fmt"
 )
 
 type chessBotPolicy struct{ level string }
@@ -88,7 +89,8 @@ func chessBotOrder(p chessBoard,moves []chessMove){
 func chessBotSearch(p chessBoard,depth,ply,alpha,beta int,nodes *int,b *RuleBudget)(int,bool){
  if *nodes<=0||b.Charge(1)!=nil{return 0,false}
  *nodes--
- moves:=p.legal()
+ var moves []chessMove
+ if depth==0{moves=p.legalLimited(true)}else{moves=p.legal()}
  if len(moves)==0{if p.check(p.Turn){return -100000+ply,true};return 0,true}
  if chessDeadPosition(p)||p.Half>=150{return 0,true}
  if depth==0{return chessBotEval(p),true}
@@ -139,9 +141,13 @@ func (policy chessBotPolicy)ChooseMove(raw json.RawMessage,level string,legal []
    if !ok{complete=false;break};v=-v
    if v>roundBest{roundBest=v;roundMove=m}
   }
-  if !complete{break};chosen,best=roundMove,roundBest
+  if !complete{
+   if b.expired(){return nil,fmt.Errorf("%w: chess search deadline",ErrUnavailable)}
+   break
+  };chosen,best=roundMove,roundBest
   if best>99000{break}
  }
+ if b.expired(){return nil,fmt.Errorf("%w: chess search deadline",ErrUnavailable)}
  if draw!=nil&&best< -150&&best> -100001{return append(json.RawMessage(nil),draw...),nil}
  return result(chosen),nil
 }

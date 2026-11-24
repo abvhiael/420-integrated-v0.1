@@ -158,6 +158,13 @@ func main(){
   }
   done()
  }
+ // Chess remains disabled by default and requires the existing restricted dependencies.
+ if err:=configureChess(os.Getenv("SOCIAL420_CHESS_MODE"),classicSessionWorker,
+  os.Getenv("SOCIAL420_CLASSIC_ROOMS")=="restricted-acceptance",
+  os.Getenv("SOCIAL420_CLASSIC_RULES")=="restricted-acceptance",
+  os.Getenv("SOCIAL420_CLASSIC_COMMUNICATIONS")=="restricted-acceptance");err!=nil{
+  log.Fatal("BC-3.3 Chess activation unavailable: ",err)
+ }
  // BC-1.6 requires its own migration/grants and never silently enables
  // social operations in an already-qualified BC-1.5 deployment.
  if os.Getenv("SOCIAL420_CRIBBAGE_SOCIAL_MODE")=="restricted-acceptance"{

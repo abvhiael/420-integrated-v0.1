@@ -1,0 +1,53 @@
+name: BC-3.3 Chess Computer Opponents
+on:
+  pull_request:
+    paths:
+      - 'services/bong-goggles-account-social/**'
+      - 'cmd/bong-goggles-social/**'
+      - '.github/workflows/bc-3-3-chess-bots.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bc-3-3-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  qualify-chess-bots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: account420_test
+          POSTGRES_USER: account420_test
+          POSTGRES_PASSWORD: local_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U account420_test -d account420_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      ACCOUNT420_TEST_DSN: postgres://account420_test:local_test_only@127.0.0.1:5432/account420_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact qualification SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Qualify Chess rules, bots, strength, restart and registration (PostgreSQL 16, race)
+        run: go test -race -tags account420_integration -count=1 -run '^TestBC3[23]' -v ./services/bong-goggles-account-social ./cmd/bong-goggles-social
+      - name: Repeat Hard PostgreSQL recovery under CPU contention
+        run: go test -race -tags account420_integration -count=10 -run '^TestBC33PostgresHumanBotRecovery/hard$' -v ./services/bong-goggles-account-social
+      - name: Static analysis and restricted service build
+        run: |
+          go vet -tags account420_integration ./services/bong-goggles-account-social ./cmd/bong-goggles-social
+          go build -o /tmp/bonggoggles-social ./cmd/bong-goggles-social

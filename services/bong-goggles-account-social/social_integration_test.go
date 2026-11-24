@@ -60,8 +60,10 @@ func fixture(t *testing.T)(*Store,*fakeBroker,*SignOn,*Handler){
  store,e:=NewStore(db);if e!=nil{t.Fatal(e)}
  if e=store.Ready(context.Background());e!=nil{t.Fatal("missing grants",e)}
  broker:=&fakeBroker{codes:map[string]string{},tokens:map[string]string{}}
- key:=make([]byte,32);for i:=range key{key[i]=byte(i+1)}
- signOn,e:=NewSignOn(store,broker,key);if e!=nil{t.Fatal(e)}
+ // Each fixture represents an independent test deployment. Keep its
+ // key stable across workers, but isolate buckets from other fixtures.
+ key,e:=random32();if e!=nil{t.Fatal(e)}
+ signOn,e:=NewSignOn(store,broker,key[:]);if e!=nil{t.Fatal(e)}
  handler,e:=NewHandler(store,signOn,"https://bonggoggles.420integrated.org");if e!=nil{t.Fatal(e)}
  return store,broker,signOn,handler
 }
@@ -239,4 +241,19 @@ func TestLoginRateLimiterIgnoresEphemeralSourcePort(t *testing.T){
  req.Header.Set("X-Forwarded-Proto","https")
  wr:=httptest.NewRecorder();h.ServeHTTP(wr,req)
  if wr.Code!=http.StatusTooManyRequests{t.Fatalf("invalid peer identity accepted: %d",wr.Code)}
+}
+
+func TestBC33FixtureRateLimitIsolation(t *testing.T){
+ _,_,firstSSO,first:=fixture(t)
+ _,_,secondSSO,second:=fixture(t)
+ ctx:=context.Background()
+ replica,e:=NewHandler(firstSSO.Store,firstSSO,"https://bonggoggles.420integrated.org")
+ if e!=nil{t.Fatal(e)}
+ if firstSSO.key==secondSSO.key{t.Fatal("fixture keys reused")}
+ for i:=0;i<60;i++{
+  worker:=first;if i%2==1{worker=replica}
+  if !worker.rate(ctx,"/v1/classic-rooms/test/change",memberA,60){t.Fatal("premature limit",i)}
+ }
+ if first.rate(ctx,"/v1/classic-sessions/test/action",memberA,60)||replica.rate(ctx,"/v1/classic-rooms/test/change",memberA,60){t.Fatal("shared production quota bypassed")}
+ if !second.rate(ctx,"/v1/classic-rooms/test/change",memberA,60){t.Fatal("unrelated fixture inherited exhausted quota")}
 }

@@ -5,9 +5,9 @@
     "contracts/src/bet/BetAuthorization420.sol": "984e7bef82674a1f1b9c5a303cb90ede07d7619ae7f49664dd88f42147cf7f96",
     "contracts/src/bet/BetIds420.sol": "578e3ef0b71336be6030452defed6e26824beb8e268e420c2db89c407eccfab8",
     "contracts/src/bet/BetTypes420.sol": "f4feff47fe44c67ff0d0305a95d2e8063e78dc768140041234b484985bea741e",
-    "contracts/src/bet/fantasy/FantasyAdmission420.sol": "29233f40a5b6aecc43d3afa9e4b71a4e0055d792be915bb03f8a14dd0f41324f",
-    "contracts/src/bet/fantasy/FantasyContestEngine420.sol": "e6b74663219cdf3432113db84152c3defa53bf43adcef9537e58ddc038367608",
-    "contracts/src/bet/fantasy/FantasyDisputeController420.sol": "c6f07275ad8b7843eae991d6ed48eb506959ab939402603a221441fadcf68855",
+    "contracts/src/bet/fantasy/FantasyAdmission420.sol": "77899c8b082bb69e4265a5e3abff4ad738586c2d3eb253b29385c98fa08d4749",
+    "contracts/src/bet/fantasy/FantasyContestEngine420.sol": "7283c6a09297c1b20ff4a923e55ddd31a230dea7eda4c211512b3a16bca5b19a",
+    "contracts/src/bet/fantasy/FantasyDisputeController420.sol": "55f45760830f07b351c3433f3e445ab3a627e6b2b6a9e492d6d535804d8cd5ef",
     "contracts/src/bet/fantasy/FantasyNHLScoring420.sol": "d3e4bb3a34fa00d1fd9409c7d933d052d9325b80c6816a64c7c9920fc778e269",
     "contracts/src/bet/fantasy/FantasyPayoutPolicy420.sol": "3414f49e3f158f89def9c4929615f98adbeadb990523cbea4eb38a9b62406530",
     "contracts/src/bet/fantasy/FantasyRankingBook420.sol": "f9e651b7edec826e81ccc8352ae3408da78ff5f88959ddab893564416e7e21d8",
@@ -20,7 +20,7 @@
     "contracts/src/interfaces/genesis/IIdentityCredential420.sol": "74f96b43758ee97d3124e112d669e9ba9bccf9ce63be1e6c7dee8e1948f4f978",
     "contracts/src/interfaces/genesis/Types420.sol": "bee557da20b6ab622fc2e9cb779c27bb9efecfb9f7bc5d73f646446bab17f5ff",
     "contracts/src/revenue/DevelopmentCompensationIds420.sol": "5a7c4b05901c16194fc84c5f279ef2ea22e81a537516ccd156fe5e6f7feecdd3",
-    "contracts/src/revenue/DevelopmentCompensationVault420.sol": "4f28e6fbcd71e78632ce8decee2aac2967c7117d41e7574f67f8c95ec32a3e8b",
+    "contracts/src/revenue/DevelopmentCompensationVault420.sol": "4f7ac84e5e8d3d68ab388eca8094673d1481154e4a6e813ec8a953ce76914228",
     "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223"
   },
   "dispositions": {
@@ -374,6 +374,48 @@
         "testCanonicalPersonCannotEnterUsingAnotherProfileOrWallet",
         "testEntrantAliasCannotResolvePoolEvenWithResolverCapability",
         "testVerifiedCredentialAndCustodianReceiptDoNotReplaceEntryCapability"
+      ]
+    },
+    "b91ebe90365433dab67a1a62c245f0fcea67e4087e2d6eb498fead83df596ad4": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "FantasyContestEngine420._forwardFantasy(bytes32,uint256) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#130-147) uses a weak PRNG: \"amount = (gross / 100) * 3 + (gross % 100) * 3 / 100 - ((prior / 100) * 3 + (prior % 100) * 3 / 100) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#132-133)\"",
+      "rationale": "The modulo operands are finalized accounting values and the constant 100. The expression computes a deterministic fee and neither generates entropy nor selects an outcome.",
+      "supportingTests": [
+        "testPaidTwoEntrantsWinnerTakeAllAndThreePercentFund"
+      ]
+    },
+    "0539ba643624a7a2fea01f6bf49a136eb235365a225e5ace858ef40889f0ca78": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "FantasyContestEngine420._forwardFantasy(bytes32,uint256) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#130-147) performs a multiplication on the result of a division: - amount = (gross / 100) * 3 + (gross % 100) * 3 / 100 - ((prior / 100) * 3 + (prior % 100) * 3 / 100) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#132-133)",
+      "rationale": "For each gross basis, 3 * floor(gross / 100) + floor(3 * (gross % 100) / 100) is exactly floor(3 * gross / 100). Both multiplication operands are bounded, and subtracting the prior rounded amount preserves cumulative rounding.",
+      "supportingTests": [
+        "testMaximumFundedGrossPreservesExactFeeAndPrize",
+        "testFantasyCumulativeRoundingAndAuthenticatedFounderCredits"
+      ]
+    },
+    "7490a37d27ef595fd72726063172ee1c49007610074d0ba9af92b39abb523489": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "DevelopmentCompensationVault420._fantasyFee(uint256) (contracts/src/revenue/DevelopmentCompensationVault420.sol#274-278) performs a multiplication on the result of a division: - (gross / 100) * 3 + (gross % 100) * 3 / 100 (contracts/src/revenue/DevelopmentCompensationVault420.sol#277)",
+      "rationale": "The quotient term accounts for complete hundreds and the remainder term accounts for the remainder before rounding down. This computes floor(3 * gross / 100) for all uint256 values without an overflowing gross * 3 intermediate.",
+      "supportingTests": [
+        "testFantasyCumulativeRoundingAndAuthenticatedFounderCredits"
+      ]
+    },
+    "2259b5897d706175a6d0d09cd50824924d38ff8beaf7c3c4cac746d0bccb4ef0": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "FantasyContestEngine420._forwardFantasy(bytes32,uint256) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#130-147) uses a dangerous strict equality: - amount == 0 (contracts/src/bet/fantasy/FantasyContestEngine420.sol#134)",
+      "rationale": "The zero test applies to the delta between ledger-derived rounded fee amounts. A zero delta means there is no amount to forward. External token balances do not determine the delta.",
+      "supportingTests": [
+        "testPermissionlessDevelopmentForwardingUsesCanonicalBeneficiary"
+      ]
+    },
+    "1f7ab3ab592ae3b66a67356156f208a69eda60ee3894ce597c76ce238b783180": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "FantasyContestEngine420._withdraw(address) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#607-614) uses a dangerous strict equality: - amount == 0 (contracts/src/bet/fantasy/FantasyContestEngine420.sol#609)",
+      "rationale": "The withdrawal uses internal credit less the development reserve. The equality tests whether the resulting spendable credit is empty. Token transfers and forced native transfers cannot change those ledger entries.",
+      "supportingTests": [
+        "testSeparatePoolsCannotSpendEachOthersEscrow",
+        "testTokenPoolUsesExactSameAssetForEntryPrizesAndDevelopment"
       ]
     }
   },

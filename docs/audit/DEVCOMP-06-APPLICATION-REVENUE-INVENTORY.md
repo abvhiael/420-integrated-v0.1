@@ -31,21 +31,57 @@ A review-required entry remains open until its receipts, obligations and retaine
 | 420 Status | Operational status feeds | shared | The status service reads operational health. Its availability and incident records create no payment obligations. | [genesis-dapp-contract-map.json](../../contracts/config/genesis-dapp-contract-map.json), [420status-genesis.json](../../contracts/config/420status-genesis.json) |
 | 420 Verify | Build verification | shared | The service verifies source-to-bytecode correspondence. Its canonical profile has no settlement contract. | [genesis-dapp-contract-map.json](../../contracts/config/genesis-dapp-contract-map.json), [420verify-genesis.json](../../contracts/config/420verify-genesis.json) |
 | 420 Wallet | Client transaction orchestration | shared | Wallet coordinates account and application transactions. Fees and custody are attributable to the canonical account, network or application that settles each transaction. | [genesis-dapp-contract-map.json](../../contracts/config/genesis-dapp-contract-map.json), [420wallet-genesis.json](../../contracts/config/420wallet-genesis.json) |
+| 420 Smart Accounts | Account funding and wallet execution | shared | Account balances are held for the account owner. Authorized execution spends that account balance and any application receipts belong to the service called. | [genesis-dapp-contract-map.json](../../contracts/config/genesis-dapp-contract-map.json), [SmartAccount420.sol](../../contracts/src/accounts/SmartAccount420.sol) |
+| 420-IS | Namespace and checkpoint routing | shared | The router resolves interoperable identities and checkpoint authority without collecting a settlement fee. | [genesis-dapp-contract-map.json](../../contracts/config/genesis-dapp-contract-map.json), [InteropRouter420.sol](../../contracts/src/interop/InteropRouter420.sol) |
+| 420 Random | Randomness requests and fulfillment | shared | The canonical router authenticates requests, provider fulfillment and result delivery without holding a request or provider payment. | [genesis-dapp-contract-map.json](../../contracts/config/genesis-dapp-contract-map.json), [RandomnessRouter420.sol](../../contracts/src/randomness/RandomnessRouter420.sol) |
+| 420 Trust | Trust aggregation | shared | The aggregator combines registered signals for downstream consumers without collecting settlement amounts. | [genesis-dapp-contract-map.json](../../contracts/config/genesis-dapp-contract-map.json), [TrustAggregator420.sol](../../contracts/src/trust/TrustAggregator420.sol) |
+| 420 Commons | Community permissions | shared | Space, channel and membership operations set community permissions without a commercial settlement call. | [genesis-dapp-contract-map.json](../../contracts/config/genesis-dapp-contract-map.json), [CommonsRouter420.sol](../../contracts/src/commons/CommonsRouter420.sol) |
+| 420 Pulse | Publications and interactions | shared | The router registers publications and interactions without custodial or paid settlement. | [genesis-dapp-contract-map.json](../../contracts/config/genesis-dapp-contract-map.json), [PulseRouter420.sol](../../contracts/src/pulse/PulseRouter420.sol) |
+| 420 Messenger | Message envelopes and receipts | shared | Delivery receipts attest to message state and are unrelated to any monetary receipt. | [genesis-dapp-contract-map.json](../../contracts/config/genesis-dapp-contract-map.json), [MessengerRouter420.sol](../../contracts/src/messenger/MessengerRouter420.sol) |
+| 420 Arbitration | Case and ruling coordination | shared | The case and ruling paths authenticate arbitration transitions. The calling application remains responsible for asset custody and enforcing the ruling. | [genesis-dapp-contract-map.json](../../contracts/config/genesis-dapp-contract-map.json), [ArbitrationRouter420.sol](../../contracts/src/arbitration/ArbitrationRouter420.sol) |
+| 420 Oracle | Feed and oracle evidence | shared | Feed lifecycle and report submissions authenticate data. The router defines no independent revenue collection. | [genesis-dapp-contract-map.json](../../contracts/config/genesis-dapp-contract-map.json), [OracleRouter420.sol](../../contracts/src/oracle/OracleRouter420.sol) |
+| 420 Gaming Protocol | Game registry and entitlement authority | shared | The registry and associated claim and entitlement records authenticate game state. Funded play and settlement belong to the game application. | [genesis-dapp-contract-map.json](../../contracts/config/genesis-dapp-contract-map.json), [GameRegistry420.sol](../../contracts/src/gaming/GameRegistry420.sol) |
+| 420 Civic | Governance execution | shared | Governor execution may carry proposal-supplied funds to the timelock for the authorized target calls. Such execution value is budgeted expenditure rather than a charge to a customer. | [genesis-dapp-contract-map.json](../../contracts/config/genesis-dapp-contract-map.json), [CivicGovernor420.sol](../../contracts/src/governance/CivicGovernor420.sol) |
+| 420 Governance | Canonical governance authority | shared | The governance service authorizes proposal execution and associated timelock operations. It defines no independently retained service receipt. | [genesis-dapp-contract-map.json](../../contracts/config/genesis-dapp-contract-map.json), [Governance420.sol](../../contracts/src/governance/Governance420.sol) |
+| 420 Vault | Governed asset custody | excluded | Deposits create vault accounting balances and withdrawals retire custody amounts. The deposited principal is excluded under the application revenue policy. | [genesis-dapp-contract-map.json](../../contracts/config/genesis-dapp-contract-map.json), [AssetVault420.sol](../../contracts/src/vault/AssetVault420.sol) |
+| 420Town Community Boards | Community boards | shared | The Genesis profile covers community posts, threads, votes and moderation. Supporting identity, storage and search supply the underlying services. | [genesis-consumer-services.json](../../config/genesis-consumer-services.json) |
+| 420Travel | Travel discovery | shared | The Genesis MVP covers maps, places, events, reviews and discovery. The separate Decision 2 entry keeps production release disabled. | [genesis-consumer-services.json](../../config/genesis-consumer-services.json) |
+| 420Reputation | Derived reputation | shared | The canonical profile derives reputation for verified interactions from identity, verification and arbitration. | [genesis-consumer-services.json](../../config/genesis-consumer-services.json) |
+| 420Events | Event objects and discovery | shared | The Genesis service profile specifies event objects, discovery and scheduling dependencies. Ticket or sale settlement is outside this profile. | [genesis-consumer-services.json](../../config/genesis-consumer-services.json) |
+| 420Location | Place discovery | shared | The Genesis profile supplies a place registry and geospatial lookup with provider abstraction. It defines no independent settlement. | [genesis-consumer-services.json](../../config/genesis-consumer-services.json) |
+| 420Learn + 420Knowledge | Learning and credentials | shared | The Genesis profile covers courses, lessons, progress, questions and credentials. It defines no tuition or provider settlement. | [genesis-consumer-services.json](../../config/genesis-consumer-services.json) |
+| 420University | Navigation and schema | shared | The Genesis profile limits the umbrella shell to navigation and a shared schema. | [genesis-consumer-services.json](../../config/genesis-consumer-services.json) |
+| 420Mail | Identity-addressed inbox | shared | The shared inbox delegates messaging, storage and notifications to the corresponding services. | [genesis-consumer-services.json](../../config/genesis-consumer-services.json) |
+| 420Calendar | Scheduling and reminders | shared | The shared scheduling profile covers RSVPs and reminders using identity and notification services. | [genesis-consumer-services.json](../../config/genesis-consumer-services.json) |
+| 420Freelance | Deferred freelance commerce | release-disabled | The Genesis scope supplies interfaces for gigs and milestone escrow. The user-facing application is classified post-Genesis and release disabled. | [genesis-consumer-services.json](../../config/genesis-consumer-services.json), [genesis-application-decision-2.json](../../config/genesis-application-decision-2.json) |
+| 420 AI | Compute job settlement | shared | Direct AI funding is disabled. The AI adapter binds Compute provider entitlement and already-executed payer refund evidence, so those receipts belong to the Compute settlement. | [AIJobEscrow.sol](../../contracts/src/ai/AIJobEscrow.sol), [AIComputeAdapter420.sol](../../contracts/src/ai/AIComputeAdapter420.sol) |
+| 420 Attention | Campaign funding and reward delivery | excluded | Campaign balances fund beneficiary rewards. Authorized releases satisfy the recorded campaign obligations and do not create retained protocol revenue. | [AttentionTreasury.sol](../../contracts/src/system/AttentionTreasury.sol), [AttentionRewardRegistry420.sol](../../contracts/src/attention/AttentionRewardRegistry420.sol) |
+| 420 Bridge | Backing custody and external network fees | excluded | Bridge custody transfers backing assets. Bitcoin miner fees, CCTP fees and LayerZero message fees compensate their external systems. | [BridgeValueCustody420.sol](../../contracts/src/bridge/BridgeValueCustody420.sol), [BitcoinCustody420.sol](../../contracts/src/bridge/bitcoin/BitcoinCustody420.sol), [USDCCCTPAdapter.sol](../../contracts/src/bridge/adapters/USDCCCTPAdapter.sol), [CADCLayerZeroAdapter.sol](../../contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol) |
+| 420 ComputeMarket | Fixed-price provider work and residual refunds | excluded | Payer funding is reserved with payer-safety obligations. Verified work allocates provider payment and payer residual claims. Terminal failure and dispute refunds remain obligations. | [ComputeEscrowFunding420.sol](../../contracts/src/compute/ComputeEscrowFunding420.sol), [ComputeVerifiedEntitlement420.sol](../../contracts/src/compute/ComputeVerifiedEntitlement420.sol) |
+| 420 Grants | Grant obligations | excluded | The grant router exposes program and award state, and the award registry records recipient funding obligations rather than commercial charges. | [GrantRouter420.sol](../../contracts/src/grants/GrantRouter420.sol), [GrantAwardRegistry420.sol](../../contracts/src/grants/GrantAwardRegistry420.sol) |
+| 420 Launchpad | Crowdfunding payment and refund reconciliation | shared | Crowdfunding records canonical 420 Pay settlement references and confirms actual refund delivery before attaching evidence. Project receipts and refunds remain attributed to the Pay path. | [LaunchpadCrowdfundingIntegration420.sol](../../contracts/src/launchpad/LaunchpadCrowdfundingIntegration420.sol), [PaymentRouter420.sol](../../contracts/src/pay/PaymentRouter420.sol) |
+| 420 Market | Order and settlement evidence | shared | The order registry reserves inventory and records reporter-authenticated payment and refund references. The settlement adapter, rather than the order record, owns the asset path. | [OrderRegistry420.sol](../../contracts/src/market/OrderRegistry420.sol), [MarketPolicyRegistry420.sol](../../contracts/src/market/MarketPolicyRegistry420.sol) |
+| 420 Resource Protocol | Resource and storage settlement records | shared | Resource receipts and storage settlement status provide registered evidence for provider obligations. The registries do not custody user payment or retain a protocol fee. | [ResourceReceiptRegistry420.sol](../../contracts/src/resource/ResourceReceiptRegistry420.sol), [StorageSettlementRegistry420.sol](../../contracts/src/resource/StorageSettlementRegistry420.sol) |
+| 420 Rights | License and effective-use resolution | shared | The rights router resolves effective use from canonical rights and license records. Any separate commercial payment path would require its own revenue attribution. | [RightsRouter420.sol](../../contracts/src/rights/RightsRouter420.sol), [RightsLicenseRegistry420.sol](../../contracts/src/rights/RightsLicenseRegistry420.sol) |
+| 420Classifieds | Marketplace MVP | release-disabled | The launch amendment disables production release. The consumer profile delegates planned settlement to Pay and disputes to Arbitration. | [genesis-consumer-services.json](../../config/genesis-consumer-services.json), [genesis-application-decision-2.json](../../config/genesis-application-decision-2.json) |
+| 420Launchpad Crowdfunding | Project funding via canonical Pay | shared | This consumer profile uses contract-backed settlement. The crowdfunding integration binds canonical Pay payment and delivered refund references, sharing the Launchpad route. | [genesis-consumer-services.json](../../config/genesis-consumer-services.json), [LaunchpadCrowdfundingIntegration420.sol](../../contracts/src/launchpad/LaunchpadCrowdfundingIntegration420.sol) |
+| 420Media | Media publishing and livestreaming | release-disabled | The consumer profile names Pay as a dependency, and the launch amendment disables production release. | [genesis-consumer-services.json](../../config/genesis-consumer-services.json), [genesis-application-decision-2.json](../../config/genesis-application-decision-2.json) |
+| Reefer Review Publishing | Editorial and publishing service | shared | The Genesis publishing profile covers editorial and publishing tools using Rights, Storage and Search. The related ReeferReview application remains release-disabled. | [genesis-consumer-services.json](../../config/genesis-consumer-services.json), [genesis-application-decision-2.json](../../config/genesis-application-decision-2.json) |
 
 ## Catalogue coverage
 
 | Catalogue | Entry | Disposition |
 | --- | --- | --- |
-| Genesis launch | 420 AI | review-required |
+| Genesis launch | 420 AI | shared |
 | Genesis launch | 420 Analytics | shared |
 | Genesis launch | 420 AppStore | shared |
-| Genesis launch | 420 Arbitration | review-required |
-| Genesis launch | 420 Attention | review-required |
-| Genesis launch | 420 Bridge | review-required |
+| Genesis launch | 420 Arbitration | shared |
+| Genesis launch | 420 Attention | excluded |
+| Genesis launch | 420 Bridge | excluded |
 | Genesis launch | 420 Explorer | shared |
 | Genesis launch | 420 Faucet | release-disabled |
-| Genesis launch | 420 Gaming Protocol | review-required |
-| Genesis launch | 420 Governance | review-required |
+| Genesis launch | 420 Gaming Protocol | shared |
+| Genesis launch | 420 Governance | shared |
 | Genesis launch | 420 Identity | excluded |
 | Genesis launch | 420 Names | excluded |
 | Genesis launch | 420 Notifications | shared |
@@ -87,55 +123,55 @@ A review-required entry remains open until its receipts, obligations and retaine
 | Decision 2 | PuffBuddies | release-disabled |
 | Decision 2 | ReeferReview | release-disabled |
 | Decision 2 | TownSquare | release-disabled |
-| Contract ownership | 420 AI | review-required |
+| Contract ownership | 420 AI | shared |
 | Contract ownership | 420 Analytics | shared |
 | Contract ownership | 420 AppStore | shared |
-| Contract ownership | 420 Arbitration | review-required |
-| Contract ownership | 420 Attention | review-required |
-| Contract ownership | 420 Bridge | review-required |
-| Contract ownership | 420 Civic | review-required |
-| Contract ownership | 420 Commons | review-required |
-| Contract ownership | 420 ComputeMarket | review-required |
+| Contract ownership | 420 Arbitration | shared |
+| Contract ownership | 420 Attention | excluded |
+| Contract ownership | 420 Bridge | excluded |
+| Contract ownership | 420 Civic | shared |
+| Contract ownership | 420 Commons | shared |
+| Contract ownership | 420 ComputeMarket | excluded |
 | Contract ownership | 420 Explorer | shared |
 | Contract ownership | 420 Faucet | release-disabled |
-| Contract ownership | 420 Gaming Protocol | review-required |
-| Contract ownership | 420 Grants | review-required |
+| Contract ownership | 420 Gaming Protocol | shared |
+| Contract ownership | 420 Grants | excluded |
 | Contract ownership | 420 Identity | excluded |
-| Contract ownership | 420 Launchpad | review-required |
-| Contract ownership | 420 Market | review-required |
-| Contract ownership | 420 Messenger | review-required |
+| Contract ownership | 420 Launchpad | shared |
+| Contract ownership | 420 Market | shared |
+| Contract ownership | 420 Messenger | shared |
 | Contract ownership | 420 Names | excluded |
 | Contract ownership | 420 Notifications | shared |
-| Contract ownership | 420 Oracle | review-required |
+| Contract ownership | 420 Oracle | shared |
 | Contract ownership | 420 Pay | excluded |
-| Contract ownership | 420 Pulse | review-required |
-| Contract ownership | 420 Random | review-required |
+| Contract ownership | 420 Pulse | shared |
+| Contract ownership | 420 Random | shared |
 | Contract ownership | 420 Registry | excluded |
-| Contract ownership | 420 Resource Protocol | review-required |
-| Contract ownership | 420 Rights | review-required |
+| Contract ownership | 420 Resource Protocol | shared |
+| Contract ownership | 420 Rights | shared |
 | Contract ownership | 420 Search | shared |
-| Contract ownership | 420 Smart Accounts | review-required |
+| Contract ownership | 420 Smart Accounts | shared |
 | Contract ownership | 420 Stake | excluded |
 | Contract ownership | 420 Status | shared |
 | Contract ownership | 420 Swap | excluded |
 | Contract ownership | 420 Token | policy-exception |
 | Contract ownership | 420 Treasury | shared |
-| Contract ownership | 420 Trust | review-required |
-| Contract ownership | 420 Vault | review-required |
+| Contract ownership | 420 Trust | shared |
+| Contract ownership | 420 Vault | excluded |
 | Contract ownership | 420 Verify | shared |
 | Contract ownership | 420 Wallet | shared |
-| Contract ownership | 420-IS | review-required |
-| Consumer services | 420Calendar | review-required |
-| Consumer services | 420Classifieds | review-required |
-| Consumer services | 420Events | review-required |
-| Consumer services | 420Freelance | review-required |
-| Consumer services | 420Launchpad Crowdfunding | review-required |
-| Consumer services | 420Learn + 420Knowledge | review-required |
-| Consumer services | 420Location | review-required |
-| Consumer services | 420Mail | review-required |
-| Consumer services | 420Media | review-required |
-| Consumer services | 420Reputation | review-required |
-| Consumer services | 420Town Community Boards | review-required |
-| Consumer services | 420Travel | review-required |
-| Consumer services | 420University | review-required |
-| Consumer services | Reefer Review Publishing | review-required |
+| Contract ownership | 420-IS | shared |
+| Consumer services | 420Calendar | shared |
+| Consumer services | 420Classifieds | release-disabled |
+| Consumer services | 420Events | shared |
+| Consumer services | 420Freelance | release-disabled |
+| Consumer services | 420Launchpad Crowdfunding | shared |
+| Consumer services | 420Learn + 420Knowledge | shared |
+| Consumer services | 420Location | shared |
+| Consumer services | 420Mail | shared |
+| Consumer services | 420Media | release-disabled |
+| Consumer services | 420Reputation | shared |
+| Consumer services | 420Town Community Boards | shared |
+| Consumer services | 420Travel | shared |
+| Consumer services | 420University | shared |
+| Consumer services | Reefer Review Publishing | shared |

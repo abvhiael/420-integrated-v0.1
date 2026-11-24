@@ -3,16 +3,16 @@
   "policy": "420/REVENUE/POLICY/APPLICATION_REVENUE/V1",
   "catalogues": {
     "Genesis launch": {
-      "420 AI": "review-required",
+      "420 AI": "shared",
       "420 Analytics": "shared",
       "420 AppStore": "shared",
-      "420 Arbitration": "review-required",
-      "420 Attention": "review-required",
-      "420 Bridge": "review-required",
+      "420 Arbitration": "shared",
+      "420 Attention": "excluded",
+      "420 Bridge": "excluded",
       "420 Explorer": "shared",
       "420 Faucet": "release-disabled",
-      "420 Gaming Protocol": "review-required",
-      "420 Governance": "review-required",
+      "420 Gaming Protocol": "shared",
+      "420 Governance": "shared",
       "420 Identity": "excluded",
       "420 Names": "excluded",
       "420 Notifications": "shared",
@@ -58,60 +58,60 @@
       "TownSquare": "release-disabled"
     },
     "Contract ownership": {
-      "420 AI": "review-required",
+      "420 AI": "shared",
       "420 Analytics": "shared",
       "420 AppStore": "shared",
-      "420 Arbitration": "review-required",
-      "420 Attention": "review-required",
-      "420 Bridge": "review-required",
-      "420 Civic": "review-required",
-      "420 Commons": "review-required",
-      "420 ComputeMarket": "review-required",
+      "420 Arbitration": "shared",
+      "420 Attention": "excluded",
+      "420 Bridge": "excluded",
+      "420 Civic": "shared",
+      "420 Commons": "shared",
+      "420 ComputeMarket": "excluded",
       "420 Explorer": "shared",
       "420 Faucet": "release-disabled",
-      "420 Gaming Protocol": "review-required",
-      "420 Grants": "review-required",
+      "420 Gaming Protocol": "shared",
+      "420 Grants": "excluded",
       "420 Identity": "excluded",
-      "420 Launchpad": "review-required",
-      "420 Market": "review-required",
-      "420 Messenger": "review-required",
+      "420 Launchpad": "shared",
+      "420 Market": "shared",
+      "420 Messenger": "shared",
       "420 Names": "excluded",
       "420 Notifications": "shared",
-      "420 Oracle": "review-required",
+      "420 Oracle": "shared",
       "420 Pay": "excluded",
-      "420 Pulse": "review-required",
-      "420 Random": "review-required",
+      "420 Pulse": "shared",
+      "420 Random": "shared",
       "420 Registry": "excluded",
-      "420 Resource Protocol": "review-required",
-      "420 Rights": "review-required",
+      "420 Resource Protocol": "shared",
+      "420 Rights": "shared",
       "420 Search": "shared",
-      "420 Smart Accounts": "review-required",
+      "420 Smart Accounts": "shared",
       "420 Stake": "excluded",
       "420 Status": "shared",
       "420 Swap": "excluded",
       "420 Token": "policy-exception",
       "420 Treasury": "shared",
-      "420 Trust": "review-required",
-      "420 Vault": "review-required",
+      "420 Trust": "shared",
+      "420 Vault": "excluded",
       "420 Verify": "shared",
       "420 Wallet": "shared",
-      "420-IS": "review-required"
+      "420-IS": "shared"
     },
     "Consumer services": {
-      "420Calendar": "review-required",
-      "420Classifieds": "review-required",
-      "420Events": "review-required",
-      "420Freelance": "review-required",
-      "420Launchpad Crowdfunding": "review-required",
-      "420Learn + 420Knowledge": "review-required",
-      "420Location": "review-required",
-      "420Mail": "review-required",
-      "420Media": "review-required",
-      "420Reputation": "review-required",
-      "420Town Community Boards": "review-required",
-      "420Travel": "review-required",
-      "420University": "review-required",
-      "Reefer Review Publishing": "review-required"
+      "420Calendar": "shared",
+      "420Classifieds": "release-disabled",
+      "420Events": "shared",
+      "420Freelance": "release-disabled",
+      "420Launchpad Crowdfunding": "shared",
+      "420Learn + 420Knowledge": "shared",
+      "420Location": "shared",
+      "420Mail": "shared",
+      "420Media": "release-disabled",
+      "420Reputation": "shared",
+      "420Town Community Boards": "shared",
+      "420Travel": "shared",
+      "420University": "shared",
+      "Reefer Review Publishing": "shared"
     }
   },
   "routes": [
@@ -356,6 +356,359 @@
       "sources": [
         "contracts/config/genesis-dapp-contract-map.json",
         "contracts/config/420wallet-genesis.json"
+      ]
+    },
+    {
+      "application": "420 Smart Accounts",
+      "classification": "shared",
+      "route": "Account funding and wallet execution",
+      "trace": "Account balances are held for the account owner. Authorized execution spends that account balance and any application receipts belong to the service called.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/accounts/SmartAccount420.sol"
+      ]
+    },
+    {
+      "application": "420-IS",
+      "classification": "shared",
+      "route": "Namespace and checkpoint routing",
+      "trace": "The router resolves interoperable identities and checkpoint authority without collecting a settlement fee.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/interop/InteropRouter420.sol"
+      ]
+    },
+    {
+      "application": "420 Random",
+      "classification": "shared",
+      "route": "Randomness requests and fulfillment",
+      "trace": "The canonical router authenticates requests, provider fulfillment and result delivery without holding a request or provider payment.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/randomness/RandomnessRouter420.sol"
+      ]
+    },
+    {
+      "application": "420 Trust",
+      "classification": "shared",
+      "route": "Trust aggregation",
+      "trace": "The aggregator combines registered signals for downstream consumers without collecting settlement amounts.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/trust/TrustAggregator420.sol"
+      ]
+    },
+    {
+      "application": "420 Commons",
+      "classification": "shared",
+      "route": "Community permissions",
+      "trace": "Space, channel and membership operations set community permissions without a commercial settlement call.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/commons/CommonsRouter420.sol"
+      ]
+    },
+    {
+      "application": "420 Pulse",
+      "classification": "shared",
+      "route": "Publications and interactions",
+      "trace": "The router registers publications and interactions without custodial or paid settlement.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/pulse/PulseRouter420.sol"
+      ]
+    },
+    {
+      "application": "420 Messenger",
+      "classification": "shared",
+      "route": "Message envelopes and receipts",
+      "trace": "Delivery receipts attest to message state and are unrelated to any monetary receipt.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/messenger/MessengerRouter420.sol"
+      ]
+    },
+    {
+      "application": "420 Arbitration",
+      "classification": "shared",
+      "route": "Case and ruling coordination",
+      "trace": "The case and ruling paths authenticate arbitration transitions. The calling application remains responsible for asset custody and enforcing the ruling.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/arbitration/ArbitrationRouter420.sol"
+      ]
+    },
+    {
+      "application": "420 Oracle",
+      "classification": "shared",
+      "route": "Feed and oracle evidence",
+      "trace": "Feed lifecycle and report submissions authenticate data. The router defines no independent revenue collection.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/oracle/OracleRouter420.sol"
+      ]
+    },
+    {
+      "application": "420 Gaming Protocol",
+      "classification": "shared",
+      "route": "Game registry and entitlement authority",
+      "trace": "The registry and associated claim and entitlement records authenticate game state. Funded play and settlement belong to the game application.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/gaming/GameRegistry420.sol"
+      ]
+    },
+    {
+      "application": "420 Civic",
+      "classification": "shared",
+      "route": "Governance execution",
+      "trace": "Governor execution may carry proposal-supplied funds to the timelock for the authorized target calls. Such execution value is budgeted expenditure rather than a charge to a customer.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/governance/CivicGovernor420.sol"
+      ]
+    },
+    {
+      "application": "420 Governance",
+      "classification": "shared",
+      "route": "Canonical governance authority",
+      "trace": "The governance service authorizes proposal execution and associated timelock operations. It defines no independently retained service receipt.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/governance/Governance420.sol"
+      ]
+    },
+    {
+      "application": "420 Vault",
+      "classification": "excluded",
+      "route": "Governed asset custody",
+      "trace": "Deposits create vault accounting balances and withdrawals retire custody amounts. The deposited principal is excluded under the application revenue policy.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/vault/AssetVault420.sol"
+      ]
+    },
+    {
+      "application": "420Town Community Boards",
+      "classification": "shared",
+      "route": "Community boards",
+      "trace": "The Genesis profile covers community posts, threads, votes and moderation. Supporting identity, storage and search supply the underlying services.",
+      "sources": [
+        "config/genesis-consumer-services.json"
+      ]
+    },
+    {
+      "application": "420Travel",
+      "classification": "shared",
+      "route": "Travel discovery",
+      "trace": "The Genesis MVP covers maps, places, events, reviews and discovery. The separate Decision 2 entry keeps production release disabled.",
+      "sources": [
+        "config/genesis-consumer-services.json"
+      ]
+    },
+    {
+      "application": "420Reputation",
+      "classification": "shared",
+      "route": "Derived reputation",
+      "trace": "The canonical profile derives reputation for verified interactions from identity, verification and arbitration.",
+      "sources": [
+        "config/genesis-consumer-services.json"
+      ]
+    },
+    {
+      "application": "420Events",
+      "classification": "shared",
+      "route": "Event objects and discovery",
+      "trace": "The Genesis service profile specifies event objects, discovery and scheduling dependencies. Ticket or sale settlement is outside this profile.",
+      "sources": [
+        "config/genesis-consumer-services.json"
+      ]
+    },
+    {
+      "application": "420Location",
+      "classification": "shared",
+      "route": "Place discovery",
+      "trace": "The Genesis profile supplies a place registry and geospatial lookup with provider abstraction. It defines no independent settlement.",
+      "sources": [
+        "config/genesis-consumer-services.json"
+      ]
+    },
+    {
+      "application": "420Learn + 420Knowledge",
+      "classification": "shared",
+      "route": "Learning and credentials",
+      "trace": "The Genesis profile covers courses, lessons, progress, questions and credentials. It defines no tuition or provider settlement.",
+      "sources": [
+        "config/genesis-consumer-services.json"
+      ]
+    },
+    {
+      "application": "420University",
+      "classification": "shared",
+      "route": "Navigation and schema",
+      "trace": "The Genesis profile limits the umbrella shell to navigation and a shared schema.",
+      "sources": [
+        "config/genesis-consumer-services.json"
+      ]
+    },
+    {
+      "application": "420Mail",
+      "classification": "shared",
+      "route": "Identity-addressed inbox",
+      "trace": "The shared inbox delegates messaging, storage and notifications to the corresponding services.",
+      "sources": [
+        "config/genesis-consumer-services.json"
+      ]
+    },
+    {
+      "application": "420Calendar",
+      "classification": "shared",
+      "route": "Scheduling and reminders",
+      "trace": "The shared scheduling profile covers RSVPs and reminders using identity and notification services.",
+      "sources": [
+        "config/genesis-consumer-services.json"
+      ]
+    },
+    {
+      "application": "420Freelance",
+      "classification": "release-disabled",
+      "route": "Deferred freelance commerce",
+      "trace": "The Genesis scope supplies interfaces for gigs and milestone escrow. The user-facing application is classified post-Genesis and release disabled.",
+      "sources": [
+        "config/genesis-consumer-services.json",
+        "config/genesis-application-decision-2.json"
+      ]
+    },
+    {
+      "application": "420 AI",
+      "classification": "shared",
+      "route": "Compute job settlement",
+      "trace": "Direct AI funding is disabled. The AI adapter binds Compute provider entitlement and already-executed payer refund evidence, so those receipts belong to the Compute settlement.",
+      "sources": [
+        "contracts/src/ai/AIJobEscrow.sol",
+        "contracts/src/ai/AIComputeAdapter420.sol"
+      ]
+    },
+    {
+      "application": "420 Attention",
+      "classification": "excluded",
+      "route": "Campaign funding and reward delivery",
+      "trace": "Campaign balances fund beneficiary rewards. Authorized releases satisfy the recorded campaign obligations and do not create retained protocol revenue.",
+      "sources": [
+        "contracts/src/system/AttentionTreasury.sol",
+        "contracts/src/attention/AttentionRewardRegistry420.sol"
+      ]
+    },
+    {
+      "application": "420 Bridge",
+      "classification": "excluded",
+      "route": "Backing custody and external network fees",
+      "trace": "Bridge custody transfers backing assets. Bitcoin miner fees, CCTP fees and LayerZero message fees compensate their external systems.",
+      "sources": [
+        "contracts/src/bridge/BridgeValueCustody420.sol",
+        "contracts/src/bridge/bitcoin/BitcoinCustody420.sol",
+        "contracts/src/bridge/adapters/USDCCCTPAdapter.sol",
+        "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol"
+      ]
+    },
+    {
+      "application": "420 ComputeMarket",
+      "classification": "excluded",
+      "route": "Fixed-price provider work and residual refunds",
+      "trace": "Payer funding is reserved with payer-safety obligations. Verified work allocates provider payment and payer residual claims. Terminal failure and dispute refunds remain obligations.",
+      "sources": [
+        "contracts/src/compute/ComputeEscrowFunding420.sol",
+        "contracts/src/compute/ComputeVerifiedEntitlement420.sol"
+      ]
+    },
+    {
+      "application": "420 Grants",
+      "classification": "excluded",
+      "route": "Grant obligations",
+      "trace": "The grant router exposes program and award state, and the award registry records recipient funding obligations rather than commercial charges.",
+      "sources": [
+        "contracts/src/grants/GrantRouter420.sol",
+        "contracts/src/grants/GrantAwardRegistry420.sol"
+      ]
+    },
+    {
+      "application": "420 Launchpad",
+      "classification": "shared",
+      "route": "Crowdfunding payment and refund reconciliation",
+      "trace": "Crowdfunding records canonical 420 Pay settlement references and confirms actual refund delivery before attaching evidence. Project receipts and refunds remain attributed to the Pay path.",
+      "sources": [
+        "contracts/src/launchpad/LaunchpadCrowdfundingIntegration420.sol",
+        "contracts/src/pay/PaymentRouter420.sol"
+      ]
+    },
+    {
+      "application": "420 Market",
+      "classification": "shared",
+      "route": "Order and settlement evidence",
+      "trace": "The order registry reserves inventory and records reporter-authenticated payment and refund references. The settlement adapter, rather than the order record, owns the asset path.",
+      "sources": [
+        "contracts/src/market/OrderRegistry420.sol",
+        "contracts/src/market/MarketPolicyRegistry420.sol"
+      ]
+    },
+    {
+      "application": "420 Resource Protocol",
+      "classification": "shared",
+      "route": "Resource and storage settlement records",
+      "trace": "Resource receipts and storage settlement status provide registered evidence for provider obligations. The registries do not custody user payment or retain a protocol fee.",
+      "sources": [
+        "contracts/src/resource/ResourceReceiptRegistry420.sol",
+        "contracts/src/resource/StorageSettlementRegistry420.sol"
+      ]
+    },
+    {
+      "application": "420 Rights",
+      "classification": "shared",
+      "route": "License and effective-use resolution",
+      "trace": "The rights router resolves effective use from canonical rights and license records. Any separate commercial payment path would require its own revenue attribution.",
+      "sources": [
+        "contracts/src/rights/RightsRouter420.sol",
+        "contracts/src/rights/RightsLicenseRegistry420.sol"
+      ]
+    },
+    {
+      "application": "420Classifieds",
+      "classification": "release-disabled",
+      "route": "Marketplace MVP",
+      "trace": "The launch amendment disables production release. The consumer profile delegates planned settlement to Pay and disputes to Arbitration.",
+      "sources": [
+        "config/genesis-consumer-services.json",
+        "config/genesis-application-decision-2.json"
+      ]
+    },
+    {
+      "application": "420Launchpad Crowdfunding",
+      "classification": "shared",
+      "route": "Project funding via canonical Pay",
+      "trace": "This consumer profile uses contract-backed settlement. The crowdfunding integration binds canonical Pay payment and delivered refund references, sharing the Launchpad route.",
+      "sources": [
+        "config/genesis-consumer-services.json",
+        "contracts/src/launchpad/LaunchpadCrowdfundingIntegration420.sol"
+      ]
+    },
+    {
+      "application": "420Media",
+      "classification": "release-disabled",
+      "route": "Media publishing and livestreaming",
+      "trace": "The consumer profile names Pay as a dependency, and the launch amendment disables production release.",
+      "sources": [
+        "config/genesis-consumer-services.json",
+        "config/genesis-application-decision-2.json"
+      ]
+    },
+    {
+      "application": "Reefer Review Publishing",
+      "classification": "shared",
+      "route": "Editorial and publishing service",
+      "trace": "The Genesis publishing profile covers editorial and publishing tools using Rights, Storage and Search. The related ReeferReview application remains release-disabled.",
+      "sources": [
+        "config/genesis-consumer-services.json",
+        "config/genesis-application-decision-2.json"
       ]
     }
   ]

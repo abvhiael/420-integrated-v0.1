@@ -5,6 +5,13 @@ on:
     paths:
       - '.github/workflows/420bet-phase4-level2.yml'
       - 'contracts/src/bet/**'
+      - 'contracts/src/interfaces/**'
+      - 'contracts/src/libraries/**'
+      - 'contracts/src/system/**'
+      - 'contracts/foundry.toml'
+      - 'contracts/remappings.txt'
+      - 'contracts/lib/**'
+      - 'scripts/bet/scope-foundry-suites.py'
       - 'contracts/test/Bet*.t.sol'
 
 concurrency:
@@ -56,6 +63,11 @@ jobs:
         run: |
           set -euo pipefail
           regex='^(BetCasinoConvergence420|BetCasinoEmergencyConvergence420|BetCasinoSolvencyConvergence420|BetCasinoSettlementInvariant420|BetCasinoResultAdapter420|BetWagerAcceptance420|BetRandomness420|BetRandomnessTerminal420|BetSettlementEngine420|BetBankrollRisk420|BetTerminalPathInvariant420|BetCrashV1420|BetCrashProgression420|BetMinesV1420|BetMinesHardening420|BetRouletteV1420|BetBlackjackV1420|BetKenoV1420|BetPlinkoV1420|BetReferenceSlotV1420|BetDiceV1420)Test$'
+          scope="$(mktemp -d "$PWD/.bet-qualification.XXXXXX")"
+          trap 'rm -rf "$scope"' EXIT
+          python3 ../scripts/bet/scope-foundry-suites.py "$scope" BetCasinoConvergence420 BetCasinoEmergencyConvergence420 BetCasinoSolvencyConvergence420 BetCasinoSettlementInvariant420 BetCasinoResultAdapter420 BetWagerAcceptance420 BetRandomness420 BetRandomnessTerminal420 BetSettlementEngine420 BetBankrollRisk420 BetTerminalPathInvariant420 BetCrashV1420 BetCrashProgression420 BetMinesV1420 BetMinesHardening420 BetRouletteV1420 BetBlackjackV1420 BetKenoV1420 BetPlinkoV1420 BetReferenceSlotV1420 BetDiceV1420
+          export FOUNDRY_SRC="$scope/empty-src" FOUNDRY_TEST="$scope" FOUNDRY_SCRIPT="$scope/empty-script"
+          mkdir -p "$FOUNDRY_SRC" "$FOUNDRY_SCRIPT"
           set +e
           forge test --match-contract "$regex" --json > "$RUNNER_TEMP/phase4-level2.json" 2> "$RUNNER_TEMP/phase4-level2.stderr"
           forge_status=$?
@@ -91,7 +103,7 @@ jobs:
               if not tests:
                   continue
               for name in names:
-                  if f"test/{name}.t.sol:" in key:
+                  if key.endswith(f"/{name}.t.sol:{name}Test"):
                       seen.add(name)
               for test_name, result in tests.items():
                   total += 1

@@ -4,7 +4,12 @@ on:
     branches: ['bet/5d2-sports-registry']
   pull_request:
     paths:
-      - 'contracts/src/bet/**'
+      - 'contracts/src/bet/sports/**'
+      - 'contracts/src/bet/BetAuthorization420.sol'
+      - 'contracts/src/bet/BetIds420.sol'
+      - 'contracts/src/bet/BetTypes420.sol'
+      - 'contracts/src/bet/BetOperatorRegistry420.sol'
+      - 'contracts/src/bet/BetEmergencyState420.sol'
       - 'contracts/src/system/CapabilityRegistry420.sol'
       - 'contracts/src/interfaces/**'
       - '!contracts/src/interfaces/IBridgeValueCustody420.sol'

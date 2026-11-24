@@ -60,10 +60,12 @@ func chessOccurrences(h chessRepetition,key chessPositionIdentity)int{
  return n
 }
 func chessNext(d chessRuleData,m chessMove)(chessRuleData,int,error){
- old:=d.Board;d.LastMove=m.UCI();d.LastSAN=old.san(m);d.Board=old.apply(m);d.Offer=-1
- key,e:=d.Board.identity();if e!=nil{return d,0,e}
- h,n,e:=d.Repetition.record(key,d.Board.Half==0||old.Castle!=d.Board.Castle);d.Repetition=h
- return d,n,e
+ old:=d.Board
+ position,count,err:=(chessReachPosition{Board:old,History:d.Repetition}).after(m)
+ if err!=nil{return d,0,err}
+ d.LastMove=m.UCI();d.LastSAN=old.san(m);d.Board=position.Board;d.Offer=-1
+ d.Repetition=position.History
+ return d,count,nil
 }
 func chessFinish(f *RuleFrame,d *chessRuleData,reason string,winner *int)error{
  scores,e:=chessResultScores(winner);if e!=nil{return e}

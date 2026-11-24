@@ -146,3 +146,79 @@ func TestBC32ReachabilityCapacityPreservesFrontier(t *testing.T) {
 		t.Fatalf("resumed search: %v %v", result, err)
 	}
 }
+
+func TestBC32ReachPositionAutomaticEndings(t *testing.T) {
+	board, err := parseChessFEN("7k/8/5KQ1/8/8/8/8/8 w - - 149 75")
+	if err != nil {
+		t.Fatal(err)
+	}
+	position := chessReachPosition{Board: board}
+	identity, err := board.identity()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 4; i++ {
+		position.History, _, err = position.History.record(identity, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	result, moves, err := position.expand(0)
+	if err != nil || result != chessMateUnknown || len(moves) == 0 {
+		t.Fatalf("before thresholds: %v %v", result, err)
+	}
+	foundMate, foundDraw := false, false
+	for _, move := range moves {
+		child, _, err := position.after(move)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if child.Board.Half != 150 {
+			t.Fatalf("unexpected halfmove count %d", child.Board.Half)
+		}
+		result, moves, err := child.expand(0)
+		if err != nil || len(moves) != 0 {
+			t.Fatalf("child still has continuations: %v %v", result, err)
+		}
+		foundMate = foundMate || result == chessMatePossible
+		foundDraw = foundDraw || result == chessMateImpossible
+	}
+	if !foundMate || !foundDraw {
+		t.Fatal("fixture should permit both checkmate and an automatic draw")
+	}
+	job, err := newChessHistoryReachabilityJob(position, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := job.advance(1); err != nil {
+		t.Fatal(err)
+	}
+	checkpoint, err := job.checkpoint()
+	if err != nil {
+		t.Fatal(err)
+	}
+	restored, err := restoreChessReachabilityJob(checkpoint)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result, err := restored.advance(128); err != nil || result != chessMatePossible {
+		t.Fatalf("restore near draw limit: %v %v", result, err)
+	}
+
+	before, err := position.key()
+	if err != nil {
+		t.Fatal(err)
+	}
+	position.History, _, err = position.History.record(identity, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	after, err := position.key()
+	if err != nil || before == after {
+		t.Fatal("fifth repetition collided with the fourth", err)
+	}
+	result, moves, err = position.expand(0)
+	if err != nil || result != chessMateImpossible || len(moves) != 0 {
+		t.Fatalf("fifth repetition: %v %v", result, err)
+	}
+}

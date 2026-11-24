@@ -6,6 +6,8 @@ import "encoding/json"
 // frontier proves impossibility. Checkpoints are private trusted worker state,
 // never a client action or a RuleFrame field.
 type chessReachabilityJob struct {
+	History        []chessRepetition `json:"history,omitempty"`
+	exactSeen      map[chessReachPositionKey]struct{}
 	Root           chessBoard            `json:"root"`
 	Seat           int                   `json:"seat"`
 	Nodes          []chessBoard          `json:"nodes"`
@@ -27,6 +29,20 @@ func newChessReachabilityJob(p chessBoard, seat int) (*chessReachabilityJob, err
 	}
 	return &chessReachabilityJob{Root: p, Seat: seat, Nodes: []chessBoard{p}, Parents: []int{-1}, Moves: []string{""}, seen: map[chessReachKey]struct{}{chessReachIdentity(p): {}}}, nil
 }
+func newChessHistoryReachabilityJob(position chessReachPosition, seat int) (*chessReachabilityJob, error) {
+	job, err := newChessReachabilityJob(position.Board, seat)
+	if err != nil {
+		return nil, err
+	}
+	key, err := position.key()
+	if err != nil || !position.History.valid() || chessOccurrences(position.History, key.Position) == 0 {
+		return nil, ErrInvalid
+	}
+	job.History = []chessRepetition{position.History}
+	job.exactSeen = map[chessReachPositionKey]struct{}{key: {}}
+	return job, nil
+}
+
 func (j *chessReachabilityJob) advance(work int) (chessMateReachability, error) {
 	return j.advanceBounded(work, int(^uint(0)>>1))
 }
@@ -40,17 +56,32 @@ func (j *chessReachabilityJob) advanceBounded(work, maxNodes int) (chessMateReac
 	if j.Result != chessMateUnknown {
 		return j.Result, nil
 	}
-	if j.seen == nil {
+	if j.seen == nil || j.History != nil && (len(j.History) != len(j.Nodes) || j.exactSeen == nil) {
 		return chessMateUnknown, ErrInvalid
 	}
 	j.storageLimited = false
 	for n := 0; n < work && j.Cursor < len(j.Nodes); n++ {
 		i := j.Cursor
 		p := j.Nodes[i]
-		moves := p.legal()
+		var moves []chessMove
+		var leaf chessMateReachability
+		position := chessReachPosition{Board: p}
+		if j.History != nil {
+			position.History = j.History[i]
+			var err error
+			leaf, moves, err = position.expand(j.Seat)
+			if err != nil {
+				return chessMateUnknown, err
+			}
+		} else {
+			moves = p.legal()
+			if len(moves) == 0 && p.Turn == 1-j.Seat && p.check(p.Turn) {
+				leaf = chessMatePossible
+			}
+		}
 		if len(moves) == 0 {
 			j.Cursor++
-			if p.Turn == 1-j.Seat && p.check(p.Turn) {
+			if leaf == chessMatePossible {
 				path := []string{}
 				for k := i; k > 0; k = j.Parents[k] {
 					path = append(path, j.Moves[k])
@@ -69,28 +100,51 @@ func (j *chessReachabilityJob) advanceBounded(work, maxNodes int) (chessMateReac
 			continue
 		}
 		type edge struct {
-			board chessBoard
-			key   chessReachKey
-			move  chessMove
+			board    chessBoard
+			key      chessReachKey
+			move     chessMove
+			history  chessRepetition
+			exactKey chessReachPositionKey
 		}
 		edges := make([]edge, 0, len(moves))
 		for _, m := range moves {
-			q := p.apply(m)
-			k := chessReachIdentity(q)
-			if _, exists := j.seen[k]; exists {
-				continue
+			if j.History != nil {
+				child, _, err := position.after(m)
+				if err != nil {
+					return chessMateUnknown, err
+				}
+				key, err := child.key()
+				if err != nil {
+					return chessMateUnknown, err
+				}
+				if _, exists := j.exactSeen[key]; !exists {
+					edges = append(edges, edge{board: child.Board, move: m, history: child.History, exactKey: key})
+				}
+			} else {
+				q := p.apply(m)
+				k := chessReachIdentity(q)
+				if _, exists := j.seen[k]; !exists {
+					edges = append(edges, edge{board: q, key: k, move: m})
+				}
 			}
-			edges = append(edges, edge{q, k, m})
 		}
 		if len(edges) > maxNodes-len(j.Nodes) {
 			j.storageLimited = true
 			return chessMateUnknown, nil
 		}
 		for _, child := range edges {
-			if _, exists := j.seen[child.key]; exists {
-				continue
+			if j.History != nil {
+				if _, exists := j.exactSeen[child.exactKey]; exists {
+					continue
+				}
+				j.exactSeen[child.exactKey] = struct{}{}
+				j.History = append(j.History, child.history)
+			} else {
+				if _, exists := j.seen[child.key]; exists {
+					continue
+				}
+				j.seen[child.key] = struct{}{}
 			}
-			j.seen[child.key] = struct{}{}
 			j.Nodes = append(j.Nodes, child.board)
 			j.Parents = append(j.Parents, i)
 			j.Moves = append(j.Moves, child.move.UCI())
@@ -113,6 +167,12 @@ func restoreChessReachabilityJob(raw []byte) (*chessReachabilityJob, error) {
 		return nil, ErrInvalid
 	}
 	j, e := newChessReachabilityJob(saved.Root, saved.Seat)
+	if saved.History != nil {
+		if len(saved.History) == 0 {
+			return nil, ErrInvalid
+		}
+		j, e = newChessHistoryReachabilityJob(chessReachPosition{saved.Root, saved.History[0]}, saved.Seat)
+	}
 	if e != nil {
 		return nil, e
 	}

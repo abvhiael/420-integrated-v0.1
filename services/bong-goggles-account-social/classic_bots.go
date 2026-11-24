@@ -6,6 +6,7 @@ import (
  "database/sql"
  "encoding/json"
  "errors"
+ "fmt"
  "time"
 )
 
@@ -96,7 +97,7 @@ func (s *ClassicSessions) RunBotTurn(ctx context.Context,id string)(bool,error){
  policy,e:=s.botPolicy(rec.GameID,difficulty.String);if e!=nil{return false,e}
  rule,e:=s.rule(rec.GameID,rec.RulesVersion,rec.RulesHash);if e!=nil{return false,e}
  adapter,ok:=rule.(*RulesAdapter);if !ok{return false,ErrUnavailable}
- if e=s.verifyRulesTx(ctx,tx,rec,adapter);e!=nil{return false,ErrUnavailable}
+ if e=s.verifyRulesTx(ctx,tx,rec,adapter);e!=nil{return false,fmt.Errorf("%w: bot journal verification: %v",ErrUnavailable,e)}
  var now time.Time
  if e=tx.QueryRowContext(ctx,"SELECT clock_timestamp()").Scan(&now);e!=nil{return false,e}
  chess:=isClassicChess(adapter)
@@ -116,7 +117,7 @@ func (s *ClassicSessions) RunBotTurn(ctx context.Context,id string)(bool,error){
   next,turn,finished,won,e=adapter.applyChessTime(rec.State,seat,event)
   if e==nil{move,e=json.Marshal(event)}
  }else{next,turn,finished,won,e=adapter.Apply(rec.State,seat,move)}
- if e!=nil||!validRuleState(next){return false,ErrUnavailable}
+ if e!=nil||!validRuleState(next){return false,fmt.Errorf("%w: bot authoritative apply",ErrUnavailable)}
  before:=rec.State
  rec.State=next;rec.Sequence++
  var nextSeat,deadline,winner,reason any

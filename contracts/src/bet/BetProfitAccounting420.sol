@@ -2,7 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "./BankrollVault420.sol";
-import "./BetGenesisCapitalization420.sol";
+import {BetGenesisCapitalization420} from "./BetGenesisCapitalization420.sol";
 
 /// @notice Read-only, custody-derived profit reconciliation for one canonical bankroll.
 /// @dev No distribution, epoch finalization, or authority to move money. All LP equity
@@ -28,23 +28,25 @@ contract BetProfitAccounting420 {
         uint256 pendingWithdrawals;
         uint256 safetyReserve;
         uint256 lpEquity;
+        uint256 genesisEquity;
+        uint256 otherLpEquity;
         uint256 freeLiquidity;
         bool reconciled;
         uint256 eligibleRevenue;
     }
     error InvalidConfiguration();
     constructor(address vault_, address capital_) {
-        if (vault_.code.length == 0 || capital_.code.length == 0) revert InvalidConfiguration();
+        if (vault_.code.length == 0 || (capital_ != address(0) && capital_.code.length == 0)) revert InvalidConfiguration();
         bankroll = BankrollVault420(vault_);
         capitalization = BetGenesisCapitalization420(payable(capital_));
-        if (address(capitalization.bankroll()) != vault_ || bankroll.asset() != address(0))
+        if (capital_ != address(0) && (address(capitalization.bankroll()) != vault_ || bankroll.asset() != address(0)))
             revert InvalidConfiguration();
     }
 
     function report() external view returns (Report memory r) {
         VaultAccounting420.VaultState memory v = bankroll.accounting().getVault(bankroll.vaultId());
         r.asset = bankroll.asset();
-        r.capitalized = capitalization.capitalized();
+        if (address(capitalization) != address(0)) r.capitalized = capitalization.capitalized();
         r.deposits = bankroll.totalDeposited();
         r.withdrawals = bankroll.totalWithdrawn();
         r.escrow = bankroll.activeWagerStakeEscrow();
@@ -56,11 +58,13 @@ contract BetProfitAccounting420 {
         else r.gamingResult = -_signed(r.grossPayouts-r.grossWagers);
         r.recordedPnl = v.realizedPnl;
         r.assets = v.totalAssets;
-        r.custody = address(bankroll).balance;
+        r.custody = r.asset == address(0) ? address(bankroll).balance : IERC20Bankroll420(r.asset).balanceOf(address(bankroll));
         r.liability = v.activeReservedLiability;
         r.pendingWithdrawals = v.pendingWithdrawals;
         r.safetyReserve = v.safetyReserve;
         r.lpEquity = bankroll.accounting().lpEquity(bankroll.vaultId());
+        if (address(capitalization) != address(0)) r.genesisEquity = bankroll.previewRedeem(bankroll.shareBalance(address(capitalization)));
+        r.otherLpEquity = r.lpEquity - r.genesisEquity;
         r.freeLiquidity = bankroll.accounting().availableForNewRisk(bankroll.vaultId());
         r.reconciled = v.asset == r.asset && r.capitalized <= r.deposits
             && r.unresolvedReturns == 0 && r.refunds <= r.grossWagers && r.refunds <= r.grossPayouts

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync/atomic"
+	"time"
 )
 
 type ChainProbe interface {
@@ -57,11 +58,22 @@ func (s *Service) Handler() http.Handler {
 			"canonical": false,
 		})
 	})
-	mux.HandleFunc("GET /readyz", func(w http.ResponseWriter, _ *http.Request) {
+	mux.HandleFunc("GET /readyz", func(w http.ResponseWriter, r *http.Request) {
 		if !s.ready.Load() {
 			writeJSON(w, http.StatusServiceUnavailable, map[string]any{
 				"service": "420Verify",
 				"ready":   false,
+			})
+			return
+		}
+		// Startup qualification is not a permanent proof of chain readiness.
+		// Recheck on every probe so RPC outages and wrong-chain fail closed.
+		ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
+		defer cancel()
+		if err := s.Qualify(ctx); err != nil {
+			writeJSON(w, http.StatusServiceUnavailable, map[string]any{
+				"service": "420Verify",
+				"ready": false,
 			})
 			return
 		}

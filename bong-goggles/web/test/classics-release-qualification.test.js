@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {performance} from 'node:perf_hooks';
+import {hash as chessRulesHash} from './chess-fixture.mjs';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {CLASSIC_ROADMAP,ALL_CLASSICS} from '../core/classics.js';
@@ -28,6 +29,7 @@ test('BC-0.12 catalogue release audit covers exact 25 titles, sequence and fail-
  assert.equal(manifest.schema,'bc-0-12-release-evidence-v1');
  assert.equal(manifest.games['labyrinth-cribbage'].result,'developer-authorized-release');
  assert.equal(manifest.games.chess.result,'developer-authorized-release');
+ assert.equal(manifest.games.chess.rulesHash,chessRulesHash);
  const result=await auditRelease({manifest,fetchImpl:()=>{throw Error('should not call GitHub without release')}});
  assert.deepEqual(result,{count:25,released:2,locked:23});
  const cli=execFileSync(process.execPath,[fileURLToPath(new URL('../scripts/classics-release-gate.mjs',import.meta.url)),'--audit'],{encoding:'utf8'});

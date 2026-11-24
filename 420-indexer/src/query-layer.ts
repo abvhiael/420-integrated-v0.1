@@ -124,18 +124,22 @@ export function logsQuery420(chainId: bigint, opts: { address?: string; cursor?:
 
 export function protocolEventsQuery420(chainId: bigint, opts: { protocol?: string; objectKey?: string; cursor?: string; limit?: number; direction?: QueryDirection420 } = {}): SqlQuery420 {
   const direction = opts.direction ?? 'desc';
+  const isCompensation = opts.protocol === '420DevelopmentCompensation';
+  const table = isCompensation ? 'idx_protocol_events' : 'idx_protocol_object_events';
+  const objectKey = isCompensation ? "fields->>'contributionId'" : 'object_key';
+  const columns = isCompensation ? `*, ${objectKey} as object_key` : '*';
   const limit = normalizeLimit420(opts.limit);
   const params: unknown[] = [chainId.toString()];
   const predicates = ['chain_id = $1'];
   if (opts.protocol) { params.push(opts.protocol); predicates.push(`protocol = $${params.length}`); }
-  if (opts.objectKey) { params.push(opts.objectKey); predicates.push(`object_key = $${params.length}`); }
+  if (opts.objectKey) { params.push(opts.objectKey); predicates.push(`${objectKey} = $${params.length}`); }
   if (opts.cursor) {
     const cursor = decodePositionCursor420(opts.cursor);
     params.push(cursor.blockNumber.toString(), cursor.txIndex, cursor.logIndex);
     predicates.push(`(block_number, tx_index, log_index) ${cmp(direction)} ($${params.length - 2}, $${params.length - 1}, $${params.length})`);
   }
   params.push(limit + 1);
-  return { text: `select * from idx_protocol_object_events where ${predicates.join(' and ')} order by block_number ${order(direction)}, tx_index ${order(direction)}, log_index ${order(direction)} limit $${params.length}`, params };
+  return { text: `select ${columns} from ${table} where ${predicates.join(' and ')} order by block_number ${order(direction)}, tx_index ${order(direction)}, log_index ${order(direction)} limit $${params.length}`, params };
 }
 
 export function assetTransfersQuery420(chainId: bigint, opts: { assetKey?: string; address?: string; cursor?: string; beforeBlock?: bigint; limit?: number; direction?: QueryDirection420 } = {}): SqlQuery420 {

@@ -4,6 +4,8 @@ pragma solidity ^0.8.24;
 import "../src/exchange/ExchangeAtomicRouter420.sol";
 import "../src/exchange/ExchangeIds420.sol";
 import "../src/interfaces/genesis/ICapabilityRegistry420.sol";
+import "../src/system/CapabilityRegistry420.sol";
+import "../src/revenue/FoundingDeveloperCompensationSplitter420.sol";
 
 contract FeeSettlementToken420 {
     string public name;
@@ -64,7 +66,9 @@ contract ExchangeFeeSettlement420Test {
     FeeSettlementCaps420 private caps;
     FeeSettlementOracle420 private refOracle;
     FeeSettlementAdapter420 private adapter;
-    MockDevelopmentVaultFee420 private devVault;
+    DevelopmentCompensationVault420 private devVault;
+    FoundingDeveloperCompensationSplitter420 private splitter;
+    CapabilityRegistry420 private revenueCaps;
     ExchangeAuthorization420 private authorization;
     ExchangeEmergencyControl420 private emergency;
     ExchangeOracleGuard420 private guard;
@@ -77,8 +81,10 @@ contract ExchangeFeeSettlement420Test {
 
     constructor(){
         a=new FeeSettlementToken420("A","A");b=new FeeSettlementToken420("B","B");c=new FeeSettlementToken420("C","C");
-        caps=new FeeSettlementCaps420();refOracle=new FeeSettlementOracle420();adapter=new FeeSettlementAdapter420();devVault=new MockDevelopmentVaultFee420();
+        caps=new FeeSettlementCaps420();refOracle=new FeeSettlementOracle420();adapter=new FeeSettlementAdapter420();revenueCaps=new CapabilityRegistry420();splitter=new FoundingDeveloperCompensationSplitter420(address(0xAA11),address(0xAA22),address(0xAA33));devVault=new DevelopmentCompensationVault420(address(revenueCaps),address(splitter));splitter.bindCompensationVault(address(devVault));
         authorization=new ExchangeAuthorization420(address(caps));emergency=new ExchangeEmergencyControl420(address(this));guard=new ExchangeOracleGuard420(address(this));assets=new ExchangeAssetRegistry420(address(this));markets=new ExchangeMarketRegistry420(address(this),address(assets),C_ID);routes=new ExchangeRouteRegistry420(address(this));policy=new ExchangeFeePolicy420(address(this));feeRouter=new ExchangeFeeRouter420(address(this),address(policy));
+        revenueCaps.registerProtocolComponent(DevelopmentCompensationIds420.COMPONENT_DEVELOPMENT_COMPENSATION,address(this));
+        revenueCaps.createGrant(keccak256("exchange compensation"),address(feeRouter),DevelopmentCompensationIds420.COMPONENT_DEVELOPMENT_COMPENSATION,DevelopmentCompensationIds420.ACTION_CONTRIBUTE_REVENUE,DevelopmentCompensationIds420.scopeSource(feeRouter.SOURCE_APPLICATION_ID()),type(uint256).max,0,0,0,0);
         _asset(A_ID,address(a),bytes16("A"));_asset(B_ID,address(b),bytes16("B"));_asset(C_ID,address(c),bytes16("C"));
         markets.configureMarket(AB,A_ID,B_ID,keccak256("AB"),address(adapter),ExchangeTypes420.MarketStatus.ACTIVE,keccak256("AB-meta"));markets.configureMarket(BC,B_ID,C_ID,keccak256("BC"),address(adapter),ExchangeTypes420.MarketStatus.ACTIVE,keccak256("BC-meta"));
         routes.configureRoute(ROUTE,keccak256("420SWAP"),address(adapter),address(adapter),keccak256("fee-route"),true);guard.configureGuard(AB,address(refOracle),1 days,500,true);guard.configureGuard(BC,address(refOracle),1 days,500,true);
@@ -101,7 +107,9 @@ contract ExchangeFeeSettlement420Test {
         require(c.balanceOf(DEVELOPMENT)==2e17,"development");
         require(c.balanceOf(COMMUNITY)==15e16,"community");
         require(c.balanceOf(LIQUIDITY)==2e17,"liquidity");
-        require(devVault.received()==5e16,"developer");
+        require(splitter.totalTokenCredited(address(c))==5e16,"developer");
+        require(c.balanceOf(address(splitter))==5e16 && c.balanceOf(address(devVault))==0,"compensation custody");
+        require(c.allowance(address(feeRouter),address(devVault))==0,"vault allowance residue");
         require(c.balanceOf(address(router))==0,"router residue");
         require(c.balanceOf(address(feeRouter))==0,"fee router residue");
         require(c.allowance(address(router),address(feeRouter))==0,"fee allowance residue");
@@ -124,6 +132,15 @@ contract ExchangeFeeSettlement420Test {
         router.swapExactInputPath(address(a),10 ether,99e17,address(this),pathHash,hops);
         router.swapExactInputPath(address(a),10 ether,99e17,address(this),pathHash,hops);
         require(router.tradeNonce()==2,"nonce");
+    }
+
+    function testRevokedCompensationGrantRollsBackActualTrade() public {
+        revenueCaps.revokeGrant(keccak256("exchange compensation"));
+        ExchangeAtomicRouter420.Hop[] memory hops=_twoHop();
+        bytes32 pathHash=router.hashPath(address(a),100 ether,address(this),hops);
+        uint256 beforeA=a.balanceOf(address(this));
+        (bool ok,)=address(router).call(abi.encodeWithSelector(router.swapExactInputPath.selector,address(a),100 ether,99 ether,address(this),pathHash,hops));
+        require(!ok && a.balanceOf(address(this))==beforeA && c.balanceOf(PROTOCOL)==0 && splitter.totalTokenCredited(address(c))==0 && router.tradeNonce()==0,"atomic grant rollback");
     }
 
     function _twoHop() private view returns(ExchangeAtomicRouter420.Hop[] memory h){h=new ExchangeAtomicRouter420.Hop[](2);h[0]=ExchangeAtomicRouter420.Hop(AB,ROUTE,address(b),1,"");h[1]=ExchangeAtomicRouter420.Hop(BC,ROUTE,address(c),1,"");}

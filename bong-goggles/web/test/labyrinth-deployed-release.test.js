@@ -9,7 +9,7 @@ const view=()=>({id,roomId:room,gameId:'labyrinth-cribbage',
  rulesVersion:'v2.0',rulesHash:BC28_LABYRINTH_HASH,seatCount:2,sequence:1,
  status:'active',viewerSeat:0,turnSeat:0,winnerSeat:null,
  privateView:{seat:0,variant:'labyrinth-2p',scores:[0,0],phase:'discard',
- hand:[0,1,2,3,4,5,6,7,8],pegCount:0}});
+ hand:[0,1,2,3,4,5,6,7,8],cardCounts:[9,9],pegCount:0}});
 const fail=fn=>assert.throws(fn,/BC-2.8 real Labyrinth Cribbage acceptance/);
 test('BC-2.8 production live adapter recognizes only pinned 325-point two-human rule identity',()=>{
  const s=view();assert.equal(verifyBC28LabyrinthLiveView(s),s);
@@ -17,6 +17,12 @@ test('BC-2.8 production live adapter recognizes only pinned 325-point two-human 
  fail(()=>verifyBC28LabyrinthLiveView({...s,rulesVersion:'v1.0'}));
  fail(()=>verifyBC28LabyrinthLiveView({...s,rulesHash:'f'.repeat(64)}));
  fail(()=>verifyBC28LabyrinthLiveView({...s,seatCount:4}));
+ assert.equal(verifyBC28LabyrinthLiveView({...s,seatCount:3,privateView:{
+  ...s.privateView,variant:'labyrinth-3p',scores:[0,0,0],cardCounts:[9,9,8]}}).seatCount,3);
+ assert.equal(verifyBC28LabyrinthLiveView({...s,seatCount:4,privateView:{
+  ...s.privateView,variant:'labyrinth-4p-partners',scores:[0,0,0,0],cardCounts:[9,9,7,7]}}).seatCount,4);
+ fail(()=>verifyBC28LabyrinthLiveView({...s,privateView:{
+  ...s.privateView,cardCounts:[6,9]}}));
  fail(()=>verifyBC28LabyrinthLiveView({...s,privateView:{...s.privateView,variant:'labyrinth-4p-individual'}}));
  fail(()=>verifyBC28LabyrinthLiveView({...s,privateView:{...s.privateView,seed:'hidden'}}));
  fail(()=>verifyBC28LabyrinthLiveView({...s,privateView:{...s.privateView,hand:[0,0,1]}}));

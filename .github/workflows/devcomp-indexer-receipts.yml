@@ -53,7 +53,7 @@ jobs:
           npm --prefix 420-indexer ci
           npm --prefix 420-indexer run build
           cd 420-indexer
-          node --test dist/test/compensation-indexer.test.js
+          node --test dist/test/compensation-indexer.test.js dist/test/compensation-report.test.js
       - name: Ingest real vault and splitter receipts and recover a reorganization
         env:
           DEVCOMP_LOCAL_RPC: http://127.0.0.1:18548

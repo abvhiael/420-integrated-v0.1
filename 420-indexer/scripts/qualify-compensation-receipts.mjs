@@ -288,6 +288,22 @@ try {
       (event) => event.transactionHash === claim.hash
     )
   );
+  process.env.INDEXER_COMPENSATION_REPORT_BINDING = JSON.stringify({
+    chainId: '420', vault: vaultAddress, splitter: splitterAddress, founders
+  });
+  const report = await routeIndexerHttp420(new IndexerPublicApiAdapter420(service), 'GET',
+    '/v1/protocols/development-compensation/report?chainId=420&from=0&to=9999999999');
+  assert.equal(report.status, 200);
+  const { contributions, entitlements } = report.body.data;
+  const native = '0x' + '0'.repeat(40);
+  const token = wrappedAddress.toLowerCase();
+  assert.equal(contributions.find(row => row.asset === native).compensation, '140');
+  assert.equal(contributions.find(row => row.asset === native).eligibleRevenue, '1400');
+  assert.equal(contributions.find(row => row.asset === token).compensation, '80');
+  assert.equal(contributions.find(row => row.asset === token).eligibleRevenue, '800');
+  assert.equal(entitlements.filter(row => row.asset === native).reduce((sum, row) => sum + BigInt(row.claimed), 0n), 0n);
+  assert.equal(entitlements.filter(row => row.asset === token).reduce((sum, row) => sum + BigInt(row.claimed), 0n), 20n);
+  assert.equal(entitlements.filter(row => row.asset === token).reduce((sum, row) => sum + BigInt(row.outstanding), 0n), 60n);
   rebuild = await open(rebuildSchema);
   await (
     await createCompensationIndexer420(source, rebuild, pins, artifacts, opts)

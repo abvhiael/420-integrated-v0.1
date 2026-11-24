@@ -145,6 +145,42 @@ async function createRoom(io,seatType='human',difficulty=null){
 export async function playToMidpoint(io){
  if(io.game!=='labyrinth-cribbage')fail('incorrect live game adapter');
  const initial=await createRoom(io);
+ // A real production HTTP match is insufficient if users cannot operate
+ // the actual published page. Both real signed browser contexts must render
+ // the original board and their own concealed hand before any local action.
+ for(const [seat,page] of io.pages.entries()){
+  await page.goto('https://bonggoggles.420integrated.org/games/labyrinth-cribbage/play?session='+initial.id,{
+   waitUntil:'domcontentloaded',timeout:30000
+  });
+  await page.locator('.lab-board').first().waitFor({timeout:30000});
+  if(await page.locator('img[src="/assets/games/labyrinth-cribbage/labyrinth.png"]').count()<1||
+     await page.locator('[data-lab-card]').count()<6)
+   fail('published original board or private 420ID '+seat+' hand unavailable');
+ }
+ const start=await get(io,0,initial.id);
+ if(start.status!=='active'||![0,1].includes(start.turnSeat))
+  fail('published match never produced current human seat');
+ const seat=start.turnSeat,actor=io.pages[seat];
+ const own=await get(io,seat,initial.id);
+ if(own.privateView.phase!=='discard')fail('new live game did not begin canonical discard');
+ const first=legalMove(own);
+ if(first.type!=='discard'||first.cards.length!==3)fail('incorrect first 325-point discard');
+ for(const card of first.cards){
+  const button=actor.locator('[data-lab-card="'+card+'"]');
+  if(await button.count()!==1)fail('browser private card selection missing');
+  await button.click();
+ }
+ const submit=actor.locator('[data-lab-action="discard"]');
+ if(await submit.count()!==1||await submit.isDisabled())
+  fail('explicit browser discard action did not enable after valid selection');
+ await submit.click();
+ let advanced=false;
+ for(let i=0;i<35;i++){
+  await delay(250);
+  const confirmed=await get(io,seat,initial.id);
+  if(confirmed.sequence>own.sequence){advanced=confirmed.sequence===own.sequence+1;break}
+ }
+ if(!advanced)fail('real browser card selection and Play action did not commit a server move');
  const mid=await playHumans(io,initial.id,{stopAt:5});
  if(mid.status!=='active'||mid.sequence<5)fail('midpoint before verified canonical turns');
  return {sessionId:initial.id,sequence:mid.sequence};

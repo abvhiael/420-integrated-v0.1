@@ -66,6 +66,7 @@ class FundedFormats(LocalFixture):
         self.encryption=ECC.import_key((self.private/'encryption.pem').read_bytes())
         for p in self.profiles:self.tx(self.admission.functions.registerIdentity(b32(p['subject']),b32(p['credential'])))
         for host in (self.peer,self.house):
+            self.grant_fantasy_source(host)
             self.grant(self.admin,host.functions.CREATE().call(),self.auth.functions.scopeGlobal().call())
             for actor in self.accounts[:5]:self.tx(self.token.functions.approve(host.address,2**255),actor)
         self.snapshots={};self.make_slate('multi',3);self.make_slate('single',1)

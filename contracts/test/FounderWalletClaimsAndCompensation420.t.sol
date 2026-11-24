@@ -133,6 +133,29 @@ contract FounderWalletClaimsAndCompensation420Test {
         vault.contributeToken(address(token),APP_ID,revenueRef,vault.policyId(),amount*10,1000);
     }
 
+    function testFantasyCumulativeRoundingAndAuthenticatedFounderCredits() public {
+        vm.deal(address(this), 12);
+        bytes32 pool = keccak256("fantasy-pool");
+        vault.contributeFantasy{value:3}(address(0),pool,101);
+        vault.contributeFantasy{value:3}(address(0),pool,200);
+        require(splitter.totalNativeCredited()==6, "cumulative fee");
+        require(splitter.claimableNative(ADMIN)==3, "native founder credit");
+        (bool replay,) = address(vault).call{value:3}(abi.encodeCall(vault.contributeFantasy,(address(0),pool,200)));
+        require(!replay,"replay");
+        FounderCompensationTestToken420 token = new FounderCompensationTestToken420();
+        token.mint(address(this), 12);
+        token.approve(address(vault),12);
+        vault.contributeFantasy(address(token),pool,400);
+        require(splitter.claimableToken(address(token),ADMIN)==6,"token admin");
+        require(splitter.claimableToken(address(token),ANDREW)==3,"token Andrew");
+        require(splitter.claimableToken(address(token),JANET)==3,"token Janet");
+        vm.prank(address(0xBAD));
+        (bool unauthorized,) = address(vault).call(abi.encodeCall(vault.contributeFantasy,(address(token),pool,400)));
+        require(!unauthorized,"unauthorized source");
+        (bool wrongPolicy,) = address(vault).call{value:3}(abi.encodeCall(vault.contributeNative,(vault.fantasyApplicationId(),pool,vault.fantasyPolicyId(),100,uint16(300))));
+        require(!wrongPolicy,"general policy must not accept Fantasy policy");
+    }
+
     function testThreeFoundersClaimIndividuallyNoImpersonationOrDuplicate() public {
         vm.prank(address(0xBAD));
         (bool impostor,) = address(claims).call(abi.encodeCall(claims.claimFounderWallet, ()));

@@ -31,6 +31,7 @@ class FundedSeasons(FundedFormats):
         self.transactions=self.deploy('FantasySeasonTransactions420',self.data.address,self.rosters.address)
         self.actions=self.deploy('FantasySeasonActions420',self.data.address,self.rosters.address,self.admission.address,self.transactions.address)
         self.season=self.deploy('FantasySeasonEscrow420',self.data.address,self.rosters.address,self.seasonscores.address,self.disputes.address,self.admission.address,self.randomrouter.address,self.vault.address,self.actions.address)
+        self.grant_fantasy_source(self.season)
         self.grant(self.admin,k256(b'BET_FANTASY_BIND_SEASON_HOST.V1'),self.auth.functions.scopeGlobal().call())
         for module in (self.data,self.rosters,self.transactions,self.actions):self.tx(module.functions.bindHost(self.season.address))
         self.grant(self.admin,self.season.functions.CREATE().call(),self.auth.functions.scopeGlobal().call())

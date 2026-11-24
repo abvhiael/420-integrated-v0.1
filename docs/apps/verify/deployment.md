@@ -4,7 +4,7 @@
 
 ## Current deployment state
 
-The service implementation is under the VERIFY-AUDIT remediation phase in PR #503. Public backend and frontend URLs remain unassigned in `testnet/public-services/verify/readiness.json`. Do not advertise a public endpoint until the readiness manifest contains real URLs and the live smoke checks below have passed.
+The repository-grounded VERIFY-AUDIT remediation in PR #503 was merged on 4 October 2026. This is a post-merge testnet-readiness review. Public backend and frontend URLs remain unassigned in `testnet/public-services/verify/readiness.json`. Do not advertise a public endpoint until the readiness manifest contains real URLs and the live smoke checks below have passed.
 
 The Go service serves both the API and the embedded same-origin frontend.
 
@@ -77,7 +77,7 @@ Startup fails closed unless all configuration validates and the service can:
 
 `GET /healthz` reports process health and explicitly reports `canonical: false`.
 
-`GET /readyz` returns HTTP 200 only after the startup chain qualification succeeds. A process that is alive but unable to prove the configured canonical chain remains not-ready.
+`GET /readyz` returns HTTP 200 only after startup qualification and a fresh bounded canonical-chain probe on each readiness request. An RPC outage, wrong-chain response, or unavailable canonical bytecode returns HTTP 503 without exposing internal errors. A process that is alive but unable to prove the configured canonical chain remains not-ready.
 
 ## Public HTTP surface
 

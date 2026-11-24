@@ -12,6 +12,8 @@ on:
       - 'contracts/src/bet/BetGenesisCapitalization420.sol'
       - 'contracts/test/BetProfitAccounting420.t.sol'
       - 'contracts/src/bet/BetGovernedProfitEpoch420.sol'
+      - 'contracts/src/bet/BetFantasyProfitEpochSource420.sol'
+      - 'contracts/src/revenue/**'
       - 'contracts/test/BetGovernedProfitEpoch420.t.sol'
       - 'contracts/src/bet/BetAuthorization420.sol'
       - 'contracts/src/bet/BetIds420.sol'

@@ -4,6 +4,7 @@ on:
     paths:
       - '420-indexer/**'
       - 'contracts/src/revenue/**'
+      - 'contracts/src/exchange/Wrapped420.sol'
       - 'contracts/src/apps/ProtocolRegistry.sol'
       - 'contracts/src/system/CapabilityRegistry420.sol'
       - 'contracts/src/system/SystemAccess.sol'
@@ -46,6 +47,8 @@ jobs:
         run: |
           test "$(git rev-parse HEAD)" = "$QUALIFICATION_SHA"
           python scripts/prepare-devcomp-foundry-scope.py --output "$RUNNER_TEMP/devcomp-receipts"
+          mkdir -p "$RUNNER_TEMP/devcomp-receipts/src/exchange"
+          cp contracts/src/exchange/Wrapped420.sol "$RUNNER_TEMP/devcomp-receipts/src/exchange/"
           forge build --root "$RUNNER_TEMP/devcomp-receipts" --skip test
           npm --prefix 420-indexer ci
           npm --prefix 420-indexer run build

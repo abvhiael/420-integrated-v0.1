@@ -122,39 +122,33 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
     event Invitation(bytes32 indexed pool, bytes32 indexed subject, bool allowed);
     event ConflictRecorded(bytes32 indexed pool, bytes32 indexed subject);
 
-    // Fees remain segregated until permissionless delivery; no beneficiary can
-    // bypass the vault. Each pool retains its own cumulative rounding basis.
+    // Each settled pool is queued once with its finalized gross and rounded fee.
     DevelopmentCompensationVault420 public immutable developmentVault;
-    mapping(bytes32 => uint256) private deliveredGross;
     uint256 private reservedDevelopment;
-    function _forwardFantasy(bytes32 id, uint256 gross) private {
-        uint256 prior = deliveredGross[id];
-        uint256 amount = (gross / 100) * 3 + (gross % 100) * 3 / 100
-            - ((prior / 100) * 3 + (prior % 100) * 3 / 100);
-        if (amount == 0) revert InvalidState();
-        deliveredGross[id] = gross;
+    bytes32[] private developmentQueue;
+    uint256 private developmentCursor;
+
+    function _forwardNextDevelopment() private {
+        if (developmentCursor == developmentQueue.length) revert InvalidState();
+        bytes32 id = developmentQueue[developmentCursor++];
+        Pool storage pool = pools[id];
+        uint256 amount = pool.fee;
         credit[devFund] -= amount;
         reservedDevelopment -= amount;
         totalLiability -= amount;
-        if (asset == address(0)) {
-            developmentVault.contributeFantasy{value: amount}(asset, id, gross);
-        } else {
-            IERC20FantasyApproval420 token = IERC20FantasyApproval420(asset);
-            if (!token.approve(address(developmentVault), 0) || !token.approve(address(developmentVault), amount)) revert InvalidState();
-            developmentVault.contributeFantasy(asset, id, gross);
-            if (!token.approve(address(developmentVault), 0)) revert InvalidState();
+        bool tokenSettlement = asset != address(0);
+        if (tokenSettlement) {
+            _approveDevelopment(0);
+            _approveDevelopment(amount);
         }
+        developmentVault.contributeFantasy{value: tokenSettlement ? 0 : amount}(asset, id, pool.gross);
+        if (tokenSettlement) _approveDevelopment(0);
     }
-    bytes32[] private developmentQueue;
-    uint256 private developmentCursor;
-    function _forwardNextDevelopment() private {
-        while (developmentCursor < developmentQueue.length) {
-            bytes32 id = developmentQueue[developmentCursor++];
-            _forwardFantasy(id, pools[id].gross);
-            return;
-        }
-        revert InvalidState();
+
+    function _approveDevelopment(uint256 amount) private {
+        if (!IERC20FantasyApproval420(asset).approve(address(developmentVault), amount)) revert InvalidState();
     }
+
     constructor(
         address disputes_,
         address slates_,
@@ -218,7 +212,7 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
     function createPool(bytes32 id, Config calldata config, bytes calldata payoutBands) external payable nonReentrant {
         _cap(CREATE, bytes32(0), true);
         admission.requireController(config.launcher, msg.sender);
-        FantasySlateBook420.Slate memory s = slateBook.slateOf(config.slate);
+        FantasySlateBook420.SettlementSlate memory s = slateBook.settlementSlate(config.slate);
         if (
             id == 0 || pools[id].state != State.NONE || s.manifest == 0 || block.timestamp >= s.lockAt
                 || s.earlyStart != 0 || config.candidateFeed == 0 || (config.cap != 0 && config.cap < 2)
@@ -282,8 +276,8 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
     }
 
     function _open(bytes32 id) private view {
-        FantasySlateBook420.Slate memory s = slateBook.slateOf(configs[id].slate);
-        uint64 lock = s.earlyStart == 0 ? s.lockAt : s.earlyStart;
+        FantasySlateBook420.SettlementSlate memory s = slateBook.settlementSlate(configs[id].slate);
+        uint256 lock = s.earlyStart == 0 ? s.lockAt : s.earlyStart;
         if (pools[id].state != State.OPEN || block.timestamp >= lock) revert InvalidTime();
     }
 
@@ -340,7 +334,7 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
         Pool storage p = pools[id];
         Config storage c = configs[id];
         if (
-            userKey == slateBook.slateOf(c.slate).custodianUserKey || entryForUser[id][userKey] != 0
+            userKey == slateBook.settlementSlate(c.slate).custodianUserKey || entryForUser[id][userKey] != 0
                 || entryForSubject[id][subject] != 0 || sub.nonce != 1 || (c.cap != 0 && p.count >= c.cap)
                 || (c.inviteOnly && !invited[id][subject])
         ) revert Unauthorized();
@@ -381,7 +375,7 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
     function _lockPool(bytes32 id) private {
         Pool storage p = pools[id];
         if (p.state != State.OPEN) revert InvalidState();
-        FantasySlateBook420.Slate memory s = slateBook.slateOf(configs[id].slate);
+        FantasySlateBook420.SettlementSlate memory s = slateBook.settlementSlate(configs[id].slate);
         if (block.timestamp < (s.earlyStart == 0 ? s.lockAt : s.earlyStart)) revert InvalidTime();
         if (p.count < 2) {
             _cancel(id, keccak256("MINIMUM_ENTRANTS"));
@@ -400,8 +394,8 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
         if (p.state == State.OPEN) _lockPool(id);
         if (p.state != State.LOCKED) revert InvalidState();
         Entry storage e = entries[id][index];
-        FantasySlateBook420.Slate memory s = slateBook.slateOf(configs[id].slate);
-        uint64 lock = s.earlyStart == 0 ? s.lockAt : s.earlyStart;
+        FantasySlateBook420.SettlementSlate memory s = slateBook.settlementSlate(configs[id].slate);
+        uint256 lock = s.earlyStart == 0 ? s.lockAt : s.earlyStart;
         if (block.timestamp > uint256(lock) + PUBLICATION_WINDOW) revert InvalidTime();
         if (e.subject == 0 || e.revealed || commitmentOf(id, e.subject, e.nonce, lineup, salt) != e.commitment) {
             revert InvalidLineup();
@@ -419,7 +413,7 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
     function _cancel(bytes32 id, bytes32 reason) private {
         Pool storage p = pools[id];
         if (p.state == State.NONE || p.state == State.SETTLED || p.state == State.CANCELED) revert InvalidState();
-        FantasyDisputeController420.Pool memory dp = disputes.poolOf(id);
+        FantasyDisputeController420.SettlementStatus memory dp = disputes.settlementStatus(id);
         if (dp.state == FantasyDisputeController420.PoolState.FINAL) revert InvalidState();
         if (dp.state != FantasyDisputeController420.PoolState.CANCELED) disputes.cancelByHost(id, reason);
         p.state = State.CANCELED;
@@ -430,7 +424,7 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
     function recover(bytes32 id) external nonReentrant {
         Pool storage p = pools[id];
         Config storage c = configs[id];
-        FantasySlateBook420.Slate memory s = slateBook.slateOf(c.slate);
+        FantasySlateBook420.SettlementSlate memory s = slateBook.settlementSlate(c.slate);
         if (p.state == State.OPEN && block.timestamp >= (s.earlyStart == 0 ? s.lockAt : s.earlyStart)) _lockPool(id);
         if (p.state == State.CANCELED) return;
         if (p.state == State.NONE || p.state == State.SETTLED) revert InvalidState();
@@ -438,7 +432,7 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
             _cancel(id, keccak256("EARLY_START"));
             return;
         }
-        uint64 lock = s.earlyStart == 0 ? s.lockAt : s.earlyStart;
+        uint256 lock = s.earlyStart == 0 ? s.lockAt : s.earlyStart;
         if (block.timestamp > uint256(lock) + PUBLICATION_WINDOW && p.revealed != p.count) {
             _cancel(id, keccak256("PUBLICATION_FAILURE"));
             return;
@@ -447,7 +441,7 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
             _cancel(id, keccak256("ALL_GAMES_EXCLUDED"));
             return;
         }
-        FantasyDisputeController420.Pool memory dp = disputes.poolOf(id);
+        FantasyDisputeController420.SettlementStatus memory dp = disputes.settlementStatus(id);
         if (dp.state == FantasyDisputeController420.PoolState.CANCELED) {
             _cancel(id, keccak256("DISPUTE_CANCELLATION"));
             return;
@@ -474,7 +468,7 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
     function _startReview(bytes32 id) private {
         Pool storage p = pools[id];
         if (p.state == State.OPEN) _lockPool(id);
-        FantasySlateBook420.Slate memory s = slateBook.slateOf(configs[id].slate);
+        FantasySlateBook420.SettlementSlate memory s = slateBook.settlementSlate(configs[id].slate);
         if (
             p.state != State.LOCKED || p.revealed != p.count || s.resolvedAt == 0 || s.eligibleGames == 0
                 || (s.earlyStart != 0 && p.lastAcceptedAt >= s.earlyStart)
@@ -487,13 +481,13 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
             p.fee = configs[id].paid ? (p.gross / 100) * 3 + (p.gross % 100) * 3 / 100 : 0;
             p.netPrize = p.gross - p.fee;
         }
-        disputes.startCorrection(id, s.resolvedAt);
+        disputes.startCorrection(id, uint64(s.resolvedAt));
     }
 
     function beginRevision(bytes32 id, FantasyTypes420.StatReport calldata report) external nonReentrant {
         Pool storage p = pools[id];
         if (p.state == State.LOCKED) _startReview(id);
-        FantasyDisputeController420.Pool memory dp = disputes.poolOf(id);
+        FantasyDisputeController420.SettlementStatus memory dp = disputes.settlementStatus(id);
         if (
             p.state != State.REVIEW || dp.state != FantasyDisputeController420.PoolState.REVIEW
                 || report.revision <= p.revision || block.timestamp >= dp.deadline
@@ -517,7 +511,7 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
         Entry storage e = entries[id][index];
         if (
             p.state != State.REVIEW || p.revision == 0 || !e.revealed
-                || disputes.poolOf(id).state != FantasyDisputeController420.PoolState.REVIEW
+                || disputes.settlementStatus(id).state != FantasyDisputeController420.PoolState.REVIEW
         ) revert InvalidState();
         int256 score = scoring.calculate(
             address(slateBook), configs[id].slate, p.revision, reports[id][p.revision].root, e.lineup, witnesses
@@ -546,7 +540,7 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
 
     function candidateIsCurrent(bytes32 id, bytes32 candidate) public view returns (bool) {
         Pool storage p = pools[id];
-        FantasySlateBook420.Slate memory s = slateBook.slateOf(configs[id].slate);
+        FantasySlateBook420.SettlementSlate memory s = slateBook.settlementSlate(configs[id].slate);
         return p.state == State.REVIEW && p.publishedRevision != 0 && p.revision == p.publishedRevision
             && p.publishedCandidate == candidate && s.resolvedAt != 0 && s.eligibleGames != 0
             && (s.earlyStart == 0 || p.lastAcceptedAt < s.earlyStart);
@@ -554,12 +548,13 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
 
     function settle(bytes32 id) external nonReentrant {
         Pool storage p = pools[id];
-        FantasyDisputeController420.Pool memory dp = disputes.poolOf(id);
+        FantasyDisputeController420.SettlementStatus memory dp = disputes.settlementStatus(id);
         if (dp.state != FantasyDisputeController420.PoolState.FINAL || !candidateIsCurrent(id, dp.candidate)) {
             revert InvalidState();
         }
         p.state = State.SETTLED;
-        credit[devFund] += p.fee; reservedDevelopment += p.fee;
+        credit[devFund] += p.fee;
+        reservedDevelopment += p.fee;
         if (p.fee != 0) developmentQueue.push(id);
         emit PoolSettled(id, dp.candidate, p.netPrize, p.fee);
     }

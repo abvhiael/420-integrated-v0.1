@@ -1,0 +1,68 @@
+name: DEVCOMP Indexer receipt qualification
+on:
+  pull_request:
+    paths:
+      - '420-indexer/**'
+      - 'contracts/src/revenue/**'
+      - 'contracts/src/apps/ProtocolRegistry.sol'
+      - 'contracts/src/system/CapabilityRegistry420.sol'
+      - 'contracts/src/system/SystemAccess.sol'
+      - 'contracts/src/libraries/ServiceIds420.sol'
+      - 'contracts/src/interfaces/**'
+      - 'contracts/foundry.toml'
+      - 'scripts/prepare-devcomp-foundry-scope.py'
+      - '.github/workflows/devcomp-indexer-receipts.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  receipt-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: indexer420
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d indexer420"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - name: Build exact compensation and Indexer sources
+        env:
+          QUALIFICATION_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$QUALIFICATION_SHA"
+          python scripts/prepare-devcomp-foundry-scope.py --output "$RUNNER_TEMP/devcomp-receipts"
+          forge build --root "$RUNNER_TEMP/devcomp-receipts" --skip test
+          npm --prefix 420-indexer ci
+          npm --prefix 420-indexer run build
+          cd 420-indexer
+          node --test dist/test/compensation-indexer.test.js
+      - name: Ingest real vault and splitter receipts and recover a reorganization
+        env:
+          DEVCOMP_LOCAL_RPC: http://127.0.0.1:18548
+          INDEXER_PG_URL: postgresql://postgres:postgres@127.0.0.1:5432/indexer420
+        run: |
+          set -euo pipefail
+          export DEVCOMP_FOUNDRY_OUT="$RUNNER_TEMP/devcomp-receipts/out"
+          anvil --host 127.0.0.1 --port 18548 --chain-id 420 --slots-in-an-epoch 32 --silent &
+          anvil_pid=$!
+          trap 'kill "$anvil_pid" 2>/dev/null || true' EXIT
+          for attempt in {1..30}; do
+            if cast chain-id --rpc-url "$DEVCOMP_LOCAL_RPC" >/dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          node 420-indexer/scripts/qualify-compensation-receipts.mjs

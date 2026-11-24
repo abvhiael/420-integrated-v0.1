@@ -6,15 +6,16 @@ import "encoding/json"
 // frontier proves impossibility. Checkpoints are private trusted worker state,
 // never a client action or a RuleFrame field.
 type chessReachabilityJob struct {
-	Root    chessBoard            `json:"root"`
-	Seat    int                   `json:"seat"`
-	Nodes   []chessBoard          `json:"nodes"`
-	Parents []int                 `json:"parents"`
-	Moves   []string              `json:"moves"`
-	Cursor  int                   `json:"cursor"`
-	Result  chessMateReachability `json:"result"`
-	Witness []string              `json:"witness,omitempty"`
-	seen    map[chessReachKey]struct{}
+	Root           chessBoard            `json:"root"`
+	Seat           int                   `json:"seat"`
+	Nodes          []chessBoard          `json:"nodes"`
+	Parents        []int                 `json:"parents"`
+	Moves          []string              `json:"moves"`
+	Cursor         int                   `json:"cursor"`
+	Result         chessMateReachability `json:"result"`
+	Witness        []string              `json:"witness,omitempty"`
+	seen           map[chessReachKey]struct{}
+	storageLimited bool
 }
 
 func chessReachIdentity(p chessBoard) chessReachKey {
@@ -27,7 +28,13 @@ func newChessReachabilityJob(p chessBoard, seat int) (*chessReachabilityJob, err
 	return &chessReachabilityJob{Root: p, Seat: seat, Nodes: []chessBoard{p}, Parents: []int{-1}, Moves: []string{""}, seen: map[chessReachKey]struct{}{chessReachIdentity(p): {}}}, nil
 }
 func (j *chessReachabilityJob) advance(work int) (chessMateReachability, error) {
-	if j == nil || work < 1 || work > 4096 || j.Seat < 0 || j.Seat > 1 || j.Cursor < 0 || j.Cursor > len(j.Nodes) || len(j.Nodes) == 0 || len(j.Nodes) != len(j.Parents) || len(j.Nodes) != len(j.Moves) {
+	return j.advanceBounded(work, int(^uint(0)>>1))
+}
+
+// A node and its full outgoing frontier are added together. A storage cutoff
+// preserves the previous cursor and leaves the proof pending.
+func (j *chessReachabilityJob) advanceBounded(work, maxNodes int) (chessMateReachability, error) {
+	if j == nil || maxNodes < 1 || work < 1 || work > 4096 || j.Seat < 0 || j.Seat > 1 || j.Cursor < 0 || j.Cursor > len(j.Nodes) || len(j.Nodes) == 0 || len(j.Nodes) != len(j.Parents) || len(j.Nodes) != len(j.Moves) {
 		return chessMateUnknown, ErrInvalid
 	}
 	if j.Result != chessMateUnknown {
@@ -36,12 +43,13 @@ func (j *chessReachabilityJob) advance(work int) (chessMateReachability, error) 
 	if j.seen == nil {
 		return chessMateUnknown, ErrInvalid
 	}
+	j.storageLimited = false
 	for n := 0; n < work && j.Cursor < len(j.Nodes); n++ {
 		i := j.Cursor
 		p := j.Nodes[i]
-		j.Cursor++
 		moves := p.legal()
 		if len(moves) == 0 {
+			j.Cursor++
 			if p.Turn == 1-j.Seat && p.check(p.Turn) {
 				path := []string{}
 				for k := i; k > 0; k = j.Parents[k] {
@@ -57,19 +65,37 @@ func (j *chessReachabilityJob) advance(work int) (chessMateReachability, error) 
 			continue
 		}
 		if chessMaterialCannotMate(p, j.Seat) {
+			j.Cursor++
 			continue
 		}
+		type edge struct {
+			board chessBoard
+			key   chessReachKey
+			move  chessMove
+		}
+		edges := make([]edge, 0, len(moves))
 		for _, m := range moves {
 			q := p.apply(m)
 			k := chessReachIdentity(q)
 			if _, exists := j.seen[k]; exists {
 				continue
 			}
-			j.seen[k] = struct{}{}
-			j.Nodes = append(j.Nodes, q)
-			j.Parents = append(j.Parents, i)
-			j.Moves = append(j.Moves, m.UCI())
+			edges = append(edges, edge{q, k, m})
 		}
+		if len(edges) > maxNodes-len(j.Nodes) {
+			j.storageLimited = true
+			return chessMateUnknown, nil
+		}
+		for _, child := range edges {
+			if _, exists := j.seen[child.key]; exists {
+				continue
+			}
+			j.seen[child.key] = struct{}{}
+			j.Nodes = append(j.Nodes, child.board)
+			j.Parents = append(j.Parents, i)
+			j.Moves = append(j.Moves, child.move.UCI())
+		}
+		j.Cursor++
 	}
 	if j.Cursor == len(j.Nodes) {
 		j.Result = chessMateImpossible

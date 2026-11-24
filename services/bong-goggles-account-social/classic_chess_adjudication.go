@@ -48,27 +48,14 @@ type chessReachKey struct{
 // mate. Counters are omitted because this graph tests mating possibility
 // under legal board moves, not a particular draw-claim strategy.
 func chessMateReach(p chessBoard,seat,limit int)chessMateReachability{
- if seat<0||seat>1||limit<1{return chessMateUnknown}
- if chessMaterialCannotMate(p,seat){return chessMateImpossible}
- key:=func(q chessBoard)chessReachKey{return chessReachKey{q.Squares,q.Turn,q.Castle,q.EP}}
- seen:=map[chessReachKey]bool{key(p):true}
- queue:=[]chessBoard{p}
- for i:=0;i<len(queue);i++{
-  q:=queue[i]
-  moves:=q.legal()
-  if len(moves)==0{
-   if q.Turn==1-seat&&q.check(q.Turn){return chessMatePossible}
-   continue
-  }
-  if chessMaterialCannotMate(q,seat){continue}
-  for _,m:=range moves{
-   next:=q.apply(m)
-   k:=key(next);if seen[k]{continue}
-   if len(seen)>=limit{return chessMateUnknown}
-   seen[k]=true;queue=append(queue,next)
-  }
+ if limit<1{return chessMateUnknown}
+ job,err:=newChessReachabilityJob(p,seat)
+ if err!=nil{return chessMateUnknown}
+ for job.Result==chessMateUnknown&&job.Cursor<len(job.Nodes){
+  result,err:=job.advanceBounded(1,limit)
+  if err!=nil||result==chessMateUnknown&&job.storageLimited{return chessMateUnknown}
  }
- return chessMateImpossible
+ return job.Result
 }
 // A locked pawn barrier can have a tiny finite reachable graph even with
 // substantial material. Avoid searching unrestricted middlegames at every

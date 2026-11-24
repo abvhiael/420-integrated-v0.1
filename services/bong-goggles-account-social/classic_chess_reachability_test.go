@@ -119,3 +119,30 @@ func TestBC32SicilianResignation(t *testing.T) {
 		t.Fatalf("White resignation: %v %v %v", done, winner, err)
 	}
 }
+
+func TestBC32ReachabilityCapacityPreservesFrontier(t *testing.T) {
+	board, err := parseChessFEN("7k/8/5KQ1/8/8/8/8/8 w - - 0 1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	job, err := newChessReachabilityJob(board, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := job.advanceBounded(1, 1)
+	if err != nil || result != chessMateUnknown || !job.storageLimited || job.Cursor != 0 || len(job.Nodes) != 1 {
+		t.Fatalf("cutoff damaged pending frontier: %v %v %v %d %d", result, err, job.storageLimited, job.Cursor, len(job.Nodes))
+	}
+	checkpoint, err := job.checkpoint()
+	if err != nil {
+		t.Fatal(err)
+	}
+	restored, err := restoreChessReachabilityJob(checkpoint)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err = restored.advanceBounded(128, 4096)
+	if err != nil || result != chessMatePossible {
+		t.Fatalf("resumed search: %v %v", result, err)
+	}
+}

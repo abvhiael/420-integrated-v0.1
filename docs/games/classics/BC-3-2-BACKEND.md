@@ -46,7 +46,10 @@ go vet -tags account420_integration ./services/bong-goggles-account-social ./cmd
 ```
 
 The conditional exact search and cooperative witnesses prove some positions.
-The checkpoint verifier checks a standalone traversal. An arbitrary position
+The synchronous bounded scan and standalone resumable search share the
+same traversal. A node capacity cutoff retains the unexpanded position
+and leaves the result unknown. The checkpoint verifier replays the
+traversal from its root before accepting a restored result. An arbitrary position
 can still exhaust the synchronous search, and there is no durable session
 handoff to the checkpoint solver. These constraints leave automatic dead
 position and loss-on-resignation or flag-fall adjudication unqualified in the

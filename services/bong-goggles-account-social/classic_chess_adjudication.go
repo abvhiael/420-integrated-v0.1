@@ -135,18 +135,35 @@ func chessMateWitness(p chessBoard,seat int)bool{
  }
  return false
 }
-// Known opening witnesses are validated through the same legal generator.
-// This also handles resignation/flag fall before the first board move.
+// Opening lines are constructive certificates, including their legal prefixes.
+var chessOpeningMates = [2][][]string{
+ {
+  {"e2e4","f7f6","d2d4","g7g5","d1h5"},
+  {"e2e4","e7e5","f1c4","a7a6","d1h5","a6a5","h5f7"},
+  {"d2d4","d7d5","b1c3","h7h6","e2e4","d5e4","f1c4","a7a6","d1h5","a6a5","h5f7"},
+ },
+ {
+  {"f2f3","e7e5","g2g4","d8h4"},
+  {"e2e4","e7e5","h2h3","f8c5","a2a3","d8h4","a3a4","h4f2"},
+ },
+}
+
 func chessOpeningMateWitness(p chessBoard,seat int)bool{
- if p!=chessInitialBoard(){return false}
- line:=[]string{"f2f3","e7e5","g2g4","d8h4"}
- if seat==0{line=[]string{"e2e4","f7f6","d2d4","g7g5","d1h5"}}
- for _,uci:=range line{
-  found:=false
-  for _,m:=range p.legal(){if m.UCI()==uci{p=p.apply(m);found=true;break}}
-  if !found{return false}
+ if seat<0||seat>1{return false}
+ for _,line:=range chessOpeningMates[seat]{
+  position:=chessInitialBoard()
+  matched:=position==p
+  for _,uci:=range line{
+   found:=false
+   for _,m:=range position.legal(){
+    if m.UCI()==uci{position=position.apply(m);found=true;break}
+   }
+   if !found{break}
+   matched=matched||position==p
+  }
+  if matched&&position.Turn==1-seat&&position.check(position.Turn)&&len(position.legal())==0{return true}
  }
- return p.Turn==1-seat&&p.check(p.Turn)&&len(p.legal())==0
+ return false
 }
 func chessAdjudicateLoss(p chessBoard,loser int)(*int,error){
  if loser<0||loser>1{return nil,ErrInvalid}

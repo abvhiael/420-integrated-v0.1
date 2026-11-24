@@ -23,6 +23,14 @@ type chessCommand struct{
  Type string `json:"type"`
  UCI string `json:"uci,omitempty"`
 }
+// Identify the actual versioned Chess adapter, even when a fixture shares its
+// catalogue identifier.
+func isClassicChess(rule ClassicRule) bool {
+ adapter,ok:=rule.(*RulesAdapter)
+ if !ok||adapter==nil{return false}
+ _,ok=adapter.module.(chessRules)
+ return ok
+}
 func NewChessRulesAdapter()(*RulesAdapter,error){return NewRulesAdapter(chessRules{})}
 func(chessRules) Definition()RuleDefinition{return RuleDefinition{GameID:"chess",Version:"v1.0",Specification:chessRuleSpecification}}
 func(chessRules) ValidateSeats(room ClassicRoom,seats []ClassicSeat)error{

@@ -88,6 +88,9 @@ func (s *ClassicSessions) saveRuleMove(ctx context.Context,tx *sql.Tx,id string,
 // Reconstruct from initial seed + every committed private action. Reject
 // missing/extra public move entries, broken digests and invalid state.
 func (s *ClassicSessions) verifyRulesTx(ctx context.Context,tx *sql.Tx,rec classicSessionRecord,adapter *RulesAdapter)error{
+ return s.verifyRulesTraceTx(ctx,tx,rec,adapter,nil)
+}
+func (s *ClassicSessions) verifyRulesTraceTx(ctx context.Context,tx *sql.Tx,rec classicSessionRecord,adapter *RulesAdapter,verified func([32]byte,[]RuleTrace)error)error{
  if e:=s.verifyClassicJournalTx(ctx,tx,rec);e!=nil{return ErrUnavailable}
  var version,hash,seedText string
  var initial json.RawMessage
@@ -156,6 +159,7 @@ func (s *ClassicSessions) verifyRulesTx(ctx context.Context,tx *sql.Tx,rec class
  if e!=nil{return ErrUnavailable}
  canonicalSaved,e:=adapter.encode(stored)
  if e!=nil||RuleHash(canonicalSaved)!=RuleHash(replay){return ErrUnavailable}
+ if isClassicChess(adapter)&&(rec.Deadline!=nil||(rec.Status!="active"&&rec.Status!="finished")){return ErrUnavailable}
  if rec.Status=="active"{
   if stored.Terminal||rec.TurnSeat==nil||stored.Turn!=*rec.TurnSeat{return ErrUnavailable}
  }else if rec.Status=="finished"{
@@ -169,6 +173,7 @@ func (s *ClassicSessions) verifyRulesTx(ctx context.Context,tx *sql.Tx,rec class
   adapter:adapter,roomID:rec.RoomID,version:version,hash:hash,initialHash:initialHash,
   seatCount:rec.SeatCount,moves:len(trace),seed:seed,digest:digest,state:replay,
  })
+ if verified!=nil{return verified(seed,trace)}
  return nil
 }
 func (s *ClassicSessions) VerifyRules(ctx context.Context,id string)error{

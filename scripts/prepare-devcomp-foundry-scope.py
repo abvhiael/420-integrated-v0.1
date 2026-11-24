@@ -21,6 +21,7 @@ ROOT_FILES = (
     "src/revenue/DevelopmentCompensationIds420.sol",
     "src/revenue/FoundingDeveloperCompensationSplitter420.sol",
     "test/DevelopmentCompensationVault420.t.sol",
+    "test/DevelopmentCompensationAdversarial420.t.sol",
     "test/DevelopmentCompensationGenesis420.t.sol",
     "test/FounderWalletClaimsAndCompensation420.t.sol",
 )

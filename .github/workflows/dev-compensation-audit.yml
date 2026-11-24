@@ -6,6 +6,7 @@ on:
       - "contracts/src/revenue/DevelopmentCompensationVault420.sol"
       - "contracts/src/revenue/DevelopmentCompensationIds420.sol"
       - "contracts/test/DevelopmentCompensationVault420.t.sol"
+      - "contracts/test/DevelopmentCompensationAdversarial420.t.sol"
       - "contracts/test/DevelopmentCompensationGenesis420.t.sol"
       - "contracts/test/FounderWalletClaimsAndCompensation420.t.sol"
       - "contracts/src/revenue/FoundingDeveloperCompensationSplitter420.sol"
@@ -150,6 +151,11 @@ jobs:
         env:
           FOUNDRY_PROFILE: hardening
         run: forge test --root "$DEVCOMP_SCOPE_ROOT" --match-path 'test/FounderWalletClaimsAndCompensation420.t.sol' -vvvv
+
+      - name: Run real-registry and mixed-asset adversarial qualification
+        env:
+          FOUNDRY_PROFILE: hardening
+        run: forge test --root "$DEVCOMP_SCOPE_ROOT" --match-path 'test/DevelopmentCompensationAdversarial420.t.sol' -vv
 
       - name: Install Slither
         run: python -m pip install --disable-pip-version-check slither-analyzer

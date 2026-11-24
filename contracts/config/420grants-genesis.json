@@ -1,6 +1,6 @@
 {
   "schema": "420-grants-genesis-v1",
-  "status": "AUDIT_REMEDIATION_IN_PROGRESS",
+  "status": "REPOSITORY_QUALIFIED_LIVE_TESTNET_DEFERRED",
   "class": "GENESIS_IMPLEMENTATION_PROTOCOL",
   "publicStandaloneApplication": false,
   "purpose": "Governed grant program, application, award and milestone lifecycle bound to Civic-authorized Treasury disbursements while 420Vault remains the custody/release authority.",

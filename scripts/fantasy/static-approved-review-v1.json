@@ -10,11 +10,11 @@
     "contracts/src/interfaces/genesis/ICapabilityRegistryExtended420.sol": "2ab13853023a734c75adc0c19bdd7483d77d7aaf75fe8daa079f7258771fdf85",
     "contracts/src/system/CapabilityRegistry420.sol": "eec70c83ff91b2c7a5fd3fc10728db06d402642be0f8e0c48c4530ac96e7b7ef",
     "contracts/src/revenue/DevelopmentCompensationIds420.sol": "5a7c4b05901c16194fc84c5f279ef2ea22e81a537516ccd156fe5e6f7feecdd3",
-    "contracts/src/revenue/DevelopmentCompensationVault420.sol": "4f28e6fbcd71e78632ce8decee2aac2967c7117d41e7574f67f8c95ec32a3e8b",
-    "contracts/src/token/ERC20Template420.sol": "d7b62c98bfc75be6b56f15180d027a62b4afaae6f674df27fbe35e163596c738",
+    "contracts/src/revenue/DevelopmentCompensationVault420.sol": "4f7ac84e5e8d3d68ab388eca8094673d1481154e4a6e813ec8a953ce76914228",
+    "contracts/src/token/ERC20Template420.sol": "8f9a950e8b2ce8d76c45a7a50e4405e476e664b1bed044e4e89c4bd8bc04e303",
     "contracts/src/apps/Identity420.sol": "f47526bce8b55d10c64fb3d8d320fc1e4dc6d43945db064e86d373adec7e0152",
     "contracts/src/bet/fantasy/FantasyAdmission420.sol": "77899c8b082bb69e4265a5e3abff4ad738586c2d3eb253b29385c98fa08d4749",
-    "contracts/src/bet/fantasy/FantasySlateBook420.sol": "1007ffa2b5946c99fdbe6202e4c87114668a41d357e03f6f6eabced5cf0e6b4a",
+    "contracts/src/bet/fantasy/FantasySlateBook420.sol": "e920edfda93494edc87f3bef3e1b9ef011f2efe3f891b258b37abf4c322f2592",
     "contracts/src/bet/fantasy/FantasyTypes420.sol": "c9fe9a5df74fc931a1ad4f838a332c32e65314c2444631243b4f3e822429f068",
     "contracts/src/interfaces/IOracle420.sol": "2b68ecfb6c818f53f2853467035edbc34e0ebdbe1581c0ebaff48c6c8d9a38a3",
     "contracts/src/interfaces/genesis/IIdentityCredential420.sol": "74f96b43758ee97d3124e112d669e9ba9bccf9ce63be1e6c7dee8e1948f4f978",
@@ -22,18 +22,18 @@
     "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
     "contracts/script/fantasy/FantasyApprovedLocalImports420.sol": "a49d9d02719531d1dd906196be7784ffbb00dd5e1e1d705cc99ac2b7bd1126e5",
     "contracts/script/fantasy/FantasyDailyLocalImports420.sol": "5688f48bcb43df54d64921f3ba246beb87e5034dbb7766f7326153defa8874a3",
-    "contracts/src/bet/fantasy/FantasyContestEngine420.sol": "baa30f3438ec3939091cc2a41343d59d28a67bf970befb7a9a2c6df76c79f587",
-    "contracts/src/bet/fantasy/FantasyDisputeController420.sol": "c6f07275ad8b7843eae991d6ed48eb506959ab939402603a221441fadcf68855",
+    "contracts/src/bet/fantasy/FantasyContestEngine420.sol": "7ea986b9f8b467d08a4244456b968b41ba4e1b843adcc342b08cfc0d5df82fb9",
+    "contracts/src/bet/fantasy/FantasyDisputeController420.sol": "0d7673a3612e9b470fac2b192200d9308a0a3aa5fdfc43c91e8064003aa63953",
     "contracts/src/bet/fantasy/FantasyDraftEntropy420.sol": "7361099eda674f1179c3df3d273eb00794be9e21fef357c2dad9bfe571517fae",
     "contracts/src/bet/fantasy/FantasyFormatBook420.sol": "b2fb5c1d4e4119bb639e385fc7372b28e3af7a683f060dd4e92a63199b67aeee",
-    "contracts/src/bet/fantasy/FantasyFormatEscrow420.sol": "923f4069a80ef4458182f7df41538ecc50ba9775aba970296f61ce3d31bcd615",
+    "contracts/src/bet/fantasy/FantasyFormatEscrow420.sol": "61fe0dad2036defc6ef70f488bd47444e1716f84b1fa5170634ed14ad0f956bf",
     "contracts/src/bet/fantasy/FantasyFormatReceipt420.sol": "3f7535fd969d4757ffd8b454bb3e2130ac7364aee2fe24a1cae8b2d3398eba86",
     "contracts/src/bet/fantasy/FantasyNHLScoring420.sol": "d3e4bb3a34fa00d1fd9409c7d933d052d9325b80c6816a64c7c9920fc778e269",
     "contracts/src/bet/fantasy/FantasyPayoutPolicy420.sol": "3414f49e3f158f89def9c4929615f98adbeadb990523cbea4eb38a9b62406530",
     "contracts/src/bet/fantasy/FantasyRankingBook420.sol": "f9e651b7edec826e81ccc8352ae3408da78ff5f88959ddab893564416e7e21d8",
     "contracts/src/bet/fantasy/FantasySeasonActions420.sol": "725ce06a5a1fdb0bd4da28d71d6ac256329764bbfaaf7eb5c7f467b606a5f195",
     "contracts/src/bet/fantasy/FantasySeasonData420.sol": "bbd4b5f4ef8fcf48be4a64abc1abc5b3074c204556844ae3a1d212f809b3b9bb",
-    "contracts/src/bet/fantasy/FantasySeasonEscrow420.sol": "10e53a29d52dfb44794e2f2a0fbe2af45638d7debf29cf872aae236049ecb56b",
+    "contracts/src/bet/fantasy/FantasySeasonEscrow420.sol": "03f724c3c7b0b0d81dceea880ae3ba55f114337e9d0217f1c51a2436acf06294",
     "contracts/src/bet/fantasy/FantasySeasonMath420.sol": "7d92d69e4871083937da6b9823721381f974919e2338b0278f8f2a043cf0ed8a",
     "contracts/src/bet/fantasy/FantasySeasonReceipt420.sol": "28c5a43809bce2d6a2068bbba646243a1caabef98026c4cb7376381f42220177",
     "contracts/src/bet/fantasy/FantasySeasonRoster420.sol": "e794a097b82d8f88a922168731dda6135e170a61b3bec4d6297904e1edbddb84",
@@ -53,20 +53,20 @@
     "contracts/src/randomness/RandomnessProfileRegistry420.sol": "6474ada3f985f9ad6bd35f7b1951a32135ba172b7b4cbbe463581efe1bfcede1",
     "contracts/src/randomness/RandomnessRegistry.sol": "9e83b1d6069cab8fe7f00f58308732ba3b79d2b2f77bbd9632185126ab8a3623",
     "contracts/src/randomness/RandomnessRouteRegistry420.sol": "e32a0b95e998b8f7962140c5b62ce35bcb7340f296178eb316e3bb9ec810a346",
-    "contracts/src/randomness/RandomnessRouter420.sol": "c4bf8a457df29c18c979cf3f0ef50ecbdd2b2f608430d5ff069704dc3f831115"
+    "contracts/src/randomness/RandomnessRouter420.sol": "6036aef19ebc4868657657961140817a4f82d362769090053bfbf22f2561aae7"
   },
   "dispositions": {
     "ccd78e2bb29ff74359107520ac9c5ce5baf4f671e4ba33140420db6365adcfe0": {
       "severity": "High",
       "check": "arbitrary-send-eth",
       "location": "FantasyContestEngine420._sendExact(address,uint256) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#590-603) sends eth to arbitrary user",
-      "reason": "Inherited canonical daily/dispute withdrawal sends only the withdrawing beneficiary\u2019s fixed credit, with debit-before-send, guarded mutex and exact transfer checks; no new arbitrary recipient path is introduced."
+      "reason": "Inherited canonical daily/dispute withdrawal sends only the withdrawing beneficiary’s fixed credit, with debit-before-send, guarded mutex and exact transfer checks; no new arbitrary recipient path is introduced."
     },
     "4f68e487368e19b8c46f241c4620461dfb2c0d3718af1a702067b4f81d901526": {
       "severity": "High",
       "check": "arbitrary-send-eth",
       "location": "FantasyDisputeController420._sendExact(address,uint256) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#528-541) sends eth to arbitrary user",
-      "reason": "Inherited canonical daily/dispute withdrawal sends only the withdrawing beneficiary\u2019s fixed credit, with debit-before-send, guarded mutex and exact transfer checks; no new arbitrary recipient path is introduced."
+      "reason": "Inherited canonical daily/dispute withdrawal sends only the withdrawing beneficiary’s fixed credit, with debit-before-send, guarded mutex and exact transfer checks; no new arbitrary recipient path is introduced."
     },
     "fab1bd323ef54e83b49793c27cbd5d8008fddc19576c443bcd504f685ade60b6": {
       "severity": "High",
@@ -230,12 +230,6 @@
       "location": "RandomnessRouter420.result(bytes32) (contracts/src/randomness/RandomnessRouter420.sol#273-278) uses a dangerous strict equality:",
       "reason": "These comparisons are exact identity/state/revision/checkpoint sentinels, not assumptions about externally mutable balances. Zero identities fail closed; same-block checkpoints deliberately update the existing checkpoint."
     },
-    "0245ffff5238f2af552f5e77513a8bd4690ad812def7987fbdfebb7176e946fc": {
-      "severity": "Medium",
-      "check": "reentrancy-no-eth",
-      "location": "Reentrancy in FantasyFormatEscrowBase420.recover(bytes32) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#243-255):",
-      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
-    },
     "9167460f220953af1df0537a92fc697656513d084d8525ec56f6e4696be3f22b": {
       "severity": "Medium",
       "check": "reentrancy-no-eth",
@@ -258,12 +252,6 @@
       "severity": "Medium",
       "check": "reentrancy-no-eth",
       "location": "Reentrancy in FantasyContestEngine420.recover(bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#395-433):",
-      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
-    },
-    "9eeb67e02f13b4f3e77a8df7cab68a481c5a15f190f6a77bc1e45b8eefb179d4": {
-      "severity": "Medium",
-      "check": "reentrancy-no-eth",
-      "location": "Reentrancy in FantasySeasonEscrow420.startDraft(bytes32) (contracts/src/bet/fantasy/FantasySeasonEscrow420.sol#90-93):",
       "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
     },
     "2264ca88969385cb7e4c06a2c3dd57889cf106fe2e80bdf354b138a40781425b": {
@@ -296,28 +284,10 @@
       "location": "Reentrancy in FantasySeasonTransactions420.process(bytes32,uint16) (contracts/src/bet/fantasy/FantasySeasonTransactions420.sol#55-84):",
       "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
     },
-    "76a95dd59849cbe06c50d915b2faa9c8ae8bcf1dab02a550c5482a68b168ed86": {
-      "severity": "Medium",
-      "check": "reentrancy-no-eth",
-      "location": "Reentrancy in FantasyFormatEscrowBase420.publishCandidate(bytes32) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#180-183):",
-      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
-    },
-    "fb31c1d0807bb4fa336c75b1188994cb532c39a7118cef5840a452729f9388d2": {
-      "severity": "Medium",
-      "check": "reentrancy-no-eth",
-      "location": "Reentrancy in FantasyFormatEscrowBase420.recoverHouse(bytes32,uint64) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#256-265):",
-      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
-    },
     "1620d47a27353b58dd667b9cc5da52fc80010fa658a45b96f189fcab31ade026": {
       "severity": "Medium",
       "check": "reentrancy-no-eth",
       "location": "Reentrancy in FantasyFormatEscrowBase420.publishHouse(bytes32,uint64) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#217-221):",
-      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
-    },
-    "d984bebeadd7f00a72b5aac8e3a438c5cc2a7429b230f3858faeef1cea09e725": {
-      "severity": "Medium",
-      "check": "reentrancy-no-eth",
-      "location": "Reentrancy in FantasyContestEngine420.beginRevision(bytes32,FantasyTypes420.StatReport) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#453-470):",
       "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
     },
     "09dfbc1cb106025c5669f576178e40b56dbf0a6091d9ecee8734de785bc4f4d0": {
@@ -332,18 +302,6 @@
       "location": "Reentrancy in FantasyContestEngine420.recover(bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#395-433):",
       "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
     },
-    "8140315fc0e0a261309011274a955dd99ff1f611fbe70cf36d7d4d39d684abdc": {
-      "severity": "Medium",
-      "check": "reentrancy-no-eth",
-      "location": "Reentrancy in FantasySeasonEscrow420.recover(bytes32) (contracts/src/bet/fantasy/FantasySeasonEscrow420.sol#143-159):",
-      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
-    },
-    "38173bfb643ee188137c45fd1735be7225921c37f4b951bdac2ff746078b985f": {
-      "severity": "Medium",
-      "check": "reentrancy-no-eth",
-      "location": "Reentrancy in FantasySeasonEscrow420.join(bytes32,bytes32,bytes32) (contracts/src/bet/fantasy/FantasySeasonEscrow420.sol#75-79):",
-      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
-    },
     "8f512b539cc5fc829faf219df1643255b0168656aa5add955942d8e5db4d85f5": {
       "severity": "Medium",
       "check": "reentrancy-no-eth",
@@ -354,18 +312,6 @@
       "severity": "Medium",
       "check": "reentrancy-no-eth",
       "location": "Reentrancy in FantasyContestEngine420.recover(bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#395-433):",
-      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
-    },
-    "5af31b2d5132314dcab402e51e65c50d7ce2ff8f93715b930134ffe9685965e6": {
-      "severity": "Medium",
-      "check": "reentrancy-no-eth",
-      "location": "Reentrancy in FantasyFormatEscrowBase420.enter(bytes32,bytes32,bytes32,FantasyFormatEscrowBase420.Submission) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#110-126):",
-      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
-    },
-    "68929e8bbff592a6f9e491067345702a4fd8a3f6a59ce604ee05b66baae84f7e": {
-      "severity": "Medium",
-      "check": "reentrancy-no-eth",
-      "location": "Reentrancy in FantasyFormatEscrowBase420.enter(bytes32,bytes32,bytes32,FantasyFormatEscrowBase420.Submission) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#110-126):",
       "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
     },
     "23f2e3b8da8a0501c18bbf73752425271206fbb02fbc7a3d41379a6f36fb8e0b": {
@@ -450,12 +396,6 @@
       "severity": "Medium",
       "check": "uninitialized-local",
       "location": "FantasySeasonMath420.leagueFeasible(uint16[32][],uint16[32]).neighbors (contracts/src/bet/fantasy/FantasySeasonMath420.sol#32) is a local variable never initialized",
-      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
-    },
-    "04725aaed959ef31ed391823e7275ea4b00a6fa0c8a7a326dcf0d59f16fcc3e4": {
-      "severity": "Medium",
-      "check": "uninitialized-local",
-      "location": "RandomnessRouter420.requestRandomness(bytes32,bytes32,bytes32,uint64).fallback_ (contracts/src/randomness/RandomnessRouter420.sol#95) is a local variable never initialized",
       "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
     },
     "55b85e7697cd16340c2daf45daf1710204c13d1ba43e70c91c125fd87ccb4ea5": {
@@ -625,6 +565,78 @@
       "check": "unused-return",
       "location": "FantasyDisputeController420.delegateResolver(bytes32,bytes32,bytes32,uint64) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#338-353) ignores return value by (actor,None,None,None,None,None,None) = identities.profiles(subject) (contracts/src/bet/fantasy/FantasyDisputeController420.sol#346)",
       "reason": "Tuple fields unrelated to the identity/controller/person-key predicate are deliberately ignored. The queried canonical identity functions and credential validity/controller checks cover the required fields; canonical source is unchanged."
+    },
+    "a8080517e319fea51378233edebc4203931e303a9e97c888c90a4cea7d66522f": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyFormatEscrowBase420.recover(bytes32) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#271-283):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "626c84ca01fbe72626964407287f633e364ad1e8bc78dfab4e8765c5f9c87c62": {
+      "severity": "Medium",
+      "check": "uninitialized-local",
+      "location": "RandomnessRouter420._requestRandomness(bytes32,bytes32,bytes32,uint64).fallback_ (contracts/src/randomness/RandomnessRouter420.sol#129) is a local variable never initialized",
+      "reason": "Solidity zero-initializes these value and fixed-array memory locals. They are counters, flags, accumulators and optional absent fallback values; zero is their required initial state. No uninitialized storage pointer is used."
+    },
+    "5caa1d68a88242837e0c1667802d703944c1a95127d03b495db3ab60b64ddcb6": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasySeasonEscrow420.join(bytes32,bytes32,bytes32) (contracts/src/bet/fantasy/FantasySeasonEscrow420.sol#106-110):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "67f729517cbcbd3ff1ff27c823b120408bd4101cf93bb4525be15f5fbb80e839": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyFormatEscrowBase420.enter(bytes32,bytes32,bytes32,FantasyFormatEscrowBase420.Submission) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#136-152):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "dc4eff7c84151b06568dcc4e02698996dccb515fd31128932ad8d57ea1a72465": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyFormatEscrowBase420.enter(bytes32,bytes32,bytes32,FantasyFormatEscrowBase420.Submission) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#136-152):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "c7294fe0e49982c80f76762ff096cb434f475a393debf132d18474e46a55a206": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyFormatEscrowBase420.publishCandidate(bytes32) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#207-210):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "1193897c686e4b2029f08300bbfc086a859f12a13f54d2fd09af274376546e8a": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasySeasonEscrow420.recover(bytes32) (contracts/src/bet/fantasy/FantasySeasonEscrow420.sol#174-190):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "97611f07a97cc77c3ea8913e53cb51e5e8e27b6ddad1c02c8bbc8ad0541b647c": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasySeasonEscrow420.startDraft(bytes32) (contracts/src/bet/fantasy/FantasySeasonEscrow420.sol#121-124):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "ebe07d011d6c84ed36b736583faa308b271001c0dd83b3be9db640d7d48d74b5": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyContestEngine420.beginRevision(bytes32,FantasyTypes420.StatReport) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#487-504):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "926bc90b0e5cd5d23c65048473b322acdc616f241137c51cba8c958194492614": {
+      "severity": "Medium",
+      "check": "reentrancy-no-eth",
+      "location": "Reentrancy in FantasyFormatEscrowBase420.recoverHouse(bytes32,uint64) (contracts/src/bet/fantasy/FantasyFormatEscrow420.sol#284-293):",
+      "reason": "Prize/bond state transitions are guarded across callbacks. SeasonTransactions.process calls only the immutable bound Roster, whose mutation paths authenticate Transactions and call only fixed data/math view functions, with no user callback or token transfer. Payout/ranking children are constructed by their host. Raw findings and immutable-source identities remain retained."
+    },
+    "4051c17331cb2e5fa190d69c37de33b6b91b97831e6f14516502555cd3a914d1": {
+      "severity": "Medium",
+      "check": "divide-before-multiply",
+      "location": "FantasySeasonEscrow420._forwardFantasy(bytes32,uint256) (contracts/src/bet/fantasy/FantasySeasonEscrow420.sol#49-66) performs a multiplication on the result of a division:",
+      "reason": "Season forwarding subtracts the previously rounded charge from the new rounded charge. The quotient and remainder expression computes floor(3*gross/100) without overflow, for each of the two cumulative bases. It preserves the pool fee when forwarding repeats are rejected."
+    },
+    "7490a37d27ef595fd72726063172ee1c49007610074d0ba9af92b39abb523489": {
+      "severity": "Medium",
+      "check": "divide-before-multiply",
+      "location": "DevelopmentCompensationVault420._fantasyFee(uint256) (contracts/src/revenue/DevelopmentCompensationVault420.sol#274-278) performs a multiplication on the result of a division:",
+      "reason": "The quotient term accounts for complete hundreds and the remainder term accounts for the remaining units before rounding down. The sum equals floor(3*gross/100) without requiring an overflowing gross*3 intermediate."
     }
   },
   "reviewedSignatureVariants": {

@@ -157,6 +157,10 @@ contract FounderWalletClaimsAndCompensation420Test {
         require(!unauthorized,"unauthorized source");
         (bool wrongPolicy,) = address(vault).call{value:3}(abi.encodeCall(vault.contributeNative,(vault.fantasyApplicationId(),pool,vault.fantasyPolicyId(),100,uint16(300))));
         require(!wrongPolicy,"general policy must not accept Fantasy policy");
+        require(vault.fantasyForwardedBasis(address(0)) == 200, "isolated native basis");
+        require(vault.fantasyForwardedAmount(address(0)) == 6, "isolated native amount");
+        require(vault.fantasyForwardedBasis(address(token)) == 400, "isolated token basis");
+        require(vault.fantasyForwardedAmount(address(token)) == 12, "isolated token amount");
     }
 
     function testFantasyEventsReportIncrementalRevenueAndCumulativeRounding() public {

@@ -68,6 +68,14 @@ contract BetEconomics420 is I420System {
     uint256 public promotionAvailable;
     uint256 public promotionReserved;
     uint256 private _entered;
+    uint256 public feesFunded;
+    uint256 public rewardsFunded;
+    uint256 public promotionsFunded;
+    uint256 public protocolFeesAccrued;
+    uint256 public operatorFeesAccrued;
+    uint256 public feesPaid;
+    uint256 public rewardsPaid;
+    uint256 public promotionsPaid;
 
     error ZeroAddress();
     error InvalidId();
@@ -122,9 +130,9 @@ contract BetEconomics420 is I420System {
         emit FeeScheduleConfigured(copy.scheduleId, copy.gameVersionId, copy.protocolFeeBps, copy.operatorFeeBps, copy.protocolRecipient, copy.manifestHash);
     }
 
-    function fundFees(uint256 amount) external payable nonReentrant { _fund(1, amount); feeAvailable += amount; }
-    function fundRewards(uint256 amount) external payable nonReentrant { _fund(2, amount); rewardAvailable += amount; }
-    function fundPromotions(uint256 amount) external payable nonReentrant { _fund(3, amount); promotionAvailable += amount; }
+    function fundFees(uint256 amount) external payable nonReentrant { _fund(1, amount); feeAvailable += amount; feesFunded += amount; }
+    function fundRewards(uint256 amount) external payable nonReentrant { _fund(2, amount); rewardAvailable += amount; rewardsFunded += amount; }
+    function fundPromotions(uint256 amount) external payable nonReentrant { _fund(3, amount); promotionAvailable += amount; promotionsFunded += amount; }
 
     function bindWager(bytes32 wagerId, bytes32 gameVersionId, bytes32 operatorId, uint256 stake) external {
         if (wagerId == bytes32(0) || gameVersionId == bytes32(0) || operatorId == bytes32(0) || stake == 0) revert InvalidId();
@@ -166,6 +174,8 @@ contract BetEconomics420 is I420System {
         bool charge = outcome == BetTypes420.TerminalOutcome.WIN || outcome == BetTypes420.TerminalOutcome.LOSS;
         binding.charged = charge;
         if (charge) {
+            protocolFeesAccrued += binding.protocolFee;
+            operatorFeesAccrued += binding.operatorFee;
             if (binding.protocolFee != 0) feeClaimable[binding.protocolRecipient] += binding.protocolFee;
             if (binding.operatorFee != 0) feeClaimable[binding.operatorRecipient] += binding.operatorFee;
             feeClaimableTotal += total;
@@ -180,6 +190,7 @@ contract BetEconomics420 is I420System {
         if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_CLAIM_FEE, authorization.scopeForPlayer(msg.sender), amount)) revert Unauthorized();
         feeClaimable[msg.sender] -= amount;
         feeClaimableTotal -= amount;
+        feesPaid += amount;
         _pay(msg.sender, amount);
         emit FeeClaimed(msg.sender, amount);
     }
@@ -200,8 +211,8 @@ contract BetEconomics420 is I420System {
         bytes32 action = c.kind == ClaimKind.REWARD ? BetIds420.ACTION_CLAIM_REWARD : BetIds420.ACTION_CLAIM_PROMOTION;
         if (msg.sender != c.beneficiary && !authorization.isAuthorized(msg.sender, action, authorization.scopeForPlayer(c.beneficiary), c.amount)) revert Unauthorized();
         c.claimed = true;
-        if (c.kind == ClaimKind.REWARD) rewardReserved -= c.amount;
-        else promotionReserved -= c.amount;
+        if (c.kind == ClaimKind.REWARD) { rewardReserved -= c.amount; rewardsPaid += c.amount; }
+        else { promotionReserved -= c.amount; promotionsPaid += c.amount; }
         _pay(c.beneficiary, c.amount);
         emit ClaimPaid(claimId, c.kind, c.beneficiary, c.amount);
     }

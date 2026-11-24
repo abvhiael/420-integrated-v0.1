@@ -40,7 +40,15 @@ fresh = {
     'clients/420bet-poker/crypto/nlhe-independent-verifier.mjs',
     'clients/420bet-poker/crypto/nlhe-independent-verifier.test.mjs',
 }
-paths = [p for p in paths if p not in fresh]
+# Shared financial owners have new accounting semantics. Their historical
+# native result is not inherited; the mandatory WS8 financial execution
+# step and existing funded-hand/native/replay jobs qualify the current SHA.
+financial = {
+    "contracts/src/bet/BankrollVault420.sol",
+    "contracts/src/bet/BetEconomics420.sol",
+    "contracts/src/bet/SettlementEngine420.sol",
+}
+paths = [p for p in paths if p not in fresh | financial]
 subprocess.run(["git", "diff", "--exit-code", SOURCE, "HEAD", "--", *paths], check=True)
 repo = os.environ["GITHUB_REPOSITORY"]
 def get(path):
@@ -68,12 +76,56 @@ verify_run(RUN, REPLACEMENT, {
     138201145341: "consolidated-gate",
 })
 subprocess.run(["git", "fetch", "--no-tags", "origin", REPLACEMENT], check=True)
-# Stronger than the artifact's partial manifests: verify the entire source/test
-# and compiler input trees, replay/crypto trees and exact WS7 workflow identity.
-subprocess.run(["git", "diff", "--exit-code", REPLACEMENT, "HEAD", "--",
+# Preserve the historical proof input trees, compiler configuration, exact
+# WS7 workflow and every other historical source/test path by default.
+# Enumerate the financial changes explicitly, never a wildcard exclusion.
+# Other application changes are outside the inherited Poker result; their
+# own qualification workflows remain required independently.
+financial_related = {
+    "contracts/src/bet/BetCasinoProfitAccounting420.sol",
+    "contracts/src/bet/BetFantasyProfitEpochSource420.sol",
+    "contracts/src/bet/BetGenesisCapitalization420.sol",
+    "contracts/src/bet/BetGovernedProfitEpoch420.sol",
+    "contracts/src/bet/BetProfitAccounting420.sol",
+    "contracts/src/bet/BetTreasuryExpenseEpochSource420.sol",
+    "contracts/test/BetCasinoEmergencyConvergence420.t.sol",
+    "contracts/test/BetCasinoSettlementInvariant420.t.sol",
+    "contracts/test/BetGenesisCapitalization420.t.sol",
+    "contracts/test/BetGovernedProfitEpoch420.t.sol",
+    "contracts/test/BetProfitAccounting420.t.sol",
+    "contracts/test/BetTerminalPathInvariant420.t.sol",
+}
+other_application = {
+    "contracts/src/bet/fantasy/FantasyContestEngine420.sol",
+    "contracts/src/bet/fantasy/FantasyDisputeController420.sol",
+    "contracts/src/bet/fantasy/FantasyFormatEscrow420.sol",
+    "contracts/src/bet/fantasy/FantasySeasonEscrow420.sol",
+    "contracts/src/bet/fantasy/FantasySlateBook420.sol",
+    "contracts/src/exchange/ExchangeFeeRouter420.sol",
+    "contracts/src/revenue/DevelopmentCompensationVault420.sol",
+    "contracts/src/treasury/TreasuryReleaseExecutor420.sol",
+    "contracts/test/DevelopmentCompensationAdversarial420.t.sol",
+    "contracts/test/ExchangeFeeSettlement420.t.sol",
+    "contracts/test/FounderWalletClaimsAndCompensation420.t.sol",
+    "contracts/test/TreasuryNativeVaultIntegration420.t.sol",
+    "contracts/test/fantasy/FantasyContestEngine420.t.sol",
+}
+changed = set(subprocess.check_output([
+    "git", "diff", "--name-only", "--no-renames", REPLACEMENT, "HEAD", "--",
     "contracts/src", "contracts/test", "contracts/foundry.toml",
     "contracts/remappings.txt", "contracts/lib", "clients/420bet-poker",
-    ".github/workflows/420bet-poker-ws7-consolidated-adversarial.yml"], check=True)
+    ".github/workflows/420bet-poker-ws7-consolidated-adversarial.yml",
+], text=True).splitlines())
+unexpected = changed - financial - financial_related - other_application
+if unexpected:
+    raise RuntimeError("Unclassified historical source drift: " + repr(sorted(unexpected)))
+print(json.dumps({
+    "historicalProofInputsUnchanged": True,
+    "freshFinancialOwners": sorted(changed & financial),
+    "freshFinancialRelated": sorted(changed & financial_related),
+    "otherApplicationChangesNotInherited": sorted(changed & other_application),
+    "qualifiedSHA": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+}, sort_keys=True))
 artifacts = {a["id"]: a for a in get(f"actions/runs/{RUN}/artifacts?per_page=100")["artifacts"]}
 expected = {
     14886608650: ("ws7-crypto-exact-sha",
@@ -141,4 +193,4 @@ for ident, (name, digest, files) in expected.items():
             assert hashlib.sha256(original).hexdigest() == checksum
             assert hashlib.sha256(current).hexdigest() == checksum
     print(f"Verified replacement artifact {ident}: {name}, archive and all source checksums")
-print("Historical run/job/source identities retained; replacement WS7 exact-SHA crypto and native evidence verified; changed 5A.5 owners REQUIRE fresh execution")
+print("Historical run/job/source identities retained; replacement WS7 exact-SHA crypto and native evidence verified; changed 5A.5 and financial owners REQUIRE fresh execution; no historical integrated financial approval is claimed")

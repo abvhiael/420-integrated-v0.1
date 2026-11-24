@@ -87,6 +87,9 @@ contract MockTerminalVault420 {
 
     // The production BankrollVault420.resolveWager ABI returns three uint256 values.
     // Match that ABI even when the SettlementEngine does not use the returned amounts.
+    // SettlementEngine classifies equal payouts after resolving custody.
+    function classifyEqualReturn(bytes32, bool) external pure {}
+
     function resolveWager(bytes32, uint256 grossPayout)
         external returns (uint256 stake, uint256 stakeAbsorbed, uint256 bankrollOutflow)
     {

@@ -97,6 +97,22 @@ static=json.loads(staticPath.read_text(encoding='utf-8'))
 assert static['qualifiedSHA']==sha and static['trackedWorkingTreeDirty'] is False
 assert not any(x['severity'].lower() in {'high','medium'} for x in static['findings'])
 paths += [staticPath]
+financial_path = Path("artifacts/ws8-financial/execution.json")
+financial_raw = Path("artifacts/ws8-financial/results.json")
+financial = json.loads(financial_path.read_text(encoding="utf-8"))
+assert financial["qualifiedSHA"] == sha
+assert financial["rawSHA256"] == hashlib.sha256(financial_raw.read_bytes()).hexdigest()
+expected_financial = set(["BetBankrollRisk420Test","BetEconomics420Test","BetSettlementEngine420Test","BetCasinoConvergence420Test","BetCasinoEmergencyConvergence420Test","BetCasinoSolvencyConvergence420Test","BetCasinoSettlementInvariant420Test","BetTerminalPathInvariant420Test","BetProfitAccounting420Test","BetGovernedProfitEpoch420Test","BetGenesisCapitalization420Test"])
+actual_financial = {}
+for key, suite in json.loads(financial_raw.read_text(encoding="utf-8")).items():
+    name = key.split(":")[-1]
+    assert name in expected_financial and name not in actual_financial
+    tests = suite["test_results"]
+    assert tests and all(t["status"] == "Success" for t in tests.values()), key
+    actual_financial[name] = len(tests)
+assert set(actual_financial) == expected_financial
+assert financial["suites"] == actual_financial
+paths += [financial_path, financial_raw]
 assert crypto["genuineProofsVerified"] == 41
 assert len(funded["mandatoryTests"]) == 11 and set(funded["mandatoryTests"].values()) == {"Success"}
 assert funded["totalPassed"] >= 15
@@ -113,7 +129,7 @@ report = {"level": 2, "qualifiedSHA": sha, "acceptance": "passed", "genuineProof
     "genuineWinnerProofsVerified": 41, "newWinnerProofsGenerated": 36, "reusedWinnerProofs": 5,
     "winnerBalances": winnerReplay['balances'], "winnerFee": winnerReplay['fee'],
     "evaluation5A6Tests": betting["evaluation5A6Tests"],
-    "betting5A5Tests": betting['mandatoryTests'], "freshNativeOwners": betting['nativeOwners'],
+    "betting5A5Tests": betting['mandatoryTests'], "freshNativeOwners": betting['nativeOwners'], "freshFinancialOwners": actual_financial,
     "scope": "Level 2 local rules and cryptographic integration; not Level 3 or live deployment acceptance",
     "liveDeploymentReady": runtime['liveDeploymentReady'], "compiledRuntimeSizes": runtime['contracts'],
     "constructorGasUsed": runtime['constructorGasUsed'],

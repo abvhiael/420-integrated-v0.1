@@ -46,6 +46,10 @@ contract DevelopmentCompensationVault420 is I420System {
     mapping(bytes32 => bool) public consumedRevenueContribution;
     uint256 private _entered;
 
+    /// @notice Finalized and successfully forwarded Fantasy basis and fees by settlement asset.
+    mapping(address => uint256) public fantasyForwardedBasis;
+    mapping(address => uint256) public fantasyForwardedAmount;
+
     error ZeroAddress();
     error InvalidIdentifier();
     error InvalidPolicyReference();
@@ -264,6 +268,8 @@ contract DevelopmentCompensationVault420 is I420System {
         }
         fantasyGross[key] = cumulativeGross;
         uint256 incrementalGross = cumulativeGross - previous;
+        fantasyForwardedBasis[token] += incrementalGross;
+        fantasyForwardedAmount[token] += amount;
         bytes32 revenueRef = keccak256(abi.encode(fantasyPolicyId, token, pool, cumulativeGross));
         if (token == address(0)) {
             if (msg.value != amount) revert IncorrectContributionAmount();

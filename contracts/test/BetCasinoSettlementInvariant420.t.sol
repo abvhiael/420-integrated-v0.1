@@ -36,6 +36,9 @@ contract MockCasinoSettlementVault420 {
     // Match BankrollVault420.resolveWager's three-value return ABI, even though
     // SettlementEngine420 does not consume the values. A void mock return can
     // cause a high-level typed call to revert during returndata decoding.
+    // SettlementEngine classifies equal payouts after resolving custody.
+    function classifyEqualReturn(bytes32, bool) external pure {}
+
     function resolveWager(bytes32, uint256 grossPayout)
         external
         returns (uint256 stake, uint256 stakeAbsorbed, uint256 bankrollOutflow)

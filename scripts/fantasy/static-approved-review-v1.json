@@ -10,7 +10,7 @@
     "contracts/src/interfaces/genesis/ICapabilityRegistryExtended420.sol": "2ab13853023a734c75adc0c19bdd7483d77d7aaf75fe8daa079f7258771fdf85",
     "contracts/src/system/CapabilityRegistry420.sol": "eec70c83ff91b2c7a5fd3fc10728db06d402642be0f8e0c48c4530ac96e7b7ef",
     "contracts/src/revenue/DevelopmentCompensationIds420.sol": "5a7c4b05901c16194fc84c5f279ef2ea22e81a537516ccd156fe5e6f7feecdd3",
-    "contracts/src/revenue/DevelopmentCompensationVault420.sol": "45efdb4ca0073460ba9804f61cc3290cede19eb9b3b1a7ff7af7b467037a7d4c",
+    "contracts/src/revenue/DevelopmentCompensationVault420.sol": "17bb9b0bfbe3abd61b866113f88de6af265288e7ef564bdd75b26bdb5fd50380",
     "contracts/src/token/ERC20Template420.sol": "8f9a950e8b2ce8d76c45a7a50e4405e476e664b1bed044e4e89c4bd8bc04e303",
     "contracts/src/apps/Identity420.sol": "f47526bce8b55d10c64fb3d8d320fc1e4dc6d43945db064e86d373adec7e0152",
     "contracts/src/bet/fantasy/FantasyAdmission420.sol": "77899c8b082bb69e4265a5e3abff4ad738586c2d3eb253b29385c98fa08d4749",
@@ -642,5 +642,11 @@
   "reviewedSignatureVariants": {
     "40f1c84b2272402fd87329e6822b747aafaf7d1206fc5702a5f7a87f55c75902": "bef395a94fdc131fbf20440961775de935482bf3ecefd933e25c9880c2c34af8"
   },
-  "variantRationale": "Slither alias propagation may enumerate the bounded p.fee writes in the same mutex-protected _startReview path. The exact normalized finding variant is source-bound, preserves severity and maps one-to-one to the reviewed finding. No new detector category or unbound fingerprint is accepted."
+  "variantRationale": "Slither alias propagation may enumerate the bounded p.fee writes in the same mutex-protected _startReview path. The exact normalized finding variant is source-bound, preserves severity and maps one-to-one to the reviewed finding. No new detector category or unbound fingerprint is accepted.",
+  "vaultSourceReview": {
+    "previousNormalizedSHA256": "45efdb4ca0073460ba9804f61cc3290cede19eb9b3b1a7ff7af7b467037a7d4c",
+    "reviewedCommit": "3897d40d64ff2f539f0d2c22703a8b756da27e7d",
+    "scope": "Two appended per-asset counters and two increments in contributeFantasy; reversing exactly those additions reproduces the previous reviewed digest.",
+    "rationale": "Counters update only after monotonic pool basis, nonzero rounded fee and scoped source authorization checks, under the existing shared mutex. Checked arithmetic and atomic revert preserve both counters on failed native/token delivery or callback. No new external calls, destinations, permissions or fee arithmetic. Existing divide-before-multiply disposition remains unchanged. All severe finding signatures must still match the existing review."
+  }
 }

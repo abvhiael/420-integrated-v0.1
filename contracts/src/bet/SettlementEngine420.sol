@@ -424,6 +424,9 @@ contract SettlementEngine420 is I420System {
 
         uint256 releasedLiability = riskManager.releaseExposure(wagerId);
         vault.resolveWager(wagerId, grossPayout);
+        if (grossPayout == wager.stake) {
+            vault.classifyEqualReturn(wagerId, outcome == BetTypes420.TerminalOutcome.VOID);
+        }
         registry.recordSettlement(wagerId, outcome, grossPayout);
         economics.finalizeWagerFees(wagerId, outcome);
         settlement = registry.getSettlement(wagerId);

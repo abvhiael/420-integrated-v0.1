@@ -41,6 +41,9 @@ contract TreasuryReleaseExecutor420 {
     address public immutable operator;
     uint256 private _entered;
 
+    /// @notice Cumulative completed payments keyed by Treasury registry, budget and asset.
+    mapping(address => mapping(bytes32 => mapping(address => uint256))) public paidByBudgetAsset;
+
     error InvalidConfiguration();
     error UnauthorizedOperator();
     error UnauthorizedRelease();
@@ -120,6 +123,7 @@ contract TreasuryReleaseExecutor420 {
         ) revert InvalidReleaseTarget();
 
         disb.markExecuted(id, commitment);
+        paidByBudgetAsset[e.disbursementRegistry][e.budgetId][e.asset] += e.amount;
         emit VaultReleaseCommitted(id, e.operationId, commitment, abi.encode(e));
         _entered = 0;
     }

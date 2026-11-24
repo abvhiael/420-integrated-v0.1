@@ -2,6 +2,8 @@ package social
 
 import (
  "bytes"
+ "errors"
+ "strings"
  "encoding/json"
  "testing"
  "time"
@@ -82,4 +84,25 @@ func TestBC33ComparativeStrength(t *testing.T){
  }
  t.Logf("opening suite reference scores: %+v",totals)
  if totals["medium"]<=totals["easy"]||totals["hard"]<=totals["medium"]{t.Fatal("difficulty ordering not established",totals)}
+}
+
+func TestBC33DeadlineAndDeterministicBudget(t *testing.T){
+ a,state:=bc321Adapter(t)
+ policy:=NewChessBotPolicies().Hard
+ for _,limit:=range []int{1,20,100,100000}{
+  first,e:=a.ChooseMoveBounded(state,0,"hard",policy,limit,time.Time{});if e!=nil{t.Fatal(limit,e)}
+  second,e:=a.ChooseMoveBounded(state,0,"hard",policy,limit,time.Time{});if e!=nil||!bytes.Equal(first,second){t.Fatal(limit,e)}
+ }
+ _,e:=a.ChooseMoveBounded(state,0,"hard",policy,100000,time.Now().Add(-time.Second))
+ if !errors.Is(e,ErrUnavailable)||!strings.Contains(e.Error(),"deadline"){t.Fatal("missing deadline diagnosis",e)}
+}
+func TestBC33LegalExistenceMatchesFullGenerator(t *testing.T){
+ p:=chessInitialBoard()
+ for i:=0;i<300;i++{
+  all:=p.legal();first:=p.legalLimited(true)
+  if (len(all)==0)!=(len(first)==0){t.Fatal("terminal mismatch",i)}
+  if len(all)==0{p=chessInitialBoard();continue}
+  if first[0]!=all[0]{t.Fatal("move ordering mismatch",i)}
+  p=p.apply(all[(i*17+3)%len(all)])
+ }
 }

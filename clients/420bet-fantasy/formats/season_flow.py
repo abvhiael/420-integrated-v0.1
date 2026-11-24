@@ -70,11 +70,14 @@ class FundedSeasons(FundedFormats):
         for child in [self.season.functions.weekDisputeId(id,w).call() for w in (1,2)]:self.grant(self.season.address,self.disputes.functions.REGISTER().call(),self.auth.functions.scopeForContest(child).call())
         self.grant(self.validator.address,k256(b'BET_FANTASY_VALIDATE_SEASON_PRIVATE.V1'),self.auth.functions.scopeForContest(id).call())
         self.tx(self.season.functions.create(id,bytes.fromhex(self.profiles[0]['subject'][2:]),stake,prize,encode(['(uint64,uint64,uint16[])[]'],[[(3,4,[5000,3000,2000])]])))
+        origins = []
         for m in range(1,users+1):
-            p=self.profiles[m];subject=bytes.fromhex(p['subject'][2:]);credential=bytes.fromhex(p['credential'][2:]);self.grant(p['account'],k256(b'BET_FANTASY_ENTER'),self.auth.functions.scopeForContest(id).call());self.tx(self.season.functions.join(id,subject,credential),p['account'])
+            p=self.profiles[m];subject=bytes.fromhex(p['subject'][2:]);credential=bytes.fromhex(p['credential'][2:]);self.grant(p['account'],k256(b'BET_FANTASY_ENTER'),self.auth.functions.scopeForContest(id).call())
+            receipt = self.tx(self.season.functions.join(id,subject,credential),p['account'])
+            origins.append('0x' + receipt.transactionHash.hex().removeprefix('0x'))
             if m==1:self.reject(label+' duplicate season identity',self.season.functions.join(id,subject,credential),p['account'])
         pins={c.address:self.w3.keccak(self.w3.eth.get_code(c.address)).hex() for c in self.contracts.values()};client=SeasonClient(self.w3,self.build,self.season.address,pins);custodian=SeasonCustodian(client,self.private)
-        case={'id':id,'label':label,'mode':mode,'draftStart':draft_start,'periods':periods,'calendar':calendar,'client':client,'custodian':custodian,'users':users,'stake':stake,'prize':prize}
+        case={'id':id,'label':label,'mode':mode,'draftStart':draft_start,'periods':periods,'calendar':calendar,'client':client,'custodian':custodian,'users':users,'stake':stake,'prize':prize,'origins':origins}
         if users==4:
             subject=bytes.fromhex(self.profiles[1]['subject'][2:]);preferences=list(range(1,1501)) if label=='full-nhl-inventory' else [1]
             root,payload,_=client.preference(id,1,preferences,[k256(('private draft salt '+str(a)).encode()) for a in preferences])
@@ -228,11 +231,7 @@ class FundedSeasons(FundedFormats):
         for m in range(1,5):self.tx(self.season.functions.collect(id,m));self.reject(c['label']+' duplicate final claim',self.season.functions.collect(id,m))
         fee = 3 * c['stake'] * c['users'] // 100
         if fee:
-            developer = self.accounts[8]
-            balance_before = self.token.functions.balanceOf(developer).call()
-            self.tx(self.season.functions.forwardDevelopment())
-            if self.token.functions.balanceOf(developer).call() - balance_before != fee:
-                raise AssertionError('independent per-season developer delivery mismatch '+c['label'])
+            self.forward_fantasy_development(self.season, fee, c['stake'] * c['users'], c['label'], id, c['origins'])
         self.outcomes.append({'case':c['label'],'mode':c['mode'],'users':4,'weeklyCanonicalFinality':True,'randomnessRequest':'0x'+c['request'].hex(),'pool':'0x'+id.hex()});c['custodian'].close()
 
     def collect_refunds(self,c,reason):

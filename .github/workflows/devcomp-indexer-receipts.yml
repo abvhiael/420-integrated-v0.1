@@ -5,6 +5,14 @@ on:
       - '420-indexer/**'
       - 'explorer/**'
       - 'analytics/**'
+      - 'clients/420bet-fantasy/**'
+      - 'contracts/src/bet/**'
+      - 'contracts/src/oracle/**'
+      - 'contracts/src/randomness/**'
+      - 'contracts/src/apps/Identity420.sol'
+      - 'contracts/src/token/ERC20Template420.sol'
+      - 'contracts/script/fantasy/**'
+      - 'scripts/fantasy/**'
       - 'go.mod'
       - 'go.sum'
       - 'contracts/test/ExchangeFeeSettlement420.t.sol'
@@ -24,7 +32,7 @@ permissions:
 jobs:
   receipt-recovery:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 30
     services:
       postgres:
         image: postgres:16
@@ -43,6 +51,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '11.25.0'
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
@@ -81,3 +95,42 @@ jobs:
             sleep 1
           done
           node 420-indexer/scripts/qualify-compensation-receipts.mjs
+      - name: Settle funded Fantasy formats and seasons through both consumers
+        env:
+          INDEXER_PG_URL: postgresql://postgres:postgres@127.0.0.1:5432/indexer420
+        run: |
+          set -euo pipefail
+          python -m pip install -r clients/420bet-fantasy/formats/requirements.txt
+          export DEVCOMP_EXPLORER_BIN="$RUNNER_TEMP/devcomp-explorer"
+          export DEVCOMP_ANALYTICS_BIN="$RUNNER_TEMP/devcomp-analytics"
+          export FOUNDRY_OUT="$RUNNER_TEMP/devcomp-fantasy-build"
+          export FOUNDRY_CACHE_PATH="$RUNNER_TEMP/devcomp-fantasy-cache"
+          (
+            cd contracts
+            FOUNDRY_PROFILE=pr FOUNDRY_VIA_IR=true FOUNDRY_SRC=script/fantasy \
+              FOUNDRY_SCRIPT=script/fantasy FOUNDRY_TEST=test/__approved_empty__ forge build --use 0.8.30
+          )
+          python scripts/fantasy/diagnose-approved-formats.py --anvil "$(command -v anvil)" \
+            --build "$FOUNDRY_OUT" --output "$RUNNER_TEMP/devcomp-fantasy-formats"
+          python scripts/fantasy/diagnose-approved-seasons.py --anvil "$(command -v anvil)" \
+            --build "$FOUNDRY_OUT" --output "$RUNNER_TEMP/devcomp-fantasy-seasons" --all-modes
+      - name: Run the daily Fantasy browser settlement through both consumers
+        env:
+          INDEXER_PG_URL: postgresql://postgres:postgres@127.0.0.1:5432/indexer420
+        run: |
+          set -euo pipefail
+          python -m pip install -r clients/420bet-fantasy/daily/requirements.txt
+          pnpm --dir clients/420bet-fantasy/daily install --frozen-lockfile --ignore-scripts
+          pnpm --dir clients/420bet-fantasy/daily exec playwright install --with-deps chromium
+          node clients/420bet-fantasy/daily/build.mjs
+          export DEVCOMP_EXPLORER_BIN="$RUNNER_TEMP/devcomp-explorer"
+          export DEVCOMP_ANALYTICS_BIN="$RUNNER_TEMP/devcomp-analytics"
+          python scripts/fantasy/qualify-daily-application.py --output "$RUNNER_TEMP/devcomp-fantasy-daily"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: devcomp-funded-fantasy-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            ${{ runner.temp }}/devcomp-fantasy-formats/compensation-consumers.json
+            ${{ runner.temp }}/devcomp-fantasy-seasons/compensation-consumers.json
+            ${{ runner.temp }}/devcomp-fantasy-daily/compensation-consumers.json
+          if-no-files-found: error

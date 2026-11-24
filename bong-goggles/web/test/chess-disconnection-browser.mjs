@@ -46,7 +46,8 @@ try{
    else if(p==='/v1/classic-sessions/'+id+'/chess-actions')data=envelope({sequence:seq,actions:seat===(seq-1)%2?[{type:'move',uci:moves[seq-1]},{type:'resign'}]:[{type:'resign'}]}).data;
    else if(p==='/v1/classic-sessions/'+id+'/action'){
     const b=r.request().postDataJSON();assert.equal(b.expectedSequence,seq+1);assert.equal(seat,(seq-1)%2);
-    assert.deepEqual(b.move,{type:'move',uci:seat?'e7e5':'e2e4'});posts++;
+    assert.ok(seq>=1&&seq<=moves.length,'unexpected submission outside scripted match sequence');
+    assert.deepEqual(b.move,{type:'move',uci:moves[seq-1]});posts++;
     const a=board.split(''),from=index(b.move.uci.slice(0,2)),to=index(b.move.uci.slice(2,4));a[to]=a[from];a[from]='.';board=a.join('');last=b.move.uci;san=notation[seq-1];seq++;
     if(dropReply&&seat===0){dropReply=false;outage=true;await r.abort('connectionreset');return;}
     data=envelope({session:session(seat)}).data;

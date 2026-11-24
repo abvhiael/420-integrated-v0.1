@@ -91,5 +91,8 @@
     "phase_merge_commit": "1f937b7ef641980cc118336763ba50ffc8f3cc5a",
     "superseded_for_current_completeness_claims": true
   },
-  "public_endpoint_deployment_claimed": false
+  "public_endpoint_deployment_claimed": false,
+  "testnet_work_roadmap": "docs/audit/420VERIFY-TESTNET-WORK-ROADMAP.md",
+  "outstanding_live_work_status": "PENDING_TESTNET_INFRASTRUCTURE_AND_LIVE_QUALIFICATION",
+  "repository_followup_pr": 1377
 }

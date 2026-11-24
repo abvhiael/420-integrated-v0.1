@@ -135,6 +135,18 @@ if(pinnedInheritedBytes>44*1024)throw Error('Existing independent modules exceed
 // over the already qualified BC-2.5 file bytes. Never raise BC-2.4 or BC-2.5
 // historic per-file limits, and never debit new UI to the old base budget.
 // Owner-traced routes: separately bound only added peg-render/runtime bytes.
+// Direct computer setup: only this feature's exact source growth is excluded
+// from earlier independent allowances. Retain every existing ceiling.
+const computerStartBaselines={'core/labyrinth-computer-start.js':0,'core/labyrinth-route-runtime.js':5780,'core/labyrinth-cribbage-ui.js':16254,'core/shared-game-ui.js':11871};
+const computerStartGrowth=new Map();
+for(const [path,baseline] of Object.entries(computerStartBaselines)){
+ const actual=regularSizes.get(path),growth=Math.max(0,actual-baseline);
+ if(!Number.isSafeInteger(actual)||growth>(baseline===0?4096:2048))throw Error('Computer setup scope exceeded: '+path);
+ computerStartGrowth.set(path,growth);
+ regularSizes.set(path,actual-growth);
+}
+const computerStartBytes=[...computerStartGrowth.values()].reduce((a,b)=>a+b,0);
+if(computerStartBytes>8192)throw Error('Direct computer setup exceeds 8 KiB');
 const pegRouteBaselines={'core/labyrinth-route-runtime.js':4878,'core/labyrinth-peg-overlay.js':5769};
 const pegRouteGrowth=new Map();
 for(const [path,baseline] of Object.entries(pegRouteBaselines)){
@@ -348,7 +360,7 @@ for(const [path,{baseline,maxAdded}] of Object.entries(bc02Files)){
  bc02Growth+=growth;
 }
 if(bc02Growth>8*1024)throw new Error('BC-0.2 menu exceeded 8 KiB scoped budget');
-if(baseTotal-bc24Growth-bc25Growth-bc26Growth-bc27Growth-pinnedInheritedBytes-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024+CCC_PRACTICE_ALLOWANCE)
+if(baseTotal-computerStartBytes-bc24Growth-bc25Growth-bc26Growth-bc27Growth-pinnedInheritedBytes-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024+CCC_PRACTICE_ALLOWANCE)
  throw new Error('BC-0.5 combined static asset budget exceeded: '+baseTotal);
 // CCC's account-only form wiring belongs to the separately approved roadboard/chat
 // allowance, not to the frozen BC-0.2 through BC-0.5 per-file limits.
@@ -365,7 +377,7 @@ if(!Number.isSafeInteger(gameKitLogicSize)||gameKitLogicSize<12*1024||gameKitLog
 // of the frozen BC-0.2 through BC-0.5 and original asset allowances.
 if(gameKitLogicSize+gameKitSize>24*1024)
  throw new Error('BC-0.9 combined tabletop allowance exceeded 24 KiB');
-const legacyBaseTotal=baseTotal-bc24Growth-bc25Growth-bc26Growth-bc27Growth-pinnedInheritedBytes-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-cribbageViewBytes-cribbageResumeBytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
+const legacyBaseTotal=baseTotal-computerStartBytes-bc24Growth-bc25Growth-bc26Growth-bc27Growth-pinnedInheritedBytes-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-cribbageViewBytes-cribbageResumeBytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
 if(legacyBaseTotal>limits.baseTotal+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
  throw new Error('Previously qualified base asset budget exceeded: '+legacyBaseTotal+' > '+limits.baseTotal);
 console.log('Inherited independent source-bound modules:',JSON.stringify({bytes:pinnedInheritedBytes,cap:44*1024,source:'main e4020bb + BC-2.1 v2'}));

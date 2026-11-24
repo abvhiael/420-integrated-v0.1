@@ -56,3 +56,30 @@ func TestBC33ChessReplay(t *testing.T){
  }
  replay,e:=a.Replay([32]byte{},2,trace);if e!=nil||!bytes.Equal(state,replay){t.Fatal("replay",e)}
 }
+
+func TestBC33ComparativeStrength(t *testing.T){
+ // Compare actual policies on a deterministic opening suite. Independent
+ // deeper reference search scores each selected move, not policy metadata.
+ a,state:=bc321Adapter(t)
+ totals:=map[string]int{}
+ for i,uci:=range []string{"e2e4","e7e5","g1f3","b8c6","f1c4","g8f6","d2d3","f8c5"}{
+  f,e:=a.decode(state);if e!=nil{t.Fatal(e)}
+  d,e:=chessDecode(f);if e!=nil{t.Fatal(e)}
+  for _,level:=range []string{"easy","medium","hard"}{
+   policy,_:=NewChessBotPolicies().policy(level)
+   limit,_,_:=botLimits(level)
+   raw,e:=a.ChooseMoveBounded(state,f.Turn,level,policy,limit,time.Time{});if e!=nil{t.Fatal(e)}
+   var cmd chessCommand;if !strictRuleJSON(raw,&cmd){t.Fatal(string(raw))}
+   found:=false
+   for _,m:=range d.Board.legal(){if m.UCI()!=cmd.UCI{continue};found=true
+    nodes:=40000
+    score,ok:=chessBotSearch(d.Board.apply(m),2,1,-100001,100001,&nodes,NewRuleBudget(100000))
+    if !ok{t.Fatal("reference budget")};totals[level]-=score
+   }
+   if !found{t.Fatal("non-board action in opening",cmd)}
+  }
+  next,_,_,_,e:=a.Apply(state,i%2,chessAction("move",uci));if e!=nil{t.Fatal(e)};state=next
+ }
+ t.Logf("opening suite reference scores: %+v",totals)
+ if totals["medium"]<=totals["easy"]||totals["hard"]<=totals["medium"]{t.Fatal("difficulty ordering not established",totals)}
+}

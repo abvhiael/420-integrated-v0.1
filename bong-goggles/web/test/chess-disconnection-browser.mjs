@@ -6,6 +6,7 @@ import {readFile} from 'node:fs/promises';
 import {resolve,extname,sep} from 'node:path';
 import {chromium} from 'playwright';
 import {id,roomId,actor,fixture,envelope} from './chess-fixture.mjs';
+import {normalizeChessSession,normalizeChessActions} from '../core/chess-session.js';
 const root=resolve(import.meta.dirname,'..'),peer='22222222-2222-4222-8222-222222222222';
 const types={'.html':'text/html','.css':'text/css','.js':'text/javascript','.json':'application/json','.svg':'image/svg+xml'};
 const server=createServer(async(req,res)=>{
@@ -24,6 +25,9 @@ const server=createServer(async(req,res)=>{
 });
 let browser,seq=1,board=fixture().privateView.board,last='',san='',outage=false,posts=0,dropReply=false,failedReads=0,authenticatedReads=0;const errors=[];
 const moves=['e2e4','e7e5','g1f3','b8c6'];const notation=['e4','e5','Nf3','Nc6'];
+// After the four submitted plies the game is still active. Advertise a
+// real legal continuation, but never accept an unexpected fifth POST.
+const nextMove=()=>moves[seq-1]??(seq===moves.length+1?'d2d3':null);
 const index=sq=>(Number(sq[1])-1)*8+'abcdefgh'.indexOf(sq[0]);
 const session=seat=>{const s=fixture(seat);s.sequence=seq;s.turnSeat=(seq-1)%2;Object.assign(s.privateView,{board,turn:s.turnSeat,lastMove:last,lastSAN:san});return s;};
 try{
@@ -43,7 +47,13 @@ try{
    if(p==='/v1/me'&&seat===0)authenticatedReads++;
    let status=200,data;
    if(p==='/v1/me')data={walletRequired:false,profile:{subject}};
-   else if(p==='/v1/classic-sessions/'+id+'/chess-actions')data=envelope({sequence:seq,actions:seat===(seq-1)%2?[{type:'move',uci:moves[seq-1]},{type:'resign'}]:[{type:'resign'}]}).data;
+   else if(p==='/v1/classic-sessions/'+id+'/chess-actions'){
+    const uci=nextMove();assert.ok(uci,'fixture must advertise legal continuation of active game');
+    const reply=envelope({sequence:seq,actions:seat===(seq-1)%2?[{type:'move',uci},{type:'resign'}]:[{type:'resign'}]});
+    const current=normalizeChessSession(envelope({session:session(seat)}),id);
+    assert.ok(current&&normalizeChessActions(reply,current),'fixture generated invalid session/action envelope at revision '+seq);
+    data=reply.data;
+   }
    else if(p==='/v1/classic-sessions/'+id+'/action'){
     const b=r.request().postDataJSON();assert.equal(b.expectedSequence,seq+1);assert.equal(seat,(seq-1)%2);
     assert.ok(seq>=1&&seq<=moves.length,'unexpected submission outside scripted match sequence');
@@ -104,6 +114,10 @@ try{
  await w.getByText('Last move: Nc6',{exact:true}).waitFor({timeout:15000});
  await w.getByText('White to move · Your turn',{exact:true}).waitFor();
  assert.equal(posts,4);assert.equal(seq,5);assert.ok(failedReads>0);
+ assert.equal(await w.locator('[data-chess-square="c6"]').getAttribute('aria-label'),'c6, Black knight');
+ await w.locator('[data-chess-square="d2"]').click();
+ await w.locator('[data-chess-square="d3"].target').waitFor({timeout:15000});
+ assert.equal(posts,4,'selecting a legal continuation must not submit a move');
  assert.equal(w.url(),url);assert.equal(await w.evaluate(()=>window.bc37DocumentMarker),'same-document');
  assert.deepEqual(errors,[]);
  console.log('BC-3.7 Chromium: temporary network loss, same-document reconnect, opponent progress, lost committed response, no duplicate POST and resumed gameplay passed');

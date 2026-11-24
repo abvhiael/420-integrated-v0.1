@@ -4,6 +4,9 @@ pragma solidity ^0.8.24;
 import "../src/exchange/ExchangeAtomicRouter420.sol";
 import "../src/exchange/ExchangeIds420.sol";
 import "../src/interfaces/genesis/ICapabilityRegistry420.sol";
+import "../src/revenue/FoundingDeveloperCompensationSplitter420.sol";
+import "../src/system/CapabilityRegistry420.sol";
+import {Vm} from "../forge-std/Test.sol";
 
 contract FeeSettlementToken420 {
     string public name;
@@ -105,6 +108,59 @@ contract ExchangeFeeSettlement420Test {
         require(c.balanceOf(address(router))==0,"router residue");
         require(c.balanceOf(address(feeRouter))==0,"fee router residue");
         require(c.allowance(address(router),address(feeRouter))==0,"fee allowance residue");
+    }
+
+    function testProductionFeeRouterCreditsAuthenticatedFounderClaims() public {
+        address lead = address(0xAA11);
+        address founderTwo = address(0xAA22);
+        address founderThree = address(0xAA33);
+        CapabilityRegistry420 registry = new CapabilityRegistry420();
+        bytes32 component = DevelopmentCompensationIds420.COMPONENT_DEVELOPMENT_COMPENSATION;
+        registry.registerProtocolComponent(component, address(this));
+        FoundingDeveloperCompensationSplitter420 splitter =
+            new FoundingDeveloperCompensationSplitter420(lead, founderTwo, founderThree);
+        DevelopmentCompensationVault420 vault = new DevelopmentCompensationVault420(address(registry), address(splitter));
+        splitter.bindCompensationVault(address(vault));
+        policy.setFeeSplit(ExchangeFeePolicy420.FeeSplit(3000, 2500, 2000, 1500, 1000));
+        policy.setRecipients(ExchangeFeePolicy420.Recipients(PROTOCOL, DEVELOPMENT, COMMUNITY, LIQUIDITY, address(vault)));
+
+        ExchangeAtomicRouter420.Hop[] memory hops = _twoHop();
+        bytes32 pathHash = router.hashPath(address(a), 100 ether, address(this), hops);
+        Vm vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
+        vm.expectRevert(DevelopmentCompensationVault420.UnauthorizedSource.selector);
+        router.swapExactInputPath(address(a), 100 ether, 99 ether, address(this), pathHash, hops);
+        require(router.tradeNonce() == 0 && c.balanceOf(PROTOCOL) == 0, "authorization rollback");
+
+        registry.createGrant(
+            keccak256("exchange-compensation"),
+            address(feeRouter),
+            component,
+            DevelopmentCompensationIds420.ACTION_CONTRIBUTE_REVENUE,
+            DevelopmentCompensationIds420.scopeSource(feeRouter.SOURCE_APPLICATION_ID()),
+            0, 0, 0, uint64(block.timestamp), uint64(block.timestamp + 1 days)
+        );
+        uint256 output = router.swapExactInputPath(address(a), 100 ether, 99 ether, address(this), pathHash, hops);
+        require(output == 99 ether, "net output");
+        require(c.balanceOf(PROTOCOL) == 0.30 ether, "protocol allocation");
+        require(c.balanceOf(DEVELOPMENT) == 0.25 ether, "development allocation");
+        require(c.balanceOf(COMMUNITY) == 0.20 ether, "community allocation");
+        require(c.balanceOf(LIQUIDITY) == 0.15 ether, "liquidity allocation");
+        require(c.balanceOf(address(vault)) == 0 && c.balanceOf(address(feeRouter)) == 0, "retained balance");
+        require(c.allowance(address(feeRouter), address(vault)) == 0, "allowance residue");
+
+        require(splitter.claimableToken(address(c), lead) == 0.05 ether, "lead credit");
+        require(splitter.claimableToken(address(c), founderTwo) == 0.025 ether, "founder two credit");
+        require(splitter.claimableToken(address(c), founderThree) == 0.025 ether, "founder three credit");
+        vm.prank(lead);
+        splitter.claimToken(address(c));
+        vm.prank(founderTwo);
+        splitter.claimToken(address(c));
+        vm.prank(founderThree);
+        splitter.claimToken(address(c));
+        require(c.balanceOf(lead) == 0.05 ether, "lead claim");
+        require(c.balanceOf(founderTwo) == 0.025 ether, "founder two claim");
+        require(c.balanceOf(founderThree) == 0.025 ether, "founder three claim");
+        require(c.balanceOf(address(splitter)) == 0, "claims conserve allocation");
     }
 
     function testNetSlippageFloorRollsBackFeeAndTrade() public {

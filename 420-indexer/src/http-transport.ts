@@ -303,6 +303,17 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
         beforeBlock: optionalBigint420(url, 'beforeBlock')
       }));
     }
+    if (path === '/v1/protocols/development-compensation/report') {
+      const from = optionalBigint420(url, 'from');
+      const to = optionalBigint420(url, 'to');
+      if (from === undefined || to === undefined || from >= to) invalidRequest420('expected from < to in Unix seconds');
+      if (!api.compensationReport) return error420(503, 'unavailable', 'compensation report unavailable');
+      try {
+        return ok420(await api.compensationReport(chainId, from, to));
+      } catch {
+        return error420(503, 'unavailable', 'compensation report unavailable');
+      }
+    }
     if (path === '/v1/protocols/events') {
       return ok420(await api.protocolEvents(chainId, {
         ...pageRequest420(url),

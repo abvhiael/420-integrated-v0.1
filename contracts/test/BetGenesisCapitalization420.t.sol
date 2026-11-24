@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 import "../src/bet/BetGenesisCapitalization420.sol";
+import {BetProfitAccounting420} from "../src/bet/BetProfitAccounting420.sol";
 import "../src/system/CapabilityRegistry420.sol";
 import {BetAuthorization420} from "../src/bet/BetAuthorization420.sol";
 import {BetIds420} from "../src/bet/BetIds420.sol";
@@ -73,6 +74,8 @@ contract BetGenesisCapitalization420Test {
         _grant(address(this),BetIds420.COMPONENT_BET,BetIds420.ACTION_VAULT_REGISTER,ba.scopeForVault(BANKROLL),0);
         accounting.registerVault(BANKROLL,address(0));
         adapter = new BetGenesisCapitalization420(address(registry),address(bankroll),BUDGET,SOURCE);
+        _grant(address(this),BetIds420.COMPONENT_BET,BetIds420.ACTION_VAULT_BIND_CASINO_CAPITAL,ba.scopeForVault(BANKROLL),0);
+        bankroll.bindCasinoCapitalOwner(address(adapter));
         _grant(address(bankroll),BetIds420.COMPONENT_BET,BetIds420.ACTION_VAULT_RECORD_DEPOSIT,ba.scopeForVault(BANKROLL),CAP);
         policy.setAssetPolicy(address(0),true,CAP+1,CAP+1,100);
         vm.deal(address(this),CAP+1);
@@ -118,6 +121,24 @@ contract BetGenesisCapitalization420Test {
         require(custody.freeBalance(SOURCE,address(0))==1 && budgets.budget(BUDGET).executed==CAP,"source mismatch");
         require(disb.disbursement(id).vaultReleaseHash==commitment,"receipt mismatch");
         vm.expectRevert(BetGenesisCapitalization420.Replay.selector); adapter.capitalize(id,commitment);
+    }
+    function testCasinoOwnedSettlementRecognizesOnlySafeSurplus() public {
+        _budget(CAP,TreasuryIds420.BUDGET_PROTOCOL,address(0)); _depositGrant();
+        bytes32 id=_valid(CAP); adapter.capitalize(id,adapter.preview(id));
+        _grant(address(this),BetIds420.COMPONENT_BET,BetIds420.ACTION_VAULT_ESCROW_STAKE,ba.scopeForVault(BANKROLL),CAP);
+        _grant(address(this),BetIds420.COMPONENT_BET,BetIds420.ACTION_VAULT_SETTLE_WAGER,ba.scopeForVault(BANKROLL),CAP);
+        _grant(address(bankroll),BetIds420.COMPONENT_BET,BetIds420.ACTION_VAULT_SETTLE_WAGER,ba.scopeForVault(BANKROLL),CAP);
+        vm.deal(address(this),100 ether);
+        bankroll.escrowWagerStakeNative{value:100 ether}(keccak256("win"),address(this));
+        bankroll.resolveWager(keccak256("win"),0);
+        BetProfitAccounting420 report=new BetProfitAccounting420(address(bankroll),address(adapter));
+        BetProfitAccounting420.Report memory r=report.report();
+        require(r.reconciled && r.casinoOwnedGains==100 ether && r.casinoOwnedLosses==0 && r.eligibleRevenue==100 ether,"owned earnings");
+        vm.deal(address(this),20 ether);
+        bankroll.escrowWagerStakeNative{value:20 ether}(keccak256("loss"),address(0x1234));
+        bankroll.resolveWager(keccak256("loss"),50 ether);
+        r=report.report();
+        require(r.reconciled && r.casinoOwnedLosses==30 ether && r.eligibleRevenue==70 ether && r.protectedCasinoCapital==CAP,"loss netting");
     }
     function testUnauthorizedCaller() public {
         _budget(CAP,TreasuryIds420.BUDGET_PROTOCOL,address(0)); _depositGrant();

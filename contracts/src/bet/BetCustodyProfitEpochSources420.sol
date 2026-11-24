@@ -64,9 +64,10 @@ contract BetBankrollProfitEpochSource420 is BetPinnedCustodySource420 {
     function profitTotals() external view override returns(Totals memory t){
         if(!_valid()||address(accounting).codehash!=accountingCodeHash)return t;
         BetProfitAccounting420.Report memory r=accounting.report();
-        // All equity belongs to the current LP redemption ledger. Do not
-        // manufacture protocol revenue or charge third-party LP losses twice.
-        t.reconciled=r.reconciled&&r.asset==asset&&r.eligibleRevenue==0;
+        t.reconciled=r.reconciled&&r.asset==asset;
+        t.retainedReceipts=r.casinoOwnedGains;
+        t.losses=r.casinoOwnedLosses;
+        t.freeProtocolCash=r.eligibleRevenue;
     }
 }
 

@@ -1,0 +1,864 @@
+{
+  "baseline": "c5b47bb56e103a4511cab271b740cedb4a791eb7",
+  "tree": "e8fbf3e291b8a8b70f6e310711beaa5341384b25",
+  "scope": "P5.1",
+  "prs": [
+    {
+      "pr": 1119,
+      "head": "d9dcba51e210e5ad59fc8586eac1cef7f4ae1361",
+      "step": "P5.6",
+      "behind": 2952,
+      "ahead": 8,
+      "files": [
+        {
+          "path": "contracts/src/bet/PlinkoPaytableAuthorityV2420.sol",
+          "branchChange": "added",
+          "disposition": "absent at historical path; reconcile"
+        },
+        {
+          "path": "contracts/src/bet/PlinkoV2420.sol",
+          "branchChange": "added",
+          "disposition": "absent at historical path; reconcile"
+        },
+        {
+          "path": "contracts/src/bet/PlinkoV2View420.sol",
+          "branchChange": "added",
+          "disposition": "absent at historical path; reconcile"
+        },
+        {
+          "path": "contracts/src/bet/SettlementEngine420.sol",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "contracts/src/bet/WagerRouter420.sol",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "contracts/test/BetPlinkoV2VerticalSlice420.t.sol",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "docs/bet/BET-PLINKO-V2-16-ROWS.md",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        }
+      ]
+    },
+    {
+      "pr": 1089,
+      "head": "9321d8ce642a6e14b6210ac420bf7049cd75dc96",
+      "step": "P5.8",
+      "behind": 3123,
+      "ahead": 381,
+      "files": [
+        {
+          "path": ".github/workflows/420bet-ecosystem-7-level1.yml",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": ".github/workflows/420bet-sports-5d9-app.yml",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": ".github/workflows/420bet-sports-5d9-level2.yml",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": ".github/workflows/420bet-sports-5d9.yml",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": ".github/workflows/420bet-sportsbook-provider-level1.yml",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/README.md",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/package.json",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/canonical-identity-eligibility.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/consent-enrollment-broker.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/delivery-alerts.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/delivery-worker.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/delivery-writer-lease.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/ecosystem.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/identity-authority-provider.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/identity-runtime.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/indexer-event-abi.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/indexer-event-reader.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/mail-auth-broker.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/notifications-consent-authority.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/notifications-go-provider-entry.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/notifications-go-provider.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/notifications-mail-adapters.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/notifications-mail-outbox.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/notifications-mail-runtime.mjs",
+          "branchChange": "added",
+          "disposition": "absent at historical path; reconcile"
+        },
+        {
+          "path": "clients/420bet-lobby/server/notifications-mail-source.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/notifications-revocation-consumer.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/ownership-authority.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/ownership-directories.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/ownership-http.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/ownership-resolver.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/registry-verifier.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/run-delivery-worker.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/serve-consent-enrollment.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/serve-identity.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/serve-ownership.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/serve.mjs",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/sportsbook-engine.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/sportsbook-journal.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/sync-indexer-events.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/verify-registry.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/wallet-identity-sessions.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/wallet-session-http.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/server/wallet-signature-verifier.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/src/consent-enrollment.js",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/src/main.js",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/src/wallet-session.js",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/consent-enrollment-broker.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/consent-web-proxy.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/delivery-large-history-replay.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/delivery-recovery-operations.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/delivery-worker.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/ecosystem.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/identity-authority-provider.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/identity-runtime.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/indexer-event-reader.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/mail-auth-broker.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/notifications-consent-authority.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/notifications-mail-integration.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/notifications-mail-runtime.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/notifications-mail-source.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/notifications-reorg-runtime.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/notifications-revocation-consumer.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/ownership-authority.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/ownership-resolver.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/real-go-services-bridge.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/registry-verifier.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/reorg-compensation.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/sportsbook-engine.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/sportsbook-worker.test.mjs",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/wallet-identity-integration.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/wallet-session-http.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/wallet-session-worker.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/worker/index.js",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/wrangler.jsonc",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "contracts/src/bet/WagerRouter420.sol",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "deploy/420bet/consent-enrollment.service",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "deploy/420bet/delivery-worker.service",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "deploy/420bet/notifications420.service",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "docs/420BET-TESTNET-WORK-ROADMAP.md",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "docs/bet/BET-AUDIT-7-CONSENT-DELIVERY-RUNBOOK.md",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "docs/bet/BET-AUDIT-7-DELIVERY-RECOVERY-RUNBOOK.md",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "docs/bet/BET-AUDIT-7-ECOSYSTEM-INTEGRATIONS.md",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "docs/bet/BET-AUDIT-7-INDEXER-WORKSTREAM.md",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "docs/bet/BET-AUDIT-7-NOTIFICATIONS-MAIL.md",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "docs/bet/BET-AUDIT-7-REGISTRY-INTEGRATION.md",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "docs/bet/BET-AUDIT-7-WALLET-IDENTITY.md",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "docs/bet/TN-BOOK-00-LOCAL-QUALIFICATION.md",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "integration/betaudit7/real_services_test.go",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "mail/auth_actor_test.go",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "mail/http.go",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "notifications/README.md",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "notifications/betconsent/enrollment.go",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "notifications/betconsent/enrollment_test.go",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "notifications/betconsent/routes.go",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "notifications/betconsent/routes_test.go",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "notifications/betconsent/store.go",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "notifications/betconsent/store_test.go",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "notifications/betdelivery/provider_receipts.go",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "notifications/betdelivery/provider_receipts_test.go",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "notifications/betdelivery/service.go",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "notifications/betdelivery/service_test.go",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "notifications/cmd/notifications420/main.go",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "notifications/runtime/service.go",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        }
+      ]
+    },
+    {
+      "pr": 1041,
+      "head": "8c508897fa10bde2d3b0ca160b20e0b9d7fbad30",
+      "step": "P5.7",
+      "behind": 3477,
+      "ahead": 21,
+      "files": [
+        {
+          "path": ".github/workflows/420bet-cannabis-cowboy-m8-math.yml",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": ".github/workflows/420bet-cannabis-cowboy-m8-minbet-cert.yml",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": ".github/workflows/420bet-cannabis-cowboy-m8-precision.yml",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/scripts/cannabis-cowboy-m8-audit.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/scripts/cannabis-cowboy-m8-stratified.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/src/cannabis-cowboy-engine.js",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/cannabis-cowboy-m4.test.mjs",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "clients/420bet-lobby/tests/cannabis-cowboy-m8.test.mjs",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        }
+      ]
+    },
+    {
+      "pr": 785,
+      "head": "0bf8aede5ed1675493017d5e054f972abcede24c",
+      "step": "P5.3",
+      "behind": 5367,
+      "ahead": 1,
+      "files": [
+        {
+          "path": ".github/workflows/420bet-poker-ws7-consolidated-adversarial.yml",
+          "branchChange": "added",
+          "disposition": "identical verified blob; preserve",
+          "mainBlob": "987ebe10e3cf3a3ed8e90c36283a648907242c8d"
+        }
+      ]
+    },
+    {
+      "pr": 724,
+      "head": "d8a69275f44963e7f62f96afbefdfad28e222eaf",
+      "step": "P5.5",
+      "behind": 6384,
+      "ahead": 6,
+      "files": [
+        {
+          "path": ".github/workflows/420bet-video-poker-5-5-level1.yml",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "contracts/src/bet/SettlementEngine420.sol",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "contracts/src/bet/WagerRouter420.sol",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "contracts/test/BetWagerAcceptance420.t.sol",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        }
+      ]
+    },
+    {
+      "pr": 672,
+      "head": "f39a407cb78def52538defbc4086944b623aefdc",
+      "step": "P5.4",
+      "behind": 7106,
+      "ahead": 4,
+      "files": [
+        {
+          "path": ".github/workflows/420bet-capitalization-policy-level1.yml",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "contracts/config/420bet-capitalization-profit-waterfall-v1.json",
+          "branchChange": "added",
+          "disposition": "absent at historical path; reconcile"
+        },
+        {
+          "path": "docs/bet/420BET-GENESIS-CAPITAL-REPAYMENT-AND-EPOCH-REVENUE.md",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "scripts/verify-420bet-capitalization-policy.py",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        }
+      ]
+    },
+    {
+      "pr": 663,
+      "head": "39b81929e84619da2249ee5ba9089c44e78583a0",
+      "step": "P5.3",
+      "behind": 7340,
+      "ahead": 11,
+      "files": [
+        {
+          "path": ".github/workflows/420bet-dice-client.yml",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": ".github/workflows/420bet-dice-level1.yml",
+          "branchChange": "added",
+          "disposition": "absent at historical path; reconcile"
+        },
+        {
+          "path": "clients/420bet-dice-v1/scripts/local-deploy-smoke.mjs",
+          "branchChange": "modified",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "docs/420BET-4.1-DICE-LEVEL1-CLOSEOUT.md",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        }
+      ]
+    },
+    {
+      "pr": 662,
+      "head": "653e5a6718c41b9b75eb18e176f7aa7e15055398",
+      "step": "P5.2",
+      "behind": 7340,
+      "ahead": 4,
+      "files": [
+        {
+          "path": "docs/420BET-4.1-DICE-LEVEL1-AUDIT.md",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        },
+        {
+          "path": "docs/420BET-COMPLETION-AUDIT-ROADMAP.md",
+          "branchChange": "added",
+          "disposition": "absent at historical path; reconcile"
+        }
+      ]
+    },
+    {
+      "pr": 148,
+      "head": "74e8e91d9028678e9cb61c2b1faede4061fa2f7a",
+      "step": "P5.5",
+      "behind": 21271,
+      "ahead": 3,
+      "files": [
+        {
+          "path": "contracts/src/bet/VideoPokerV1420.sol",
+          "branchChange": "added",
+          "disposition": "identical verified blob; preserve",
+          "mainBlob": "76bd23664ab2e5981913c61292eb909effc44e21"
+        },
+        {
+          "path": "contracts/test/BetVideoPokerV1420.t.sol",
+          "branchChange": "added",
+          "disposition": "reconcile unique changes against current implementation in assigned step"
+        }
+      ]
+    },
+    {
+      "pr": 1345,
+      "head": "937fcd367358982f987e092a497f66804c39e8b7",
+      "step": "P5.9",
+      "behind": 529,
+      "ahead": 0,
+      "files": [
+        {
+          "path": "bong-goggles/web/app.js",
+          "branchChange": "merged ancestry",
+          "disposition": "merged ancestry; preserve and regression-test"
+        },
+        {
+          "path": "bong-goggles/web/core/classic-cribbage-multiplayer.js",
+          "branchChange": "merged ancestry",
+          "disposition": "merged ancestry; preserve and regression-test"
+        },
+        {
+          "path": "bong-goggles/web/core/classic-rooms.js",
+          "branchChange": "merged ancestry",
+          "disposition": "merged ancestry; preserve and regression-test"
+        },
+        {
+          "path": "bong-goggles/web/core/classics.js",
+          "branchChange": "merged ancestry",
+          "disposition": "merged ancestry; preserve and regression-test"
+        },
+        {
+          "path": "bong-goggles/web/core/cribbage-board.js",
+          "branchChange": "merged ancestry",
+          "disposition": "merged ancestry; preserve and regression-test"
+        },
+        {
+          "path": "bong-goggles/web/core/cribbage-live-view.js",
+          "branchChange": "merged ancestry",
+          "disposition": "merged ancestry; preserve and regression-test"
+        },
+        {
+          "path": "bong-goggles/web/core/cribbage-room-resume.js",
+          "branchChange": "merged ancestry",
+          "disposition": "merged ancestry; preserve and regression-test"
+        },
+        {
+          "path": "bong-goggles/web/core/cribbage-route-runtime.js",
+          "branchChange": "merged ancestry",
+          "disposition": "merged ancestry; preserve and regression-test"
+        },
+        {
+          "path": "bong-goggles/web/core/cribbage-session.js",
+          "branchChange": "merged ancestry",
+          "disposition": "merged ancestry; preserve and regression-test"
+        },
+        {
+          "path": "bong-goggles/web/core/cribbage-ui.js",
+          "branchChange": "merged ancestry",
+          "disposition": "merged ancestry; preserve and regression-test"
+        },
+        {
+          "path": "bong-goggles/web/scripts/build.mjs",
+          "branchChange": "merged ancestry",
+          "disposition": "merged ancestry; preserve and regression-test"
+        },
+        {
+          "path": "bong-goggles/web/scripts/qualify-web.mjs",
+          "branchChange": "merged ancestry",
+          "disposition": "merged ancestry; preserve and regression-test"
+        },
+        {
+          "path": "bong-goggles/web/test/classic-rooms.test.js",
+          "branchChange": "merged ancestry",
+          "disposition": "merged ancestry; preserve and regression-test"
+        },
+        {
+          "path": "bong-goggles/web/test/classics-menu.test.js",
+          "branchChange": "merged ancestry",
+          "disposition": "merged ancestry; preserve and regression-test"
+        },
+        {
+          "path": "bong-goggles/web/test/cribbage-browser-qualification.mjs",
+          "branchChange": "merged ancestry",
+          "disposition": "merged ancestry; preserve and regression-test"
+        },
+        {
+          "path": "bong-goggles/web/test/cribbage-frontend.test.js",
+          "branchChange": "merged ancestry",
+          "disposition": "merged ancestry; preserve and regression-test"
+        },
+        {
+          "path": "bong-goggles/web/test/cribbage-multiplayer.test.js",
+          "branchChange": "merged ancestry",
+          "disposition": "merged ancestry; preserve and regression-test"
+        },
+        {
+          "path": "bong-goggles/web/test/shared-game-ui.test.js",
+          "branchChange": "merged ancestry",
+          "disposition": "merged ancestry; preserve and regression-test"
+        }
+      ]
+    }
+  ]
+}

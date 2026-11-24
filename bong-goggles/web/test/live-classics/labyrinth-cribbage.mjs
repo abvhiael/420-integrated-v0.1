@@ -31,17 +31,23 @@ const rid=id=>{if(!uuid.test(id))fail('unsafe UUID');return id};
 export const verifyBC28LabyrinthLiveView=(view,expectedGame='labyrinth-cribbage')=>{
  if(!view||!uuid.test(view.id)||!uuid.test(view.roomId)||
   view.gameId!==expectedGame||view.rulesVersion!=='v2.0'||view.rulesHash!==hash||
-  view.seatCount!==2||!Number.isSafeInteger(view.sequence)||
+  ![2,3,4].includes(view.seatCount)||!Number.isSafeInteger(view.sequence)||
   view.sequence<1||!allowedStates.has(view.status)||
   !Number.isInteger(view.viewerSeat)||view.viewerSeat<0||view.viewerSeat>=view.seatCount)
   fail('invalid server-signed game view');
  if(!view.privateView||view.privateView.seat!==view.viewerSeat||
   !Array.isArray(view.privateView.scores)||
   view.privateView.scores.length!==view.seatCount||
-  view.privateView.variant!=='labyrinth-2p'||
+  !(view.seatCount===2?view.privateView.variant==='labyrinth-2p':
+    view.seatCount===3?view.privateView.variant==='labyrinth-3p':
+    ['labyrinth-4p-partners','labyrinth-4p-individual'].includes(view.privateView.variant))||
   !Array.isArray(view.privateView.hand)||
   !view.privateView.hand.every(c=>Number.isSafeInteger(c)&&c>=0&&c<52)||
-  new Set(view.privateView.hand).size!==view.privateView.hand.length)
+  new Set(view.privateView.hand).size!==view.privateView.hand.length||
+  !Array.isArray(view.privateView.cardCounts)||
+  view.privateView.cardCounts.length!==view.seatCount||
+  view.privateView.cardCounts[view.viewerSeat]!==view.privateView.hand.length||
+  !view.privateView.scores.every(x=>Number.isSafeInteger(x)&&x>=0&&x<=10000))
   fail('server private seat projection not verified');
  for(const field of ['deck','seed','opponentHand','allHands','crib','kept','engineState','initialState']){
   if(Object.hasOwn(view.privateView,field))fail('hidden '+field+' leaked from server');
@@ -214,4 +220,96 @@ export async function runBotDifficulty(io){
   }else fail('unexpected authoritative turn seat');
  }
  fail('live '+difficulty+' bot never reached server-owned 325-point finish');
+}
+
+// BC-2.8 requires actual deployed human+bot 3-seat and both 4-seat
+// outcomes as well as the two-account 2-seat full-match acceptance.
+// Real rooms are created and completed only by server-authorized browsers;
+// bot turns are observed from the real backend's worker, never submitted
+// from the browser or inferred from a locally simulated score.
+export async function runMixedFormats(io){
+ if(io.game!=='labyrinth-cribbage')fail('incorrect live mixed-format adapter');
+ for(const format of [
+  {count:3,id:'labyrinth-3p',value:null},
+  {count:4,id:'labyrinth-4p-partners',value:'partnerships'},
+  {count:4,id:'labyrinth-4p-individual',value:'individual'}
+ ]){
+  const a=io.pages[0],b=io.pages[1];
+  const body={gameId:'labyrinth-cribbage',visibility:'public',seatCount:format.count};
+  if(format.value)body.format=format.value;
+  const opened=requireResponse(await io.request(a,prefix+'classic-rooms','POST',body),
+   201,'qualified '+format.id+' room');
+  let room=opened.room;rid(room?.id);
+  if(room.gameId!=='labyrinth-cribbage'||room.seatCount!==format.count||
+   room.variantId!==format.id||room.status!=='open')fail('wrong immutable mixed-room format');
+  const joined=requireResponse(await io.request(b,prefix+'classic-rooms/'+room.id+'/change','POST',{
+   action:'join',seat:1,expectedRevision:room.revision
+  }),200,'second 420ID mixed-room join');
+  room=joined.room;
+  if(room.seats?.[1]?.controller!=='human')fail('second human not seated');
+  for(let seat=2;seat<format.count;seat++){
+   const level=['easy','medium','hard'][(seat+format.count)%3];
+   const bot=requireResponse(await io.request(a,prefix+'classic-rooms/'+room.id+'/change','POST',{
+    action:'bot',seat,difficulty:level,expectedRevision:room.revision
+   }),200,'operator '+format.id+' '+level+' bot seat');
+   room=bot.room;
+   if(room.seats?.[seat]?.controller!=='bot'||room.seats[seat].difficulty!==level)
+    fail('server bot seat/difficulty drifted');
+  }
+  if(room.status!=='ready')fail('mixed room started without complete consent');
+  const started=requireResponse(await io.request(a,prefix+'classic-sessions','POST',{
+   roomId:room.id
+  }),201,'signed mixed-format session');
+  const first=current(started.session);
+  if(first.roomId!==room.id||first.privateView.variant!==format.id||
+   first.viewerSeat!==0||first.sequence!==1)fail('mixed session altered immutable room');
+  const peer=await get(io,1,first.id);
+  if(peer.viewerSeat!==1||peer.privateView.variant!==format.id||
+   JSON.stringify(peer.privateView)===JSON.stringify(first.privateView))
+   fail('mixed-format second 420ID did not receive separate private hand');
+  let botMoves=0,completed=false;
+  const deadline=Date.now()+timeBudgetMs;
+  for(let step=0;step<maxMoves&&Date.now()<deadline;step++){
+   const state=await get(io,0,first.id);
+   if(state.status==='finished'){
+    const final=current(state),winner=final.winnerSeat;
+    if(!Number.isInteger(winner)||final.privateView.scores[winner]<325||botMoves<8)
+     fail('real '+format.id+' terminal winner/bot evidence not met');
+    if(format.id==='labyrinth-4p-partners'&&
+      (final.privateView.scores[0]!==final.privateView.scores[2]||
+       final.privateView.scores[1]!==final.privateView.scores[3]))
+      fail('deployed partnership shared scores diverged');
+    for(let who=0;who<2;who++){
+     const view=await get(io,who,first.id);
+     if(view.sequence!==final.sequence||view.winnerSeat!==winner)
+      fail('mixed final results differ between real 420ID accounts');
+     const history=requireResponse(await io.request(io.pages[who],
+      prefix+'classic-sessions/history-labyrinth'),200,'mixed result history');
+     if(!history.history?.matches?.some(m=>m.id===first.id&&m.status==='finished'&&
+       m.variantId===format.id&&m.winnerSeat===winner))
+      fail('mixed-format private history not committed');
+    }
+    completed=true;break;
+   }
+   const seat=state.turnSeat;
+   if(seat===0||seat===1){
+    const own=await get(io,seat,first.id);
+    if(own.sequence!==state.sequence||own.viewerSeat!==seat)
+     fail('mixed game wrong 420ID principal');
+    await move(io,seat,own);
+    await delay(1100);
+   }else if(Number.isInteger(seat)&&seat>=2&&seat<format.count){
+    let advanced=false;
+    for(let n=0;n<60&&Date.now()<deadline;n++){
+     await delay(650);
+     const next=await get(io,0,first.id);
+     if(next.sequence>state.sequence){botMoves+=next.sequence-state.sequence;advanced=true;break}
+    }
+    if(!advanced)fail('server-owned '+format.id+' bot worker stalled');
+   }else fail('unexpected authenticated mixed-format turn seat');
+  }
+  if(!completed)fail('deployed '+format.id+' never completed a server-owned 325-point game');
+ }
+ return {formats:['labyrinth-3p','labyrinth-4p-partners','labyrinth-4p-individual'],
+  status:'finished',authoritative:true};
 }

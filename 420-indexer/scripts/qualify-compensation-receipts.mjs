@@ -126,18 +126,52 @@ const send = async (ref, value) =>
 const first = await send('canonical', 100n);
 const wrapped = await deploy('Wrapped420', []);
 const wrappedAddress = await wrapped.getAddress();
-await (await wrapped.deposit({ value: 80n })).wait();
-await (await wrapped.approve(vaultAddress, 80n)).wait();
-const tokenContribution = await (
-  await vault.contributeToken(
-    wrappedAddress,
-    app,
-    id('canonical-token'),
-    await vault.policyId(),
-    800n,
-    1000
+const exchangePolicy = await deploy('ExchangeFeePolicy420', [author]);
+const exchange = await deploy('ExchangeFeeRouter420', [
+  author,
+  await exchangePolicy.getAddress()
+]);
+const exchangeAddress = await exchange.getAddress();
+const exchangeApp = await exchange.SOURCE_APPLICATION_ID();
+const exchangeScope = keccak256(
+  AbiCoder.defaultAbiCoder().encode(
+    ['string', 'bytes32'],
+    ['420/REVENUE/DEVELOPMENT_COMPENSATION/SCOPE/SOURCE/V1', exchangeApp]
+  )
+);
+await (
+  await capabilities.createGrant(
+    id('exchange-grant'),
+    exchangeAddress,
+    component,
+    action,
+    exchangeScope,
+    0,
+    0,
+    0,
+    0,
+    head.timestamp + 3600n
   )
 ).wait();
+await (await exchangePolicy.setFeeSplit([3000, 2500, 2000, 1500, 1000])).wait();
+const recipients = await Promise.all(
+  [4, 5, 6, 7].map(async (n) => (await provider.getSigner(n)).getAddress())
+);
+await (
+  await exchangePolicy.setRecipients([...recipients, vaultAddress])
+).wait();
+await (await exchange.setCollector(author, true)).wait();
+await (await wrapped.deposit({ value: 800n })).wait();
+await (await wrapped.approve(exchangeAddress, 800n)).wait();
+const tokenContribution = await (
+  await exchange.routeTokenFee(id('canonical-token'), wrappedAddress, 800n)
+).wait();
+for (const [recipient, expected] of recipients.map((recipient, index) => [
+  recipient,
+  [240n, 200n, 160n, 120n][index]
+])) {
+  assert.equal(await wrapped.balanceOf(recipient), expected);
+}
 const tokenClaim = await (
   await splitter.connect(await provider.getSigner(2)).claimToken(wrappedAddress)
 ).wait();
@@ -244,7 +278,9 @@ try {
     response.body.data.items.some(
       (event) =>
         event.transactionHash === tokenContribution.hash &&
-        event.fields.compensationAmount === '80'
+        event.fields.compensationAmount === '80' &&
+        event.fields.sourceApplicationId === exchangeApp &&
+        event.fields.source === exchangeAddress.toLowerCase()
     )
   );
   assert(

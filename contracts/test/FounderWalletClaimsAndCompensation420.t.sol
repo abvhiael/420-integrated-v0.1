@@ -5,6 +5,9 @@ import "../src/revenue/FoundingDeveloperCompensationSplitter420.sol";
 import "../src/revenue/DevelopmentCompensationVault420.sol";
 
 interface VmFounderWallets420 {
+    struct Log { bytes32[] topics; bytes data; address emitter; }
+    function recordLogs() external;
+    function getRecordedLogs() external returns (Log[] memory);
     function prank(address) external;
     function deal(address,uint256) external;
     function chainId(uint256) external;
@@ -154,6 +157,32 @@ contract FounderWalletClaimsAndCompensation420Test {
         require(!unauthorized,"unauthorized source");
         (bool wrongPolicy,) = address(vault).call{value:3}(abi.encodeCall(vault.contributeNative,(vault.fantasyApplicationId(),pool,vault.fantasyPolicyId(),100,uint16(300))));
         require(!wrongPolicy,"general policy must not accept Fantasy policy");
+    }
+
+    function testFantasyEventsReportIncrementalRevenueAndCumulativeRounding() public {
+        vm.deal(address(this), 3);
+        bytes32 pool = keccak256("incremental-fantasy-basis");
+        vm.recordLogs();
+        vault.contributeFantasy{value: 1}(address(0), pool, 34);
+        vault.contributeFantasy{value: 2}(address(0), pool, 100);
+        VmFounderWallets420.Log[] memory logs = vm.getRecordedLogs();
+        bytes32 topic = keccak256(
+            "DevelopmentCompensationForwarded(bytes32,bytes32,bytes32,address,address,address,uint256,uint16,uint256,bytes32)"
+        );
+        uint256 totalBasis;
+        uint256 totalFee;
+        uint256 forwards;
+        for (uint256 i; i < logs.length; ++i) {
+            if (logs[i].emitter != address(vault) || logs[i].topics[0] != topic) continue;
+            (,,, uint256 basis, uint16 bps, uint256 fee, bytes32 policy) =
+                abi.decode(logs[i].data, (address, address, address, uint256, uint16, uint256, bytes32));
+            require(bps == 300 && policy == vault.fantasyPolicyId(), "Fantasy policy");
+            require(basis == (forwards == 0 ? 34 : 66), "incremental basis per contribution");
+            totalBasis += basis;
+            totalFee += fee;
+            ++forwards;
+        }
+        require(forwards == 2 && totalBasis == 100 && totalFee == 3, "basis and fee conservation");
     }
 
     function testThreeFoundersClaimIndividuallyNoImpersonationOrDuplicate() public {

@@ -27,13 +27,13 @@ Exact qualified implementation head: `7a9185b48818f3c994e44a822e440f36d2ccd711`.
 - forbidden primitive scan — PASS;
 - targeted Slither high-severity gate — PASS.
 
-Repository-side DEVCOMP audit remediation is complete through DEVCOMP-AUDIT-5. Remaining DEVCOMP-AUDIT-6 through DEVCOMP-AUDIT-9 are explicitly transferred to the canonical testnet/release work roadmap in `docs/ROADMAP.md`; repository CI or synthetic evidence must not be promoted to completion of those live phases.
+The original October repository-side DEVCOMP audit remediation is complete through DEVCOMP-AUDIT-5. Subsequent founder-splitter qualification for FINDING-01 through FINDING-03 passed on `526fb695a5cdcb385c9797c512ad8ccf8014bf10` (run `45311358006`, jobs `138167596332` and `138167596173`); PR #1383 merged as `a5ca806a82b4032422785b080a58daa0826c3cff`. FINDING-04 documentation reconciliation does not close the remaining local FINDING-05/06 evidence. Remaining DEVCOMP-AUDIT-6 through DEVCOMP-AUDIT-9 are explicitly transferred to the canonical testnet/release work roadmap in `docs/ROADMAP.md`; repository CI or synthetic evidence must not be promoted to completion of those live phases.
 
 ## DEVCOMP-AUDIT-6 — deployment package and binding — TESTNET HANDOFF / BLOCKED ON DEPLOYMENT ENVIRONMENT
 Once the production-equivalent testnet is live:
 1. select the exact qualified release commit;
-2. deploy against the canonical `CapabilityRegistry420`;
-3. record the immutable 420 Integrated Labs beneficiary;
+2. follow `scripts/prepare-founder-financial-deployment.py`: deploy the splitter with the verified immutable founder wallets, deploy the vault against the canonical `CapabilityRegistry420` with the splitter as beneficiary, and bind the splitter to the exact vault once;
+3. record the immutable 420 Integrated Labs beneficiary (splitter), all three immutable recipients and the 50/25/25 split; verify both runtime code identities and binding;
 4. record deployed address, bytecode/code hash and chain ID;
 5. publish `420/service/development-compensation/v1` in Protocol Registry;
 6. prove Registry resolution returns the exact deployed vault;
@@ -46,7 +46,7 @@ Exercise native $420 and approved ERC-20 contribution paths from real authorized
 - exact split math;
 - one-time revenue references;
 - zero vault residue;
-- beneficiary receipt;
+- authenticated splitter receipt, separate per-asset credits and individually finalized founder claims with exact 50/25/25 cumulative accounting and no Genesis grant commingling;
 - exact event fields;
 - rollback on rejected transfer/beneficiary failure;
 - event visibility to Explorer/Analytics/indexing infrastructure.

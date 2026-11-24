@@ -104,6 +104,11 @@ contract SportsFundedTickets420 is SportsAuthority420 {
     mapping(address => uint256) public assetCollateral;
     mapping(address => uint256) public assetPendingStake;
     mapping(address => uint256) public assetPlayerCredit;
+    // Cumulative terminal cash-flow counters; collateral remains operator property.
+    mapping(address => uint256) public settledStakes;
+    mapping(address => uint256) public settledPayouts;
+    mapping(address => uint256) public collateralDeposited;
+    mapping(address => uint256) public collateralWithdrawn;
     event CollateralAdded(bytes32 indexed marketId, address indexed operator, uint256 amount);
     event CollateralRemoved(bytes32 indexed marketId, address indexed operator, uint256 amount);
     event TicketFunded(bytes32 indexed id, bytes32 indexed marketId, address indexed player, bytes32 oddsDigest, uint256 stake, uint256 gross);
@@ -151,6 +156,7 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         assetLiability[asset] += amount;
         assetCollateral[asset] += amount;
         collateral[marketId] += amount;
+        collateralDeposited[asset] += amount;
         _receive(asset, msg.sender, amount);
         emit CollateralAdded(marketId, msg.sender, amount);
     }
@@ -161,6 +167,7 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         collateral[marketId] -= amount;
         assetCollateral[asset] -= amount;
         assetLiability[asset] -= amount;
+        collateralWithdrawn[asset] += amount;
         _send(asset, msg.sender, amount);
         emit CollateralRemoved(marketId, msg.sender, amount);
     }
@@ -340,6 +347,8 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         pendingStake[t.marketId] -= t.stake;
         address asset = _asset(t.marketId);
         assetPendingStake[asset] -= t.stake;
+        settledStakes[asset] += t.stake;
+        settledPayouts[asset] += payout;
         marketProfitExposure[t.marketId] -= t.profit;
         selectionProfitExposure[t.marketId][t.selection] -= t.profit;
         playerExposure[t.marketId][t.player] -= t.stake;

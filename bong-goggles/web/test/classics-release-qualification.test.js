@@ -27,11 +27,12 @@ test('BC-0.12 catalogue release audit covers exact 25 titles, sequence and fail-
  const manifest=await loadReleaseEvidence();
  assert.equal(manifest.schema,'bc-0-12-release-evidence-v1');
  assert.equal(manifest.games['labyrinth-cribbage'].result,'developer-authorized-release');
+ assert.equal(manifest.games.chess.result,'developer-authorized-release');
  const result=await auditRelease({manifest,fetchImpl:()=>{throw Error('should not call GitHub without release')}});
- assert.deepEqual(result,{count:25,released:1,locked:24});
+ assert.deepEqual(result,{count:25,released:2,locked:23});
  const cli=execFileSync(process.execPath,[fileURLToPath(new URL('../scripts/classics-release-gate.mjs',import.meta.url)),'--audit'],{encoding:'utf8'});
  assert.match(cli,/BC-0.12 catalogue\/release audit/);
- assert.match(cli,/"locked":24/);
+ assert.match(cli,/"locked":23/);
  const begin=performance.now();
  for(const g of CLASSIC_ROADMAP){
   for(const screen of ['intro','rules','play','setup','table','results','history','rematch']){
@@ -44,7 +45,7 @@ test('BC-0.12 catalogue release audit covers exact 25 titles, sequence and fail-
  assert.ok(performance.now()-begin<12_000,'bounded 25-title/8-screen smoke exceeded 12 seconds');
  assert.equal(ALL_CLASSICS.filter(x=>x.status==='account').length,1);
  assert.equal(ALL_CLASSICS.find(x=>x.status==='account')?.id,'cross-country-chaos');
- assert.equal(CLASSIC_ROADMAP.filter(x=>x.status==='playable').length,1,'only owner-authorized Labyrinth release');
+ assert.equal(CLASSIC_ROADMAP.filter(x=>x.status==='playable').length,2,'only owner-authorized Labyrinth and Chess releases');
 });
 test('BC-0.12 seeded property probes reject all altered title order, statuses and unauthorized proofs',()=>{
  let seed=0x812420;

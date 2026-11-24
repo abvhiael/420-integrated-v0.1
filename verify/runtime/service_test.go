@@ -92,8 +92,12 @@ func TestServiceBecomesReadyOnlyAfterQualification(t *testing.T) {
 func TestReadyRechecksCanonicalChainAfterStartup(t *testing.T) {
 	probe := &fakeProbe{chainID: 420}
 	svc, err := NewService(validConfig(), probe)
-	if err != nil { t.Fatal(err) }
-	if err := svc.Qualify(context.Background()); err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := svc.Qualify(context.Background()); err != nil {
+		t.Fatal(err)
+	}
 	assertReadyStatus(t, svc, http.StatusOK)
 
 	probe.chainID = 421

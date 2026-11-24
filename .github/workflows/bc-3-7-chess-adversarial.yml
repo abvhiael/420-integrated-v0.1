@@ -1,0 +1,81 @@
+name: BC-3.7 Chess Automated and Adversarial Qualification
+on:
+  pull_request:
+    paths:
+      - 'bong-goggles/web/**'
+      - 'services/bong-goggles-account-social/**'
+      - '.github/workflows/bc-3-7-chess-adversarial.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bc37-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  chess-web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    defaults:
+      run:
+        working-directory: bong-goggles/web
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact source
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install web build dependencies (manifest-pinned)
+        run: npm install --no-package-lock --no-audit --no-fund
+      - name: Complete web regression and build qualification
+        run: npm run qualify
+      - name: Install pinned browser qualification dependencies
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.65.1 axe-core@4.10.3
+          npx playwright install --with-deps chromium
+      - name: Chess real-browser history, profiles, multiplayer, accessibility and network recovery qualification
+        run: node test/chess-browser-qualification.mjs && node test/chess-multiplayer-browser.mjs && node test/chess-history-browser.mjs && node test/chess-disconnection-browser.mjs
+      - name: Preserve public release lock
+        run: node scripts/classics-release-gate.mjs --audit
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+  chess-postgresql:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: account420_test
+          POSTGRES_USER: account420_test
+          POSTGRES_PASSWORD: local_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U account420_test -d account420_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      ACCOUNT420_TEST_DSN: postgres://account420_test:local_test_only@127.0.0.1:5432/account420_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact source
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Complete Chess backend, adversarial concurrency, AI and authoritative API regression
+        run: go test -race -count=1 -tags account420_integration -run '^TestBC3[234567]' -v ./services/bong-goggles-account-social ./cmd/bong-goggles-social
+      - name: Static analysis and service build
+        run: |
+          go vet -tags account420_integration ./services/bong-goggles-account-social ./cmd/bong-goggles-social
+          go build -o /tmp/bc37-social ./cmd/bong-goggles-social

@@ -1,0 +1,69 @@
+name: BC-2.6 Labyrinth History and Social Integration
+on:
+  pull_request:
+    paths:
+      - 'services/bong-goggles-account-social/classic_match_social.go'
+      - 'services/bong-goggles-account-social/classic_sessions_http.go'
+      - 'services/bong-goggles-account-social/classic_labyrinth_social_integration_test.go'
+      - 'bong-goggles/web/core/labyrinth-social.js'
+      - 'bong-goggles/web/core/labyrinth-route-runtime.js'
+      - 'bong-goggles/web/core/shared-game-ui.js'
+      - 'bong-goggles/web/test/labyrinth-social.test.js'
+      - 'bong-goggles/web/scripts/qualify-web.mjs'
+      - 'docs/games/classics/BC-2-6-QUALIFICATION.md'
+      - '.github/workflows/bc-2-6-labyrinth-social.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verified-social-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact-head social privacy, friend challenge and 4-player outcomes
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          node --check bong-goggles/web/core/labyrinth-social.js
+          node --check bong-goggles/web/core/labyrinth-route-runtime.js
+          node --test bong-goggles/web/test/labyrinth-social.test.js bong-goggles/web/test/labyrinth-human-multiplayer.test.js bong-goggles/web/test/cribbage-social.test.js
+  two-identity-postgres-social:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: account420_test
+          POSTGRES_USER: account420_test
+          POSTGRES_PASSWORD: local_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U account420_test -d account420_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      ACCOUNT420_TEST_DSN: postgres://account420_test:local_test_only@127.0.0.1:5432/account420_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Exact-head friend consent, history, team statistics, blocks and legacy Cribbage
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          go test -race -count=1 -tags account420_integration -timeout=14m -run '^(TestBC26|TestBC16AuthenticatedChallengeHistoryAndRematch)' ./services/bong-goggles-account-social
+          go vet ./services/bong-goggles-account-social

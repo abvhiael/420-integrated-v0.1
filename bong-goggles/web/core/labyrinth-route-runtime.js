@@ -1,5 +1,6 @@
 import {resolveRoute} from './routes.js';
 import {LabyrinthSessionController} from './labyrinth-session.js';
+import {LabyrinthSocialController,bindLabyrinthSocial} from './labyrinth-social.js';
 import {bindLabyrinthTable,verifyLabyrinthProjection} from './labyrinth-cribbage-ui.js';
 import {labyrinthCribbageVariant} from './labyrinth-cribbage-rules.js';
 import {validateLabyrinthPegAtlas,renderLabyrinthPegOverlay} from './labyrinth-peg-overlay.js';
@@ -11,7 +12,10 @@ export function createLabyrinthRouteRuntime({enabled=false,onChange=()=>{},
  const active=()=>resolveRoute(windowObject.location.pathname).gameId==='labyrinth-cribbage';
  const controller=new LabyrinthSessionController({enabled,fetchImpl,
   onChange:()=>{if(active())onChange();}});
+ const social=new LabyrinthSocialController({enabled,fetchImpl,onChange:()=>{if(active())onChange();}});
  const matchId=()=>new URLSearchParams(windowObject.location.search).get('session');
+ const socialScreen=()=>/\/(history|rematch|results)$/.test(windowObject.location.pathname);
+ let lastSocial=0;
  let lastList=0;
  let pegMap=null,pegMapRequested=false;
  const loadPegMap=async()=>{
@@ -29,6 +33,9 @@ export function createLabyrinthRouteRuntime({enabled=false,onChange=()=>{},
  const refresh=(force=false)=>{
   if(!active()||!controller.client.enabled)return;
   void loadPegMap();
+  if(socialScreen()&&(force||Date.now()-lastSocial>=15000)){
+   lastSocial=Date.now();void social.refresh();
+  }
   const id=matchId();
   if(id)void controller.open(id,{quiet:true});
   else if(force||Date.now()-lastList>=15000){
@@ -41,6 +48,7 @@ export function createLabyrinthRouteRuntime({enabled=false,onChange=()=>{},
  documentObject.addEventListener('visibilitychange',visible);
  const bind=root=>{
   if(!active())return;
+  bindLabyrinthSocial(root,social,id=>windowObject.location.assign('/games/rooms/'+id));
   bindLabyrinthTable(root,{view:controller.state.view,selection:controller.state.selection,
    onSelection:x=>controller.select(x),
    onMove:m=>{void controller.act(m).catch(()=>{});}
@@ -87,14 +95,14 @@ export function createLabyrinthRouteRuntime({enabled=false,onChange=()=>{},
  };
  const interval=windowObject.setInterval(()=>{if(!documentObject.hidden)refresh();},3500);
  return Object.freeze({
-  get state(){return controller.state;},
+  get state(){return {...controller.state,social:social.state};},
   bind,refresh,
-  invalidate:()=>controller.invalidate(),
+  invalidate:()=>{controller.invalidate();social.invalidate();lastSocial=0;},
   destroy:()=>{
    windowObject.clearInterval(interval);
    windowObject.removeEventListener('online',online);
    documentObject.removeEventListener('visibilitychange',visible);
-   controller.invalidate();
+   controller.invalidate();social.invalidate();
   }
  });
 }

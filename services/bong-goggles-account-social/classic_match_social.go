@@ -16,6 +16,7 @@ type ClassicHistoryMatch struct {
  ClassicSession
  ViewerSeat int `json:"viewerSeat"`
  Scores []int64 `json:"scores"`
+ VariantID string `json:"variantId,omitempty"`
 }
 type ClassicHistoryStats struct {
  SampleSize int `json:"sampleSize"`
@@ -39,27 +40,55 @@ type ClassicHistory struct {
 // full journal verification before extracting *public* scores. No engine
 // state, private hands, seeds or journal contents leave the service.
 func (s *ClassicSessions) History(ctx context.Context,viewer string)(ClassicHistory,error){
+ return s.HistoryForGame(ctx,viewer,"cribbage")
+}
+// BC-2.6 retains the original Cribbage response exactly while deriving a
+// separate 325-point account-only history and private invitation inbox.
+func (s *ClassicSessions) HistoryForGame(ctx context.Context,viewer,game string)(ClassicHistory,error){
  out:=ClassicHistory{Matches:[]ClassicHistoryMatch{},Invitations:[]ClassicPendingInvitation{}}
- if !uuid.MatchString(viewer){return out,ErrInvalid}
+ if !uuid.MatchString(viewer)||(game!="cribbage"&&game!="labyrinth-cribbage"){return out,ErrInvalid}
  list,e:=s.List(ctx,viewer);if e!=nil{return out,e}
  for _,summary:=range list{
-  if summary.GameID!="cribbage"{continue}
+  if summary.GameID!=game{continue}
   if len(out.Matches)==20{break}
   v,e:=s.Get(ctx,viewer,summary.ID)
   if errors.Is(e,ErrNotFound){continue} // revoked/blocked between reads
   if e!=nil{return ClassicHistory{},e}
-  var visible struct{Scores []int64 `json:"scores"`}
+  var visible struct{
+   Scores []int64 `json:"scores"`
+   Variant string `json:"variant"`
+  }
   if json.Unmarshal(v.PrivateView,&visible)!=nil||len(visible.Scores)!=v.SeatCount{
    return ClassicHistory{},ErrUnavailable
   }
   scores:=append([]int64(nil),visible.Scores...)
   for _,score:=range scores{if score<0||score>10000{return ClassicHistory{},ErrUnavailable}}
-  out.Matches=append(out.Matches,ClassicHistoryMatch{ClassicSession:v.ClassicSession,ViewerSeat:v.ViewerSeat,Scores:scores})
+  variantID:=""
+  if game=="labyrinth-cribbage"{
+   switch visible.Variant{
+   case "labyrinth-2p":if v.SeatCount!=2{return ClassicHistory{},ErrUnavailable}
+   case "labyrinth-3p":if v.SeatCount!=3{return ClassicHistory{},ErrUnavailable}
+   case "labyrinth-4p-partners","labyrinth-4p-individual":if v.SeatCount!=4{return ClassicHistory{},ErrUnavailable}
+   default:return ClassicHistory{},ErrUnavailable
+   }
+   variantID=visible.Variant
+  }
+  out.Matches=append(out.Matches,ClassicHistoryMatch{ClassicSession:v.ClassicSession,ViewerSeat:v.ViewerSeat,Scores:scores,VariantID:variantID})
   if v.Status=="active"{continue}
   out.Stats.SampleSize++
   if v.Status=="finished" {out.Stats.Completed++}
   if v.WinnerSeat!=nil{
-   if classicTeam(v.GameID,v.SeatCount,*v.WinnerSeat)==classicTeam(v.GameID,v.SeatCount,v.ViewerSeat){
+   // Four-player Labyrinth has two independent scoring formats; never
+   // claim a free-for-all winner as a teammate of another participant.
+   format:=""
+   if game=="labyrinth-cribbage"&&v.SeatCount==4{
+    switch visible.Variant{
+    case "labyrinth-4p-partners":format="partnerships"
+    case "labyrinth-4p-individual":format="individual"
+    default:return ClassicHistory{},ErrUnavailable
+    }
+   }
+   if classicRoomTeam(v.GameID,v.SeatCount,*v.WinnerSeat,format)==classicRoomTeam(v.GameID,v.SeatCount,v.ViewerSeat,format){
     out.Stats.Wins++
    }else{out.Stats.Losses++}
   }
@@ -69,12 +98,12 @@ func (s *ClassicSessions) History(ctx context.Context,viewer string)(ClassicHist
  rows,e:=s.Store.DB.QueryContext(ctx,"SELECT i.room_id,i.seat_index,i.inviter,i.expires_at "+
   "FROM bg_account_social.classic_room_invites i JOIN bg_account_social.classic_rooms r ON r.id=i.room_id "+
   "WHERE i.target=$1 AND i.status='pending' AND i.expires_at>clock_timestamp() "+
-  "AND r.game_id='cribbage' AND r.status IN ('open','ready') "+
+  "AND r.game_id=$2 AND r.status IN ('open','ready') "+
   "AND NOT EXISTS(SELECT 1 FROM bg_account_social.classic_room_seats rs "+
   "JOIN bg_account_social.blocks b ON (b.blocker=$1 AND b.blocked=rs.subject) "+
   "OR (b.blocked=$1 AND b.blocker=rs.subject) "+
   "WHERE rs.room_id=i.room_id AND rs.subject IS NOT NULL) "+
-  "ORDER BY i.created_at DESC,i.id DESC LIMIT 20",viewer)
+  "ORDER BY i.created_at DESC,i.id DESC LIMIT 20",viewer,game)
  if e!=nil{return ClassicHistory{},e}
  for rows.Next(){
   var v ClassicPendingInvitation
@@ -159,11 +188,19 @@ func newMatchLobby(ctx context.Context,tx *sql.Tx,viewer,requestID string,digest
 }
 
 func (s *ClassicSessions) Challenge(ctx context.Context,viewer,target,requestID string)(ClassicRoomView,error){
+ return s.ChallengeForGame(ctx,viewer,target,requestID,"cribbage")
+}
+// A Labyrinth challenge uses the existing mutual-friend, block and 420ID
+// peer locks, but a game-separated request digest and fresh consent lobby.
+func (s *ClassicSessions) ChallengeForGame(ctx context.Context,viewer,target,requestID,game string)(ClassicRoomView,error){
  var empty ClassicRoomView
- if !uuid.MatchString(viewer)||!uuid.MatchString(target)||!uuid.MatchString(requestID)||viewer==target{return empty,ErrInvalid}
- if _,e:=s.rule("cribbage","","");e!=nil{return empty,e}
+ if !uuid.MatchString(viewer)||!uuid.MatchString(target)||!uuid.MatchString(requestID)||viewer==target||
+  (game!="cribbage"&&game!="labyrinth-cribbage"){return empty,ErrInvalid}
+ if _,e:=s.rule(game,"","");e!=nil{return empty,e}
  tx,e:=s.Store.DB.BeginTx(ctx,nil);if e!=nil{return empty,e};defer tx.Rollback()
- digest:=matchRequestDigest("challenge",target)
+ kind:="challenge"
+ if game=="labyrinth-cribbage"{kind="labyrinth-challenge"}
+ digest:=matchRequestDigest(kind,target)
  // A reused request ID with changed intent must conflict even when the
  // newly supplied target no longer exists. Recheck after the peer lock to
  // serialize still-uncommitted concurrent first submissions.
@@ -183,7 +220,7 @@ func (s *ClassicSessions) Challenge(ctx context.Context,viewer,target,requestID 
   {Index:0,Controller:"human",Subject:viewer,Team:0},
   {Index:1,Controller:"invited",Subject:target,Team:1},
  }
- id,e:=newMatchLobby(ctx,tx,viewer,requestID,digest,"cribbage",seats,nil)
+ id,e:=newMatchLobby(ctx,tx,viewer,requestID,digest,game,seats,nil)
  if e!=nil{return empty,e}
  if e=tx.Commit();e!=nil{return empty,e}
  return s.Rooms.Get(ctx,viewer,id)

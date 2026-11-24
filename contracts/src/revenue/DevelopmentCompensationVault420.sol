@@ -40,7 +40,8 @@ contract DevelopmentCompensationVault420 is I420System {
 
     bytes32 public constant fantasyPolicyId = keccak256("420/REVENUE/POLICY/BET_FANTASY_ENTRY_V1");
     bytes32 public constant fantasyApplicationId = keccak256("420/BET/FANTASY/APPLICATION/V1");
-    bytes32 public constant fantasyContributionAction = keccak256("420/REVENUE/DEVELOPMENT_COMPENSATION/ACTION/CONTRIBUTE_FANTASY/V1");
+    bytes32 public constant fantasyContributionAction =
+        keccak256("420/REVENUE/DEVELOPMENT_COMPENSATION/ACTION/CONTRIBUTE_FANTASY/V1");
     mapping(bytes32 => uint256) public fantasyGross;
     mapping(bytes32 => bool) public consumedRevenueContribution;
     uint256 private _entered;
@@ -136,7 +137,14 @@ contract DevelopmentCompensationVault420 is I420System {
         _forwardNative(sourceApplicationId, revenueRef, policyRef, grossProtocolRevenue, compensationBps, amount);
     }
 
-    function _forwardNative(bytes32 sourceApplicationId, bytes32 revenueRef, bytes32 policyRef, uint256 grossProtocolRevenue, uint16 compensationBps, uint256 amount) private {
+    function _forwardNative(
+        bytes32 sourceApplicationId,
+        bytes32 revenueRef,
+        bytes32 policyRef,
+        uint256 grossProtocolRevenue,
+        uint16 compensationBps,
+        uint256 amount
+    ) private {
         bytes32 id = _consume(msg.sender, sourceApplicationId, revenueRef);
         // The destination is the immutable deployment-configured 420 Integrated Labs beneficiary,
         // never caller-selected. Source authorization, exact fee math, replay protection and the
@@ -175,7 +183,15 @@ contract DevelopmentCompensationVault420 is I420System {
         _forwardToken(token, sourceApplicationId, revenueRef, policyRef, grossProtocolRevenue, compensationBps, amount);
     }
 
-    function _forwardToken(address token, bytes32 sourceApplicationId, bytes32 revenueRef, bytes32 policyRef, uint256 grossProtocolRevenue, uint16 compensationBps, uint256 amount) private {
+    function _forwardToken(
+        address token,
+        bytes32 sourceApplicationId,
+        bytes32 revenueRef,
+        bytes32 policyRef,
+        uint256 grossProtocolRevenue,
+        uint16 compensationBps,
+        uint256 amount
+    ) private {
         bytes32 id = _consume(msg.sender, sourceApplicationId, revenueRef);
         IERC20DevelopmentCompensation420 asset = IERC20DevelopmentCompensation420(token);
 
@@ -224,16 +240,24 @@ contract DevelopmentCompensationVault420 is I420System {
     /// @notice Separately authorized, fixed 3% Fantasy entry allocation. The basis is
     /// cumulative finalized eligible entries for one pool, never general net protocol revenue.
     /// The caller must be a specifically granted canonical Fantasy settlement contract.
-    function contributeFantasy(address token, bytes32 pool, uint256 cumulativeGross) external payable nonReentrant {
+    function contributeFantasy(
+        address token,
+        bytes32 pool,
+        uint256 cumulativeGross
+    ) external payable nonReentrant {
         if (pool == bytes32(0)) revert InvalidIdentifier();
         bytes32 key = keccak256(abi.encode(msg.sender, token, pool));
         uint256 previous = fantasyGross[key];
         if (cumulativeGross <= previous) revert Replay();
         uint256 amount = _fantasyFee(cumulativeGross) - _fantasyFee(previous);
         if (amount == 0) revert IncorrectContributionAmount();
-        if (!capabilityRegistry.isAuthorized(msg.sender,
-            DevelopmentCompensationIds420.COMPONENT_DEVELOPMENT_COMPENSATION,
-            fantasyContributionAction, DevelopmentCompensationIds420.scopeSource(fantasyApplicationId), amount)) {
+        if (!capabilityRegistry.isAuthorized(
+                msg.sender,
+                DevelopmentCompensationIds420.COMPONENT_DEVELOPMENT_COMPENSATION,
+                fantasyContributionAction,
+                DevelopmentCompensationIds420.scopeSource(fantasyApplicationId),
+                amount
+            )) {
             revert UnauthorizedSource();
         }
         fantasyGross[key] = cumulativeGross;
@@ -247,7 +271,9 @@ contract DevelopmentCompensationVault420 is I420System {
         }
     }
 
-    function _fantasyFee(uint256 gross) private pure returns (uint256) {
+    function _fantasyFee(
+        uint256 gross) private pure returns (uint256
+    ) {
         return (gross / 100) * 3 + (gross % 100) * 3 / 100;
     }
 

@@ -38,7 +38,7 @@ def render(data):
         "| --- | --- | --- | --- | --- |",
     ]
     for row in data["routes"]:
-        links = ", ".join(f"[{Path(path).name}](../../{path})" for path in row["sources"])
+        links = ", ".join(f"[{Path(path).name}](https://github.com/abvhiael/420-integrated-v0.1/blob/main/{path})" for path in row["sources"])
         lines.append(f'| {row["application"]} | {row["route"]} | {row["classification"]} | {row["trace"]} | {links} |')
     lines.extend(["", "## Catalogue coverage", "",
                   "| Catalogue | Entry | Disposition |", "| --- | --- | --- |"])

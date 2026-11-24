@@ -2,6 +2,8 @@
 pragma solidity ^0.8.24;
 import "./SportsBetAcceptance420.t.sol";
 import "../../src/bet/sports/SportsFundedTickets420.sol";
+import {BetSportsbookProfitEpochSource420} from "../../src/bet/BetCustodyProfitEpochSources420.sol";
+import {IBetProfitEpochSource420} from "../../src/bet/BetGovernedProfitEpoch420.sol";
 
 interface SportsFundingVm { function deal(address,uint256) external; }
 
@@ -187,6 +189,9 @@ contract SportsFundedTickets420Test is SportsBetAcceptance420Test {
 
     /// @notice Bookkeeping must exactly explain vault custody while claims are pending.
     function _assertSingleMarketSolvent() internal view {
+        require(vault.collateralDeposited(address(token))+vault.settledStakes(address(token))
+            ==vault.collateralWithdrawn(address(token))+vault.settledPayouts(address(token))+vault.assetCollateral(address(token)),
+            "terminal cash flow reconciliation");
         uint256 accounted = vault.collateral(market) + vault.pendingStake(market)
             + vault.credit(PLAYER, address(token));
         require(token.balanceOf(address(vault)) == accounted, "unbacked claim / unallocated custody");
@@ -209,6 +214,26 @@ contract SportsFundedTickets420Test is SportsBetAcceptance420Test {
         _assertSingleMarketSolvent();
     }
 
+    function testProfitAdapterExcludesOperatorOwnedGainAndDonation() public {
+        BetSportsbookProfitEpochSource420 source=new BetSportsbookProfitEpochSource420(
+            address(token),address(vault),address(vault).codehash);
+        _submit(_quote(1));
+        _call(CONTROL,address(vault),abi.encodeCall(vault.deposit,(market,2000)));
+        bytes32 id=_fund(500);
+        require(source.profitTotals().reconciled,"pending");
+        vm.warp(markets.get(market).config.cutoff+1);
+        bytes32 evidence=keccak256("profit-test");
+        bytes32 other=markets.selections(market)[1];
+        vm.prank(REPORT_A);cert.attest(market,other,evidence);
+        vm.prank(REPORT_B);cert.attest(market,other,evidence);
+        vm.warp(block.timestamp+1 hours);cert.finalize(market);
+        _call(CONTROL,address(vault),abi.encodeCall(vault.resolve,(id,false)));
+        IBetProfitEpochSource420.Totals memory t=source.profitTotals();
+        require(t.reconciled&&t.retainedReceipts==0&&t.freeProtocolCash==0,"operator gains not protocol");
+        require(vault.settledStakes(address(token))==500&&vault.settledPayouts(address(token))==0,"terminal receipt");
+        _call(CONTROL,address(vault),abi.encodeCall(vault.withdrawCollateral,(market,2500)));
+        require(source.profitTotals().reconciled,"withdrawn operator proceeds");
+    }
     function testAccountingInvariantAcrossLossAndCollateralWithdrawal() public {
         _submit(_quote(1));
         _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));

@@ -175,11 +175,96 @@
     },
     {
       "application": "420Bet",
+      "route": "Bankroll gaming results and LP equity",
+      "classification": "excluded",
+      "trace": "Actual settled wagers and payouts reconcile to LP redemption equity; neither third-party LP gains nor losses are protocol receipts. Unclassified equal returns and custody mismatches fail closed.",
+      "sources": [
+        "contracts/config/420bet-capitalization-profit-waterfall-v1.json",
+        "contracts/src/bet/BetCustodyProfitEpochSources420.sol",
+        "contracts/src/bet/BetProfitAccounting420.sol",
+        "contracts/test/BetProfitAccounting420.t.sol"
+      ]
+    },
+    {
+      "application": "420Bet",
+      "route": "Shared fee, reward and promotion pools",
+      "classification": "excluded",
+      "trace": "Prefunded balances and allocated claims are reconciled by funding, reservation and payment counters. Prefunding is not incremental revenue; governed expenses are accounted separately.",
+      "sources": [
+        "contracts/src/bet/BetCustodyProfitEpochSources420.sol",
+        "contracts/src/bet/BetEconomics420.sol",
+        "contracts/test/BetProfitAccounting420.t.sol"
+      ]
+    },
+    {
+      "application": "420Bet",
+      "route": "Poker cash-table protocol rake",
+      "classification": "eligible",
+      "trace": "Only exact settled rake transferred by the canonical seat ledger into dedicated pinned protocol receipt custody is recognized. Player chips, other rake recipients and donations are excluded. Accounting qualification does not authorize withdrawal or vault forwarding.",
+      "sources": [
+        "contracts/config/420bet-capitalization-profit-waterfall-v1.json",
+        "contracts/src/bet/BetCustodyProfitEpochSources420.sol",
+        "contracts/src/bet/PokerSeatLedger420.sol",
+        "contracts/test/BetPokerSeatLedger53.t.sol",
+        ".github/workflows/420bet-poker-5a-3-level1.yml"
+      ]
+    },
+    {
+      "application": "420Bet",
+      "route": "Sportsbook funded tickets and operator collateral",
+      "classification": "excluded",
+      "trace": "Terminal stakes, payouts and collateral movements reconcile to operator-owned collateral and player credits. Operator gain is not protocol revenue. No approved protocol fee is introduced.",
+      "sources": [
+        "contracts/src/bet/BetCustodyProfitEpochSources420.sol",
+        "contracts/src/bet/sports/SportsFundedTickets420.sol",
+        "contracts/test/sports-5d4/SportsFundedTickets420.t.sol",
+        ".github/workflows/420bet-sports-5d4.yml"
+      ]
+    },
+    {
+      "application": "420Bet",
+      "route": "Tournament prize escrow and finalized fee basis",
+      "classification": "policy-exception",
+      "trace": "Prize and refund liabilities remain protected. Finalized development fee credits are counted separately from general retained profit; the adapter reconciles receipts, withdrawals and liabilities. Actual authenticated compensation forwarding remains unqualified.",
+      "sources": [
+        "contracts/src/bet/BetCustodyProfitEpochSources420.sol",
+        "contracts/src/bet/tournament/settlement/PokerTournamentFinanceState420.sol",
+        "contracts/src/bet/tournament/settlement/PokerTournamentPrizeModule420.sol",
+        "contracts/test/tournament-5c7/PokerTournamentPrizes420.t.sol"
+      ]
+    },
+    {
+      "application": "420Bet",
+      "route": "Fantasy compensation exclusion from general epoch",
+      "classification": "excluded",
+      "trace": "The pinned compensation vault reports cumulative forwarded Fantasy entry basis as both gross and separately routed basis; the general epoch excludes it exactly once. Existing per-pool compensation routes remain policy exceptions.",
+      "sources": [
+        "contracts/src/bet/BetFantasyProfitEpochSource420.sol",
+        "contracts/src/bet/BetGovernedProfitEpoch420.sol",
+        "contracts/test/BetGovernedProfitEpoch420.t.sol"
+      ]
+    },
+    {
+      "application": "420Bet",
+      "route": "Governed operating expenses",
+      "classification": "excluded",
+      "trace": "Executed casino-budget releases reduce the eligible basis; the pinned expense adapter reconciles executor-paid amounts to registry execution totals and rejects alternative unaccounted release paths.",
+      "sources": [
+        "contracts/src/bet/BetTreasuryExpenseEpochSource420.sol",
+        "contracts/test/TreasuryNativeVaultIntegration420.t.sol"
+      ]
+    },
+    {
+      "application": "420Bet",
       "route": "Casino-wide retained profit",
       "classification": "review-required",
-      "trace": "Reconcile bankroll, poker, sportsbook and shared pools against finalized eligible net profit. Account for separately forwarded Fantasy compensation once.",
+      "trace": "Per-asset epoch arithmetic and individual custody projections are implemented. Full same-asset production-source epoch reconciliation, including tournament and governed expenses, and exact-candidate evidence are still required; governed activation and distribution remain disabled.",
       "sources": [
-        "contracts/config/420bet-capitalization-profit-waterfall-v1.json"
+        "contracts/config/420bet-capitalization-profit-waterfall-v1.json",
+        "contracts/src/bet/BetGovernedProfitEpoch420.sol",
+        "contracts/src/bet/BetCustodyProfitEpochSources420.sol",
+        "contracts/test/BetGovernedProfitEpoch420.t.sol",
+        ".github/workflows/420bet-profit-accounting.yml"
       ]
     },
     {

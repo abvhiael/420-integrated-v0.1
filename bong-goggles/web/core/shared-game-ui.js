@@ -136,7 +136,7 @@ export function renderSharedGameScreen({game,screen='intro',view=null,labyrinthS
  // The 325-point Labyrinth has a separate private-seat schema and original
  // approved board; never render it on the standard 121-point leaf board.
  if(game.id==='labyrinth-cribbage')return '<div class="games-screen" data-game-screen="'+esc(screen)+'">'+
-  nav(game,screen)+renderLabyrinthScreen({screen,view:labyrinthState?.view??view,session:labyrinthState?.session??null,selection:labyrinthState?.selection??[],recoverable:labyrinthState?.recoverable??[],sessionError:labyrinthState?.error??null})+
+  nav(game,screen)+renderLabyrinthScreen({screen,view:labyrinthState?.view??view,session:labyrinthState?.session??null,selection:labyrinthState?.selection??[],recoverable:labyrinthState?.recoverable??[],sessionError:labyrinthState?.error??null,computerEnabled:game.status==='playable'&&labyrinthState?.computerEnabled===true})+
   (['history','rematch','results'].includes(screen)?renderLabyrinthSocial(labyrinthState?.social):'')+'</div>';
  const authorized=authorizedGameView(game,view);
  const screens={intro,rules,play,setup,table,results,history,rematch};

@@ -1,4 +1,4 @@
-// BC-1.7/1.8 real-service Labyrinth Cribbage adapter for the existing main-only
+// BC-2.8 real-service Labyrinth Cribbage adapter for the existing main-only
 // BC-0.12 live acceptance harness. Uses two independently authenticated
 // browser pages and ACTUAL server-owned rules; no fake responses, local
 // scoring, fabricated wins, or web wallet/wager authority.
@@ -10,7 +10,8 @@ import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
 import {setTimeout as delay} from 'node:timers/promises';
 
-const hash='9eed3af244d95dd1757b2ce82c1f66d85581a9b0656e0f36eba825cf8ddbc791';
+export const BC28_LABYRINTH_HASH='9eed3af244d95dd1757b2ce82c1f66d85581a9b0656e0f36eba825cf8ddbc791';
+const hash=BC28_LABYRINTH_HASH;
 const prefix='/social-api/v1/';
 const stages=new Set(['discard','cut','peg']);
 const allowedStates=new Set(['active','finished']);
@@ -18,7 +19,7 @@ const maxMoves=2200;
 const timeBudgetMs=45*60*1000;
 // BC-2.8 uses real 420ID cookies only from protected main dispatch. The
 // browser/service owns all scores, cards, outcomes and bot moves.
-const fail=m=>{throw Error('BC-1.7 real Labyrinth Cribbage acceptance: '+m)};
+const fail=m=>{throw Error('BC-2.8 real Labyrinth Cribbage acceptance: '+m)};
 const requireResponse=(r,status,path)=>{
  if(r?.status!==status)fail(path+' returned '+r?.status+' (expected '+status+')');
  if(r.data?.onChain!==false||r.data.wager!==false||r.data.rewards!==false)
@@ -27,24 +28,29 @@ const requireResponse=(r,status,path)=>{
 };
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const rid=id=>{if(!uuid.test(id))fail('unsafe UUID');return id};
-const current=(view,expectedGame='labyrinth-cribbage')=>{
+export const verifyBC28LabyrinthLiveView=(view,expectedGame='labyrinth-cribbage')=>{
  if(!view||!uuid.test(view.id)||!uuid.test(view.roomId)||
   view.gameId!==expectedGame||view.rulesVersion!=='v2.0'||view.rulesHash!==hash||
-  ![2,3,4].includes(view.seatCount)||!Number.isSafeInteger(view.sequence)||
+  view.seatCount!==2||!Number.isSafeInteger(view.sequence)||
   view.sequence<1||!allowedStates.has(view.status)||
   !Number.isInteger(view.viewerSeat)||view.viewerSeat<0||view.viewerSeat>=view.seatCount)
   fail('invalid server-signed game view');
  if(!view.privateView||view.privateView.seat!==view.viewerSeat||
   !Array.isArray(view.privateView.scores)||
-  view.privateView.scores.length!==view.seatCount)
+  view.privateView.scores.length!==view.seatCount||
+  view.privateView.variant!=='labyrinth-2p'||
+  !Array.isArray(view.privateView.hand)||
+  !view.privateView.hand.every(c=>Number.isSafeInteger(c)&&c>=0&&c<52)||
+  new Set(view.privateView.hand).size!==view.privateView.hand.length)
   fail('server private seat projection not verified');
  for(const field of ['deck','seed','opponentHand','allHands']){
   if(Object.hasOwn(view.privateView,field))fail('hidden '+field+' leaked from server');
  }
  return view;
 };
+const current=verifyBC28LabyrinthLiveView;
 const pip=c=>Math.min((c%13)+1,10);
-function legalMove(view){
+export function legalBC28LabyrinthMove(view){
  const s=view.privateView;
  if(!stages.has(s.phase))fail('unrecognized game phase '+s.phase);
  const cards=s.hand;
@@ -60,6 +66,7 @@ function legalMove(view){
  const playable=cards.find(c=>pip(c)+s.pegCount<=31);
  return playable===undefined?{type:'go'}:{type:'play',card:playable};
 }
+const legalMove=legalBC28LabyrinthMove;
 async function get(io,who,id){
  const data=requireResponse(await io.request(io.pages[who],prefix+'classic-sessions/'+rid(id)),200,'session GET');
  return current(data.session);

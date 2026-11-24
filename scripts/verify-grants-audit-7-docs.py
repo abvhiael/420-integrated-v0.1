@@ -109,6 +109,7 @@ for token in [
 ]:
     need(token in arch,f"architecture missing Grants canonical token: {token}")
 
+need(cfg.get("status")=="REPOSITORY_QUALIFIED_LIVE_TESTNET_DEFERRED", "Grants repository qualification status drift")
 need(cfg.get("schema")=="420-grants-genesis-v1","Grants config schema drift")
 need(cfg.get("class")=="GENESIS_IMPLEMENTATION_PROTOCOL","Grants classification drift")
 need(cfg.get("publicStandaloneApplication") is False,"Grants standalone-app classification drift")

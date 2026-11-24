@@ -29,3 +29,22 @@ test('BC-3.5 validate inbox and bind challenge/rematch to authenticated consent'
  assert.match(posts[1].url,/\/rematch$/);
  user=null;await c.refresh();assert.equal(c.state.history,null);assert.equal(c.state.friends.length,0);
 });
+
+test('BC-3.6 verified recent statistics, notifications and conflicting history rejection',()=>{
+ const draw={...match,id:'55555555-5555-4555-8555-555555555555',winnerSeat:null,chessReason:'agreed-draw'};
+ const loss={...match,id:'66666666-6666-4666-8666-666666666666',winnerSeat:1,chessReason:'checkmate'};
+ const active={...match,id:'77777777-7777-4777-8777-777777777777',status:'active',winnerSeat:null,turnSeat:0};
+ const stats={sampleSize:3,completed:3,wins:1,losses:1,draws:1};
+ const history={...hist,matches:[{...match,chessReason:'resigned'},draw,loss,active],stats};
+ const parsed=verifyChessHistory(envelope({history}));
+ assert.deepEqual(parsed.stats,stats);
+ const html=renderChessSocial({status:'ready',viewer:actor,friends:[{subject:peer,displayName:'Friend'}],history:parsed});
+ assert.match(html,/3 completed · 1 wins · 1 losses · 1 draws/);
+ assert.match(html,/1 pending invitations · 1 awaiting your turn/);
+ assert.match(html,/checkmate/);assert.match(html,/My 420ID profile/);
+ assert.equal(verifyChessHistory(envelope({history:{...history,stats:{...stats,wins:2}}})),null);
+ assert.equal(verifyChessHistory(envelope({history:{...history,matches:[match,match]}})),null);
+ assert.equal(verifyChessHistory(envelope({history:{...history,matches:[null]}})),null);
+ assert.equal(verifyChessHistory(envelope({history:{...history,matches:[{...active,winnerSeat:1}]}})),null);
+ assert.doesNotMatch(renderChessSocial({status:'guest',history:parsed}),/3 completed/);
+});

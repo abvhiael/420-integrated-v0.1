@@ -17,12 +17,14 @@ type ClassicHistoryMatch struct {
  ViewerSeat int `json:"viewerSeat"`
  Scores []int64 `json:"scores"`
  VariantID string `json:"variantId,omitempty"`
+ ChessReason string `json:"chessReason,omitempty"`
 }
 type ClassicHistoryStats struct {
  SampleSize int `json:"sampleSize"`
  Completed int `json:"completed"`
  Wins int `json:"wins"`
  Losses int `json:"losses"`
+ Draws *int `json:"draws,omitempty"`
 }
 type ClassicPendingInvitation struct {
  RoomID string `json:"roomId"`
@@ -47,7 +49,13 @@ func (s *ClassicSessions) History(ctx context.Context,viewer string)(ClassicHist
 func (s *ClassicSessions) HistoryForGame(ctx context.Context,viewer,game string)(ClassicHistory,error){
  out:=ClassicHistory{Matches:[]ClassicHistoryMatch{},Invitations:[]ClassicPendingInvitation{}}
  if !uuid.MatchString(viewer)||(game!="cribbage"&&game!="labyrinth-cribbage"&&game!="chess"){return out,ErrInvalid}
- list,e:=s.List(ctx,viewer);if e!=nil{return out,e}
+ var list []ClassicSession
+ var e error
+ if game=="chess"{
+  draws:=0;out.Stats.Draws=&draws
+  list,e=s.listChessHistory(ctx,viewer)
+ }else{list,e=s.List(ctx,viewer)}
+ if e!=nil{return out,e}
  for _,summary:=range list{
   if summary.GameID!=game{continue}
   if len(out.Matches)==20{break}
@@ -57,6 +65,7 @@ func (s *ClassicSessions) HistoryForGame(ctx context.Context,viewer,game string)
   var visible struct{
    Scores []int64 `json:"scores"`
    Variant string `json:"variant"`
+   Reason string `json:"reason"`
   }
   if json.Unmarshal(v.PrivateView,&visible)!=nil||len(visible.Scores)!=v.SeatCount{
    return ClassicHistory{},ErrUnavailable
@@ -73,7 +82,17 @@ func (s *ClassicSessions) HistoryForGame(ctx context.Context,viewer,game string)
    }
    variantID=visible.Variant
   }
-  out.Matches=append(out.Matches,ClassicHistoryMatch{ClassicSession:v.ClassicSession,ViewerSeat:v.ViewerSeat,Scores:scores,VariantID:variantID})
+  reason:=""
+  if game=="chess"{
+   if v.SeatCount!=2||v.ViewerSeat<0||v.ViewerSeat>1||v.Status!="active"&&v.Status!="finished"{return ClassicHistory{},ErrUnavailable}
+   reason=visible.Reason
+   if v.Status=="finished"{
+    if reason==""||len(reason)>40||v.TurnSeat!=nil{return ClassicHistory{},ErrUnavailable}
+    expected,err:=chessResultScores(v.WinnerSeat);if err!=nil||len(expected)!=2||scores[0]!=expected[0]||scores[1]!=expected[1]{return ClassicHistory{},ErrUnavailable}
+    if v.WinnerSeat==nil{*out.Stats.Draws++}
+   }else if reason!=""||v.WinnerSeat!=nil||scores[0]!=0||scores[1]!=0{return ClassicHistory{},ErrUnavailable}
+  }
+  out.Matches=append(out.Matches,ClassicHistoryMatch{ClassicSession:v.ClassicSession,ViewerSeat:v.ViewerSeat,Scores:scores,VariantID:variantID,ChessReason:reason})
   if v.Status=="active"{continue}
   out.Stats.SampleSize++
   if v.Status=="finished" {out.Stats.Completed++}
@@ -298,4 +317,20 @@ func (s *ClassicSessions) Rematch(ctx context.Context,viewer,oldID,requestID str
  if e!=nil{return empty,e}
  if e=tx.Commit();e!=nil{return empty,e}
  return s.Rooms.Get(ctx,viewer,id)
+}
+
+ // Select Chess before applying the history bound, so unrelated games cannot
+ // displace the authenticated account's recent Chess matches.
+func (s *ClassicSessions) listChessHistory(ctx context.Context,viewer string)([]ClassicSession,error){
+ rows,e:=s.Store.DB.QueryContext(ctx,"SELECT "+classicSessionFields+" FROM bg_account_social.classic_sessions sess "+
+ "WHERE sess.game_id='chess' AND EXISTS(SELECT 1 FROM bg_account_social.classic_room_seats player WHERE player.room_id=sess.room_id "+
+ "AND player.controller='human' AND player.subject=$1) "+
+ "AND NOT EXISTS(SELECT 1 FROM bg_account_social.classic_room_seats opponent JOIN bg_account_social.blocks b "+
+ "ON (b.blocker=$1 AND b.blocked=opponent.subject) OR (b.blocked=$1 AND b.blocker=opponent.subject) "+
+ "WHERE opponent.room_id=sess.room_id AND opponent.subject IS NOT NULL) "+
+ "ORDER BY sess.updated_at DESC,sess.id DESC LIMIT 20",viewer)
+ if e!=nil{return nil,e};defer rows.Close()
+ out:=[]ClassicSession{}
+ for rows.Next(){r,e:=scanClassicSession(rows);if e!=nil{return nil,e};out=append(out,r.ClassicSession)}
+ return out,rows.Err()
 }

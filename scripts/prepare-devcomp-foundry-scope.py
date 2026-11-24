@@ -28,12 +28,14 @@ ROOT_FILES = (
 IMPORT = re.compile(r"""\bimport\s+(?:[^;]*?\bfrom\s+)?["']([^"']+)["']\s*;""")
 
 
-def stage(output: Path) -> dict[str, str]:
+def stage(output: Path, *, include_exchange: bool = False) -> dict[str, str]:
     source = CONTRACTS.resolve()
     dest = output.resolve()
     if dest == source or dest.is_relative_to(source):
         raise ValueError("isolated qualification output must not overwrite the repository")
     pending = [source / name for name in ROOT_FILES]
+    if include_exchange:
+        pending.append(source / "test/ExchangeFeeSettlement420.t.sol")
     seen: set[Path] = set()
     while pending:
         path = pending.pop().resolve()
@@ -60,5 +62,6 @@ def stage(output: Path) -> dict[str, str]:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--include-exchange", action="store_true")
     args = parser.parse_args()
-    print(json.dumps(stage(args.output), indent=2, sort_keys=True))
+    print(json.dumps(stage(args.output, include_exchange=args.include_exchange), indent=2, sort_keys=True))

@@ -8,6 +8,8 @@ import zipfile
 import os
 import subprocess
 import urllib.request
+import urllib.error
+import urllib.parse
 
 SOURCE = "0bf8aede5ed1675493017d5e054f972abcede24c"
 subprocess.run(["git", "fetch", "--no-tags", "origin", SOURCE], check=True)
@@ -93,8 +95,36 @@ for ident, (name, digest, files) in expected.items():
         f"https://api.github.com/repos/{repo}/actions/artifacts/{ident}/zip",
         headers={"Authorization": "Bearer " + os.environ["GH_TOKEN"],
                  "Accept": "application/vnd.github+json"})
-    with urllib.request.urlopen(req, timeout=60) as response:
-        raw = response.read()
+    # GitHub returns a short-lived signed storage URL. Authenticate only the
+    # GitHub API request; forwarding its Bearer header to storage causes 401.
+    class NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            return None
+
+    opener = urllib.request.build_opener(NoRedirect())
+    try:
+        with opener.open(req, timeout=60) as response:
+            raw = response.read()
+    except urllib.error.HTTPError as error:
+        if error.code not in (301, 302, 303, 307, 308):
+            raise
+        location = error.headers.get("Location")
+        error.close()
+        if not location:
+            raise RuntimeError("artifact redirect missing signed URL") from None
+        target = urllib.parse.urlsplit(location)
+        if target.scheme != "https" or not target.hostname or target.username or target.password:
+            raise RuntimeError("invalid artifact storage redirect") from None
+        # New request, with no GitHub credentials or inherited headers.
+        signed_request = urllib.request.Request(location)
+        try:
+            with opener.open(signed_request, timeout=60) as response:
+                raw = response.read()
+        except urllib.error.HTTPError as storage_error:
+            status = storage_error.code
+            storage_error.close()
+            # Never print the signed URL or its credential-bearing query.
+            raise RuntimeError(f"artifact storage download failed: HTTP {status}") from None
     assert hashlib.sha256(raw).hexdigest() == digest
     with zipfile.ZipFile(io.BytesIO(raw)) as archive:
         assert sorted(archive.namelist()) == ["qualified-sha.txt", "source-sha256.txt"]

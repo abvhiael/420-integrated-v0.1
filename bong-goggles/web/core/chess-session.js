@@ -12,7 +12,7 @@ export function normalizeChessSession(r,id){
  !['active','finished'].includes(s.status)||Object.keys(v).length!==fields.length||!fields.every(k=>Object.hasOwn(v,k))||
  v.gameId!=='chess'||v.ruleset!=='bc-chess-standard@1.1.0'||v.seat!==s.viewerSeat||v.color!==['white','black'][v.seat]||
  v.whiteSeat!==0||v.blackSeat!==1||typeof v.board!=='string'||!/^[.PNBRQKpnbrqk]{64}$/.test(v.board)||
- v.board.split('K').length!==2||v.board.split('k').length!==2||![0,1].includes(v.turn)||typeof v.check!=='boolean'||
+ v.board.split('K').length!==2||v.board.split('k').length!==2||![0,1].includes(v.turn)&&!v.terminal||typeof v.check!=='boolean'||
  !Number.isInteger(v.round)||v.round<1||typeof v.lastSAN!=='string'||v.lastSAN.length>16||!(v.lastMove===''||chessMove(v.lastMove))||
  v.terminal!==(s.status==='finished')||(!v.terminal&&s.turnSeat!==v.turn)||(v.terminal&&(s.turnSeat!==null||s.winnerSeat!==v.winner))||
  ![null,0,1].includes(s.winnerSeat)||typeof v.reason!=='string'||v.reason.length>40||

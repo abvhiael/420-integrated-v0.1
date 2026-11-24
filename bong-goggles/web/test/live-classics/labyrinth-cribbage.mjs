@@ -43,7 +43,7 @@ export const verifyBC28LabyrinthLiveView=(view,expectedGame='labyrinth-cribbage'
   !view.privateView.hand.every(c=>Number.isSafeInteger(c)&&c>=0&&c<52)||
   new Set(view.privateView.hand).size!==view.privateView.hand.length)
   fail('server private seat projection not verified');
- for(const field of ['deck','seed','opponentHand','allHands']){
+ for(const field of ['deck','seed','opponentHand','allHands','crib','kept','engineState','initialState']){
   if(Object.hasOwn(view.privateView,field))fail('hidden '+field+' leaked from server');
  }
  return view;

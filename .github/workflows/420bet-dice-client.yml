@@ -1,16 +1,23 @@
 name: 420Bet Dice Client
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'clients/420bet-dice-v1/**'
-      - 'contracts/src/bet/**'
+      - 'contracts/src/**'
+      - 'contracts/foundry.toml'
+      - 'contracts/remappings.txt'
+      - 'contracts/lib/**'
       - 'testnet/apps/420bet/**'
       - '.github/workflows/420bet-dice-client.yml'
   pull_request:
     paths:
       - 'clients/420bet-dice-v1/**'
-      - 'contracts/src/bet/**'
+      - 'contracts/src/**'
+      - 'contracts/foundry.toml'
+      - 'contracts/remappings.txt'
+      - 'contracts/lib/**'
       - 'testnet/apps/420bet/**'
       - '.github/workflows/420bet-dice-client.yml'
 
@@ -22,6 +29,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - uses: actions/setup-node@v4
         with:
           node-version: '24.20.0'

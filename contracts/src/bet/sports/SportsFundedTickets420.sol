@@ -105,6 +105,17 @@ contract SportsFundedTickets420 is SportsAuthority420 {
     mapping(address => uint256) public assetPendingStake;
     mapping(address => uint256) public assetPlayerCredit;
     // Cumulative terminal cash-flow counters; collateral remains operator property.
+    bytes32 public constant BIND_CASINO_OPERATOR = keccak256("BET_SPORT_BIND_CASINO_OPERATOR");
+    bytes32 public casinoOperatorId;
+    address public casinoOperatorAccount;
+    bool public collateralEverDeposited;
+    mapping(address => uint256) public casinoSettledGains;
+    mapping(address => uint256) public casinoSettledLosses;
+    mapping(address => uint256) public casinoCollateral;
+    mapping(address => uint256) public casinoDeposits;
+    mapping(address => uint256) public casinoWithdrawals;
+    mapping(address => uint256) public casinoReserved;
+    event CasinoOperatorBound(bytes32 indexed operatorId, address indexed account);
     mapping(address => uint256) public settledStakes;
     mapping(address => uint256) public settledPayouts;
     mapping(address => uint256) public collateralDeposited;
@@ -150,13 +161,31 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         return markets.get(marketId).config.asset;
     }
 
+    function bindCasinoOperator(bytes32 id) external {
+        _auth(BIND_CASINO_OPERATOR, bytes32(0));
+        if (casinoOperatorId != bytes32(0) || collateralEverDeposited || fundedCount != 0
+            || id != markets.operators().CASINO_OPERATOR_ID() || !markets.operators().isActive(id)) revert State();
+        casinoOperatorId = id;
+        casinoOperatorAccount = markets.operators().getOperator(id).operatorAccount;
+        emit CasinoOperatorBound(id, casinoOperatorAccount);
+    }
+    function _casinoMarket(bytes32 marketId) private view returns (bool) {
+        return casinoOperatorId != bytes32(0) && markets.get(marketId).config.operatorId == casinoOperatorId
+            && _operator(marketId) == casinoOperatorAccount;
+    }
+
     function deposit(bytes32 marketId, uint256 amount) external guarded {
         if (_operator(marketId) != msg.sender || amount == 0) revert Unauthorized();
         address asset = _asset(marketId);
         assetLiability[asset] += amount;
         assetCollateral[asset] += amount;
         collateral[marketId] += amount;
+        collateralEverDeposited = true;
         collateralDeposited[asset] += amount;
+        if (_casinoMarket(marketId)) {
+            casinoDeposits[asset] += amount;
+            casinoCollateral[asset] += amount;
+        }
         _receive(asset, msg.sender, amount);
         emit CollateralAdded(marketId, msg.sender, amount);
     }
@@ -168,6 +197,10 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         assetCollateral[asset] -= amount;
         assetLiability[asset] -= amount;
         collateralWithdrawn[asset] += amount;
+        if (_casinoMarket(marketId)) {
+            casinoCollateral[asset] -= amount;
+            casinoWithdrawals[asset] += amount;
+        }
         _send(asset, msg.sender, amount);
         emit CollateralRemoved(marketId, msg.sender, amount);
     }
@@ -200,6 +233,7 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         consumedIntent[intent] = true;
         ++fundedCount;
         assetProfitExposure[riskAsset] += profit;
+        if (_casinoMarket(offer.marketId)) casinoReserved[riskAsset] += profit;
         if (group != bytes32(0)) riskGroupOutstanding[group] += profit;
         reserved[offer.marketId] += profit;
         pendingStake[offer.marketId] += offer.stake;
@@ -349,6 +383,16 @@ contract SportsFundedTickets420 is SportsAuthority420 {
         assetPendingStake[asset] -= t.stake;
         settledStakes[asset] += t.stake;
         settledPayouts[asset] += payout;
+        if (_casinoMarket(t.marketId)) {
+            casinoReserved[asset] -= t.profit;
+            if (payout > t.stake) {
+                casinoSettledLosses[asset] += payout - t.stake;
+                casinoCollateral[asset] -= payout - t.stake;
+            } else {
+                casinoSettledGains[asset] += t.stake - payout;
+                casinoCollateral[asset] += t.stake - payout;
+            }
+        }
         marketProfitExposure[t.marketId] -= t.profit;
         selectionProfitExposure[t.marketId][t.selection] -= t.profit;
         playerExposure[t.marketId][t.player] -= t.stake;

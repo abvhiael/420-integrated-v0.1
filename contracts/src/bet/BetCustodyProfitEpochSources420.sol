@@ -30,6 +30,12 @@ interface ISportsProfitLedger420 {
     function assetPendingStake(address) external view returns(uint256);
     function assetPlayerCredit(address) external view returns(uint256);
     function assetProfitExposure(address) external view returns(uint256);
+    function casinoSettledGains(address) external view returns(uint256);
+    function casinoSettledLosses(address) external view returns(uint256);
+    function casinoCollateral(address) external view returns(uint256);
+    function casinoDeposits(address) external view returns(uint256);
+    function casinoWithdrawals(address) external view returns(uint256);
+    function casinoReserved(address) external view returns(uint256);
     function settledStakes(address) external view returns(uint256);
     function settledPayouts(address) external view returns(uint256);
     function collateralDeposited(address) external view returns(uint256);
@@ -152,7 +158,15 @@ contract BetSportsbookProfitEpochSource420 is BetPinnedCustodySource420 {
             &&l.assetProfitExposure(asset)<=collateral
             &&l.collateralDeposited(asset)+l.settledStakes(asset)
                 ==l.collateralWithdrawn(asset)+l.settledPayouts(asset)+collateral;
-        // The registered market operator owns all collateral and net results.
-        // No approved protocol fee exists here; do not seize or count it.
+        t.retainedReceipts=l.casinoSettledGains(asset);
+        t.losses=l.casinoSettledLosses(asset);
+        uint256 owned=l.casinoCollateral(asset);
+        uint256 deposits=l.casinoDeposits(asset);
+        uint256 reserved=l.casinoReserved(asset);
+        t.reconciled=t.reconciled && owned<=collateral && reserved<=owned
+            && deposits+t.retainedReceipts==l.casinoWithdrawals(asset)+t.losses+owned;
+        // Only unencumbered casino-owned gains above operating collateral are free.
+        uint256 protected=deposits+reserved;
+        if(t.reconciled&&owned>protected)t.freeProtocolCash=owned-protected;
     }
 }

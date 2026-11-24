@@ -7,6 +7,8 @@ import (
  "encoding/json"
  "testing"
  "sync"
+ "runtime"
+ "crypto/sha256"
 )
 
 func TestBC33PostgresHumanBotRecovery(t *testing.T){
@@ -39,6 +41,12 @@ func TestBC33PostgresHumanBotRecovery(t *testing.T){
   if e=restarted.EnableBots(policies);e!=nil{t.Fatal(e)}
   if e=restarted.VerifyRules(ctx,match.ID);e!=nil{t.Fatal(e)}
   old:=h.Sessions
+  // Contend for a CPU while preserving the original concurrent-worker assertions.
+  stop:=make(chan struct{});var load sync.WaitGroup
+  if level=="hard"{
+   load.Add(1);go func(){defer load.Done();var value [32]byte;for{select{case <-stop:return;default:for j:=0;j<128;j++{value=sha256.Sum256(value[:])};runtime.Gosched()}}}()
+  }
+  defer func(){close(stop);load.Wait()}()
   var wg sync.WaitGroup
   results:=make(chan bool,2);errs:=make(chan error,2)
   for _,worker:=range []*ClassicSessions{old,restarted}{

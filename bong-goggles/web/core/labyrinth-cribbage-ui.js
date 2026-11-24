@@ -132,7 +132,7 @@ const ruleContent='<p><strong>325 points to win.</strong> Six retained cards and
  'seven-card show. Hands flush only with all six matching suits (six points), plus one '+
  'for a matching starter; a crib flush requires all seven cards matching (seven points). '+
  'Automatic pegging and counting, last card, Go and heels apply. First award to 325 wins.</p>';
-const previewSetup='<fieldset disabled aria-disabled="true"><legend>Game configuration · release gated</legend>'+
+const previewSetup='<fieldset disabled aria-disabled="true"><legend>Game configuration · configure seats in multiplayer rooms</legend>'+
  '<label>Players <select name="players"><option>2 players</option><option>3 players</option><option selected>4 players</option></select></label>'+
  '<label>Four-player format <select name="format"><option selected>Partnerships (default)</option><option>Individual free-for-all</option></select></label>'+
  '<label>Computer strength <select name="difficulty"><option>Easy</option><option selected>Medium</option><option>Hard</option></select></label>'+
@@ -157,11 +157,11 @@ export function renderLabyrinthScreen({screen='intro',view=null,session=null,sel
   '</section>':'';
  const outcome=ended?'<p role="status">Match ended: '+esc(session.finishedReason||session.status)+
   (session.winnerSeat===null?' · no declared winner':' · winner seat '+(session.winnerSeat+1))+'</p>':'';
- if(screen==='intro')return start+'<p>Browse the approved board and rules. Live Play remains gated.</p>'+error+recovery+board+'</section>';
+ if(screen==='intro')return start+'<p>Browse the approved board and rules. Create or join a room to play.</p>'+error+recovery+board+'</section>';
  if(screen==='rules')return start+'<section aria-label="325-point Labyrinth rules">'+ruleContent+'</section>'+board+'</section>';
  if(screen==='setup')return start+'<form class="labyrinth-setup">'+previewSetup+'</form>'+board+'</section>';
  if(screen==='play')return start+error+recovery+outcome+matchControls+(v?renderLabyrinthTable({view:v,selection}):
-  '<p role="status">No verified 420ID Labyrinth session. Do not expose a playable table or private cards.</p>')+'</section>';
+  '<p role="status">No active Labyrinth session. Create or join a multiplayer room. </p>')+'</section>';
  if(screen==='table')return start+error+recovery+outcome+matchControls+(v?renderLabyrinthTable({view:v,selection}):
   '<p role="status">A server-authorized Labyrinth session is required to display a private hand.</p>')+'</section>';
  if(screen==='results')return start+error+recovery+outcome+matchControls+(ended?

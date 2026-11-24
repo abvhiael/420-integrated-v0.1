@@ -9,6 +9,7 @@ on:
       - 'contracts/config/bet/sports-5d6-pretestnet-manifest.v1.json'
       - 'scripts/verify-sports-5d6-deployment.py'
       - '.github/workflows/420bet-sports-5d6-hardening.yml'
+      - 'scripts/bet/run-scoped-foundry.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -32,7 +33,7 @@ jobs:
         run: python3 -m unittest discover -s scripts -p 'test_verify_sports_5d6_deployment.py'
       - name: Bounded Oracle hardening, real-router integration and inherited regression
         working-directory: contracts
-        run: forge test --match-path 'test/sports-5d6/*.t.sol' -vvv
+        run: python3 ../scripts/bet/run-scoped-foundry.py 'test/sports-5d6/*.t.sol' --match-path 'test/sports-5d6/*.t.sol' -vvv
       - name: Assert production gate rejects incomplete prelaunch manifest
         shell: bash
         run: |

@@ -7,6 +7,7 @@ on:
       - 'contracts/src/bet/sports/**'
       - 'contracts/test/sports-5d5/**'
       - '.github/workflows/420bet-sports-5d5.yml'
+      - 'scripts/bet/run-scoped-foundry.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -26,4 +27,4 @@ jobs:
           version: v1.8.6
       - name: Bounded 5D.5 and inherited funded-ticket adversarial tests
         working-directory: contracts
-        run: forge test --match-contract SportsMarketLifecycle420Test -vvv
+        run: python3 ../scripts/bet/run-scoped-foundry.py 'test/sports-5d5/SportsMarketLifecycle420.t.sol' --match-contract SportsMarketLifecycle420Test -vvv

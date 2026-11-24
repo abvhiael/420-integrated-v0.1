@@ -7,6 +7,7 @@ on:
       - 'contracts/src/bet/sports/**'
       - '.github/workflows/420bet-sports-5d9-level2.yml'
       - '.github/workflows/reusable-scoped-foundry.yml'
+      - 'scripts/bet/run-scoped-foundry.py'
   workflow_dispatch:
 permissions:
   contents: read

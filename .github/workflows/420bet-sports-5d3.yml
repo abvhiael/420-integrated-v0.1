@@ -8,6 +8,7 @@ on:
       - 'contracts/test/sports-5d3/**'
       - 'contracts/test/sports-5d2/SportsRegistry420.t.sol'
       - '.github/workflows/420bet-sports-5d3.yml'
+      - 'scripts/bet/run-scoped-foundry.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -27,4 +28,4 @@ jobs:
           version: v1.8.6
       - name: Run bounded odds qualification and inherited integration fixtures
         working-directory: contracts
-        run: forge test --match-contract SportsOddsIngestion420Test -vvv
+        run: python3 ../scripts/bet/run-scoped-foundry.py 'test/sports-5d3/SportsOddsIngestion420.t.sol' --match-contract SportsOddsIngestion420Test -vvv

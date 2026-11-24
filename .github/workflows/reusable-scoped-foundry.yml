@@ -37,4 +37,4 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          forge test --match-path "$MATCH_PATH" -vv
+          python3 ../scripts/bet/run-scoped-foundry.py "$MATCH_PATH" --match-path "$MATCH_PATH" -vv

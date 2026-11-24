@@ -31,6 +31,7 @@ class FundedSeasons(FundedFormats):
         self.transactions=self.deploy('FantasySeasonTransactions420',self.data.address,self.rosters.address)
         self.actions=self.deploy('FantasySeasonActions420',self.data.address,self.rosters.address,self.admission.address,self.transactions.address)
         self.season=self.deploy('FantasySeasonEscrow420',self.data.address,self.rosters.address,self.seasonscores.address,self.disputes.address,self.admission.address,self.randomrouter.address,self.vault.address,self.actions.address)
+        self.grant_fantasy_source(self.season)
         self.grant(self.admin,k256(b'BET_FANTASY_BIND_SEASON_HOST.V1'),self.auth.functions.scopeGlobal().call())
         for module in (self.data,self.rosters,self.transactions,self.actions):self.tx(module.functions.bindHost(self.season.address))
         self.grant(self.admin,self.season.functions.CREATE().call(),self.auth.functions.scopeGlobal().call())
@@ -225,6 +226,13 @@ class FundedSeasons(FundedFormats):
         ranking=contract(self.w3,self.build,'FantasyRankingBook420',self.season.functions.rankings().call());self.tx(ranking.functions.walk(id,1,64));self.tx(ranking.functions.allocate(id,1,64))
         self.tx(self.season.functions.publishFinal(id));self.tx(self.season.functions.settle(id))
         for m in range(1,5):self.tx(self.season.functions.collect(id,m));self.reject(c['label']+' duplicate final claim',self.season.functions.collect(id,m))
+        fee = 3 * c['stake'] * c['users'] // 100
+        if fee:
+            developer = self.accounts[8]
+            balance_before = self.token.functions.balanceOf(developer).call()
+            self.tx(self.season.functions.forwardDevelopment())
+            if self.token.functions.balanceOf(developer).call() - balance_before != fee:
+                raise AssertionError('independent per-season developer delivery mismatch '+c['label'])
         self.outcomes.append({'case':c['label'],'mode':c['mode'],'users':4,'weeklyCanonicalFinality':True,'randomnessRequest':'0x'+c['request'].hex(),'pool':'0x'+id.hex()});c['custodian'].close()
 
     def collect_refunds(self,c,reason):

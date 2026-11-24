@@ -93,8 +93,28 @@ def replay(text):
     fund_addresses=re.findall(r"0x[0-9a-fA-F]{40}\b",fund_line)
     assert len(fund_addresses)==2
     fund_beneficiary=fund_addresses[1]
-    forwarded=re.findall(r"emit Withdrawn\(beneficiary: (0x[0-9a-fA-F]{40}), amount: (\d+)\)",text)
-    assert len(forwarded)==1 and forwarded[0][0].lower()==fund_beneficiary.lower() and int(forwarded[0][1])==fee
+    native_asset = "0x" + "00" * 20
+    policy = k256(b"420/REVENUE/POLICY/BET_FANTASY_ENTRY_V1")
+    app = k256(b"420/BET/FANTASY/APPLICATION/V1")
+    gross = entry_fee * len(scores)
+    reference = k256(encode(["bytes32", "address", "bytes32", "uint256"], [policy, native_asset, pool, gross]))
+    contribution_id = k256(encode(
+        ["string", "address", "bytes32", "bytes32"],
+        ["420/REVENUE/DEVELOPMENT_COMPENSATION/CONTRIBUTION/V1", engine, app, reference]
+    ))
+    forwarded = only(re.findall(
+        r"emit DevelopmentCompensationForwarded\(contributionId: (0x[0-9a-f]{64}), "
+        r"sourceApplicationId: (0x[0-9a-f]{64}), revenueRef: (0x[0-9a-f]{64}), "
+        r"source: (?:[^,]*?\[)?(0x[0-9a-f]{40})\]?, asset: (0x[0-9a-f]{40}), "
+        r"beneficiary: (0x[0-9a-f]{40}), grossProtocolRevenue: (\d+), "
+        r"compensationBps: (\d+), compensationAmount: (\d+), policyRef: (0x[0-9a-f]{64})\)",
+        text, re.I
+    ), "vault contribution")
+    expected = (
+        "0x" + contribution_id.hex(), "0x" + app.hex(), "0x" + reference.hex(), engine,
+        native_asset, fund_beneficiary, str(gross), "300", str(fee), "0x" + policy.hex()
+    )
+    assert tuple(field.lower() for field in forwarded) == tuple(field.lower() for field in expected)
     domain = k256(b"420.FANTASY.RANKING.V1")
     rank_hash = k256(encode(["bytes32", "bytes32", "uint64", "uint64"], [domain, pool, 1, len(scores)]))
     payout_hash = k256(encode(["bytes32", "bytes32", "uint64", "uint256", "uint16[]"], [domain, pool, 1, prize, weights]))

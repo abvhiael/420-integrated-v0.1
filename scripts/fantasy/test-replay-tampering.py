@@ -61,8 +61,8 @@ def run(trace):
     scenarios["wrong_chain_context"] = re.sub(r"chainId: 31337", "chainId: 420", trace, count=1)
     scenarios["wrong_entry_fee"] = trace.replace("paid: true, fee: 100,", "paid: true, fee: 101,", 1)
     scenarios["missing_admission_evidence"] = "\n".join(line for line in trace.splitlines() if "emit EntryAccepted(" not in line)
-    scenarios["wrong_development_amount"]=trace.replace("amount: 9)","amount: 8)",1)
-    scenarios["missing_development_transfer"]="\n".join(line for line in trace.splitlines() if "emit Withdrawn(" not in line)
+    scenarios["wrong_development_amount"]=trace.replace("compensationAmount: 9,","compensationAmount: 8,",1)
+    scenarios["missing_development_transfer"]="\n".join(line for line in trace.splitlines() if "emit DevelopmentCompensationForwarded(" not in line)
     rejected = []
     for name, altered in scenarios.items():
         if altered == trace:

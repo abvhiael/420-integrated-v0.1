@@ -5,13 +5,13 @@
     "contracts/src/bet/BetAuthorization420.sol": "984e7bef82674a1f1b9c5a303cb90ede07d7619ae7f49664dd88f42147cf7f96",
     "contracts/src/bet/BetIds420.sol": "578e3ef0b71336be6030452defed6e26824beb8e268e420c2db89c407eccfab8",
     "contracts/src/bet/BetTypes420.sol": "f4feff47fe44c67ff0d0305a95d2e8063e78dc768140041234b484985bea741e",
-    "contracts/src/bet/fantasy/FantasyAdmission420.sol": "29233f40a5b6aecc43d3afa9e4b71a4e0055d792be915bb03f8a14dd0f41324f",
-    "contracts/src/bet/fantasy/FantasyContestEngine420.sol": "e6b74663219cdf3432113db84152c3defa53bf43adcef9537e58ddc038367608",
-    "contracts/src/bet/fantasy/FantasyDisputeController420.sol": "c6f07275ad8b7843eae991d6ed48eb506959ab939402603a221441fadcf68855",
+    "contracts/src/bet/fantasy/FantasyAdmission420.sol": "77899c8b082bb69e4265a5e3abff4ad738586c2d3eb253b29385c98fa08d4749",
+    "contracts/src/bet/fantasy/FantasyContestEngine420.sol": "7ea986b9f8b467d08a4244456b968b41ba4e1b843adcc342b08cfc0d5df82fb9",
+    "contracts/src/bet/fantasy/FantasyDisputeController420.sol": "0d7673a3612e9b470fac2b192200d9308a0a3aa5fdfc43c91e8064003aa63953",
     "contracts/src/bet/fantasy/FantasyNHLScoring420.sol": "d3e4bb3a34fa00d1fd9409c7d933d052d9325b80c6816a64c7c9920fc778e269",
     "contracts/src/bet/fantasy/FantasyPayoutPolicy420.sol": "3414f49e3f158f89def9c4929615f98adbeadb990523cbea4eb38a9b62406530",
     "contracts/src/bet/fantasy/FantasyRankingBook420.sol": "f9e651b7edec826e81ccc8352ae3408da78ff5f88959ddab893564416e7e21d8",
-    "contracts/src/bet/fantasy/FantasySlateBook420.sol": "1007ffa2b5946c99fdbe6202e4c87114668a41d357e03f6f6eabced5cf0e6b4a",
+    "contracts/src/bet/fantasy/FantasySlateBook420.sol": "e920edfda93494edc87f3bef3e1b9ef011f2efe3f891b258b37abf4c322f2592",
     "contracts/src/bet/fantasy/FantasyTypes420.sol": "c9fe9a5df74fc931a1ad4f838a332c32e65314c2444631243b4f3e822429f068",
     "contracts/src/bet/fantasy/IFantasyDisputeHost420.sol": "09b9bd98ef9888a66a1aa8648d809ee26dd407d31684f362d1196ed1b2834740",
     "contracts/src/interfaces/I420System.sol": "02e1ef2bec417289bc13c53c3c7453b132442be6932162683099c301f624ed02",
@@ -20,7 +20,7 @@
     "contracts/src/interfaces/genesis/IIdentityCredential420.sol": "74f96b43758ee97d3124e112d669e9ba9bccf9ce63be1e6c7dee8e1948f4f978",
     "contracts/src/interfaces/genesis/Types420.sol": "bee557da20b6ab622fc2e9cb779c27bb9efecfb9f7bc5d73f646446bab17f5ff",
     "contracts/src/revenue/DevelopmentCompensationIds420.sol": "5a7c4b05901c16194fc84c5f279ef2ea22e81a537516ccd156fe5e6f7feecdd3",
-    "contracts/src/revenue/DevelopmentCompensationVault420.sol": "4f28e6fbcd71e78632ce8decee2aac2967c7117d41e7574f67f8c95ec32a3e8b",
+    "contracts/src/revenue/DevelopmentCompensationVault420.sol": "45efdb4ca0073460ba9804f61cc3290cede19eb9b3b1a7ff7af7b467037a7d4c",
     "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223"
   },
   "dispositions": {
@@ -259,17 +259,6 @@
         "testReentrantDevelopmentRecipientCannotWithdrawTwice"
       ]
     },
-    "d984bebeadd7f00a72b5aac8e3a438c5cc2a7429b230f3858faeef1cea09e725": {
-      "disposition": "reviewed contextual false positive",
-      "finding": "Reentrancy in FantasyContestEngine420.beginRevision(bytes32,FantasyTypes420.StatReport) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#453-470):",
-      "rationale": "Contextual false positive on immutable typed module calls: every external engine mutation acquires the same nonReentrant lock; internal lock/review/cancel helpers are reachable only under it. Ranking/policy/admission modules are constructor-created and not replaceable; oracle/profile reads are static calls. Controller cancellation/review/publication is fixed code, and current-candidate callbacks are read-only. No callback can mutate engine credit or settle a stale/unresolved candidate.",
-      "supportingTests": [
-        "testNewerAuthenticatedRevisionBlocksOldFinalityAndTimesOut",
-        "testActualDisputeTimeoutRefundsEntriesAndBonds",
-        "testMissingHostRegistrationAuthorityRollsBackFreePrizeAndManifest",
-        "testReentrantDevelopmentRecipientCannotWithdrawTwice"
-      ]
-    },
     "09dfbc1cb106025c5669f576178e40b56dbf0a6091d9ecee8734de785bc4f4d0": {
       "disposition": "reviewed contextual false positive",
       "finding": "Reentrancy in FantasyContestEngine420.publishLineup(bytes32,uint64,uint32[7],bytes32) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#363-382):",
@@ -374,6 +363,25 @@
         "testCanonicalPersonCannotEnterUsingAnotherProfileOrWallet",
         "testEntrantAliasCannotResolvePoolEvenWithResolverCapability",
         "testVerifiedCredentialAndCustodianReceiptDoNotReplaceEntryCapability"
+      ]
+    },
+    "7490a37d27ef595fd72726063172ee1c49007610074d0ba9af92b39abb523489": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "DevelopmentCompensationVault420._fantasyFee(uint256) (contracts/src/revenue/DevelopmentCompensationVault420.sol#274-278) performs a multiplication on the result of a division: - (gross / 100) * 3 + (gross % 100) * 3 / 100 (contracts/src/revenue/DevelopmentCompensationVault420.sol#277)",
+      "rationale": "The quotient term accounts for complete hundreds and the remainder term accounts for the remainder before rounding down. This computes floor(3 * gross / 100) for all uint256 values without an overflowing gross * 3 intermediate.",
+      "supportingTests": [
+        "testFantasyCumulativeRoundingAndAuthenticatedFounderCredits"
+      ]
+    },
+    "ebe07d011d6c84ed36b736583faa308b271001c0dd83b3be9db640d7d48d74b5": {
+      "disposition": "reviewed contextual false positive",
+      "finding": "Reentrancy in FantasyContestEngine420.beginRevision(bytes32,FantasyTypes420.StatReport) (contracts/src/bet/fantasy/FantasyContestEngine420.sol#487-504):",
+      "rationale": "Contextual false positive on immutable typed module calls: every external engine mutation acquires the same nonReentrant lock; internal lock/review/cancel helpers are reachable only under it. Ranking/policy/admission modules are constructor-created and not replaceable; oracle/profile reads are static calls. Controller cancellation/review/publication is fixed code, and current-candidate callbacks are read-only. No callback can mutate engine credit or settle a stale/unresolved candidate.",
+      "supportingTests": [
+        "testNewerAuthenticatedRevisionBlocksOldFinalityAndTimesOut",
+        "testActualDisputeTimeoutRefundsEntriesAndBonds",
+        "testMissingHostRegistrationAuthorityRollsBackFreePrizeAndManifest",
+        "testReentrantDevelopmentRecipientCannotWithdrawTwice"
       ]
     }
   },

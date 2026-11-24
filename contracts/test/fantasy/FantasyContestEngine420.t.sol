@@ -25,6 +25,7 @@ abstract contract FantasyEngineFixture420 is FantasyDisputeFixture420 {
 
     function setUp() public virtual override {
         super.setUp();
+        cap.registerProtocolComponent(DevelopmentCompensationIds420.COMPONENT_DEVELOPMENT_COMPENSATION, address(this));
         vm.prank(USER3);
         identity.createProfile(PLAYER3, keccak256("third"));
         for (uint8 who = 1; who <= 3; who++) {
@@ -82,9 +83,15 @@ abstract contract FantasyEngineFixture420 is FantasyDisputeFixture420 {
         }
         _grant(ADMIN, engine.CREATE(), auth.scopeGlobal());
         _grant(address(engine), d.REGISTER(), auth.scopeForContest(CONTEST));
+        _grantFantasySource(address(engine));
         _grant(vm.addr(VALIDATOR_KEY), slates.VALIDATE_LINEUP(), auth.scopeForContest(SLATE));
         engine.registerIdentity(ADMIN_ID, keccak256("admin-user"));
         engine.registerIdentity(DELEGATE_ID, keccak256("delegate-user"));
+    }
+
+    function _grantFantasySource(address source) internal {
+        DevelopmentCompensationVault420 v = engine.developmentVault();
+        cap.createGrant(keccak256(abi.encode("fantasy-source", source)), source, DevelopmentCompensationIds420.COMPONENT_DEVELOPMENT_COMPENSATION, v.fantasyContributionAction(), DevelopmentCompensationIds420.scopeSource(v.fantasyApplicationId()), 0, 0, 0, 0, 0);
     }
 
     function _subject(uint8 who) internal pure returns (bytes32) {
@@ -1089,6 +1096,7 @@ contract FantasyContestEngine420Test is FantasyEngineFixture420 {
             USER_TYPE
         );
         _grant(address(engine), d.REGISTER(), auth.scopeForContest(CONTEST));
+        _grantFantasySource(address(engine));
         _ready(2, 100);
         _settle();
         recipient.withdraw(FantasyDisputeController420(address(engine)));
@@ -1111,10 +1119,11 @@ contract FantasyContestEngine420Test is FantasyEngineFixture420 {
             USER_TYPE
         );
         _grant(address(engine), d.REGISTER(), auth.scopeForContest(CONTEST));
+        _grantFantasySource(address(engine));
         _ready(2, 100);
         _settle();
         engine.collect(CONTEST, 1);
-        vm.expectRevert(FantasyContestEngine420.TransferFailed.selector);
+        vm.expectRevert(DevelopmentCompensationVault420.TransferFailed.selector);
         recipient.withdraw(FantasyDisputeController420(address(engine)));
         vm.prank(USER);
         engine.withdrawCredit();

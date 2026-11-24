@@ -77,7 +77,13 @@ def main():
         print(result.stdout.decode())
         if fixture.compensation_consumers:
             pool = fixture.pools[0]
-            origin = fixture.engine.events.EntryAccepted().get_logs(from_block=0, argument_filters={'pool': b32(pool)})
+            accepted = fixture.engine.events.EntryAccepted().get_logs(from_block=0, argument_filters={'pool': b32(pool)})
+            origin = [
+                event for event in accepted
+                if fixture.engine.decode_function_input(
+                    fixture.w3.eth.get_transaction(event.transactionHash).input
+                )[0].fn_name == 'enterPool'
+            ]
             state = fixture.engine.functions.poolOf(b32(pool)).call()
             forwards = fixture.vault.events.DevelopmentCompensationForwarded().get_logs(from_block=0)
             if len(forwards) != 1 or len(origin) != 2:

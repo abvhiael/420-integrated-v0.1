@@ -67,7 +67,7 @@ The splitter is distinct from the non-custodial vault: it retains authenticated 
 
 ## Auditability
 
-Every successful Development Compensation contribution emits `DevelopmentCompensationForwarded`, recording the source, application ID, revenue reference, asset, beneficiary, declared net protocol revenue, compensation basis points, compensation amount, and policy reference.
+Every successful Development Compensation contribution emits `DevelopmentCompensationForwarded`, recording the source, application ID, revenue reference, asset, beneficiary, declared net protocol revenue, compensation basis points, compensation amount, and policy reference. For the fixed Fantasy entry allocation, the event's revenue basis is the increase since the previous successful contribution for that source, asset and pool. The compensation amount is the difference between the two cumulative rounded fees. This lets consumers sum revenue bases without counting an earlier contribution again, even when rounding carries give a contribution one extra smallest unit.
 
 The splitter emits `CompensationVaultBound`, `FounderCompensationDeposited`, `FounderTokenCompensationCredited`, and `FounderCompensationClaimed`. Reconcile vault contributions with splitter credits, per-asset total credited and claimed amounts, beneficiary claims and outstanding liabilities; distinguish unsolicited balances from authenticated credits. Live Explorer/Analytics ingestion and finalized payout receipts remain testnet qualification, not established by local CI.
 

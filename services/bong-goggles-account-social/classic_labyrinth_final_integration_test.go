@@ -48,6 +48,12 @@ func TestBC27TwoHumanFull325MatchColdRecoveryAndSocialLedger(t *testing.T) {
  completed:=false
  cutSeen,pegSeen,showSeen,rounds:=false,false,false,map[int]bool{}
  for turn:=0;turn<2200;turn++{
+  // Accelerated integration exercises hundreds of authenticated requests in
+  // seconds; in real play those turns span minutes. The same BC-1.5 fixture
+  // helper rolls ONLY the isolated test DB's social-write rate window forward,
+  // never changing application policy, wall-clock deadlines or game journals.
+  // The production limiter remains active for every HTTP request.
+  if turn>0&&turn%25==0{bc15AdvanceRateWindow(t,store)}
   a:=read(host)
   if a.Status=="finished"{
    completed=true

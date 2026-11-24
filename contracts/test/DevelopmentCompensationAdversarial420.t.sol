@@ -87,7 +87,8 @@ contract DevelopmentCompensationAdversarial420Test {
         rejectNative(A, ref, 11);
         // Registry period limits include externally consumed usage. The V1 vault
         // is a view-only authorization consumer, not a metering authority.
-        registry.consume(id, 15);
+        registry.consume(id, 10);
+        registry.consume(id, 5);
         rejectNative(A, ref, 6);
         nativePayment(A, ref, 5);
         vm.warp(131);

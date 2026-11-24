@@ -118,9 +118,35 @@ export function labyrinthPegPositions(state={},atlas){
 export function renderLabyrinthPegOverlay(state,atlas){
  const pegs=labyrinthPegPositions(state,atlas);
  if(!pegs.length)return '';
- const circles=pegs.map(p=>'<circle class="lab-physical-peg lab-physical-peg--'+p.lane+
-  '" cx="'+p.x+'" cy="'+p.y+'" r="9" data-peg-score="'+p.score+
-  '" aria-label="Lane '+(p.lane+1)+' score '+p.score+'"></circle>').join('');
+ // The first three surveyed positions of each lane are the resting area.
+ // Score zero uses separate resting holes; positive scores use the physical
+ // route and both colours finish at the one surveyed central hole.
+ // The supplied art contains fewer distinct non-home positions than 324
+ // per lane. Reuse an adjacent real hole at the sparse intervals; never
+ // draw an invented hole or change the authoritative numeric score.
+ const physical=(p,back=false)=>{
+  const track=atlas.tracks[p.lane];
+  if(p.score===0)return LABYRINTH_HOLE_CENTERS[track[back?0:1]];
+  if(p.score===325)return LABYRINTH_HOLE_CENTERS[atlas.tracks[1][325]];
+  const last=p.lane===0?325:324;
+  const index=3+Math.round((p.score-1)*(last-3)/323);
+  return LABYRINTH_HOLE_CENTERS[track[index]];
+ };
+ const prior=state.previousScores;
+ const display=pegs.flatMap(p=>{
+  const front={...p,...physical(p),back:false};
+  if(!Array.isArray(prior)||prior.length!==state.scores.length)return [front];
+  const seat=state.teams.indexOf(p.team),raw=prior[seat];
+  if(!integer(raw,0,10000)||raw>state.scores[seat]||
+     state.teams.some((team,i)=>team===p.team&&prior[i]!==raw))return [front];
+  const score=Math.min(raw,325);
+  if(score===p.score&&score!==0)return [front];
+  const previous={...p,score,back:true};
+  return [{...previous,...physical(previous,true)},front];
+ });
+ const circles=display.map(p=>'<circle class="lab-physical-peg lab-physical-peg--'+p.lane+
+  '" cx="'+p.x+'" cy="'+p.y+'" r="'+(p.back?6:9)+'" data-peg-role="'+(p.back?'previous':'current')+'" data-peg-score="'+p.score+
+  '" aria-label="Lane '+(p.lane+1)+(p.back?' previous score ':' score ')+p.score+'"></circle>').join('');
  return '<svg class="lab-peg-overlay" viewBox="0 0 1254 1254" '+
   'preserveAspectRatio="xMidYMid meet" role="img" aria-label="Verified physical peg locations">'+
   circles+'</svg>';

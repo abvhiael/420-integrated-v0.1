@@ -16,6 +16,8 @@ on:
       - 'contracts/test/BetPokerNativeOutcome54.t.sol'
       - 'clients/420bet-poker/crypto/nlhe-*.mjs'
       - 'contracts/src/bet/**'
+      - 'contracts/test/sports-5d4/SportsFundedTickets420.t.sol'
+      - 'contracts/test/BetGenesisCapitalization420.t.sol'
       - 'clients/420bet-poker/zkshuffle/**'
       - 'scripts/bet/**'
   workflow_dispatch:
@@ -173,10 +175,27 @@ jobs:
               assert tests and all(t['status'] == 'Success' for t in tests.values()), key
               seen[name] = len(tests)
           assert set(seen) == expected, (expected-set(seen), set(seen)-expected)
+          capital = next(s['test_results'] for k,s in data.items() if k.split(':')[-1]=='BetGenesisCapitalization420Test')
+          assert capital['testCasinoOwnedSettlementRecognizesOnlySafeSurplus()']['status']=='Success'
           assert subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip() == os.environ['EXPECTED_SHA']
           assert not subprocess.check_output(['git','status','--porcelain','--untracked-files=no'], text=True).strip()
           (root/'execution.json').write_text(json.dumps({'qualifiedSHA':os.environ['EXPECTED_SHA'],'suites':seen,'rawSHA256':hashlib.sha256((root/'results.json').read_bytes()).hexdigest()},indent=2)+'\n')
           PY
+      - name: Fresh canonical sportsbook ownership and funded-ticket regressions
+        working-directory: contracts
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          FOUNDRY_PROFILE: pr
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          scope="$(mktemp -d "$PWD/.ws8-sports-ownership.XXXXXX")"
+          trap 'rm -rf "$scope"' EXIT
+          python3 ../scripts/bet/scope-foundry-suites.py "$scope" sports-5d4/SportsFundedTickets420
+          export FOUNDRY_SRC="$scope/empty-src" FOUNDRY_TEST="$scope" FOUNDRY_SCRIPT="$scope/empty-script"
+          mkdir -p "$FOUNDRY_SRC" "$FOUNDRY_SCRIPT" ../artifacts/ws8-financial
+          forge test --match-contract '^SportsFundedTickets420Test$' --json > ../artifacts/ws8-financial/sports-ownership-results.json
+          python3 ../scripts/bet/verify-ws8-casino-ownership.py ../artifacts/ws8-financial --write
       - uses: actions/upload-artifact@v4
         with:
           name: ws8-fresh-financial-execution

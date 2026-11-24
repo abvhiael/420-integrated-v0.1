@@ -214,6 +214,81 @@ contract SportsFundedTickets420Test is SportsBetAcceptance420Test {
         _assertSingleMarketSolvent();
     }
 
+    function _bindCanonicalCasinoMarket() internal returns (address operatorAccount) {
+        bytes32 casino = ops.CASINO_OPERATOR_ID();
+        operatorAccount = address(0x420B);
+        _grant(address(this), BetIds420.ACTION_OPERATOR_REGISTER, auth.scopeForOperator(casino));
+        _grant(address(this), BetIds420.ACTION_OPERATOR_ACTIVATE, auth.scopeForOperator(casino));
+        ops.registerOperator(casino, operatorAccount, keccak256("canonical 420Bet operator manifest"));
+        ops.activate(casino);
+        _grant(CONTROL, vault.BIND_CASINO_OPERATOR(), vault.scope(bytes32(0)));
+        _fails(PLAYER, address(vault), abi.encodeCall(vault.bindCasinoOperator, (casino)));
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.bindCasinoOperator, (OP)));
+        _call(CONTROL, address(vault), abi.encodeCall(vault.bindCasinoOperator, (casino)));
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.bindCasinoOperator, (casino)));
+        require(vault.casinoOperatorAccount() == operatorAccount && vault.casinoOperatorId() == casino, "canonical operator");
+        SportsTypes420.MarketConfig memory config = _marketConfig(template, 0);
+        config.operatorId = casino;
+        market = _newMarket(config);
+        _grant(signer, odds.SIGN(), odds.scope(market));
+        _grant(CONTROL, acceptance.CONFIGURE(), acceptance.scope(market));
+        _grant(CONTROL, vault.RESOLVE(), vault.scope(market));
+        _call(CONTROL, address(acceptance), abi.encodeCall(acceptance.configure,
+            (market, SportsBetAcceptance420.Risk(100, 1000, 2000, 1200, 1500, true))));
+        chosen = markets.selections(market)[0];
+        fundingVm.deal(operatorAccount, 1 ether);
+        vm.prank(operatorAccount); token.deposit{value: 2000}();
+        vm.prank(operatorAccount); token.approve(address(vault), 2000);
+        _call(operatorAccount, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));
+    }
+
+    function testCanonicalCasinoOperatorOwnsFundedMarketGain() public {
+        _bindCanonicalCasinoMarket();
+        BetSportsbookProfitEpochSource420 source = new BetSportsbookProfitEpochSource420(
+            address(token), address(vault), address(vault).codehash);
+        _submit(_quote(1));
+        bytes32 id = _fund(500);
+        require(source.profitTotals().freeProtocolCash == 0 && vault.casinoReserved(address(token)) == 425, "pending not revenue");
+        vm.warp(markets.get(market).config.cutoff + 1);
+        bytes32 other = markets.selections(market)[1];
+        bytes32 evidence = keccak256("canonical operator gain");
+        vm.prank(REPORT_A); cert.attest(market, other, evidence);
+        vm.prank(REPORT_B); cert.attest(market, other, evidence);
+        vm.warp(block.timestamp + 1 hours); cert.finalize(market);
+        _call(CONTROL, address(vault), abi.encodeCall(vault.resolve, (id, false)));
+        IBetProfitEpochSource420.Totals memory totals = source.profitTotals();
+        require(totals.reconciled && totals.retainedReceipts == 500 && totals.losses == 0
+            && totals.freeProtocolCash == 500 && vault.casinoCollateral(address(token)) == 2500, "casino gain");
+    }
+
+    function testCanonicalCasinoOperatorOwnsFundedMarketLoss() public {
+        _bindCanonicalCasinoMarket();
+        BetSportsbookProfitEpochSource420 source = new BetSportsbookProfitEpochSource420(
+            address(token), address(vault), address(vault).codehash);
+        _submit(_quote(1));
+        bytes32 id = _fund(500);
+        vm.warp(markets.get(market).config.cutoff + 1);
+        _certifyWinner();
+        _call(CONTROL, address(vault), abi.encodeCall(vault.resolve, (id, true)));
+        IBetProfitEpochSource420.Totals memory totals = source.profitTotals();
+        require(totals.reconciled && totals.retainedReceipts == 0 && totals.losses == 425
+            && totals.freeProtocolCash == 0 && vault.casinoCollateral(address(token)) == 1575, "casino loss");
+        vm.prank(PLAYER); vault.claim(address(token));
+        require(source.profitTotals().reconciled && token.balanceOf(PLAYER) == 10425, "protected player payout");
+    }
+
+    function testCasinoOperatorBindingRejectedAfterExternalFunding() public {
+        _call(CONTROL, address(vault), abi.encodeCall(vault.deposit, (market, 2000)));
+        bytes32 casino = ops.CASINO_OPERATOR_ID();
+        _grant(address(this), BetIds420.ACTION_OPERATOR_REGISTER, auth.scopeForOperator(casino));
+        _grant(address(this), BetIds420.ACTION_OPERATOR_ACTIVATE, auth.scopeForOperator(casino));
+        ops.registerOperator(casino, address(0x420B), keccak256("late manifest"));
+        ops.activate(casino);
+        _grant(CONTROL, vault.BIND_CASINO_OPERATOR(), vault.scope(bytes32(0)));
+        _fails(CONTROL, address(vault), abi.encodeCall(vault.bindCasinoOperator, (casino)));
+        require(vault.casinoOperatorId() == bytes32(0), "historical funds not reclassified");
+    }
+
     function testProfitAdapterExcludesOperatorOwnedGainAndDonation() public {
         BetSportsbookProfitEpochSource420 source=new BetSportsbookProfitEpochSource420(
             address(token),address(vault),address(vault).codehash);

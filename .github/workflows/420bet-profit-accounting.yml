@@ -11,6 +11,8 @@ on:
       - 'contracts/src/bet/VaultAccounting420.sol'
       - 'contracts/src/bet/BetGenesisCapitalization420.sol'
       - 'contracts/test/BetProfitAccounting420.t.sol'
+      - 'contracts/src/bet/BetGovernedProfitEpoch420.sol'
+      - 'contracts/test/BetGovernedProfitEpoch420.t.sol'
       - 'contracts/src/bet/BetAuthorization420.sol'
       - 'contracts/src/bet/BetIds420.sol'
       - 'contracts/src/bet/WithdrawalQueue420.sol'
@@ -40,16 +42,17 @@ jobs:
           test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
           scope="$(mktemp -d "$PWD/.profit.XXXXXX")"
           trap 'rm -rf "$scope"' EXIT
-          cp test/BetProfitAccounting420.t.sol test/BetEconomics420.t.sol "$scope/"
+          cp test/BetGovernedProfitEpoch420.t.sol test/BetProfitAccounting420.t.sol test/BetEconomics420.t.sol "$scope/"
           export FOUNDRY_SRC="$scope/empty-src" FOUNDRY_TEST="$scope" FOUNDRY_SCRIPT="$scope/empty-script"
           mkdir -p "$FOUNDRY_SRC" "$FOUNDRY_SCRIPT"
-          forge test --match-contract '^(BetProfitAccounting420Test|BetEconomics420Test)$' --json > "$RUNNER_TEMP/profit.json"
+          forge test --match-contract '^(BetGovernedProfitEpoch420Test|BetProfitAccounting420Test|BetEconomics420Test)$' --json > "$RUNNER_TEMP/profit.json"
           python3 - "$RUNNER_TEMP/profit.json" <<'PY'
           import json,sys
           data=json.load(open(sys.argv[1]))
           suites={k.split(':')[-1]:v['test_results'] for k,v in data.items()}
-          assert set(suites)=={'BetProfitAccounting420Test','BetEconomics420Test'}
+          assert set(suites)=={'BetGovernedProfitEpoch420Test','BetProfitAccounting420Test','BetEconomics420Test'}
           assert len(suites['BetProfitAccounting420Test'])>=9
+          assert len(suites['BetGovernedProfitEpoch420Test'])>=4
           assert any(k.startswith('testFuzz') for k in suites['BetProfitAccounting420Test'])
           assert any(k.startswith('invariant_') for k in suites['BetProfitAccounting420Test'])
           assert all(v['status']=='Success' for s in suites.values() for v in s.values())

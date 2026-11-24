@@ -314,4 +314,32 @@ contract FounderWalletClaimsAndCompensation420Test {
         (bool replay,) = address(splitter).call(abi.encodeCall(splitter.claimNative, ()));
         require(!replay, "double claim");
     }
+
+    function testInterleavedDustClaimsCannotInsolvateNativeOrToken() public {
+        vm.deal(address(this), 4);
+        FounderCompensationTestToken420 token = new FounderCompensationTestToken420();
+        for (uint256 i = 0; i < 4; i++) {
+            fundNative(keccak256(abi.encode("native-dust", i)), 1);
+            fundToken(token, keccak256(abi.encode("token-dust", i)), 1);
+            address[3] memory founders = [ADMIN, ANDREW, JANET];
+            for (uint256 j = 0; j < founders.length; j++) {
+                address founder = founders[j];
+                if (splitter.claimableNative(founder) != 0) {
+                    vm.prank(founder);
+                    splitter.claimNative();
+                }
+                if (splitter.claimableToken(address(token), founder) != 0) {
+                    vm.prank(founder);
+                    splitter.claimToken(address(token));
+                }
+            }
+            require(splitter.totalNativeClaimed() == i + 1, "native cumulative conservation");
+            require(splitter.totalTokenClaimed(address(token)) == i + 1, "token cumulative conservation");
+        }
+        require(splitter.nativeClaimed(ADMIN) == 2 && splitter.nativeClaimed(ANDREW) == 1
+            && splitter.nativeClaimed(JANET) == 1, "native 50/25/25");
+        require(token.balanceOf(ADMIN) == 2 && token.balanceOf(ANDREW) == 1
+            && token.balanceOf(JANET) == 1, "token 50/25/25");
+        require(address(splitter).balance == 0 && token.balanceOf(address(splitter)) == 0, "no unpaid liability");
+    }
 }

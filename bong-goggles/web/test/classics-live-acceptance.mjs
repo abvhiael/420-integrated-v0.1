@@ -93,6 +93,17 @@ try{
   if(result?.difficulty!==difficulty||result?.status!=='finished'||result?.authoritative!==true)
    throw Error('BC-0.12 live denied: incomplete server-side '+difficulty+' AI match');
  }
+ let mixedFormats=null;
+ if(game==='labyrinth-cribbage'){
+  if(typeof adapter.runMixedFormats!=='function')
+   throw Error('BC-2.8 live denied: missing complete 3/4-player mixed-420ID acceptance');
+  mixedFormats=await adapter.runMixedFormats(io);
+  if(mixedFormats?.status!=='finished'||mixedFormats.authoritative!==true||
+   mixedFormats.formats?.join('|')!==
+    'labyrinth-3p|labyrinth-4p-partners|labyrinth-4p-individual')
+   throw Error('BC-2.8 live denied: incomplete mixed 325-point results');
+ }
  console.log('BC-0.12 LIVE VERIFIED two authenticated separate accounts, desktop/mobile, reload, terminal, three AI tiers',JSON.stringify({
-  game,sourceSha:sha,rulesHash,terminalSequence:final[0].sequence,botLevels:3}));
+  game,sourceSha:sha,rulesHash,terminalSequence:final[0].sequence,botLevels:3,
+  mixedFormats:mixedFormats?.formats??[]}));
 }finally{for(const c of contexts)await c.close();await browser.close()}

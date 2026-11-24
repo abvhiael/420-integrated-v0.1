@@ -152,11 +152,15 @@ contract FoundingDeveloperCompensationSplitter420 {
     }
 
     function _entitlement(address wallet, uint256 receipts) private view returns (uint256) {
-        if (wallet == administrator) return receipts * ADMIN_BPS / 10000;
-        if (wallet == andrew) return receipts * ANDREW_BPS / 10000;
-        if (wallet == janet) {
-            return receipts - receipts * ADMIN_BPS / 10000 - receipts * ANDREW_BPS / 10000;
-        }
+        // Allocate indivisible units in a repeating Janet/admin/admin/Andrew
+        // cycle. Each complete group of four is exactly 50/25/25. Unlike
+        // subtracting two independently floored shares, every cumulative
+        // entitlement is monotonic, even when founders claim between deposits.
+        uint256 groups = receipts / 4;
+        uint256 remainder = receipts % 4;
+        if (wallet == administrator) return groups * 2 + (remainder > 1 ? remainder - 1 : 0);
+        if (wallet == andrew) return groups;
+        if (wallet == janet) return groups + (remainder != 0 ? 1 : 0);
         return 0;
     }
 

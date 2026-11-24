@@ -132,12 +132,12 @@ jobs:
           python3 scripts/prepare-devcomp-foundry-scope.py --output "$DEVCOMP_SCOPE_ROOT"
           echo "DEVCOMP_SCOPE_ROOT=$DEVCOMP_SCOPE_ROOT" >> "$GITHUB_ENV"
 
-      - name: Reject dangerous revenue-vault primitives
+      - name: Reject dangerous revenue-vault and splitter primitives
         shell: bash
         run: |
           set -euo pipefail
-          if grep -nE '\\b(delegatecall|selfdestruct|tx\\.origin)\\b' contracts/src/revenue/DevelopmentCompensationVault420.sol; then
-            echo "Forbidden primitive found in Development Compensation Vault." >&2
+          if grep -nE '(^|[^[:alnum:]_])(delegatecall|selfdestruct|tx[.]origin)([^[:alnum:]_]|$)' contracts/src/revenue/DevelopmentCompensationVault420.sol contracts/src/revenue/FoundingDeveloperCompensationSplitter420.sol; then
+            echo "Forbidden primitive found in compensation contracts." >&2
             exit 1
           fi
 
@@ -186,4 +186,38 @@ jobs:
           print(json.dumps({"highSeverity": high}, indent=2))
           if high:
               raise SystemExit("High-severity Slither finding in Development Compensation Vault")
+          PY
+
+      - name: Founder splitter Slither high-severity gate
+        working-directory: ${{ env.DEVCOMP_SCOPE_ROOT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          slither src/revenue/FoundingDeveloperCompensationSplitter420.sol --json /tmp/devcomp-splitter-slither.json >/tmp/devcomp-splitter-slither.txt 2>&1 || true
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report_path = Path("/tmp/devcomp-splitter-slither.json")
+          log_path = Path("/tmp/devcomp-splitter-slither.txt")
+          if not report_path.exists():
+              print(log_path.read_text(errors="replace"))
+              raise SystemExit("Slither did not produce JSON output")
+          report = json.loads(report_path.read_text())
+          if report.get("success") is not True:
+              print(log_path.read_text(errors="replace"))
+              raise SystemExit(f"Slither analysis failed: {report.get('error') or 'unknown error'}")
+          high = [
+              {
+                  "check": d.get("check"),
+                  "impact": d.get("impact"),
+                  "confidence": d.get("confidence"),
+                  "description": d.get("description", "").splitlines()[0],
+              }
+              for d in report.get("results", {}).get("detectors", [])
+              if d.get("impact") == "High"
+          ]
+          print(json.dumps({"highSeverity": high}, indent=2))
+          if high:
+              raise SystemExit("High-severity Slither finding in Founder Compensation Splitter")
           PY

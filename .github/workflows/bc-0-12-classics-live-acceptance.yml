@@ -18,7 +18,7 @@ concurrency:
 jobs:
   verify-live-two-account-match:
     runs-on: ubuntu-latest
-    timeout-minutes: 18
+    timeout-minutes: ${{ inputs.game_id == 'labyrinth-cribbage' && 180 || 18 }}
     # Production tests must never be triggered by a PR or scheduled job.
     env:
       BC12_GAME_ID: ${{ inputs.game_id }}
@@ -44,6 +44,23 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: BC-2.8 require the existing Cribbage live release before second Classic acceptance
+        if: inputs.game_id == 'labyrinth-cribbage'
+        working-directory: bong-goggles/web
+        run: |
+          node --input-type=module - <<'NODE'
+          import {CLASSIC_ROADMAP} from './core/classics.js';
+          import {loadReleaseEvidence,assertCatalogueAndEvidence} from './scripts/classics-release-gate.mjs';
+          const manifest=await loadReleaseEvidence();
+          assertCatalogueAndEvidence({manifest});
+          if(CLASSIC_ROADMAP[0]?.id!=='cribbage'||
+             CLASSIC_ROADMAP[0].status!=='playable'||!manifest.games.cribbage)
+            throw Error('BC-2.8 DENIED: BC-1.8 Cribbage real deployment/release has not qualified');
+          NODE
+      - name: BC-2.8 inspect actual Pages flags and Worker readiness; never count as a completed match
+        if: inputs.game_id == 'labyrinth-cribbage'
+        working-directory: bong-goggles/web
+        run: node test/live-classics/labyrinth-public-preflight.mjs
       - name: Install isolated pinned test-only Chromium
         working-directory: bong-goggles/web
         run: |

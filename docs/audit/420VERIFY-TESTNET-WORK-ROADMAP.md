@@ -1,7 +1,7 @@
 # 420Verify — Testnet Work Roadmap
 
 **Status:** OPEN — live testnet deployment and operational qualification deferred until the 420 testnet environment exists (2026-11-23).  
-**Source of authority:** existing VERIFY-AUDIT-8 requirements, [420Verify deployment and operations](../apps/verify/deployment.md), and [service readiness manifest](../../testnet/public-services/verify/readiness.json). This handoff does not reopen the historically completed repository audit, add Verify-specific contracts, or create new acceptance gates.
+**Source of authority:** existing VERIFY-AUDIT-8 requirements, [420Verify deployment and operations](../apps/verify/deployment.md), and [service readiness manifest](https://github.com/abvhiael/420-integrated-v0.1/blob/main/testnet/public-services/verify/readiness.json). This handoff does not reopen the historically completed repository audit, add Verify-specific contracts, or create new acceptance gates.
 
 ## Repository baseline and outstanding PR
 

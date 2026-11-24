@@ -103,8 +103,7 @@ func TestReadyRechecksCanonicalChainAfterStartup(t *testing.T) {
 	// The failed probe must not be cached as healthy.
 	assertReadyStatus(t, svc, http.StatusServiceUnavailable)
 	probe.codeErr = nil
-	// A restored RPC requires a successful fresh qualification.
-	if err := svc.Qualify(context.Background()); err != nil { t.Fatal(err) }
+	// Restored RPC must recover automatically without process restart.
 	assertReadyStatus(t, svc, http.StatusOK)
 }
 

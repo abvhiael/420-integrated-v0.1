@@ -11,11 +11,11 @@ import (
 
 // BC-3.3: activate only the independently version-pinned orthodox adapter
 // behind the same authenticated room/session/journal/presence preconditions.
-// Never accept a browser-selected ruleset or automatically expose public Play.
+// Both explicit operator modes retain identical authenticated rules and policy boundaries.
 func configureChess(mode string,sessions *social.ClassicSessions,rooms,rules,communications bool)error{
  switch mode{
  case "","disabled":return nil
- case "restricted-acceptance":
+ case "restricted-acceptance","public-play":
   if sessions==nil||sessions.Store==nil||sessions.Rooms==nil||
     !rooms||!rules||!communications{return errors.New("BC-3.3 requires authenticated room/session/replay/presence dependencies")}
   adapter,e:=social.NewChessRulesAdapter()

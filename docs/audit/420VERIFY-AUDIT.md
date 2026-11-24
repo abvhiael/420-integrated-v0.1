@@ -33,3 +33,7 @@ Ordinary VERIFY-AUDIT steps use app-specific Level 1 qualification. Level 2 is r
 ## Known deployment limitation retained after audit closeout
 
 Persisted proxy relationship evidence records historical canonical observations. The production entrypoint does not currently run the in-memory proxy tracker continuously. Downstream presentation must revalidate canonical proxy state before describing a persisted implementation relationship as current. Testnet operational monitoring may add continuous detection later; historical evidence must never be silently promoted into current authority.
+
+## Testnet execution handoff (2026-11-23)
+
+The deferred public deployment and live operational requirements are now centrally tracked in [420VERIFY-TESTNET-WORK-ROADMAP.md](420VERIFY-TESTNET-WORK-ROADMAP.md), linked from Step 5. The historic audit's statement that PR #503 remains unmerged is superseded: it merged on 2026-10-04. Post-merge readiness-fix PR #1377 remains a separately qualified repository change, not a live/testnet dependency. No live URL, TLS, runtime deployment or end-to-end testnet proof is claimed by this handoff.

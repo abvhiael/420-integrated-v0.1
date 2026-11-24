@@ -50,12 +50,12 @@ export function normalizeLabyrinthSession(result,viewer=null){return canonicalSe
 export class LabyrinthSessionController{
  constructor({enabled=false,fetchImpl=fetch,onChange=()=>{}}={}){
   this.client=createAccountSocialClient({enabled,fetchImpl});
-  this.onChange=onChange;this.generation=0;this.busy=false;
+  this.onChange=onChange;this.generation=0;this.busy=false;this.actor=null;
   this.state={status:enabled?'idle':'disabled',session:null,view:null,
     selection:[],recoverable:[],submitting:false,error:null};
  }
  emit(next){this.state=Object.freeze({...this.state,...next});this.onChange(this.state);return this.state;}
- invalidate(){this.generation++;this.busy=false;return this.emit({status:this.client.enabled?'idle':'disabled',
+ invalidate(){this.generation++;this.busy=false;this.actor=null;return this.emit({status:this.client.enabled?'idle':'disabled',
   session:null,view:null,selection:[],recoverable:[],submitting:false,error:null});}
  async principal(){
   const me=await this.client.request('/v1/me');
@@ -74,19 +74,23 @@ export class LabyrinthSessionController{
   try{
    const principal=await this.principal();
    if(generation!==this.generation)return this.state;
-   if(!principal)return this.emit({status:'guest',session:null,view:null});
+   if(!principal){this.actor=null;return this.emit({status:'guest',session:null,view:null});}
+   const sameActor=this.actor===principal;
+   if(this.actor&&!sameActor)this.emit({status:'loading',session:null,view:null,selection:[],recoverable:[]});
    const result=await this.client.request('/v1/classic-sessions/'+id);
    if(generation!==this.generation)return this.state;
-   if([401,403,404].includes(result.status))return this.emit({status:'unavailable',session:null,view:null,
-    error:'Session access denied or revoked.'});
+   if([401,403,404].includes(result.status)){this.actor=null;return this.emit({status:'unavailable',session:null,view:null,
+    error:'Session access denied or revoked.'});}
    const validated=canonicalSession(result,principal);
    if(!validated||validated.session.id!==id||old&&validated.session.sequence<old.sequence)
     throw Error('Unverified or stale Labyrinth session');
-   if(old&&validated.session.sequence===old.sequence)return this.state;
+   if(old&&sameActor&&validated.session.viewerSeat===old.viewerSeat&&
+      validated.session.sequence===old.sequence)return this.state;
+   this.actor=principal;
    return this.emit({status:'ready',...validated,selection:[],submitting:false,error:null});
   }catch(e){
-   if(generation===this.generation)return this.emit({status:'unavailable',session:null,view:null,
-    selection:[],error:e.message||'Session unavailable'});
+   if(generation===this.generation){this.actor=null;return this.emit({status:'unavailable',session:null,view:null,
+    selection:[],error:e.message||'Session unavailable'});}
    return this.state;
   }finally{if(generation===this.generation)this.busy=false;}
  }
@@ -196,7 +200,10 @@ export class LabyrinthSessionController{
   if(!this.client.enabled||this.busy)return this.state;
   const generation=++this.generation;this.busy=true;
   try{
-   if(!await this.principal())return this.emit({status:'guest',session:null,view:null,recoverable:[]});
+   const principal=await this.principal();
+   if(!principal){this.actor=null;return this.emit({status:'guest',session:null,view:null,recoverable:[]});}
+   if(this.actor&&this.actor!==principal)this.emit({status:'idle',session:null,view:null,selection:[],recoverable:[]});
+   this.actor=principal;
    const response=await this.client.request('/v1/classic-sessions');
    if(generation!==this.generation)return this.state;
    if(response.status!==200||response.data?.onChain!==false||
@@ -209,6 +216,8 @@ export class LabyrinthSessionController{
      Number.isSafeInteger(s.sequence)&&s.sequence>=1).map(s=>Object.freeze({
       id:s.id,roomId:s.roomId,status:s.status,sequence:s.sequence
      }));
+   if(await this.principal()!==principal){this.actor=null;return this.emit({status:'unavailable',session:null,view:null,recoverable:[],error:'420ID account changed'});}
+   if(generation!==this.generation)return this.state;
    return this.emit({status:this.state.session?'ready':'idle',recoverable:matches,error:null});
   }catch(e){
    if(generation===this.generation)this.emit({recoverable:[],error:e.message});

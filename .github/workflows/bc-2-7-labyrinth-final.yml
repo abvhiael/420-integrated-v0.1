@@ -1,0 +1,94 @@
+name: BC-2.7 Labyrinth Final Repository Qualification
+on:
+  pull_request:
+    paths:
+      - 'services/bong-goggles-account-social/classic_labyrinth_final_integration_test.go'
+      - 'bong-goggles/web/core/labyrinth-session.js'
+      - 'bong-goggles/web/scripts/qualify-web.mjs'
+      - 'bong-goggles/web/test/labyrinth-final-security.test.js'
+      - 'bong-goggles/web/test/labyrinth-final-browser.mjs'
+      - 'docs/games/classics/BC-2-7-QUALIFICATION.md'
+      - 'docs/BONG-GOGGLES-CLASSICS-ROADMAP.md'
+      - '.github/workflows/bc-2-7-labyrinth-final.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  complete-325-rule-and-bot-matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Exact SHA and legal deterministic Easy/Medium/Hard completed 2-4 player games
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          go test -race -count=1 -timeout=20m -run '^(TestBC23FullBotAndMixedHumanMatchesEveryFormat|TestBC23RejectHiddenAndForgedViewsActionsAndBudget|TestBC22HeelsCanImmediatelyWin325|TestBC22SevenCardShowFlushRunsAndPegging)$' -v ./services/bong-goggles-account-social
+          go vet ./services/bong-goggles-account-social
+  real-postgres-two-human-325-finish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: account420_test
+          POSTGRES_USER: account420_test
+          POSTGRES_PASSWORD: local_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U account420_test -d account420_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      ACCOUNT420_TEST_DSN: postgres://account420_test:local_test_only@127.0.0.1:5432/account420_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Actual 420ID HTTP game to 325, cold recovery, terminal history, remix consent and adversarial seat requests
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          go test -race -count=1 -tags account420_integration -timeout=26m -run '^TestBC27TwoHumanFull325MatchColdRecoveryAndSocialLedger$' -v ./services/bong-goggles-account-social
+  two-isolated-chromium-and-accessibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 19
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact source, 420ID social/rematch and UI privacy controls
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          node --check bong-goggles/web/test/labyrinth-final-browser.mjs
+          node --test bong-goggles/web/test/labyrinth-final-security.test.js bong-goggles/web/test/labyrinth-human-multiplayer.test.js bong-goggles/web/test/labyrinth-social.test.js bong-goggles/web/test/labyrinth-session.test.js bong-goggles/web/test/labyrinth-frontend.test.js
+      - name: Install pinned test-only Chromium
+        working-directory: bong-goggles/web
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.65.1
+          npx playwright install --with-deps chromium
+      - name: Real two-context desktop/mobile private turn, restart, resign and identity revocation
+        working-directory: bong-goggles/web
+        run: node test/labyrinth-final-browser.mjs
+      - name: Retain responsive 325-point board and keyboard navigation qualification
+        working-directory: bong-goggles/web
+        run: node test/labyrinth-browser-qualification.mjs

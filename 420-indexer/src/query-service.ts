@@ -114,7 +114,7 @@ export class IndexerQueryService420 {
     }));
   }
 
-  async protocolEvents(chainId: bigint, opts: { protocol?: string; objectKey?: string; cursor?: string; limit?: number; direction?: QueryDirection420 } = {}): Promise<QueryPage420<QueryRow420>> {
+  async protocolEvents(chainId: bigint, opts: { protocol?: string; objectKey?: string; transactionHash?: string; cursor?: string; limit?: number; direction?: QueryDirection420 } = {}): Promise<QueryPage420<QueryRow420>> {
     const limit = normalizeLimit420(opts.limit);
     const rows = await run420(this.db, protocolEventsQuery420(chainId, opts));
     return page420(rows, limit, (row) => encodePositionCursor420({

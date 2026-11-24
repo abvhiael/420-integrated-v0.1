@@ -68,8 +68,9 @@ contract DevelopmentCompensationAdversarial420Test {
     function rejectNative(bytes32 app, bytes32 ref, uint256 amount) private {
         uint256 beforeCredit = splitter.totalNativeCredited();
         uint256 beforeBalance = address(this).balance;
+        bytes32 policy = vault.policyId();
         vm.expectRevert(DevelopmentCompensationVault420.UnauthorizedSource.selector);
-        nativePayment(app, ref, amount);
+        vault.contributeNative{value: amount}(app, ref, policy, amount * 10, 1000);
         require(!vault.consumedRevenueContribution(vault.contributionId(address(this), app, ref)), "rejected replay marker");
         require(splitter.totalNativeCredited() == beforeCredit && address(this).balance == beforeBalance, "rejected funds");
     }
@@ -106,8 +107,9 @@ contract DevelopmentCompensationAdversarial420Test {
         bytes32 n = keccak256("native rollback");
         bytes32 t = keccak256("token rollback");
         uint256 beforeNative = address(this).balance;
+        bytes32 policy = vault.policyId();
         vm.expectRevert(DevelopmentCompensationVault420.TransferFailed.selector);
-        nativePayment(A, n, 10);
+        vault.contributeNative{value: 10}(A, n, policy, 100, 1000);
         require(address(this).balance == beforeNative && address(receiver).balance == 0
             && !vault.consumedRevenueContribution(vault.contributionId(address(this), A, n)), "native rollback");
         tokenA.mint(address(this), 10);
@@ -132,8 +134,9 @@ contract DevelopmentCompensationAdversarial420Test {
         bytes32 idA = vault.contributionId(address(this), A, ref);
         bytes32 idB = vault.contributionId(address(this), B, ref);
         require(idA != idB && splitter.consumedTokenContribution(idA) && splitter.consumedTokenContribution(idB), "scope collision");
+        bytes32 policy = vault.policyId();
         vm.expectRevert(DevelopmentCompensationVault420.Replay.selector);
-        nativePayment(A, ref, 1);
+        vault.contributeNative{value: 1}(A, ref, policy, 10, 1000);
         vm.prank(ADMIN);
         splitter.claimToken(address(tokenA));
         require(splitter.totalTokenClaimed(address(tokenA)) == 10

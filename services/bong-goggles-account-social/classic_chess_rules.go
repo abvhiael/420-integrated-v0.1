@@ -10,6 +10,7 @@ const chessProductRuleset = "bc-chess-standard@1.0.0"
 const chessRuleSpecification = chessProductRuleset+";orthodox;seat-0-white;seat-1-black;uci;san;exact-repetition;half-point-units;FIDE-2023"
 type chessRules struct{chessRuleCapacity}
 type chessRuleData struct{
+ Timing *chessTimedState `json:"timing,omitempty"`
  Board chessBoard `json:"board"`
  Repetition chessRepetition `json:"repetition"`
  LastMove string `json:"lastMove"`
@@ -162,6 +163,12 @@ func chessBoardValid(p chessBoard)bool{
 func(chessRules) Validate(f RuleFrame)error{
  d,e:=chessDecode(f);if e!=nil{return e}
  p:=d.Board
+ if d.Timing!=nil{
+  initial,err:=chessClockForProfile(d.Timing.Profile)
+  if err!=nil||d.Timing.At<=0||d.Timing.At>253402300799999||!d.Timing.Clock.Timed||
+   d.Timing.Clock.Increment!=initial.Increment{return ErrInvalid}
+  for _,balance:=range d.Timing.Clock.Remaining{if balance<0||balance>chessMaxClockMillis{return ErrInvalid}}
+ }
  if f.SeatCount!=2||f.Variant!=""||len(f.Scores)!=2||f.Round!=p.Full||!chessBoardValid(p)||!d.Repetition.valid()||len(d.Repetition.Positions)<68||len(d.Repetition.Positions)/68>p.Half+1||d.Offer< -1||d.Offer>1{return ErrInvalid}
  k,e:=p.identity();if e!=nil||!strings.HasSuffix(d.Repetition.Positions,hex.EncodeToString(k[:])){return ErrInvalid}
  if len(d.LastMove)>5||len(d.LastSAN)>16||(d.LastMove=="")!=(d.LastSAN==""){return ErrInvalid}
@@ -201,7 +208,7 @@ func(r chessRules) View(f RuleFrame,seat int)(json.RawMessage,error){
  if seat<0||seat>1{return nil,ErrForbidden}
  if e:=r.Validate(f);e!=nil{return nil,e};d,e:=chessDecode(f);if e!=nil{return nil,e}
  color:="white";if seat==1{color="black"}
- return json.Marshal(map[string]any{"gameId":"chess","ruleset":chessProductRuleset,"seat":seat,"color":color,"whiteSeat":0,"blackSeat":1,"board":string(d.Board.Squares[:]),"turn":f.Turn,"phase":f.Phase,"round":f.Round,"scores":f.Scores,"winner":f.Winner,"terminal":f.Terminal,"reason":d.Reason,"lastMove":d.LastMove,"lastSAN":d.LastSAN,"castling":d.Board.Castle,"enPassant":d.Board.EP,"halfmove":d.Board.Half,"check":d.Board.check(d.Board.Turn),"drawOffer":d.Offer})
+ return json.Marshal(map[string]any{"gameId":"chess","ruleset":chessProductRuleset,"seat":seat,"color":color,"whiteSeat":0,"blackSeat":1,"board":string(d.Board.Squares[:]),"turn":f.Turn,"phase":f.Phase,"round":f.Round,"scores":f.Scores,"winner":f.Winner,"terminal":f.Terminal,"reason":d.Reason,"lastMove":d.LastMove,"lastSAN":d.LastSAN,"castling":d.Board.Castle,"enPassant":d.Board.EP,"halfmove":d.Board.Half,"check":d.Board.check(d.Board.Turn),"drawOffer":d.Offer,"timing":d.Timing})
 }
 var _ RuleModule=chessRules{}
 var _ RuleSeatPolicy=chessRules{}

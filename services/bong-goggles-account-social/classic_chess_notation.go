@@ -3,6 +3,7 @@ package social
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -144,6 +145,14 @@ func (a *RulesAdapter) ExportChessPGN(seed [32]byte, trace []RuleTrace, meta Che
 	if a == nil || a.definition.GameID != "chess" || len(trace) > a.replayLimit() {
 		return "", ErrInvalid
 	}
+	state, err := a.initial(seed, 2)
+	if err != nil {
+		return "", err
+	}
+	return a.exportChessPGNFrom(state, trace, meta)
+}
+
+func (a *RulesAdapter) exportChessPGNFrom(state json.RawMessage, trace []RuleTrace, meta ChessPGNMetadata) (string, error) {
 	tags := []struct{ name, value string }{
 		{"Event", meta.Event}, {"Site", meta.Site}, {"Date", meta.Date},
 		{"Round", meta.Round}, {"White", meta.White}, {"Black", meta.Black},
@@ -158,10 +167,11 @@ func (a *RulesAdapter) ExportChessPGN(seed [32]byte, trace []RuleTrace, meta Che
 		fmt.Fprintf(&out, "[%s \"%s\"]\n", tag.name, escape.Replace(tag.value))
 	}
 
-	state, err := a.initial(seed, 2)
-	if err != nil {
-		return "", err
-	}
+	return a.exportChessTrace(state, trace, &out)
+}
+
+func (a *RulesAdapter) exportChessTrace(state json.RawMessage, trace []RuleTrace, out *strings.Builder) (string, error) {
+	var err error
 	var tokens []string
 	for i, step := range trace {
 		state, err = a.replayFromVerified(state, int64(i)+1, trace[i:i+1])
@@ -169,7 +179,15 @@ func (a *RulesAdapter) ExportChessPGN(seed [32]byte, trace []RuleTrace, meta Che
 			return "", err
 		}
 		var command chessCommand
-		if !strictRuleJSON(step.Action, &command) {
+		action := step.Action
+		var timed chessTimedEvent
+		if strictRuleJSON(action, &timed) && timed.At > 0 {
+			action = timed.Move
+			if len(action) == 0 {
+				continue
+			}
+		}
+		if !strictRuleJSON(action, &command) {
 			return "", ErrInvalid
 		}
 		if command.Type != "move" && command.Type != "move-offer" {
@@ -203,7 +221,7 @@ func (a *RulesAdapter) ExportChessPGN(seed [32]byte, trace []RuleTrace, meta Che
 			result = "0-1"
 		}
 	}
-	fmt.Fprintf(&out, "[Result \"%s\"]\n\n", result)
+	fmt.Fprintf(out, "[Result \"%s\"]\n\n", result)
 	lineLength := 0
 	for _, token := range append(tokens, result) {
 		if lineLength != 0 {
@@ -253,9 +271,9 @@ func (s *ClassicSessions) ExportChessPGN(ctx context.Context, viewer, id string,
 	}
 	adapter := rule.(*RulesAdapter)
 	var pgn string
-	err = s.verifyRulesTraceTx(ctx, tx, rec, adapter, func(seed [32]byte, trace []RuleTrace) error {
+	err = s.verifyRulesTraceTx(ctx, tx, rec, adapter, func(initial json.RawMessage, trace []RuleTrace) error {
 		var err error
-		pgn, err = adapter.ExportChessPGN(seed, trace, meta)
+		pgn, err = adapter.exportChessPGNFrom(initial, trace, meta)
 		return err
 	})
 	if err != nil {

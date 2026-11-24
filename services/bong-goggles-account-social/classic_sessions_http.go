@@ -20,9 +20,9 @@ func (h *Handler) classicSessionsHTTP(ctx context.Context,w http.ResponseWriter,
    items,e:=h.Sessions.List(ctx,viewer);if e!=nil{classicRoomError(w,e);return}
    writeJSON(w,200,map[string]any{"sessions":items,"onChain":false,"wager":false,"rewards":false})
   case "POST":
-   var req struct{RoomID string `json:"roomId"`}
+   var req struct{RoomID string `json:"roomId"`;ClockProfile string `json:"clockProfile,omitempty"`}
    if strictJSON(r,&req)!=nil{deny(w,400);return}
-   session,e:=h.Sessions.Start(ctx,viewer,req.RoomID)
+   session,e:=h.Sessions.startWithClock(ctx,viewer,req.RoomID,req.ClockProfile)
    if e!=nil{classicRoomError(w,e);return}
    writeJSON(w,201,map[string]any{"session":session,"onChain":false,"wager":false,"rewards":false})
   default:deny(w,405)

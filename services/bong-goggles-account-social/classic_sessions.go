@@ -187,7 +187,7 @@ func (s *ClassicSessions) Events(ctx context.Context,viewer,id string,after int6
  if e=s.verifyClassicJournalTx(ctx,tx,rec);e!=nil{return nil,0,ErrUnavailable}
  rule,e:=s.rule(rec.GameID,rec.RulesVersion,rec.RulesHash)
  if e!=nil{return nil,0,e}
- untimed:=isClassicChess(rule)
+ chess:=isClassicChess(rule)
  high:=rec.Sequence
  if after>high||high-after>50{return nil,high,ErrConflict}
  rows,e:=tx.QueryContext(ctx,"SELECT sequence,kind,actor_seat,public_state,created_at "+
@@ -203,7 +203,7 @@ func (s *ClassicSessions) Events(ctx context.Context,viewer,id string,after int6
    rows.Close();return nil,0,e
   }
   if actor.Valid{n:=int(actor.Int64);item.ActorSeat=&n}
-  if item.Sequence!=next+1||!validClassicPublicEventForSession(item,rec.SeatCount,untimed){
+  if item.Sequence!=next+1||!validClassicPublicEventForSession(item,rec.SeatCount,chess){
    rows.Close();return nil,0,ErrUnavailable
   }
   next=item.Sequence

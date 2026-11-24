@@ -141,6 +141,11 @@ var chessOpeningMates = [2][][]string{
   {"e2e4","f7f6","d2d4","g7g5","d1h5"},
   {"e2e4","e7e5","f1c4","a7a6","d1h5","a6a5","h5f7"},
   {"d2d4","d7d5","b1c3","h7h6","e2e4","d5e4","f1c4","a7a6","d1h5","a6a5","h5f7"},
+  // Queen's Gambit Declined, including the former cutoff after 6.Nf3.
+  {"d2d4","d7d5","c2c4","e7e6","b1c3","g8f6","c1g5","f8e7","e2e3","e8g8","g1f3",
+   "f6g4","d1d3","g8h8","d3g6","f7f5","g6h7","h8h7","f3h4","g7g6","g5f6","h7h6",
+   "f2f3","h6h5","a1d1","f5f4","f3g4","h5h6","g4g5","h6h5","f1e2","h5h4","a2a4",
+   "a7a6","g2g3","h4h3","e2f1","h3g4","f1e2","f4f3","h2h3","g4h5","e2f3"},
  },
  {
   {"f2f3","e7e5","g2g4","d8h4"},

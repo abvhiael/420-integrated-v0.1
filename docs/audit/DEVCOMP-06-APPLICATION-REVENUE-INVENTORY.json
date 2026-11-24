@@ -5,7 +5,7 @@
     "Genesis launch": {
       "420 AI": "review-required",
       "420 Analytics": "shared",
-      "420 AppStore": "review-required",
+      "420 AppStore": "shared",
       "420 Arbitration": "review-required",
       "420 Attention": "review-required",
       "420 Bridge": "review-required",
@@ -15,16 +15,16 @@
       "420 Governance": "review-required",
       "420 Identity": "excluded",
       "420 Names": "excluded",
-      "420 Notifications": "review-required",
+      "420 Notifications": "shared",
       "420 Pay": "excluded",
       "420 Registry": "excluded",
-      "420 Search": "review-required",
+      "420 Search": "shared",
       "420 Stake": "excluded",
-      "420 Status": "review-required",
+      "420 Status": "shared",
       "420 Swap": "excluded",
       "420 Token": "policy-exception",
-      "420 Verify": "review-required",
-      "420 Wallet": "review-required"
+      "420 Verify": "shared",
+      "420 Wallet": "shared"
     },
     "Decision 2": {
       "420Bet": "release-disabled",
@@ -60,7 +60,7 @@
     "Contract ownership": {
       "420 AI": "review-required",
       "420 Analytics": "shared",
-      "420 AppStore": "review-required",
+      "420 AppStore": "shared",
       "420 Arbitration": "review-required",
       "420 Attention": "review-required",
       "420 Bridge": "review-required",
@@ -68,7 +68,7 @@
       "420 Commons": "review-required",
       "420 ComputeMarket": "review-required",
       "420 Explorer": "shared",
-      "420 Faucet": "review-required",
+      "420 Faucet": "release-disabled",
       "420 Gaming Protocol": "review-required",
       "420 Grants": "review-required",
       "420 Identity": "excluded",
@@ -76,7 +76,7 @@
       "420 Market": "review-required",
       "420 Messenger": "review-required",
       "420 Names": "excluded",
-      "420 Notifications": "review-required",
+      "420 Notifications": "shared",
       "420 Oracle": "review-required",
       "420 Pay": "excluded",
       "420 Pulse": "review-required",
@@ -84,17 +84,17 @@
       "420 Registry": "excluded",
       "420 Resource Protocol": "review-required",
       "420 Rights": "review-required",
-      "420 Search": "review-required",
+      "420 Search": "shared",
       "420 Smart Accounts": "review-required",
       "420 Stake": "excluded",
-      "420 Status": "review-required",
+      "420 Status": "shared",
       "420 Swap": "excluded",
       "420 Token": "policy-exception",
       "420 Treasury": "shared",
       "420 Trust": "review-required",
       "420 Vault": "review-required",
-      "420 Verify": "review-required",
-      "420 Wallet": "review-required",
+      "420 Verify": "shared",
+      "420 Wallet": "shared",
       "420-IS": "review-required"
     },
     "Consumer services": {
@@ -177,7 +177,7 @@
       "application": "420Bet",
       "route": "Casino-wide retained profit",
       "classification": "review-required",
-      "trace": "Reconcile bankroll, poker, sportsbook, prediction markets and shared pools against finalized eligible net profit. Verify existing Fantasy charges are counted once before enabling the waterfall.",
+      "trace": "Reconcile bankroll, poker, sportsbook and shared pools against finalized eligible net profit. Account for separately forwarded Fantasy compensation once.",
       "sources": [
         "contracts/config/420bet-capitalization-profit-waterfall-v1.json"
       ]
@@ -296,6 +296,66 @@
       "sources": [
         "config/genesis-application-decision-2.json",
         "contracts/src/pay/PaymentRouter420.sol"
+      ]
+    },
+    {
+      "application": "420 AppStore",
+      "route": "Curated application catalogue",
+      "classification": "shared",
+      "trace": "The catalogue publishes listings and derives application provenance from 420Registry. The canonical service defines no listing or purchase settlement.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/config/420appstore-genesis.json"
+      ]
+    },
+    {
+      "application": "420 Notifications",
+      "route": "Opt-in alerts",
+      "classification": "shared",
+      "trace": "The service derives notifications from registered sources and has no independent custody or settlement.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/config/420notifications-genesis.json"
+      ]
+    },
+    {
+      "application": "420 Search",
+      "route": "Discovery index",
+      "classification": "shared",
+      "trace": "Search presents indexed discovery information. The underlying services own their transactions and associated receipts.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/config/420search-genesis.json"
+      ]
+    },
+    {
+      "application": "420 Status",
+      "route": "Operational status feeds",
+      "classification": "shared",
+      "trace": "The status service reads operational health. Its availability and incident records create no payment obligations.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/config/420status-genesis.json"
+      ]
+    },
+    {
+      "application": "420 Verify",
+      "route": "Build verification",
+      "classification": "shared",
+      "trace": "The service verifies source-to-bytecode correspondence. Its canonical profile has no settlement contract.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/config/420verify-genesis.json"
+      ]
+    },
+    {
+      "application": "420 Wallet",
+      "route": "Client transaction orchestration",
+      "classification": "shared",
+      "trace": "Wallet coordinates account and application transactions. Fees and custody are attributable to the canonical account, network or application that settles each transaction.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/config/420wallet-genesis.json"
       ]
     }
   ]

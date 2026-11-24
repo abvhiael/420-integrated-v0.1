@@ -1,0 +1,58 @@
+name: BC-2.8 Deployed Labyrinth Acceptance Preparation and Read-Only Preflight
+on:
+  pull_request:
+    paths:
+      - 'bong-goggles/web/test/live-classics/labyrinth-cribbage.mjs'
+      - 'bong-goggles/web/test/live-classics/labyrinth-public-preflight.mjs'
+      - 'bong-goggles/web/test/labyrinth-deployed-release.test.js'
+      - '.github/workflows/bc-0-12-classics-live-acceptance.yml'
+      - '.github/workflows/bc-2-8-labyrinth-deployed.yml'
+      - 'docs/games/classics/BC-2-8-QUALIFICATION.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  release-lock-and-live-adapter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm exact commit and production adapter is parseable
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          node --check bong-goggles/web/test/live-classics/labyrinth-cribbage.mjs
+          node --check bong-goggles/web/test/live-classics/labyrinth-public-preflight.mjs
+          node --check bong-goggles/web/test/labyrinth-deployed-release.test.js
+      - name: Fail-closed 325-point live adapter, private projection and public flags regression
+        run: node --test bong-goggles/web/test/labyrinth-deployed-release.test.js
+      - name: Preserve unlaunched Classics and proof-dependent catalogue
+        working-directory: bong-goggles/web
+        run: |
+          node --test test/classics-release-qualification.test.js test/classics-menu.test.js
+          node scripts/classics-release-gate.mjs --audit
+  public-read-only-preflight:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Main-only public inspection; never simulate login or publish
+        env:
+          REF_NAME: ${{ github.ref }}
+        run: test "$REF_NAME" = 'refs/heads/main'
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Probe deployed Pages Labyrinth route, exact browser flags and same-origin Worker health
+        run: node bong-goggles/web/test/live-classics/labyrinth-public-preflight.mjs

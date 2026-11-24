@@ -710,6 +710,18 @@
         "config/genesis-consumer-services.json",
         "config/genesis-application-decision-2.json"
       ]
+    },
+    {
+      "application": "420Bet",
+      "route": "Paid poker tournament purchase fee",
+      "classification": "policy-exception",
+      "trace": "The approved policy places the whole buy-in in prize escrow and separately charges a rounded-down 3% fee. Before tournament finality the fee remains refundable. The prize module credits the development recipient at final prize allocation. Route qualification requires authenticated vault forwarding and founder claim evidence, and the fee must be excluded from the general waterfall basis.",
+      "sources": [
+        "docs/bet/BET-AUDIT-5C.1-TOURNAMENT-DECISIONS.md",
+        "docs/bet/BET-AUDIT-5C.1-TOURNAMENT-POLICY.md",
+        "contracts/src/bet/tournament/settlement/PokerTournamentPrizeModule420.sol",
+        "contracts/src/bet/tournament/settlement/PokerTournamentPrizeEscrow420.sol"
+      ]
     }
   ]
 }

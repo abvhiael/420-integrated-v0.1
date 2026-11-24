@@ -21,10 +21,10 @@ contract ProfitEpochSourceFixture420 is IBetProfitEpochSource420 {
 contract BetGovernedProfitEpoch420Test {
     VmProfitEpoch420 private constant vm = VmProfitEpoch420(address(uint160(uint256(keccak256("hevm cheat code")))));
     BetGovernedProfitEpoch420 private epoch;
-    ProfitEpochSourceFixture420[8] private fixtures;
+    ProfitEpochSourceFixture420[7] private fixtures;
 
     function setUp() public {
-        BetGovernedProfitEpoch420.Source[] memory inventory = new BetGovernedProfitEpoch420.Source[](8);
+        BetGovernedProfitEpoch420.Source[] memory inventory = new BetGovernedProfitEpoch420.Source[](7);
         for (uint256 i; i < inventory.length; ++i) {
             fixtures[i] = new ProfitEpochSourceFixture420();
             inventory[i] = BetGovernedProfitEpoch420.Source(BetGovernedProfitEpoch420.Kind(i), fixtures[i]);
@@ -37,7 +37,7 @@ contract BetGovernedProfitEpoch420Test {
         fixtures[2].set(IBetProfitEpochSource420.Totals(20, 0, 0, 0, 20, true));
         fixtures[4].set(IBetProfitEpochSource420.Totals(0, 30, 0, 0, 0, true));
         fixtures[5].set(IBetProfitEpochSource420.Totals(200, 0, 0, 200, 0, true));
-        fixtures[7].set(IBetProfitEpochSource420.Totals(0, 0, 10, 0, 0, true));
+        fixtures[uint256(BetGovernedProfitEpoch420.Kind.Expenses)].set(IBetProfitEpochSource420.Totals(0, 0, 10, 0, 0, true));
         vm.warp(epoch.nextClose());
         (, BetGovernedProfitEpoch420.Epoch memory first) = epoch.finalize();
         require(first.eligibleRevenue == 80 && first.developerReserve == 8, "net retained basis");
@@ -47,7 +47,7 @@ contract BetGovernedProfitEpoch420Test {
     }
 
     function testLossCarryAndRollbackWhenCashIsUnavailable() public {
-        fixtures[7].set(IBetProfitEpochSource420.Totals(0, 0, 20, 0, 0, true));
+        fixtures[uint256(BetGovernedProfitEpoch420.Kind.Expenses)].set(IBetProfitEpochSource420.Totals(0, 0, 20, 0, 0, true));
         vm.warp(epoch.nextClose());
         epoch.finalize();
         require(epoch.carriedLoss() == 20, "loss carry");
@@ -68,7 +68,7 @@ contract BetGovernedProfitEpoch420Test {
         vm.expectRevert(SystemAccess.Unauthorized.selector);
         vm.prank(address(0x1234));
         epoch.finalize();
-        fixtures[6].set(IBetProfitEpochSource420.Totals(0, 0, 0, 0, 0, false));
+        fixtures[uint256(BetGovernedProfitEpoch420.Kind.Sportsbook)].set(IBetProfitEpochSource420.Totals(0, 0, 0, 0, 0, false));
         vm.expectRevert(BetGovernedProfitEpoch420.UnreconciledSource.selector);
         epoch.finalize();
     }

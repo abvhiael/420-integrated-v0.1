@@ -22,7 +22,7 @@ interface IBetProfitEpochSource420 {
 /// @dev Adapters publish cumulative, custody-derived counters. Only protocol-owned receipts
 /// and withdrawals net of protected obligations may be certified as free protocol cash.
 contract BetGovernedProfitEpoch420 is SystemAccess {
-    enum Kind { Bankroll, SharedPools, PokerRake, Tournament, Sportsbook, Fantasy, Prediction, Expenses }
+    enum Kind { Bankroll, SharedPools, PokerRake, Tournament, Sportsbook, Fantasy, Expenses }
 
     struct Source {
         Kind kind;
@@ -40,7 +40,7 @@ contract BetGovernedProfitEpoch420 is SystemAccess {
     error UnreconciledSource();
     error EpochNotReady();
 
-    uint256 public constant REQUIRED_KINDS = 255;
+    uint256 public constant REQUIRED_KINDS = (1 << (uint256(Kind.Expenses) + 1)) - 1;
     address public immutable asset;
     uint64 public immutable duration;
     bytes32 public immutable inventoryHash;

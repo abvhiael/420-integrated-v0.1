@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'bong-goggles/web/test/live-classics/labyrinth-cribbage.mjs'
+      - 'bong-goggles/web/test/classics-live-acceptance.mjs'
       - 'bong-goggles/web/test/live-classics/labyrinth-public-preflight.mjs'
       - 'bong-goggles/web/test/labyrinth-deployed-release.test.js'
       - '.github/workflows/bc-0-12-classics-live-acceptance.yml'

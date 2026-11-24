@@ -14,6 +14,8 @@ import {
   EvmJsonRpcSource420,
   HttpJsonRpcTransport420
 } from '../dist/src/rpc-source.js';
+import { IndexerPublicApiAdapter420 } from '../dist/src/api-surface.js';
+import { routeIndexerHttp420 } from '../dist/src/http-transport.js';
 import { IndexerQueryService420 } from '../dist/src/query-service.js';
 const rpc = process.env.DEVCOMP_LOCAL_RPC;
 const artifactsPath = process.env.DEVCOMP_FOUNDRY_OUT;
@@ -127,9 +129,18 @@ const wrappedAddress = await wrapped.getAddress();
 await (await wrapped.deposit({ value: 80n })).wait();
 await (await wrapped.approve(vaultAddress, 80n)).wait();
 const tokenContribution = await (
-  await vault.contributeToken(wrappedAddress, app, id('canonical-token'), await vault.policyId(), 800n, 1000)
+  await vault.contributeToken(
+    wrappedAddress,
+    app,
+    id('canonical-token'),
+    await vault.policyId(),
+    800n,
+    1000
+  )
 ).wait();
-const tokenClaim = await (await splitter.connect(await provider.getSigner(2)).claimToken(wrappedAddress)).wait();
+const tokenClaim = await (
+  await splitter.connect(await provider.getSigner(2)).claimToken(wrappedAddress)
+).wait();
 assert.equal(await wrapped.balanceOf(founders[1]), 20n);
 const snapshot = await provider.send('evm_snapshot', []);
 const claim = await (
@@ -140,14 +151,19 @@ const rebuildSchema = schema + '_rebuild';
 const admin = new PostgresSql420({ connectionString });
 const open = async (name) => {
   await admin.query(`create schema ${name}`);
-  const store = new PostgresSql420({ connectionString, options: `-c search_path=${name}` });
+  const store = new PostgresSql420({
+    connectionString,
+    options: `-c search_path=${name}`
+  });
   for (const file of [
     '001-core-projections.sql',
     '003-genesis-projections.sql',
     '007-durable-recovery.sql',
     '008-finalized-recovery.sql'
   ]) {
-    await store.query(await readFile(new URL('../sql/' + file, import.meta.url), 'utf8'));
+    await store.query(
+      await readFile(new URL('../sql/' + file, import.meta.url), 'utf8')
+    );
   }
   return store;
 };
@@ -187,11 +203,22 @@ try {
   assert.equal(reorg.recoveredReorgDepth, 1);
   const events = await read();
   assert(!events.some((r) => r.tx_hash === claim.hash));
-  assert(events.some((r) => r.event_name === 'FounderCompensationClaimed' && r.tx_hash === tokenClaim.hash));
-  assert(events.some((r) =>
-    r.event_name === 'FounderTokenCompensationCredited' && r.tx_hash === tokenContribution.hash
-    && r.fields.token.toLowerCase() === wrappedAddress.toLowerCase() && r.fields.amount === '80'
-  ));
+  assert(
+    events.some(
+      (r) =>
+        r.event_name === 'FounderCompensationClaimed' &&
+        r.tx_hash === tokenClaim.hash
+    )
+  );
+  assert(
+    events.some(
+      (r) =>
+        r.event_name === 'FounderTokenCompensationCredited' &&
+        r.tx_hash === tokenContribution.hash &&
+        r.fields.token.toLowerCase() === wrappedAddress.toLowerCase() &&
+        r.fields.amount === '80'
+    )
+  );
   assert(
     events.some(
       (r) =>
@@ -206,10 +233,35 @@ try {
         r.tx_hash === replacement.hash
     )
   );
+  const response = await routeIndexerHttp420(
+    new IndexerPublicApiAdapter420(service),
+    'GET',
+    '/v1/protocols/events?chainId=420&protocol=420DevelopmentCompensation'
+  );
+  assert.equal(response.status, 200);
+  assert.equal(response.body.data.items.length, events.length);
+  assert(
+    response.body.data.items.some(
+      (event) =>
+        event.transactionHash === tokenContribution.hash &&
+        event.fields.compensationAmount === '80'
+    )
+  );
+  assert(
+    !response.body.data.items.some(
+      (event) => event.transactionHash === claim.hash
+    )
+  );
   rebuild = await open(rebuildSchema);
-  await (await createCompensationIndexer420(source, rebuild, pins, artifacts, opts)).runOnce();
+  await (
+    await createCompensationIndexer420(source, rebuild, pins, artifacts, opts)
+  ).runOnce();
   assert.deepEqual(
-    (await new IndexerQueryService420(rebuild).protocolEvents(420n, { protocol: '420DevelopmentCompensation' })).items,
+    (
+      await new IndexerQueryService420(rebuild).protocolEvents(420n, {
+        protocol: '420DevelopmentCompensation'
+      })
+    ).items,
     events
   );
   console.log(
@@ -226,7 +278,9 @@ try {
 } finally {
   await db.close();
   await rebuild?.close();
-  await admin.query(`drop schema if exists ${schema}, ${rebuildSchema} cascade`);
+  await admin.query(
+    `drop schema if exists ${schema}, ${rebuildSchema} cascade`
+  );
   await admin.close();
   provider.destroy();
 }

@@ -15,7 +15,7 @@ GEN-10.5 / VERIFY-0 through VERIFY-10 was historically qualified and merged thro
 - Current audit branch: `audit/420verify-20261003`
 - Current audit PR: `#503`
 - VERIFY-AUDIT-6 exact-head Level 1 qualification: implementation SHA `868095783962370149e685f6145c0163b84ba5e8`, run `37175301638`, job `111356576146` — passed
-- Current audit phase closeout: **pending VERIFY-AUDIT-8**
+- Current audit phase closeout: **VERIFY-AUDIT-8 COMPLETE** (qualified candidate `711ed3640a46298f1b508da0d11cc7c5f349cc7a`); PR #503 subsequently merged on 4 October 2026. Historical closeout statements that PR #503 remains open are no longer current.
 - Public testnet endpoint deployment: **pending**
 
 Implementation qualification and public deployment remain separate states. No production/testnet URL may be claimed until an actual deployment exists and the testnet readiness checks pass.

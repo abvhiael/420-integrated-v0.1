@@ -362,7 +362,12 @@ func (a *RulesAdapter) replayFromVerified(state json.RawMessage,prev int64,trace
   if item.Sequence!=prev+1||item.Sequence>1000000{return nil,ErrConflict}
   before:=sha256.Sum256(state)
   if item.BeforeHash!=hex.EncodeToString(before[:]){return nil,ErrConflict}
-  updated,_,_,_,e:=a.Apply(state,item.Seat,item.Action)
+  action,e:=a.chessReplayTiming(state,item.Action)
+  if e!=nil{return nil,ErrConflict}
+  var updated json.RawMessage
+  if action!=nil{
+   updated,_,_,_,e=a.applyChessTime(state,item.Seat,*action)
+  }else{updated,_,_,_,e=a.Apply(state,item.Seat,item.Action)}
   if e!=nil{return nil,ErrConflict}
   after:=sha256.Sum256(updated)
   if item.AfterHash!=hex.EncodeToString(after[:]){return nil,ErrConflict}

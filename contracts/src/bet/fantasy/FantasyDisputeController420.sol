@@ -6,6 +6,10 @@ import "../../apps/Identity420.sol";
 import "../../interfaces/IOracle420.sol";
 import "./IFantasyDisputeHost420.sol";
 
+interface IERC20FantasyApproval420 {
+    function approve(address spender, uint256 amount) external returns (bool);
+}
+
 interface IFantasyBondToken420 {
     function balanceOf(address) external view returns (uint256);
     function transfer(address, uint256) external returns (bool);
@@ -167,6 +171,24 @@ contract FantasyDisputeController420 {
         entered = 1;
         _;
         entered = 0;
+    }
+
+    struct SettlementStatus {
+        PoolState state;
+        uint256 correctionEnd;
+        uint256 challengeEnd;
+        uint256 deadline;
+        uint256 pending;
+        bytes32 candidate;
+        bool invalidated;
+    }
+
+    function settlementStatus(bytes32 id) external view returns (SettlementStatus memory) {
+        Pool storage pool = pools[id];
+        return SettlementStatus(
+            pool.state, pool.correctionEnd, pool.challengeEnd, pool.deadline,
+            pool.pending, pool.candidate, pool.invalidated
+        );
     }
 
     function poolOf(bytes32 id) external view returns (Pool memory) {

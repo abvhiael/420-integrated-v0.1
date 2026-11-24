@@ -51,12 +51,38 @@ abstract contract FantasyFormatEscrowBase420 is IFantasyDisputeHost420 {
     event Calculated(bytes32 indexed pool,uint64 indexed index,uint64 revision,int256 score,bool qualifies,uint256 multiplier);
     event Closed(bytes32 indexed pool,bool canceled);
     event Withdrawal(address indexed beneficiary,uint256 amount);
+    // The queue contains only finalized pools with a nonzero reserved fee.
+    DevelopmentCompensationVault420 public immutable developmentVault;
+    uint256 private reservedDevelopment;
+    bytes32[] private developmentQueue;
+    uint256 private developmentCursor;
+
+    function forwardDevelopment() external guarded { _forwardNextDevelopment(); }
+
+    function _forwardNextDevelopment() private {
+        if (developmentCursor == developmentQueue.length) revert Invalid();
+        bytes32 id = developmentQueue[developmentCursor++];
+        Pool storage p = pools[id];
+        uint256 amount = _house(id) ? p.paidDevelopment : p.fee;
+        uint256 gross = _house(id) ? p.retained : configs[id].entryFee * p.qualified;
+        credit[devFund] -= amount;
+        reservedDevelopment -= amount;
+        totalLiability -= amount;
+        _approveDevelopment(0);
+        _approveDevelopment(amount);
+        developmentVault.contributeFantasy(asset, id, gross);
+        _approveDevelopment(0);
+    }
+
+    function _approveDevelopment(uint256 amount) private {
+        if (!IERC20FantasyApproval420(asset).approve(address(developmentVault), amount)) revert Invalid();
+    }
     constructor(address book_,address disputes_,address admission_,address dev_){
         if(book_.code.length==0 || disputes_.code.length==0 || admission_.code.length==0 || dev_.code.length==0)revert Invalid();
         book=FantasyFormatBook420(book_);disputes=FantasyDisputeController420(disputes_);admission=FantasyAdmission420(admission_);
         if(address(book.disputes())!=disputes_||address(admission.slates())!=address(book.slates()) || address(disputes.authorization())!=address(book.slates().authorization()) || address(disputes.oracle())!=address(book.slates().oracle()) || address(disputes.identities())!=address(admission.identities()))revert Invalid();
         asset=disputes.asset();if(asset==address(0))revert Invalid();
-        DevelopmentCompensationVault420 vault=DevelopmentCompensationVault420(payable(dev_));
+        DevelopmentCompensationVault420 vault=DevelopmentCompensationVault420(payable(dev_));developmentVault=vault;
         if(address(vault.capabilityRegistry())!=address(disputes.authorization().capabilityRegistry()))revert Invalid();
         devFund=vault.beneficiary();if(devFund==address(0)||devFund==address(this))revert Invalid();
         rankings=new FantasyRankingBook420(address(this));payouts=new FantasyPayoutPolicy420(address(this));receiptVerifier=new FantasyFormatReceipt420(address(book.slates()));
@@ -66,7 +92,7 @@ abstract contract FantasyFormatEscrowBase420 is IFantasyDisputeHost420 {
     function configOf(bytes32 id) external view returns(Config memory){return configs[id];}
     function entryOf(bytes32 id,uint64 i) external view returns(Entry memory){return entries[id][i];}
     function _house(bytes32 id) internal view virtual returns(bool);
-    function _slate(bytes32 id) private view returns(FantasySlateBook420.Slate memory){return book.slates().slateOf(book.configOf(configs[id].format).slate);}
+    function _slate(bytes32 id) private view returns(FantasySlateBook420.SettlementSlate memory){return book.slates().settlementSlate(book.configOf(configs[id].format).slate);}
     function _receive(uint256 amount) private{
         uint256 before_=IFantasyBondToken420(asset).balanceOf(address(this));
         if(amount!=0 && !IFantasyBondToken420(asset).transferFrom(msg.sender,address(this),amount))revert Transfer();
@@ -83,7 +109,7 @@ abstract contract FantasyFormatEscrowBase420 is IFantasyDisputeHost420 {
         admission.requireController(launcherSubject,msg.sender);
         if(admission.currentUserKey(launcherSubject)==0 || pools[id].state!=State.NONE || id==0 || book.manifest(c.format)==0 || c.candidateFeed==0 || (c.entryFee!=0 && c.freePrize!=0))revert Invalid();
         FantasyFormatBook420.Config memory f=book.configOf(c.format);
-        FantasySlateBook420.Slate memory s=book.slates().slateOf(f.slate);
+        FantasySlateBook420.SettlementSlate memory s=book.slates().settlementSlate(f.slate);
         if(block.timestamp>=s.lockAt || (s.earlyStart!=0 && block.timestamp>=s.earlyStart))revert Invalid();
         bool house=f.kind==FantasyFormatBook420.Kind.HOUSE;
         if(house!=_house(id))revert Invalid();
@@ -94,7 +120,7 @@ abstract contract FantasyFormatEscrowBase420 is IFantasyDisputeHost420 {
         _receive(bankroll+c.freePrize);emit Created(id,p.manifest,c);
     }
     function _open(bytes32 id) private view{
-        FantasySlateBook420.Slate memory s=_slate(id);
+        FantasySlateBook420.SettlementSlate memory s=_slate(id);
         if(pools[id].state!=State.OPEN || block.timestamp>=(s.earlyStart==0?s.lockAt:s.earlyStart))revert Invalid();
     }
     function commitmentOf(bytes32 id,bytes32 subject,uint64 nonce,bytes calldata selection,bytes32 salt) public view returns(bytes32){
@@ -132,22 +158,23 @@ abstract contract FantasyFormatEscrowBase420 is IFantasyDisputeHost420 {
         emit Submitted(id,index,subject,sub.nonce,sub.commitment,sub.envelope);
     }
     function reveal(bytes32 id,uint64 index,bytes calldata selection,bytes32 salt) external guarded{
-        Pool storage p=pools[id];Entry storage e=entries[id][index];FantasySlateBook420.Slate memory s=_slate(id);
+        Pool storage p=pools[id];Entry storage e=entries[id][index];FantasySlateBook420.SettlementSlate memory s=_slate(id);
         if(p.state!=State.OPEN||block.timestamp<s.lockAt||block.timestamp>s.lockAt+1 hours||e.subject==0||e.revealed||commitmentOf(id,e.subject,e.nonce,selection,salt)!=e.commitment||!book.validate(configs[id].format,selection))revert Invalid();
         e.revealed=true;e.selection=selection;p.revealed++;emit Published(id,index,selection,salt);
     }
     function begin(bytes32 id) external guarded{
-        Pool storage p=pools[id];FantasySlateBook420.Slate memory s=_slate(id);
+        Pool storage p=pools[id];FantasySlateBook420.SettlementSlate memory s=_slate(id);
         if(p.state!=State.OPEN||p.revealed!=p.count||s.resolvedAt==0||s.eligibleGames==0||(s.earlyStart!=0&&p.lastAccepted>=s.earlyStart)||(!_house(id)&&p.count<2))revert Invalid();
         p.state=State.REVIEW;
-        if(!_house(id))disputes.startCorrection(id,s.resolvedAt);
+        if(!_house(id))disputes.startCorrection(id,uint64(s.resolvedAt));
     }
     function beginRevision(bytes32 id) external guarded{
+        if(_house(id))revert Invalid();
         Pool storage p=pools[id];FantasyFormatBook420.Report memory r=book.reportOf(configs[id].format);
-        if(p.state!=State.REVIEW||_house(id)||r.revision<=p.revision)revert Invalid();
-        if(disputes.poolOf(id).state!=FantasyDisputeController420.PoolState.REVIEW)revert Invalid();
+        if(p.state!=State.REVIEW||r.revision<=p.revision)revert Invalid();
+        if(disputes.settlementStatus(id).state!=FantasyDisputeController420.PoolState.REVIEW)revert Invalid();
         if(block.timestamp>=_slate(id).resolvedAt+1 days){
-            FantasyDisputeController420.Pool memory d=disputes.poolOf(id);
+            FantasyDisputeController420.SettlementStatus memory d=disputes.settlementStatus(id);
             if(!d.invalidated||d.pending!=0||block.timestamp<d.challengeEnd||block.timestamp+1 days>d.deadline)revert Invalid();
         }
         p.revision=r.revision;p.scanned=0;p.qualified=0;p.publishedRevision=0;
@@ -183,11 +210,11 @@ abstract contract FantasyFormatEscrowBase420 is IFantasyDisputeHost420 {
     }
     function candidateIsCurrent(bytes32 id,bytes32 candidate) external view returns(bool){
         bytes32 parent=_house(id)?parentPool[id]:bytes32(0);
-        bool finalized=disputes.poolOf(id).state==FantasyDisputeController420.PoolState.FINAL;
+        bool finalized=disputes.settlementStatus(id).state==FantasyDisputeController420.PoolState.FINAL;
         if(parent!=0){Entry storage e=entries[parent][childEntry[id]];return pools[parent].state==State.REVIEW&&!e.terminal&&e.candidate==candidate&&(finalized||(e.revision==book.reportOf(configs[parent].format).revision&&book.reportIsCurrent(configs[parent].format)&&_timing(parent)));}
         Pool storage p=pools[id];return p.state==State.REVIEW&&p.publishedRevision!=0&&p.publishedRevision==p.revision&&p.candidate==candidate&&(finalized||(book.reportOf(configs[id].format).revision==p.revision&&book.reportIsCurrent(configs[id].format)&&_timing(id)));
     }
-    function _timing(bytes32 id) private view returns(bool){FantasySlateBook420.Slate memory s=_slate(id);return s.resolvedAt!=0&&s.eligibleGames!=0&&(s.earlyStart==0||pools[id].lastAccepted<s.earlyStart);}
+    function _timing(bytes32 id) private view returns(bool){FantasySlateBook420.SettlementSlate memory s=_slate(id);return s.resolvedAt!=0&&s.eligibleGames!=0&&(s.earlyStart==0||pools[id].lastAccepted<s.earlyStart);}
     function isEntrant(bytes32 id,bytes32 subject) external view returns(bool){bytes32 parent=parentPool[id];return entryForSubject[parent==0?id:parent][subject]!=0;}
     function isInterested(bytes32 id,bytes32 subject) external view returns(bool){
         bytes32 parent=parentPool[id];if(parent==0)parent=id;
@@ -197,15 +224,16 @@ abstract contract FantasyFormatEscrowBase420 is IFantasyDisputeHost420 {
     function settle(bytes32 id) external guarded{
         Pool storage p=pools[id];
         if(_house(id)||p.state!=State.REVIEW||!disputes.canSettle(id)||!this.candidateIsCurrent(id,p.candidate))revert Invalid();
-        p.state=State.SETTLED;credit[devFund]+=p.fee;emit Closed(id,false);
+        p.state=State.SETTLED;credit[devFund]+=p.fee;reservedDevelopment+=p.fee;if(p.fee!=0)developmentQueue.push(id);emit Closed(id,false);
     }
     function prepareHouse(bytes32 id,uint64 index,bytes calldata witnesses) external guarded returns(FantasyDisputeController420.Candidate memory c){
+        if(!_house(id))revert Invalid();
         Pool storage p=pools[id];Entry storage e=entries[id][index];FantasyFormatBook420.Report memory r=book.reportOf(configs[id].format);
-        if(!_house(id)||p.state!=State.REVIEW||!e.revealed||e.terminal||r.revision<=e.revision)revert Invalid();
+        if(p.state!=State.REVIEW||!e.revealed||e.terminal||r.revision<=e.revision)revert Invalid();
         (e.score,e.qualifies,e.multiplier)=book.calculate(configs[id].format,e.selection,witnesses);e.revision=r.revision;
-        bytes32 child=houseDisputeId(id,index);FantasyDisputeController420.Pool memory d=disputes.poolOf(child);
+        bytes32 child=houseDisputeId(id,index);FantasyDisputeController420.SettlementStatus memory d=disputes.settlementStatus(child);
         if(d.state!=FantasyDisputeController420.PoolState.REGISTERED&&d.state!=FantasyDisputeController420.PoolState.REVIEW)revert Invalid();
-        if(d.state==FantasyDisputeController420.PoolState.REGISTERED)disputes.startCorrection(child,_slate(id).resolvedAt);
+        if(d.state==FantasyDisputeController420.PoolState.REGISTERED)disputes.startCorrection(child,uint64(_slate(id).resolvedAt));
         c=houseCandidateOf(id,index);
     }
     function houseCandidateOf(bytes32 id,uint64 index) public view returns(FantasyDisputeController420.Candidate memory){
@@ -220,7 +248,7 @@ abstract contract FantasyFormatEscrowBase420 is IFantasyDisputeHost420 {
         FantasyDisputeController420.Candidate memory c=houseCandidateOf(id,index);disputes.publishCandidate(child,c);e.candidate=disputes.candidateDigest(child,c);
     }
     function refreshUnchangedHouse(bytes32 id,uint64 index,bytes calldata witnesses) external guarded{
-        Entry storage e=entries[id][index];FantasyDisputeController420.Pool memory d=disputes.poolOf(houseDisputeId(id,index));
+        Entry storage e=entries[id][index];FantasyDisputeController420.SettlementStatus memory d=disputes.settlementStatus(houseDisputeId(id,index));
         if(!_house(id)||pools[id].state!=State.REVIEW||e.terminal||e.candidate==0||d.state!=FantasyDisputeController420.PoolState.REVIEW||d.invalidated)revert Invalid();
         (int256 score,bool qualifies,uint256 multiplier)=book.calculate(configs[id].format,e.selection,witnesses);
         if(score!=e.score||qualifies!=e.qualifies||multiplier!=e.multiplier)revert Invalid();
@@ -231,22 +259,22 @@ abstract contract FantasyFormatEscrowBase420 is IFantasyDisputeHost420 {
         if(!_house(id)||p.state!=State.REVIEW||e.terminal||!disputes.canSettle(child)||!this.candidateIsCurrent(child,e.candidate))revert Invalid();
         e.terminal=true;p.reserve-=e.reserve;p.completed++;
         uint256 amount=configs[id].entryFee*e.multiplier;e.amount=amount;credit[e.beneficiary]+=amount;p.spent+=amount;
-        if(e.qualifies){p.retained+=configs[id].entryFee;uint256 due=(p.retained/100)*3+(p.retained%100)*3/100;uint256 delta=due-p.paidDevelopment;credit[devFund]+=delta;p.spent+=delta;p.paidDevelopment=due;}
+        if(e.qualifies){p.retained+=configs[id].entryFee;uint256 due=(p.retained/100)*3+(p.retained%100)*3/100;uint256 delta=due-p.paidDevelopment;credit[devFund]+=delta;reservedDevelopment+=delta;p.spent+=delta;p.paidDevelopment=due;}
         // All obligations remain in totalLiability until the fixed beneficiary withdraws.
     }
     function _cancel(bytes32 id,bytes32 reason) private{
         Pool storage p=pools[id];if(p.state==State.CANCELED||p.state==State.SETTLED||p.state==State.NONE)revert Invalid();
         p.state=State.CANCELED;
-        if(!_house(id)){if(disputes.poolOf(id).state!=FantasyDisputeController420.PoolState.CANCELED)disputes.cancelByHost(id,reason);if(configs[id].freePrize!=0)credit[p.launcher]+=configs[id].freePrize;}
+        if(!_house(id)){if(disputes.settlementStatus(id).state!=FantasyDisputeController420.PoolState.CANCELED)disputes.cancelByHost(id,reason);if(configs[id].freePrize!=0)credit[p.launcher]+=configs[id].freePrize;}
         emit Closed(id,true);
     }
     function recover(bytes32 id) external guarded{
-        Pool storage p=pools[id];FantasySlateBook420.Slate memory s=_slate(id);
+        Pool storage p=pools[id];FantasySlateBook420.SettlementSlate memory s=_slate(id);
         if((s.earlyStart!=0&&p.lastAccepted>=s.earlyStart)||(block.timestamp>s.lockAt+1 hours&&p.revealed!=p.count)||(s.resolvedAt!=0&&s.eligibleGames==0)||(!_house(id)&&block.timestamp>=s.lockAt&&p.count<2)){
             _cancel(id,keccak256("TIMING_PUBLICATION_OR_MINIMUM"));return;
         }
         if(!_house(id)){
-            FantasyDisputeController420.Pool memory d=disputes.poolOf(id);
+            FantasyDisputeController420.SettlementStatus memory d=disputes.settlementStatus(id);
             if(d.state==FantasyDisputeController420.PoolState.CANCELED||(p.scanned==p.count&&p.revision!=0&&p.qualified<2)){_cancel(id,keccak256("DISPUTE_OR_QUALIFICATION"));return;}
             if(d.state==FantasyDisputeController420.PoolState.REVIEW&&block.timestamp>=d.deadline){disputes.expire(id);_cancel(id,keccak256("DEADLINE"));return;}
         }
@@ -255,25 +283,26 @@ abstract contract FantasyFormatEscrowBase420 is IFantasyDisputeHost420 {
     }
     function recoverHouse(bytes32 id,uint64 index) external guarded{
         Pool storage p=pools[id];Entry storage e=entries[id][index];if(!_house(id)||e.subject==0||e.terminal)revert Invalid();
-        bytes32 child=houseDisputeId(id,index);FantasyDisputeController420.Pool memory d=disputes.poolOf(child);
+        bytes32 child=houseDisputeId(id,index);FantasyDisputeController420.SettlementStatus memory d=disputes.settlementStatus(child);
         if(p.state!=State.CANCELED){
             if(d.state==FantasyDisputeController420.PoolState.REVIEW&&block.timestamp>=d.deadline)disputes.expire(child);
             else if(d.state!=FantasyDisputeController420.PoolState.CANCELED && block.timestamp<uint256(_slate(id).cutoff)+6 days)revert Invalid();
         }
-        d=disputes.poolOf(child);if(d.state!=FantasyDisputeController420.PoolState.CANCELED)disputes.cancelByHost(child,keccak256("HOUSE_RECOVERY"));
+        d=disputes.settlementStatus(child);if(d.state!=FantasyDisputeController420.PoolState.CANCELED)disputes.cancelByHost(child,keccak256("HOUSE_RECOVERY"));
         e.terminal=true;e.amount=configs[id].entryFee;p.reserve-=e.reserve;p.completed++;p.spent+=e.amount;credit[e.beneficiary]+=e.amount;
     }
     function releaseHouseBankroll(bytes32 id) external guarded{
         Pool storage p=pools[id];
         if(!_house(id)||p.bankReleased||p.completed!=p.count||p.reserve!=0||block.timestamp<_slate(id).lockAt)revert Invalid();
-        p.bankReleased=true;if(p.state!=State.CANCELED)p.state=State.SETTLED;uint256 available=p.bankroll+p.gross-p.spent;credit[p.launcher]+=available;
+        p.bankReleased=true;if(p.paidDevelopment!=0)developmentQueue.push(id);if(p.state!=State.CANCELED)p.state=State.SETTLED;uint256 available=p.bankroll+p.gross-p.spent;credit[p.launcher]+=available;
     }
     function collect(bytes32 id,uint64 index) external guarded{
         Pool storage p=pools[id];Entry storage e=entries[id][index];if(_house(id)||e.subject==0||e.claimed||(p.state!=State.CANCELED&&p.state!=State.SETTLED))revert Invalid();
         e.claimed=true;uint256 amount=p.state==State.CANCELED||!e.qualifies?configs[id].entryFee:rankings.payoutOf(id,p.publishedRevision,e.dense);credit[e.beneficiary]+=amount;
     }
     function withdrawCredit() external guarded{
-        uint256 amount=credit[msg.sender];if(amount==0)revert Invalid();credit[msg.sender]=0;totalLiability-=amount;
+        if(msg.sender==devFund&&credit[msg.sender]==reservedDevelopment){_forwardNextDevelopment();return;}
+        uint256 amount=credit[msg.sender]-(msg.sender==devFund?reservedDevelopment:0);if(amount==0)revert Invalid();credit[msg.sender]-=amount;totalLiability-=amount;
         uint256 before_=IFantasyBondToken420(asset).balanceOf(msg.sender);
         if(!IFantasyBondToken420(asset).transfer(msg.sender,amount)||IFantasyBondToken420(asset).balanceOf(msg.sender)!=before_+amount)revert Transfer();emit Withdrawal(msg.sender,amount);
     }

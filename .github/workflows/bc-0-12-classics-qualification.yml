@@ -5,6 +5,7 @@ on:
       - '.github/workflows/bc-0-12-classics-qualification.yml'
       - '.github/workflows/bc-0-12-classics-live-acceptance.yml'
       - 'services/bong-goggles-account-social/classic_*.go'
+      - 'services/bong-goggles-account-social/migrations/011_classic_chess_untimed.sql'
       - 'bong-goggles/web/core/classics.js'
       - 'bong-goggles/web/core/classic-*.js'
       - 'bong-goggles/web/core/tabletop-components.js'
@@ -20,6 +21,7 @@ on:
       - '.github/workflows/bc-0-12-classics-qualification.yml'
       - '.github/workflows/bc-0-12-classics-live-acceptance.yml'
       - 'services/bong-goggles-account-social/classic_*.go'
+      - 'services/bong-goggles-account-social/migrations/011_classic_chess_untimed.sql'
       - 'bong-goggles/web/core/classics.js'
       - 'bong-goggles/web/core/classic-*.js'
       - 'bong-goggles/web/core/tabletop-components.js'
@@ -96,7 +98,7 @@ jobs:
       - name: Reproduce 420ID two-account, multiplayer/AI, failure injection and recovery
         run: |
           go test -race -count=1 -tags account420_integration \
-            -run '^(TestBC12|TestBC11|TestBC08DeterministicBotVersusBotSimulation|TestBC06SessionMovesReplaysPrivacyAndRestart)' \
+            -run '^(TestBC32|TestBC12|TestBC11|TestBC08DeterministicBotVersusBotSimulation|TestBC06SessionMovesReplaysPrivacyAndRestart)' \
             ./services/bong-goggles-account-social ./cmd/bong-goggles-social
       - name: Vet and build account-social serving boundary
         run: |

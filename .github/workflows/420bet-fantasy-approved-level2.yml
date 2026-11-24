@@ -9,6 +9,14 @@ on:
       - 'contracts/script/fantasy/**'
       - 'scripts/fantasy/**'
       - '.github/workflows/420bet-fantasy-approved-level2.yml'
+  pull_request:
+    paths:
+      - 'contracts/src/revenue/DevelopmentCompensationVault420.sol'
+      - 'contracts/src/bet/fantasy/**'
+      - 'contracts/test/fantasy*/**'
+      - 'clients/420bet-fantasy/**'
+      - 'scripts/fantasy/**'
+      - '.github/workflows/420bet-fantasy-approved-level2.yml'
   workflow_dispatch:
 permissions:
   contents: read

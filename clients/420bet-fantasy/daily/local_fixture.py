@@ -33,6 +33,13 @@ class LocalFixture:
         end=now+7*86400 if valid_until is None else int(valid_until)
         if not now<end<=now+7*86400:raise ValueError('local authority must be a bounded lease')
         self.nonce+=1;return self.tx(self.cap.functions.createGrant(k256(encode(['string','uint256'],['daily-local-grant',self.nonce])),principal,k256(b'420.BET.CORE'),action,scope,0,0,0,now,end))
+    def grant_fantasy_source(self,host):
+        component=k256(b'420/REVENUE/DEVELOPMENT_COMPENSATION/COMPONENT/V1')
+        action=self.vault.functions.fantasyContributionAction().call()
+        scope=k256(encode(['string','bytes32'],['420/REVENUE/DEVELOPMENT_COMPENSATION/SCOPE/SOURCE/V1',self.vault.functions.fantasyApplicationId().call()]))
+        self.nonce+=1
+        now=self.w3.eth.get_block('latest').timestamp
+        self.tx(self.cap.functions.createGrant(k256(encode(['string','uint256'],['fantasy-source',self.nonce])),host.address,component,action,scope,0,0,0,now,0))
     def advance(self,timestamp):
         current=self.w3.eth.get_block('latest').timestamp
         if timestamp>current:self.w3.provider.make_request('evm_increaseTime',[timestamp-current])
@@ -58,6 +65,8 @@ class LocalFixture:
         self.disputes=self.deploy('FantasyDisputeController420',self.auth.address,self.identity.address,self.router.address,self.resolver_type,self.token.address,self.accounts[9])
         self.book=self.deploy('FantasySlateBook420',self.auth.address,self.router.address);self.scorer=self.deploy('FantasyNHLScoring420');self.vault=self.deploy('DevelopmentCompensationVault420',self.cap.address,self.accounts[8])
         self.engine=self.deploy('FantasyContestEngine420',self.disputes.address,self.book.address,self.scorer.address,self.vault.address,self.issuer,self.user_type)
+        self.tx(self.cap.functions.registerProtocolComponent(k256(b'420/REVENUE/DEVELOPMENT_COMPENSATION/COMPONENT/V1'),self.admin))
+        self.grant_fantasy_source(self.engine)
         validator=Account.create();publisher=Account.create();encryption=ECC.generate(curve='Curve25519')
         for name,data in [('validator.key',validator.key.hex()),('publisher.key',publisher.key.hex()),('encryption.pem',encryption.export_key(format='PEM'))]:
             (self.private/name).write_text(data,encoding='utf-8');os.chmod(self.private/name,0o600)

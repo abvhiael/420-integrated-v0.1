@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {withAccountSocialBuildFlags,resolveClassicBuildFlags,ACCOUNT_SOCIAL_BUILD_FLAG,CLASSIC_ROOMS_BUILD_FLAG} from '../scripts/account-social-build-config.mjs';
+import {withAccountSocialBuildFlags,resolveClassicBuildFlags,ACCOUNT_SOCIAL_BUILD_FLAG,CLASSIC_ROOMS_BUILD_FLAG,resolveChessBuildFlag} from '../scripts/account-social-build-config.mjs';
 import {validateRuntimeConfig} from '../core/runtime-config.js';
 
 const example=JSON.parse(await readFile(new URL('../runtime-config.example.json',import.meta.url),'utf8'));
@@ -81,4 +81,19 @@ test('BC-1.8 production Pages main activates Classic rooms and messages only wit
  assert.equal(withAccountSocialBuildFlags(example,'true',enabled.rooms,enabled.communications).features.classicCommunications,true);
  const disabled=set({account:'true',pages:'1',branch:'main',rooms:'false',communications:'false'});
  assert.equal(withAccountSocialBuildFlags(example,'true',disabled.rooms,disabled.communications).features.classicCommunications,false);
+});
+
+test('BC-3.8 owner-authorized Pages release remains explicit and rollback safe',()=>{
+ const approved={account:'true',rooms:'true',communications:'true',pages:'1',branch:'main'};
+ assert.equal(resolveChessBuildFlag(approved),'true');
+ assert.equal(resolveChessBuildFlag({...approved,chess:'false'}),'false');
+ for(const change of [{account:'false'},{rooms:'false'},{communications:'false'},{pages:'0'},{branch:'preview'}]){
+  assert.equal(resolveChessBuildFlag({...approved,...change}),'false');
+  assert.throws(()=>resolveChessBuildFlag({...approved,...change,chess:'true'}));
+ }
+ const config=withAccountSocialBuildFlags({...example,environment:'production'},'true','true','true','true');
+ assert.equal(validateRuntimeConfig(config).features.chessRestricted,true);
+ assert.equal(validateRuntimeConfig({...config,features:{...config.features,accountSocial:false}}).features.chessRestricted,false);
+ assert.equal(validateRuntimeConfig({...config,features:{...config.features,classicCommunications:false}}).features.chessRestricted,false);
+ assert.equal(config.features.accountMonetization,false);
 });

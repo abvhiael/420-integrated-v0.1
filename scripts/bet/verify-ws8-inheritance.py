@@ -83,6 +83,9 @@ subprocess.run(["git", "fetch", "--no-tags", "origin", REPLACEMENT], check=True)
 # own qualification workflows remain required independently.
 financial_related = {
     "contracts/src/bet/BetCasinoProfitAccounting420.sol",
+    "contracts/src/bet/BetCustodyProfitEpochSources420.sol",
+    "contracts/src/bet/PokerSeatLedger420.sol",
+    "contracts/test/BetPokerSeatLedger53.t.sol",
     "contracts/src/bet/BetFantasyProfitEpochSource420.sol",
     "contracts/src/bet/BetGenesisCapitalization420.sol",
     "contracts/src/bet/BetGovernedProfitEpoch420.sol",
@@ -96,6 +99,11 @@ financial_related = {
     "contracts/test/BetTerminalPathInvariant420.t.sol",
 }
 other_application = {
+    "contracts/src/bet/sports/SportsFundedTickets420.sol",
+    "contracts/test/sports-5d4/SportsFundedTickets420.t.sol",
+    "contracts/src/bet/tournament/settlement/PokerTournamentFinanceState420.sol",
+    "contracts/src/bet/tournament/settlement/PokerTournamentPrizeModule420.sol",
+    "contracts/test/tournament-5c7/PokerTournamentPrizes420.t.sol",
     "contracts/src/bet/fantasy/FantasyContestEngine420.sol",
     "contracts/src/bet/fantasy/FantasyDisputeController420.sol",
     "contracts/src/bet/fantasy/FantasyFormatEscrow420.sol",

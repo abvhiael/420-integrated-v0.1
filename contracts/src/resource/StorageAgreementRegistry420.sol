@@ -51,6 +51,16 @@ contract StorageAgreementRegistry420 is I420System {
     StorageCapacityRegistry420 public immutable capacity;
 
     mapping(bytes32 => Agreement) private _agreements;
+    mapping(bytes32 => bytes32) public collateralReservation;
+    mapping(bytes32 => bytes32) public settlementForAgreement;
+    mapping(bytes32 => bool) public settlementFinalized;
+    mapping(bytes32 => bool) public collateralReleased;
+    mapping(bytes32 => bytes32) public agreementForCommitment;
+    address public settlementController;
+    bytes32 public settlementControllerCodeHash;
+    event AgreementSettlementBound(bytes32 indexed agreementId, bytes32 indexed settlementId);
+    event AgreementSettlementFinalized(bytes32 indexed agreementId, bytes32 indexed settlementId);
+    event AgreementCollateralReleased(bytes32 indexed agreementId);
 
     error ZeroAddress();
     error InvalidAgreement();
@@ -142,6 +152,7 @@ contract StorageAgreementRegistry420 is I420System {
 
         ResourceOfferRegistry420.Offer memory offer = offers.getOffer(offerId);
         if (offer.serviceId != ResourceIds420.SERVICE_STORE || !offers.isEffective(offerId)) revert InvalidStoreOffer();
+        if (sizeBytes > offer.maxUnits) revert InvalidStoreOffer();
         if (offer.validUntil != 0 && offer.validUntil < startTime) revert InvalidStoreOffer();
         if (!schemes.isActive(proofSchemeId)) revert InactiveProofScheme();
 
@@ -204,6 +215,12 @@ contract StorageAgreementRegistry420 is I420System {
                 || commitment.endTime != agreement.endTime
         ) revert CommitmentMismatch();
 
+        if (agreementForCommitment[commitmentId] != bytes32(0)) revert CommitmentMismatch();
+        if (agreement.sizeBytes > offer.maxUnits) revert InvalidStoreOffer();
+        collateralReservation[agreementId] = providers.collateral().reserveExposure(
+            node.providerId, agreementId, uint256(agreement.sizeBytes) * uint256(offer.unitPrice420)
+        );
+        agreementForCommitment[commitmentId] = agreementId;
         agreement.commitmentId = commitmentId;
         agreement.capacityReservationId = capacityReservationId;
         agreement.state = State.ACTIVE;
@@ -223,6 +240,53 @@ contract StorageAgreementRegistry420 is I420System {
         if (agreement.state != State.ACTIVE || block.timestamp <= agreement.endTime) revert InvalidState();
         agreement.state = State.COMPLETED;
         emit StorageAgreementCompleted(agreementId);
+        _releaseIfDischarged(agreementId, agreement);
+    }
+
+    function bindSettlementController(address controller) external {
+        if (msg.sender != providers.governanceTimelock() || settlementController != address(0)
+            || controller.code.length == 0) revert Unauthorized();
+        settlementController = controller;
+        settlementControllerCodeHash = controller.codehash;
+    }
+
+    function registerSettlement(bytes32 agreementId, bytes32 settlementId) external {
+        _requireSettlementController();
+        Agreement storage a = _get(agreementId);
+        if (a.state != State.ACTIVE || block.timestamp >= a.startTime || settlementId == bytes32(0)
+            || settlementForAgreement[agreementId] != bytes32(0) || collateralReservation[agreementId] == bytes32(0))
+            revert InvalidState();
+        settlementForAgreement[agreementId] = settlementId;
+        emit AgreementSettlementBound(agreementId, settlementId);
+    }
+
+    function finalizeSettlement(bytes32 agreementId, bytes32 settlementId) external {
+        _requireSettlementController();
+        Agreement storage a = _get(agreementId);
+        if (settlementId == bytes32(0) || settlementForAgreement[agreementId] != settlementId
+            || settlementFinalized[agreementId]) revert InvalidState();
+        settlementFinalized[agreementId] = true;
+        emit AgreementSettlementFinalized(agreementId, settlementId);
+        _releaseIfDischarged(agreementId, a);
+    }
+
+    function _requireSettlementController() private view {
+        if (msg.sender != settlementController || msg.sender.codehash != settlementControllerCodeHash) revert Unauthorized();
+    }
+
+    function releaseDischargedAgreement(bytes32 agreementId) external {
+        Agreement storage a = _get(agreementId);
+        _releaseIfDischarged(agreementId, a);
+        if (!collateralReleased[agreementId]) revert InvalidState();
+    }
+
+    function _releaseIfDischarged(bytes32 agreementId, Agreement storage a) private {
+        if (collateralReleased[agreementId] || a.state != State.COMPLETED
+            || block.timestamp <= commitments.collateralReleaseAfter(a.commitmentId)
+            || (settlementForAgreement[agreementId] != bytes32(0) && !settlementFinalized[agreementId])) return;
+        collateralReleased[agreementId] = true;
+        providers.collateral().releaseExposure(collateralReservation[agreementId]);
+        emit AgreementCollateralReleased(agreementId);
     }
 
     function getAgreement(bytes32 agreementId) external view returns (Agreement memory) { return _get(agreementId); }

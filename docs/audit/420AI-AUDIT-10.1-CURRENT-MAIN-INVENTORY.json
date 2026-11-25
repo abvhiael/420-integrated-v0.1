@@ -2785,7 +2785,69 @@
         "componentIdPreimage": "420/component/ai/policy-registry/v1",
         "protocolVersion": "1.0.0",
         "address": null
-      }
+      },
+      "imports": [
+        "import \"../interfaces/I420System.sol\";",
+        "import \"../system/SystemAccess.sol\";",
+        "import \"./AIIds420.sol\";"
+      ],
+      "declarations": [
+        {
+          "kind": "contract",
+          "name": "AIPolicyRegistry420",
+          "declaration": "contract AIPolicyRegistry420"
+        },
+        {
+          "kind": "struct",
+          "name": "Policy",
+          "declaration": "struct Policy{bytes32 workloadClass;bytes32 privacyPolicyId;bytes32 verificationProfileId;bytes32 servicePricingPolicyId;uint256 maxSpend420;uint64 maxDeadlineSeconds;uint32 revision;bool active;bool exists;}"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidPolicy",
+          "declaration": "error InvalidPolicy()"
+        },
+        {
+          "kind": "error",
+          "name": "PolicyNotFound",
+          "declaration": "error PolicyNotFound()"
+        },
+        {
+          "kind": "event",
+          "name": "PolicyConfigured",
+          "declaration": "event PolicyConfigured(bytes32 indexed policyId,uint32 indexed revision,bytes32 indexed workloadClass,bytes32 verificationProfileId,uint256 maxSpend420,uint64 maxDeadlineSeconds,bool active)"
+        },
+        {
+          "kind": "function",
+          "name": "systemName",
+          "declaration": "function systemName()"
+        },
+        {
+          "kind": "function",
+          "name": "protocolVersion",
+          "declaration": "function protocolVersion()"
+        },
+        {
+          "kind": "function",
+          "name": "setPolicy",
+          "declaration": "function setPolicy(bytes32 id,bytes32 w,bytes32 privacy,bytes32 verify,bytes32 pricing,uint256 maxSpend,uint64 maxDeadline,bool active)"
+        },
+        {
+          "kind": "function",
+          "name": "getPolicy",
+          "declaration": "function getPolicy(bytes32 id)"
+        },
+        {
+          "kind": "function",
+          "name": "getPolicyRevision",
+          "declaration": "function getPolicyRevision(bytes32 id,uint32 rev)"
+        },
+        {
+          "kind": "function",
+          "name": "isActive",
+          "declaration": "function isActive(bytes32 id)"
+        }
+      ]
     },
     {
       "path": "contracts/src/ai/AIProviderRegistry.sol",
@@ -2798,7 +2860,178 @@
         "address": "0x000000000000000000000000000000000000042f",
         "componentIdPreimage": "420/component/ai/provider-registry/v1",
         "protocolVersion": "2.0.0"
-      }
+      },
+      "imports": [
+        "import \"../system/SystemAccess.sol\";",
+        "import \"../interfaces/I420System.sol\";"
+      ],
+      "declarations": [
+        {
+          "kind": "contract",
+          "name": "AIProviderRegistry",
+          "declaration": "contract AIProviderRegistry"
+        },
+        {
+          "kind": "enum",
+          "name": "ProviderState",
+          "declaration": "enum ProviderState { NONE, REGISTERED, ACTIVE, SUSPENDED, RETIRED }"
+        },
+        {
+          "kind": "struct",
+          "name": "Provider",
+          "declaration": "struct Provider { address operatorAccount; address settlementAccount; bytes32 metadataHash; bytes32 stakeRef; bytes32 computeProviderRef; uint64 createdAt; uint32 revision; ProviderState state; bool exists; }"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidProviderId",
+          "declaration": "error InvalidProviderId()"
+        },
+        {
+          "kind": "error",
+          "name": "ProviderAlreadyExists",
+          "declaration": "error ProviderAlreadyExists()"
+        },
+        {
+          "kind": "error",
+          "name": "ProviderNotFound",
+          "declaration": "error ProviderNotFound()"
+        },
+        {
+          "kind": "error",
+          "name": "NotOperator",
+          "declaration": "error NotOperator()"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidStateTransition",
+          "declaration": "error InvalidStateTransition()"
+        },
+        {
+          "kind": "error",
+          "name": "ActiveStakeLocked",
+          "declaration": "error ActiveStakeLocked()"
+        },
+        {
+          "kind": "error",
+          "name": "MissingStake",
+          "declaration": "error MissingStake()"
+        },
+        {
+          "kind": "error",
+          "name": "NoChange",
+          "declaration": "error NoChange()"
+        },
+        {
+          "kind": "event",
+          "name": "ProviderRegistered",
+          "declaration": "event ProviderRegistered(bytes32 indexed providerId, address indexed operatorAccount, address indexed settlementAccount, bytes32 stakeRef, bytes32 computeProviderRef)"
+        },
+        {
+          "kind": "event",
+          "name": "ProviderMetadataUpdated",
+          "declaration": "event ProviderMetadataUpdated(bytes32 indexed providerId, bytes32 metadataHash, uint32 revision)"
+        },
+        {
+          "kind": "event",
+          "name": "ProviderSettlementUpdated",
+          "declaration": "event ProviderSettlementUpdated(bytes32 indexed providerId, address indexed settlementAccount, uint32 revision)"
+        },
+        {
+          "kind": "event",
+          "name": "ProviderStakeReferenceUpdated",
+          "declaration": "event ProviderStakeReferenceUpdated(bytes32 indexed providerId, bytes32 stakeRef, uint32 revision)"
+        },
+        {
+          "kind": "event",
+          "name": "ProviderComputeReferenceUpdated",
+          "declaration": "event ProviderComputeReferenceUpdated(bytes32 indexed providerId, bytes32 computeProviderRef, uint32 revision)"
+        },
+        {
+          "kind": "event",
+          "name": "ProviderStateChanged",
+          "declaration": "event ProviderStateChanged(bytes32 indexed providerId, ProviderState previousState, ProviderState newState, uint32 revision)"
+        },
+        {
+          "kind": "function",
+          "name": "systemName",
+          "declaration": "function systemName()"
+        },
+        {
+          "kind": "function",
+          "name": "protocolVersion",
+          "declaration": "function protocolVersion()"
+        },
+        {
+          "kind": "function",
+          "name": "register",
+          "declaration": "function register(bytes32 providerId, address operatorAccount, bytes32 metadataHash, uint256 legacyBond)"
+        },
+        {
+          "kind": "function",
+          "name": "registerProvider",
+          "declaration": "function registerProvider( bytes32 providerId, address operatorAccount, address settlementAccount, bytes32 metadataHash, bytes32 stakeRef, bytes32 computeProviderRef )"
+        },
+        {
+          "kind": "function",
+          "name": "updateMetadata",
+          "declaration": "function updateMetadata(bytes32 providerId, bytes32 metadataHash)"
+        },
+        {
+          "kind": "function",
+          "name": "updateSettlementAccount",
+          "declaration": "function updateSettlementAccount(bytes32 providerId, address settlementAccount)"
+        },
+        {
+          "kind": "function",
+          "name": "updateStakeReference",
+          "declaration": "function updateStakeReference(bytes32 providerId, bytes32 stakeRef)"
+        },
+        {
+          "kind": "function",
+          "name": "updateComputeProviderReference",
+          "declaration": "function updateComputeProviderReference(bytes32 providerId, bytes32 computeProviderRef)"
+        },
+        {
+          "kind": "function",
+          "name": "activate",
+          "declaration": "function activate(bytes32 providerId)"
+        },
+        {
+          "kind": "function",
+          "name": "retire",
+          "declaration": "function retire(bytes32 providerId)"
+        },
+        {
+          "kind": "function",
+          "name": "setActive",
+          "declaration": "function setActive(bytes32 providerId, bool active)"
+        },
+        {
+          "kind": "function",
+          "name": "isOperational",
+          "declaration": "function isOperational(bytes32 providerId)"
+        },
+        {
+          "kind": "function",
+          "name": "_register",
+          "declaration": "function _register( bytes32 providerId, address operatorAccount, address settlementAccount, bytes32 metadataHash, bytes32 stakeRef, bytes32 computeProviderRef )"
+        },
+        {
+          "kind": "function",
+          "name": "_operator",
+          "declaration": "function _operator(bytes32 providerId)"
+        },
+        {
+          "kind": "function",
+          "name": "_get",
+          "declaration": "function _get(bytes32 providerId)"
+        },
+        {
+          "kind": "function",
+          "name": "_setState",
+          "declaration": "function _setState(bytes32 providerId, Provider storage p, ProviderState newState)"
+        }
+      ]
     },
     {
       "path": "contracts/src/ai/AIReputationRegistry.sol",
@@ -2811,7 +3044,94 @@
         "address": "0x0000000000000000000000000000000000000433",
         "componentIdPreimage": "420/component/ai/reputation-registry/v1",
         "protocolVersion": "2.0.0"
-      }
+      },
+      "imports": [
+        "import \"../system/SystemAccess.sol\";",
+        "import \"../interfaces/I420System.sol\";",
+        "import \"./AIIds420.sol\";"
+      ],
+      "declarations": [
+        {
+          "kind": "contract",
+          "name": "AIReputationRegistry",
+          "declaration": "contract AIReputationRegistry"
+        },
+        {
+          "kind": "struct",
+          "name": "Reputation",
+          "declaration": "struct Reputation { uint64 completed; uint64 disputed; uint64 upheld; uint64 failed; }"
+        },
+        {
+          "kind": "error",
+          "name": "AdapterAlreadyBound",
+          "declaration": "error AdapterAlreadyBound()"
+        },
+        {
+          "kind": "error",
+          "name": "NotTrustAdapter",
+          "declaration": "error NotTrustAdapter()"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidEvidence",
+          "declaration": "error InvalidEvidence()"
+        },
+        {
+          "kind": "error",
+          "name": "EvidenceAlreadyApplied",
+          "declaration": "error EvidenceAlreadyApplied()"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidOutcome",
+          "declaration": "error InvalidOutcome()"
+        },
+        {
+          "kind": "event",
+          "name": "TrustAdapterBound",
+          "declaration": "event TrustAdapterBound(address indexed adapter)"
+        },
+        {
+          "kind": "event",
+          "name": "ReputationApplied",
+          "declaration": "event ReputationApplied(bytes32 indexed providerId, uint64 completed, uint64 disputed, uint64 upheld)"
+        },
+        {
+          "kind": "event",
+          "name": "EvidenceApplied",
+          "declaration": "event EvidenceApplied(bytes32 indexed providerId, bytes32 indexed evidenceId, bytes32 indexed outcome, uint64 completed, uint64 disputed, uint64 upheld, uint64 failed)"
+        },
+        {
+          "kind": "function",
+          "name": "systemName",
+          "declaration": "function systemName()"
+        },
+        {
+          "kind": "function",
+          "name": "protocolVersion",
+          "declaration": "function protocolVersion()"
+        },
+        {
+          "kind": "function",
+          "name": "bindTrustAdapter",
+          "declaration": "function bindTrustAdapter(address adapter)"
+        },
+        {
+          "kind": "function",
+          "name": "setReputation",
+          "declaration": "function setReputation(bytes32, uint64, uint64, uint64)"
+        },
+        {
+          "kind": "function",
+          "name": "applyEvidence",
+          "declaration": "function applyEvidence(bytes32 providerId, bytes32 evidenceId, bytes32 outcome)"
+        },
+        {
+          "kind": "modifier",
+          "name": "onlyTrustAdapter",
+          "declaration": "modifier onlyTrustAdapter()"
+        }
+      ]
     },
     {
       "path": "contracts/src/ai/AIRequestRegistry420.sol",
@@ -2824,7 +3144,43 @@
         "componentIdPreimage": "420/component/ai/request-registry/v1",
         "protocolVersion": "1.0.0",
         "address": null
-      }
+      },
+      "imports": [
+        "import \"../interfaces/I420System.sol\";",
+        "import \"./AIJobManager.sol\";"
+      ],
+      "declarations": [
+        {
+          "kind": "contract",
+          "name": "AIRequestRegistry420",
+          "declaration": "contract AIRequestRegistry420"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidDependency",
+          "declaration": "error InvalidDependency()"
+        },
+        {
+          "kind": "struct",
+          "name": "RequestView",
+          "declaration": "struct RequestView{address requester;bytes32 modelVersionId;bytes32 workloadClass;bytes32 inputCommitment;bytes32 privacyPolicyId;bytes32 verificationProfileId;uint256 maxSpend;uint64 deadline;bytes32 computeRequestId;bytes32 computeJobId;bytes32 providerId;AIJobManager.Status status;}"
+        },
+        {
+          "kind": "function",
+          "name": "systemName",
+          "declaration": "function systemName()"
+        },
+        {
+          "kind": "function",
+          "name": "protocolVersion",
+          "declaration": "function protocolVersion()"
+        },
+        {
+          "kind": "function",
+          "name": "getRequest",
+          "declaration": "function getRequest(bytes32 id)"
+        }
+      ]
     },
     {
       "path": "contracts/src/ai/AIResultRegistry420.sol",
@@ -2837,7 +3193,43 @@
         "componentIdPreimage": "420/component/ai/result-registry/v1",
         "protocolVersion": "1.0.0",
         "address": null
-      }
+      },
+      "imports": [
+        "import \"../interfaces/I420System.sol\";",
+        "import \"./AIJobManager.sol\";"
+      ],
+      "declarations": [
+        {
+          "kind": "contract",
+          "name": "AIResultRegistry420",
+          "declaration": "contract AIResultRegistry420"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidDependency",
+          "declaration": "error InvalidDependency()"
+        },
+        {
+          "kind": "struct",
+          "name": "ResultView",
+          "declaration": "struct ResultView{bytes32 requestId;bytes32 computeJobId;bytes32 providerId;bytes32 modelVersionId;bytes32 outputCommitment;bytes32 resultManifestHash;bytes32 disputeRef;AIJobManager.Status status;}"
+        },
+        {
+          "kind": "function",
+          "name": "systemName",
+          "declaration": "function systemName()"
+        },
+        {
+          "kind": "function",
+          "name": "protocolVersion",
+          "declaration": "function protocolVersion()"
+        },
+        {
+          "kind": "function",
+          "name": "getResult",
+          "declaration": "function getResult(bytes32 id)"
+        }
+      ]
     },
     {
       "path": "contracts/src/ai/AIRewardTypes420.sol",
@@ -2845,7 +3237,20 @@
       "previousBlob": "1ec80d78b7965333c8dcd3196b08d923e5947c9c",
       "owner": "Contribution type constants",
       "classification": "non_deployable_interface_or_library",
-      "deployment": null
+      "deployment": null,
+      "imports": [],
+      "declarations": [
+        {
+          "kind": "library",
+          "name": "AIRewardTypes420",
+          "declaration": "library AIRewardTypes420"
+        },
+        {
+          "kind": "function",
+          "name": "supported",
+          "declaration": "function supported(bytes32 contributionType)"
+        }
+      ]
     },
     {
       "path": "contracts/src/ai/AIRewardsAdapter420.sol",
@@ -2853,7 +3258,60 @@
       "previousBlob": "a2a067aef4bbbfe2a24460ce60c9f5cd0e62b786",
       "owner": "Verified contribution forwarding to ContributionRegistry",
       "classification": "implemented_production_binding_unverified",
-      "deployment": null
+      "deployment": null,
+      "imports": [
+        "import \"../interfaces/I420System.sol\";",
+        "import \"../rewards/ContributionRegistry420.sol\";",
+        "import \"./IAIContributionVerifier420.sol\";",
+        "import \"./AIRewardTypes420.sol\";"
+      ],
+      "declarations": [
+        {
+          "kind": "contract",
+          "name": "AIRewardsAdapter420",
+          "declaration": "contract AIRewardsAdapter420"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidInput",
+          "declaration": "error InvalidInput()"
+        },
+        {
+          "kind": "error",
+          "name": "UnsupportedContributionType",
+          "declaration": "error UnsupportedContributionType()"
+        },
+        {
+          "kind": "error",
+          "name": "UnverifiedContribution",
+          "declaration": "error UnverifiedContribution()"
+        },
+        {
+          "kind": "event",
+          "name": "AIContributionForwarded",
+          "declaration": "event AIContributionForwarded( bytes32 indexed contributionId, bytes32 indexed contributionType, bytes32 indexed sourceId, address beneficiary, bytes32 evidenceHash )"
+        },
+        {
+          "kind": "function",
+          "name": "systemName",
+          "declaration": "function systemName()"
+        },
+        {
+          "kind": "function",
+          "name": "protocolVersion",
+          "declaration": "function protocolVersion()"
+        },
+        {
+          "kind": "function",
+          "name": "appId",
+          "declaration": "function appId()"
+        },
+        {
+          "kind": "function",
+          "name": "publishContribution",
+          "declaration": "function publishContribution( bytes32 contributionType, bytes32 sourceId, address beneficiary, bytes32 evidenceHash )"
+        }
+      ]
     },
     {
       "path": "contracts/src/ai/AIRouter420.sol",
@@ -2866,7 +3324,51 @@
         "componentIdPreimage": "420/component/ai/router/v1",
         "protocolVersion": "1.0.0",
         "address": null
-      }
+      },
+      "imports": [
+        "import \"../interfaces/I420System.sol\";",
+        "import \"./IAI420.sol\";",
+        "import \"./AIProviderRegistry.sol\";",
+        "import \"./AIModelRegistry.sol\";",
+        "import \"./AIModelDeploymentRegistry420.sol\";"
+      ],
+      "declarations": [
+        {
+          "kind": "contract",
+          "name": "AIRouter420",
+          "declaration": "contract AIRouter420"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidDependency",
+          "declaration": "error InvalidDependency()"
+        },
+        {
+          "kind": "function",
+          "name": "systemName",
+          "declaration": "function systemName()"
+        },
+        {
+          "kind": "function",
+          "name": "protocolVersion",
+          "declaration": "function protocolVersion()"
+        },
+        {
+          "kind": "function",
+          "name": "canUseDeployment",
+          "declaration": "function canUseDeployment(bytes32 id)"
+        },
+        {
+          "kind": "function",
+          "name": "isProviderOperational",
+          "declaration": "function isProviderOperational(bytes32 id)"
+        },
+        {
+          "kind": "function",
+          "name": "isModelVersionOperational",
+          "declaration": "function isModelVersionOperational(bytes32 id)"
+        }
+      ]
     },
     {
       "path": "contracts/src/ai/IAI420.sol",

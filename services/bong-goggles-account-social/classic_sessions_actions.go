@@ -87,7 +87,8 @@ func (s *ClassicSessions) startWithClock(ctx context.Context,viewer,roomID,profi
  if e=tx.QueryRowContext(ctx,"SELECT clock_timestamp()").Scan(&now);e!=nil{return empty,e}
  var deadline *time.Time
  if profile!=""&&!isClassicChess(rule){return empty,ErrInvalid}
- if !isClassicChess(rule){d:=now.Add(classicTurnSeconds*time.Second);deadline=&d
+ if room.GameID=="scrabble"{deadline=wordSaladDeadline(room.Format,now)
+ }else if !isClassicChess(rule){d:=now.Add(classicTurnSeconds*time.Second);deadline=&d
  }else if profile!=""&&profile!="untimed"{
   clock,err:=chessClockForProfile(profile);if err!=nil{return empty,err}
   timing:=chessTimedState{Profile:profile,Clock:clock,At:now.UnixMilli()}
@@ -139,6 +140,7 @@ func (s *ClassicSessions) Expire(ctx context.Context,id string)error{
 func (s *ClassicSessions) expireLocked(ctx context.Context,tx *sql.Tx,r *classicSessionRecord,now time.Time)error{
  if r.Status!="active"||r.Deadline==nil||now.Before(*r.Deadline){return nil}
  rule,err:=s.rule(r.GameID,r.RulesVersion,r.RulesHash);if err!=nil{return err}
+ if r.GameID=="scrabble"{return s.expireWordSaladLocked(ctx,tx,r,rule.(*RulesAdapter),now)}
  if isClassicChess(rule){return s.expireChessLocked(ctx,tx,r,rule.(*RulesAdapter),now)}
  actor:=any(nil)
  if r.TurnSeat!=nil{actor=*r.TurnSeat}
@@ -214,12 +216,16 @@ func (s *ClassicSessions) Act(ctx context.Context,viewer,id string,action Classi
  var next any;var deadline any;var winner any;var reason any
  beforeState:=append(json.RawMessage(nil),rec.State...)
  chess:=isClassicChess(rule)
+ salad:=rec.GameID=="scrabble"
+ if salad&&kind=="cancel"&&rec.Sequence!=1{return empty,ErrConflict}
  if chess&&kind=="cancel"{return empty,ErrConflict}
  ruleAction:=action.Move
  if chess&&kind=="resign"{ruleAction=chessAction("resign","")}
- if kind=="move"||chess&&kind=="resign"{
+ if salad&&kind=="resign"{ruleAction=json.RawMessage(`{"type":"resign"}`)}
+ if salad&&kind=="move"{var m saladMove;if !strictRuleJSON(ruleAction,&m)||m.Type=="timeout"||m.Type=="resign"{return empty,ErrInvalid}}
+ if kind=="move"||(chess||salad)&&kind=="resign"{
   if rec.TurnSeat==nil{return empty,ErrUnavailable}
-  if *rec.TurnSeat!=seat&&!(chess&&chessNonTurnAction(ruleAction)){return empty,ErrForbidden}
+  if *rec.TurnSeat!=seat&&!(chess&&chessNonTurnAction(ruleAction))&&!(salad&&kind=="resign"){return empty,ErrForbidden}
   var state json.RawMessage
   var turn int
   var finished bool
@@ -246,8 +252,9 @@ func (s *ClassicSessions) Act(ctx context.Context,viewer,id string,action Classi
     if !difficulty.Valid{return empty,ErrUnavailable}
     if _,e=s.botPolicy(rec.GameID,difficulty.String);e!=nil{return empty,ErrUnavailable}
    }else if controller!="human"{return empty,ErrUnavailable}
-   rec.TurnSeat=&turn;next=turn
-   if !chess{d:=now.Add(classicTurnSeconds*time.Second);rec.Deadline=&d;deadline=d
+   oldTurn:=*rec.TurnSeat;rec.TurnSeat=&turn;next=turn
+   if salad{if kind!="resign"||turn!=oldTurn{rec.Deadline=wordSaladDeadline(room.Format,now)};deadline=rec.Deadline;kind="move"
+   }else if !chess{d:=now.Add(classicTurnSeconds*time.Second);rec.Deadline=&d;deadline=d
    }else if rec.Deadline!=nil{
     frame,err:=replayAdapter.decode(state);if err!=nil{return empty,err}
     data,err:=chessDecode(frame);if err!=nil{return empty,err}

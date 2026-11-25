@@ -59,7 +59,7 @@ contract ResourceProviderCollateral420 is I420System {
         if (entered || msg.value == 0 || !_registered() || registry.vaultState(vaultId) != VaultRegistry420.VaultState.ACTIVE) revert InvalidDeposit();
         entered = true;
         ResourceProviderRegistry420.Provider memory provider = providers.getProvider(providerId);
-        if (provider.operatorAccount != msg.sender || provider.state == ResourceProviderRegistry420.State.RETIRED) revert Unauthorized();
+        if ((provider.operatorAccount != msg.sender && providers.collateralSponsor(providerId) != msg.sender) || provider.state == ResourceProviderRegistry420.State.RETIRED) revert Unauthorized();
         id = positionId(providerId);
         Position storage p = positions[id];
         if (p.state == State.NONE) {
@@ -93,11 +93,23 @@ contract ResourceProviderCollateral420 is I420System {
         VaultAccounting420.Obligation memory o = accounting.getObligation(obligationId);
         return _validObligation(obligationId, id, p.owner, o.amount) ? o.amount : 0;
     }
-    function custodyInvariant() external view returns (bool) {
+    function custodyInvariant() public view returns (bool) {
         VaultAccounting420.AssetAccounting memory a = accounting.getAccounting(vaultId, address(0));
         return _registered() && a.reserved >= totalSlashable && a.recordedBalance >= a.reserved + a.claimable
             && address(vault).balance >= a.recordedBalance;
     }
+    function eligible(bytes32 providerId, bytes32 referenceId, address operator, uint256 minimum) external view returns (bool) {
+        if (minimum == 0 || referenceId != positionId(providerId)) return false;
+        Position storage p = positions[referenceId];
+        if (p.state != State.BONDED || p.providerId != providerId || p.owner == address(0)
+            || (p.owner != operator && p.owner != providers.collateralSponsor(providerId))
+            || p.slashable < minimum || p.trancheCount == 0
+            || registry.vaultState(vaultId) != VaultRegistry420.VaultState.ACTIVE || !custodyInvariant()) return false;
+        // Each deposit is atomically reserved with an immutable Vault controller.
+        // Only this authority can cancel or release its obligations; balance changes must update slashable in the same transaction.
+        return true;
+    }
+
     function _registered() private view returns (bool) {
         VaultRegistry420.Vault memory v = registry.getVault(vaultId);
         return v.vaultAddress == address(vault) && v.vaultType == VaultIds420.VAULT_COLLATERAL

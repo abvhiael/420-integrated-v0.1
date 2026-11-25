@@ -1,0 +1,102 @@
+{
+  "artifacts": [
+    {
+      "artifactId": 15051641915,
+      "jsonBytes": 91293,
+      "jsonSha256": "9d7dc0a6b37fce908169f6e1ee02b86adc6d707ffabb2d5f82cdb7afe20beb57",
+      "name": "420ai-abi-storage-compatibility",
+      "zipBytes": 5493,
+      "zipSha256": "7c00d2f0d4fd1754792908dd351a64c8da7297a8b5dace420a9fe54d9e5b8aa1"
+    },
+    {
+      "artifactId": 15051437289,
+      "jsonBytes": 242368,
+      "jsonSha256": "76422d1b627f9329452417fd1e4ea217491bb0ac7249a2f193de956249daaff5",
+      "name": "420ai-compiled-inventory",
+      "zipBytes": 14630,
+      "zipSha256": "1dae5320dea89470be1ef612b962c86575428e81387f45177e1bceb15fd50a12"
+    }
+  ],
+  "compatibilityChecks": {
+    "disputeStorageAppended": true,
+    "existingABIEntriesUnchanged": true,
+    "existingSelectorsUnchanged": true,
+    "existingStorageAndNestedMembersUnchanged": true,
+    "jobsABIUnchanged": true,
+    "newDisputeInterfacesInventoried": true,
+    "sameCompiler": true,
+    "sameCompilerSettings": true
+  },
+  "jobs": [
+    {
+      "conclusion": "success",
+      "id": 139421009181,
+      "name": "ai-client"
+    },
+    {
+      "conclusion": "success",
+      "id": 139421009148,
+      "name": "ai-read-api"
+    },
+    {
+      "conclusion": "success",
+      "id": 139421009191,
+      "name": "audit-state"
+    },
+    {
+      "conclusion": "success",
+      "id": 139421009362,
+      "name": "compute-integration"
+    },
+    {
+      "conclusion": "success",
+      "id": 139421009389,
+      "name": "current-main-inventory"
+    },
+    {
+      "conclusion": "success",
+      "id": 139421009295,
+      "name": "custody-settlement"
+    },
+    {
+      "conclusion": "success",
+      "id": 139421008588,
+      "name": "deployment-materialization"
+    },
+    {
+      "conclusion": "success",
+      "id": 139421009082,
+      "name": "focused-ai-contracts"
+    },
+    {
+      "conclusion": "success",
+      "id": 139421009187,
+      "name": "genesis-compatibility"
+    },
+    {
+      "conclusion": "success",
+      "id": 139421009228,
+      "name": "pretestnet-qualification"
+    },
+    {
+      "conclusion": "success",
+      "id": 139421009623,
+      "name": "pretestnet-security"
+    },
+    {
+      "conclusion": "success",
+      "id": 139421009032,
+      "name": "provider-runtime"
+    },
+    {
+      "conclusion": "success",
+      "id": 139421009154,
+      "name": "v1-modules"
+    }
+  ],
+  "qualificationHead": "b4c92b6689c77cc2614b1bf6df06e8391f506bad",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "schema": "420ai-10.1-c-archival-evidence-v1",
+  "workflowConclusion": "success",
+  "workflowRunId": 45675273175
+}

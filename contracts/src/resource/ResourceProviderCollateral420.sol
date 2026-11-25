@@ -39,6 +39,16 @@ contract ResourceProviderCollateral420 is I420System {
     mapping(bytes32 => uint64) public withdrawalCursor;
     mapping(bytes32 => uint256) public withdrawnAmount;
     uint256 public totalWithdrawn;
+    uint256 public totalSlashed;
+    mapping(bytes32 => uint256) public slashedAmount;
+    mapping(bytes32 => uint64) public slashCursor;
+    mapping(bytes32 => uint256) public penaltyExecuted;
+    mapping(bytes32 => address) public penaltyRecipient;
+    mapping(bytes32 => bytes32) public penaltyDecision;
+    mapping(bytes32 => bool) public consumedPenaltyDecision;
+    bytes32 public constant SLASH_DISTRIBUTION_TYPE = keccak256("420/RESOURCE/COLLATERAL/SLASH-DISTRIBUTION/V1");
+    event PenaltyAuthorized(bytes32 indexed penaltyId, bytes32 indexed decision, address indexed recipient);
+    event PenaltyExecuted(bytes32 indexed penaltyId, bytes32 indexed positionId, uint256 amount, uint256 cumulative);
     mapping(bytes32 => uint256) public outstandingPenaltyHolds;
     struct PenaltyHold {
         bytes32 position;
@@ -97,7 +107,7 @@ contract ResourceProviderCollateral420 is I420System {
         if (entered || address(providers.collateral()) != address(this) || msg.value == 0 || !_registered() || registry.vaultState(vaultId) != VaultRegistry420.VaultState.ACTIVE) revert InvalidDeposit();
         entered = true;
         ResourceProviderRegistry420.Provider memory provider = providers.getProvider(providerId);
-        if ((provider.operatorAccount != msg.sender && providers.collateralSponsor(providerId) != msg.sender) || provider.state == ResourceProviderRegistry420.State.RETIRED) revert Unauthorized();
+        if ((provider.operatorAccount != msg.sender && providers.collateralSponsor(providerId) != msg.sender) || provider.state == ResourceProviderRegistry420.State.RETIRED || providers.permanentlyDisqualified(providerId)) revert Unauthorized();
         id = positionId(providerId);
         Position storage p = positions[id];
         if (p.state == State.NONE) {
@@ -197,10 +207,94 @@ contract ResourceProviderCollateral420 is I420System {
     function dismissPenalty(bytes32 key) external {
         if (entered || msg.sender != providers.governanceTimelock()) revert Unauthorized();
         PenaltyHold storage h = penaltyHolds[key];
-        if (h.position == bytes32(0) || h.resolved) revert InvalidDeposit();
+        if (h.position == bytes32(0) || h.resolved || penaltyDecision[key] != bytes32(0)) revert InvalidDeposit();
         h.resolved = true;
         outstandingPenaltyHolds[h.position] -= h.amount;
         emit PenaltyHoldDismissed(key, h.position);
+    }
+
+    /// @notice Bind a final governance decision to an existing evidence hold and exact beneficiary.
+    /// @dev No recipient or distribution amount can be selected by the provider or execution caller.
+    function authorizePenalty(bytes32 key, bytes32 decision, address recipient) external {
+        if (entered || msg.sender != providers.governanceTimelock()) revert Unauthorized();
+        PenaltyHold storage h = penaltyHolds[key];
+        if (h.position == bytes32(0) || h.resolved || penaltyDecision[key] != bytes32(0)
+            || decision == bytes32(0) || consumedPenaltyDecision[decision] || recipient == address(0)
+            || recipient == positions[h.position].owner || recipient == address(vault) || recipient == address(this))
+            revert InvalidDeposit();
+        consumedPenaltyDecision[decision] = true;
+        penaltyDecision[key] = decision;
+        penaltyRecipient[key] = recipient;
+        emit PenaltyAuthorized(key, decision, recipient);
+    }
+
+    /// @notice Execute bounded, replay-safe batches against protected native Vault obligations.
+    function executePenalty(bytes32 key, uint64 maxTranches) external {
+        if (entered || maxTranches == 0 || maxTranches > 64) revert InvalidDeposit();
+        PenaltyHold storage h = penaltyHolds[key];
+        if (h.resolved || penaltyDecision[key] == bytes32(0)) revert InvalidDeposit();
+        entered = true;
+        bytes32 id = h.position;
+        Position storage p = positions[id];
+        uint256 pending = h.amount - penaltyExecuted[key];
+        uint64 cursor = slashCursor[id] > withdrawalCursor[id] ? slashCursor[id] : withdrawalCursor[id];
+        uint256 amount;
+        for (uint64 visited; visited < maxTranches && cursor < p.trancheCount && amount < pending; ++visited) {
+            uint64 index = cursor + 1;
+            bytes32 oldId = trancheObligation[id][index];
+            uint256 oldAmount = obligationAmount[oldId];
+            if (oldAmount == 0) { cursor = index; continue; }
+            uint256 take = oldAmount < pending - amount ? oldAmount : pending - amount;
+            _slashTranche(id, index, key, oldId, oldAmount, take, p.owner);
+            amount += take;
+            if (take == oldAmount) cursor = index;
+        }
+        if (amount == 0) revert AccountingMismatch();
+        slashCursor[id] = cursor;
+        if (withdrawalCursor[id] < cursor) withdrawalCursor[id] = cursor;
+        p.slashable -= amount;
+        totalSlashable -= amount;
+        slashedAmount[id] += amount;
+        totalSlashed += amount;
+        outstandingPenaltyHolds[id] -= amount;
+        penaltyExecuted[key] += amount;
+        if (penaltyExecuted[key] == h.amount) h.resolved = true;
+        if (p.slashable == 0 && p.state == State.EXITING) p.state = State.WITHDRAWN;
+        _payPenalty(key, amount);
+        if (p.deposited != p.slashable + withdrawnAmount[id] + slashedAmount[id] || !custodyInvariant()) revert AccountingMismatch();
+        emit PenaltyExecuted(key, id, amount, penaltyExecuted[key]);
+        entered = false;
+    }
+
+    function _slashTranche(bytes32 id, uint64 index, bytes32 key, bytes32 oldId, uint256 oldAmount, uint256 take, address owner) private {
+        if (!_validObligation(oldId, id, owner, oldAmount)) revert AccountingMismatch();
+        vault.cancelObligation(keccak256(abi.encode("RESOURCE_SLASH_CANCEL", key, oldId)), oldId);
+        obligationAmount[oldId] = 0;
+        if (oldAmount > take) {
+            uint256 remaining = oldAmount - take;
+            bytes32 replacement = keccak256(abi.encode("420/RESOURCE/COLLATERAL/SLASH-REMAINDER/V1", key, oldId, remaining));
+            vault.createObligation(keccak256(abi.encode(replacement, "RESERVE")), replacement, address(0), owner, remaining, COLLATERAL_TYPE, id);
+            if (!_validObligation(replacement, id, owner, remaining)) revert AccountingMismatch();
+            trancheObligation[id][index] = replacement;
+            obligationPosition[replacement] = id;
+            obligationAmount[replacement] = remaining;
+        }
+    }
+
+    function _payPenalty(bytes32 key, uint256 amount) private {
+        bytes32 obligation = keccak256(abi.encode("420/RESOURCE/COLLATERAL/SLASH-PAYOUT/V1", block.chainid, address(this), key, penaltyExecuted[key]));
+        VaultAccounting420.AssetAccounting memory beforeA = accounting.getAccounting(vaultId, address(0));
+        uint256 beforeBalance = address(vault).balance;
+        vault.createObligation(keccak256(abi.encode(obligation, "RESERVE")), obligation, address(0), penaltyRecipient[key], amount, SLASH_DISTRIBUTION_TYPE, key);
+        vault.releaseObligation(keccak256(abi.encode(obligation, "RELEASE")), obligation);
+        vault.claim(keccak256(abi.encode(obligation, "CLAIM")), obligation);
+        VaultAccounting420.AssetAccounting memory afterA = accounting.getAccounting(vaultId, address(0));
+        VaultAccounting420.Obligation memory paid = accounting.getObligation(obligation);
+        if (paid.state != 3 || paid.beneficiary != penaltyRecipient[key] || paid.amount != amount
+            || beforeBalance != address(vault).balance + amount
+            || beforeA.recordedBalance != afterA.recordedBalance + amount
+            || beforeA.reserved != afterA.reserved || beforeA.claimable != afterA.claimable
+            || afterA.released != beforeA.released + amount) revert AccountingMismatch();
     }
 
     function canWithdraw(bytes32 id) public view returns (bool) {
@@ -228,7 +322,7 @@ contract ResourceProviderCollateral420 is I420System {
         totalWithdrawn += amount;
         p.slashable -= amount;
         totalSlashable -= amount;
-        if (index == p.trancheCount) p.state = State.WITHDRAWN;
+        if (p.slashable == 0) p.state = State.WITHDRAWN;
         vault.releaseObligation(keccak256(abi.encode(obligationId, "EXIT_RELEASE")), obligationId);
         vault.claim(keccak256(abi.encode(obligationId, "EXIT_CLAIM")), obligationId);
         VaultAccounting420.AssetAccounting memory afterA = accounting.getAccounting(vaultId, address(0));
@@ -238,7 +332,7 @@ contract ResourceProviderCollateral420 is I420System {
             || beforeA.reserved != afterA.reserved + amount
             || beforeA.claimable != afterA.claimable
             || afterA.released != beforeA.released + amount
-            || p.deposited != p.slashable + withdrawnAmount[id]
+            || p.deposited != p.slashable + withdrawnAmount[id] + slashedAmount[id]
             || !custodyInvariant()) revert AccountingMismatch();
         if (p.state == State.WITHDRAWN) {
             if (p.slashable != 0) revert AccountingMismatch();

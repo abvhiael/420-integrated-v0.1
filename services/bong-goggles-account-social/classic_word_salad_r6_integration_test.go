@@ -134,3 +134,49 @@ func TestBC42WordSaladJournalRollbackAndCorruption(t *testing.T){
  if !reflect.DeepEqual(after,r6Record(t,store,match.ID)){t.Fatal("corruption attempts mutated snapshot")}
  r6Counts(t,store,match.ID,[3]int{2,1,1})
 }
+
+// Use a consistent test-only clock fixture: shorten the snapshot AND its
+// matching public genesis deadline in a single transaction, then exercise
+// real database-clock arbitration through independent service instances.
+// No production deadline validation is disabled.
+func TestBC42WordSaladTimeoutRaces(t *testing.T){
+ store,h,_,_:=bc06Fixture(t,"198.51.100.221");a:=r6Resolver(t,h);ctx:=context.Background()
+ for _,kind:=range []string{"move","resign"}{for _,expired:=range []bool{false,true}{
+  t.Run(fmt.Sprintf("%s/expired=%t",kind,expired),func(t *testing.T){
+   match:=r6Start(t,h,"live");before:=r6Record(t,store,match.ID)
+   if expired{
+    tx,e:=store.DB.BeginTx(ctx,nil);if e!=nil{t.Fatal(e)};defer tx.Rollback()
+    var at time.Time;if e=tx.QueryRow("SELECT clock_timestamp()-interval '1 second'").Scan(&at);e!=nil{t.Fatal(e)}
+    if _,e=tx.Exec("UPDATE bg_account_social.classic_sessions SET turn_deadline=$2 WHERE id=$1",match.ID,at);e!=nil{t.Fatal(e)}
+    before.Deadline=&at
+    if _,e=tx.Exec("UPDATE bg_account_social.classic_session_events SET public_state=$2 WHERE session_id=$1 AND sequence=1",match.ID,string(classicPublicState(before)));e!=nil{t.Fatal(e)}
+    if e=tx.Commit();e!=nil{t.Fatal(e)}
+   }
+   if e:=h.Sessions.VerifyRules(ctx,match.ID);e!=nil{t.Fatal("fixture integrity",e)}
+   actor:=*before.TurnSeat;subjects:=[]string{memberA,memberB}
+   cmd:=ClassicSessionAction{RequestID:bc06ActionID(t),Action:kind,ExpectedSequence:2}
+   if kind=="move"{cmd.Move=r6Opening(t,a,before)}
+   other,e:=NewClassicSessions(store,h.Rooms,h.Sessions.Rules);if e!=nil{t.Fatal(e)}
+   gate:=make(chan struct{});var wg sync.WaitGroup;var actionErr,expireErr error
+   wg.Add(2);go func(){defer wg.Done();<-gate;_,actionErr=h.Sessions.Act(ctx,subjects[actor],match.ID,cmd)}()
+   go func(){defer wg.Done();<-gate;expireErr=other.Expire(ctx,match.ID)}()
+   close(gate);wg.Wait()
+   if expireErr!=nil{t.Fatal("expire race",expireErr)}
+   after:=r6Record(t,store,match.ID);if after.Sequence!=2{t.Fatal("duplicate revision",after.Sequence)}
+   var raw json.RawMessage;if e=store.DB.QueryRow("SELECT action FROM bg_account_social.classic_rule_moves WHERE session_id=$1 AND sequence=2",match.ID).Scan(&raw);e!=nil{t.Fatal(e)}
+   var m saladMove;if e=json.Unmarshal(raw,&m);e!=nil{t.Fatal(e)}
+   if expired{
+    if !errors.Is(actionErr,ErrConflict)||m.Type!="timeout"||after.Status!="active"||after.TurnSeat==nil||*after.TurnSeat==actor||after.Deadline==nil||!after.Deadline.After(*before.Deadline){t.Fatal("expired arbitration",actionErr,m.Type,after)}
+    f,e:=a.decode(after.State);if e!=nil{t.Fatal(e)};d,e:=saladDecode(f);if e!=nil||d.Streak!=1||d.Forfeit[actor]||len(d.Board)!=0{t.Fatal("timeout mutated placement/resignation",e)}
+    r6Counts(t,store,match.ID,[3]int{2,1,0})
+   }else{
+    want:="place";if kind=="resign"{want="resign"}
+    if actionErr!=nil||m.Type!=want{t.Fatal("unexpired arbitration",actionErr,m.Type)}
+    if kind=="resign"&&(after.Status!="finished"||after.WinnerSeat==nil||*after.WinnerSeat==actor){t.Fatal("resignation winner",after)}
+    if kind=="move"&&(after.Status!="active"||after.TurnSeat==nil||*after.TurnSeat==actor){t.Fatal("placement turn",after)}
+    r6Counts(t,store,match.ID,[3]int{2,1,1})
+   }
+   if e=other.VerifyRules(ctx,match.ID);e!=nil{t.Fatal("race replay",e)}
+  })
+ }}
+}

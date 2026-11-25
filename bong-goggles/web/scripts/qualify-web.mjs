@@ -10,6 +10,7 @@ import {chaosEffectKinds} from '../core/chaos-game-effects.js';
 import {CHAOS_IMAGE_MANIFEST_PATH,verifyChaosPublishedImageManifest} from './verify-chaos-image-manifest.mjs';
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
+import {chessArt,chessArtPrefix,chessArtPaths,chessArtBudget} from './chess-art.mjs';
 const root=resolve(import.meta.dirname,'..','dist');
 // CCC-ART-5 qualified base: 1,076,369 B. Home's authenticated off-chain feed
 // adds 5,138 B (combined 1,081,507 B). Reserve exactly 5 KiB for this UI;
@@ -40,7 +41,18 @@ const cardFiles=files.filter(f=>normalize(f.path).startsWith(artPrefix));
 const mapFiles=files.filter(f=>normalize(f.path).startsWith(mapPrefix));
 const vehicleFiles=files.filter(f=>normalize(f.path).startsWith(vehiclePrefix));
 const labyrinthArtFiles=files.filter(f=>normalize(f.path).startsWith(labyrinthArtPrefix));
-const regularFiles=files.filter(f=>!normalize(f.path).startsWith(artPrefix)&&!normalize(f.path).startsWith(mapPrefix)&&!normalize(f.path).startsWith(vehiclePrefix)&&!normalize(f.path).startsWith(labyrinthArtPrefix)&&normalize(f.path)!=='assets/games/cribbage/board-cannabis-leaf.png');
+const chessFiles=files.filter(f=>normalize(f.path).startsWith(chessArtPrefix));
+let chessArtBytes=0;
+if(chessFiles.length!==chessArtPaths.size)throw Error('Incomplete Chess art inventory');
+for(const f of chessFiles){
+ const name=normalize(f.path),entry=chessArt.find(([id])=>chessArtPrefix+id+'.webp'===name);
+ if(!entry||f.size>entry[3])throw Error('Unexpected or oversized Chess art '+name);
+ const m=await sharp(f.path).metadata();
+ if(m.format!=='webp'||!m.width||m.width>entry[1]||(entry[2]&&!m.hasAlpha))throw Error('Invalid optimized Chess art '+name);
+ chessArtBytes+=f.size;
+}
+if(chessArtBytes>chessArtBudget)throw Error('Chess image budget exceeded');
+const regularFiles=files.filter(f=>!chessArtPaths.has(normalize(f.path))&&!normalize(f.path).startsWith(artPrefix)&&!normalize(f.path).startsWith(mapPrefix)&&!normalize(f.path).startsWith(vehiclePrefix)&&!normalize(f.path).startsWith(labyrinthArtPrefix)&&normalize(f.path)!=='assets/games/cribbage/board-cannabis-leaf.png');
 const baseTotal=regularFiles.reduce((sum,f)=>sum+f.size,0);
 const practiceJs=regularFiles.find(f=>normalize(f.path)==='core/chaos-practice-table.js')?.size;
 const practiceCss=regularFiles.find(f=>normalize(f.path)==='ccc-practice.css')?.size;
@@ -435,7 +447,7 @@ for(const f of vehicleFiles){
  const gitSha=createHash('sha1').update(Buffer.from('blob '+raw.length+'\0')).update(raw).digest('hex');
  if(gitSha!==CHAOS_VEHICLE_SOURCE_SHA[id])throw new Error('Published vehicle token differs from approved source: '+name);
 }
-const total=baseTotal+cardTotal+mapTotal+vehicleTotal;
+const total=baseTotal+cardTotal+mapTotal+vehicleTotal+chessArtBytes;
 for(const file of files){const name=relative(root,file.path);if(name.endsWith('.js')&&file.size>limits.singleJs)throw new Error(`JavaScript asset budget exceeded: ${name}`);if(name.endsWith('.css')&&file.size>limits.singleCss)throw new Error(`CSS asset budget exceeded: ${name}`);}
 const html=await readFile(resolve(root,'index.html'),'utf8');const app=await readFile(resolve(root,'app.js'),'utf8');const css=await readFile(resolve(root,'styles.css'),'utf8');const branding=await readFile(resolve(root,'branding.css'),'utf8');
 const tabletopCss=await readFile(resolve(root,'ccc-tabletop.css'),'utf8');
@@ -539,7 +551,7 @@ if(!computerJs.includes('chaosActionOptions(s)')||
 for(const [name,ok] of Object.entries({'document language':/<html\s+lang="[a-z-]+"/i.test(html),'viewport':/name="viewport"/.test(html),'main landmark':/<main\b/.test(app),'focus treatment':/:focus-visible\b/.test(css),'reduced motion':/prefers-reduced-motion/.test(css),'forced colors':/forced-colors/.test(css),'noindex private default':/name="robots"[^>]*noindex/i.test(html)}))if(!ok)throw new Error(`static accessibility/privacy gate missing: ${name}`);
 const names=new Map(files.map(file=>[relative(root,file.path).replaceAll('\\','/'),file.size]));
 for(const asset of DASHBOARD_ASSETS){const size=names.get(asset);if(!size||size>128*1024)throw new Error('missing or oversized dashboard artwork: '+asset);}
-for(const name of names.keys())if(name.startsWith('assets/')&&name!==CHAOS_IMAGE_MANIFEST_PATH&&!DASHBOARD_ASSETS.includes(name)&&!cardAllowlist.has(name)&&!mapAllowlist.has(name)&&!vehicleAllowlist.has(name)&&!bc14Allowed.has(name)&&name!==originalCribbageArt&&name!=='assets/games/labyrinth-cribbage/labyrinth.png')
+for(const name of names.keys())if(name.startsWith('assets/')&&name!==CHAOS_IMAGE_MANIFEST_PATH&&!DASHBOARD_ASSETS.includes(name)&&!cardAllowlist.has(name)&&!mapAllowlist.has(name)&&!vehicleAllowlist.has(name)&&!bc14Allowed.has(name)&&!chessArtPaths.has(name)&&name!==originalCribbageArt&&name!=='assets/games/labyrinth-cribbage/labyrinth.png')
  throw new Error('unexpected published asset: '+name);
 for(const asset of CHAOS_CARD_ART_OUTPUTS)if(!names.has(asset))throw new Error('missing approved card art: '+asset);
 if(names.has('bong-goggles-logo.png'))throw new Error('oversized original brand master must remain source-only');

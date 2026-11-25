@@ -14,6 +14,7 @@ type ClassicRoom struct {
  ID string `json:"id"`
  Host string `json:"host"`
  GameID string `json:"gameId"`
+ Format string `json:"format,omitempty"`
  Visibility string `json:"visibility"`
  SeatCount int `json:"seatCount"`
  Status string `json:"status"`
@@ -81,10 +82,10 @@ func NewClassicRooms(store *Store)(*ClassicRooms,error){
  if store==nil||store.DB==nil{return nil,ErrInvalid}
  return &ClassicRooms{Store:store},nil
 }
-const classicRoomColumns="id,host,game_id,visibility,seat_count,status,revision,updated_at"
+const classicRoomColumns="id,host,game_id,visibility,seat_count,status,revision,updated_at,format"
 func scanClassicRoom(row interface{Scan(...any)error})(ClassicRoom,error){
  var r ClassicRoom
- e:=row.Scan(&r.ID,&r.Host,&r.GameID,&r.Visibility,&r.SeatCount,&r.Status,&r.Revision,&r.UpdatedAt)
+ e:=row.Scan(&r.ID,&r.Host,&r.GameID,&r.Visibility,&r.SeatCount,&r.Status,&r.Revision,&r.UpdatedAt,&r.Format)
  return r,e
 }
 // This opt-in is independent from the old AUTH-9 games. Runtime is allowed
@@ -129,7 +130,7 @@ func (c *ClassicRooms) CreateWithFormat(ctx context.Context,viewer,game,visibili
   if count==4{
    if format!=""&&format!="partnerships"&&format!="individual"{return empty,ErrInvalid}
   }else if format!=""&&format!="individual"{return empty,ErrInvalid}
- }else if format!=""{return empty,ErrInvalid}
+ }else if game=="scrabble"{if format==""{format="17:classic-salad:live"};if _,_,e:=saladVariant(format,count);e!=nil{return empty,e}}else if format!=""{return empty,ErrInvalid}
  if !uuid.MatchString(viewer)||!classicSeatsValid(game,count)||(visibility!="private"&&visibility!="public"){return empty,ErrInvalid}
  id,e:=newID();if e!=nil{return empty,e}
  tx,e:=c.Store.DB.BeginTx(ctx,nil);if e!=nil{return empty,e};defer tx.Rollback()
@@ -140,7 +141,7 @@ func (c *ClassicRooms) CreateWithFormat(ctx context.Context,viewer,game,visibili
  var countActive int
  e=tx.QueryRowContext(ctx,"SELECT count(*) FROM bg_account_social.classic_rooms WHERE host=$1 AND status IN ('open','ready','in_game')",viewer).Scan(&countActive)
  if e!=nil{return empty,e};if countActive>=10{return empty,ErrConflict}
- _,e=tx.ExecContext(ctx,"INSERT INTO bg_account_social.classic_rooms (id,host,game_id,visibility,seat_count) VALUES($1,$2,$3,$4,$5)",id,viewer,game,visibility,count)
+ _,e=tx.ExecContext(ctx,"INSERT INTO bg_account_social.classic_rooms (id,host,game_id,visibility,seat_count,format) VALUES($1,$2,$3,$4,$5,$6)",id,viewer,game,visibility,count,func()string{if game=="scrabble"{return format};return ""}())
  if e!=nil{return empty,e}
  for seat:=0;seat<count;seat++{
   controller:="empty";var occupant any
@@ -202,7 +203,7 @@ func (c *ClassicRooms) Get(ctx context.Context,viewer,id string)(ClassicRoomView
  room,e:=scanClassicRoom(c.Store.DB.QueryRowContext(ctx,"SELECT "+classicRoomColumns+" FROM bg_account_social.classic_rooms WHERE id=$1",id))
  if errors.Is(e,sql.ErrNoRows){return out,ErrNotFound};if e!=nil{return out,e}
  allowed,e:=c.visible(ctx,viewer,room);if e!=nil{return out,e};if !allowed{return out,ErrNotFound}
- out.ClassicRoom=room;out.Seats=[]ClassicSeat{};out.Invites=[]ClassicInvite{}
+ out.ClassicRoom=room;if room.GameID=="scrabble"{out.VariantID=room.Format};out.Seats=[]ClassicSeat{};out.Invites=[]ClassicInvite{}
  rows,e:=c.Store.DB.QueryContext(ctx,"SELECT seat_index,controller,subject,difficulty,team FROM bg_account_social.classic_room_seats WHERE room_id=$1 ORDER BY seat_index",id)
  if e!=nil{return ClassicRoomView{},e}
  for rows.Next(){

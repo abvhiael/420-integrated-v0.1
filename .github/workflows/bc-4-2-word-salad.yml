@@ -1,0 +1,49 @@
+name: BC-4.2 Word Salad Backend Qualification
+on:
+  pull_request:
+    paths:
+      - 'bong-goggles/web/**'
+      - 'services/bong-goggles-account-social/**'
+      - '.github/workflows/bc-4-2-word-salad.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bc42-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  word-salad-postgresql:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: account420_test
+          POSTGRES_USER: account420_test
+          POSTGRES_PASSWORD: local_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U account420_test -d account420_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      ACCOUNT420_TEST_DSN: postgres://account420_test:local_test_only@127.0.0.1:5432/account420_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact source
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Word Salad engine, authenticated API and durable replay regression
+        run: go test -race -count=1 -tags account420_integration -run '^(TestBC42|TestWordSalad)' -v ./services/bong-goggles-account-social ./cmd/bong-goggles-social
+      - name: Static analysis and service build
+        run: |
+          go vet -tags account420_integration ./services/bong-goggles-account-social ./cmd/bong-goggles-social
+          go build -o /tmp/bc42-social ./cmd/bong-goggles-social

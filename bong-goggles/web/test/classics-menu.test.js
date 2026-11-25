@@ -65,7 +65,7 @@ test('BC-0.2 all 25 and legacy game detail pages survive direct loads without fa
  assert.match(cribbage,/not yet playable until real 420ID room activation/);
  assert.doesNotMatch(cribbage,/<button[^>]*>Start game/);
  assert.match(renderClassicGamePage('yahtzee'),/1, 2, 3 or 6 rows/);
- assert.match(renderClassicGamePage('scrabble'),/rights must be resolved/);
+ assert.match(renderClassicGamePage('scrabble'),/public Play remains gated pending release qualification/);
  assert.match(renderClassicGamePage('cross-country-chaos'),/Play Cross-Country Chaos/);
  assert.match(renderClassicGamePage('cross-country-chaos'),/separate 420ID accounts/);
  assert.doesNotMatch(renderClassicGamePage('cross-country-chaos'),/pass-and-play/);

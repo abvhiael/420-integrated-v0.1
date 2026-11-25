@@ -203,7 +203,7 @@ func (s *ClassicSessions) Events(ctx context.Context,viewer,id string,after int6
    rows.Close();return nil,0,e
   }
   if actor.Valid{n:=int(actor.Int64);item.ActorSeat=&n}
-  if item.Sequence!=next+1||!validClassicPublicEventForSession(item,rec.SeatCount,chess){
+  if item.Sequence!=next+1||!validClassicPublicEventForSession(item,rec.SeatCount,chess||rec.GameID=="scrabble"){
    rows.Close();return nil,0,ErrUnavailable
   }
   next=item.Sequence

@@ -17,6 +17,11 @@ import (
 
 func bc06Fixture(t *testing.T,ip string)(*Store,*Handler,*http.Cookie,*http.Cookie){
  t.Helper()
+ store,h,host,peer,_:=bc06FixtureWithBroker(t,ip)
+ return store,h,host,peer
+}
+func bc06FixtureWithBroker(t *testing.T,ip string)(*Store,*Handler,*http.Cookie,*http.Cookie,*fakeBroker){
+ t.Helper()
  store,broker,_,h:=fixture(t)
  messages,e:=NewMessageService(store,bytes.Repeat([]byte{41},32));if e!=nil{t.Fatal(e)}
  games,e:=NewAccountGames(store);if e!=nil{t.Fatal(e)}
@@ -41,7 +46,7 @@ func bc06Fixture(t *testing.T,ip string)(*Store,*Handler,*http.Cookie,*http.Cook
   _=store.Relationship(ctx,memberB,memberA,"block",false)
   _=store.Relationship(ctx,memberA,memberB,"block",false)
  })
- return store,h,host,peer
+ return store,h,host,peer,broker
 }
 func bc06Room(t *testing.T,h *Handler,a,b *http.Cookie)ClassicRoomView{
  t.Helper()

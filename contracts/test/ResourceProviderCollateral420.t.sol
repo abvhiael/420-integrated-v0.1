@@ -47,6 +47,7 @@ contract ResourceProviderCollateral420Test {
         _grant(address(collateral),VaultIds420.ACTION_CREATE_OBLIGATION,true);
         _grant(address(collateral),VaultIds420.ACTION_RELEASE_OBLIGATION,true);
         _grant(address(collateral),VaultIds420.ACTION_CLAIM,true);
+        _grant(address(collateral),VaultIds420.ACTION_CANCEL_OBLIGATION,true);
     }
     function _grant(address who,bytes32 action,bool allow) internal {
         caps.set(who,VaultIds420.COMPONENT_VAULT,action,auth.scopeForVault(VID),allow);
@@ -223,5 +224,66 @@ contract ResourceProviderCollateral420Test {
         vm.prank(OTHER);
         collateral.withdraw(id);
         require(OTHER.balance==2 ether && address(vault).balance==0,"sponsor payout");
+    }
+
+    function testGovernanceDisciplineCannotBeOverridden() public {
+        bytes32 id = _deposit(2 ether);
+        _activate(id);
+        vm.prank(OWNER);
+        (bool ok,) = address(providers).call(abi.encodeCall(providers.setDisciplinarySuspension,(ID,true,keccak256("evidence"))));
+        require(!ok,"operator discipline");
+        providers.setDisciplinarySuspension(ID,true,keccak256("evidence"));
+        require(!providers.isActive(ID),"suspension");
+        vm.prank(OWNER);
+        (ok,) = address(providers).call(abi.encodeCall(providers.setState,(ID,ResourceProviderRegistry420.State.ACTIVE)));
+        require(!ok,"self reinstatement");
+        providers.reinstateProvider(ID,keccak256("remediated"));
+        vm.prank(OWNER);
+        providers.setState(ID,ResourceProviderRegistry420.State.ACTIVE);
+        require(providers.isActive(ID),"qualified reinstatement");
+        providers.disqualifyProvider(ID,keccak256("permanent"));
+        (ok,) = address(providers).call(abi.encodeCall(providers.reinstateProvider,(ID,keccak256("retry"))));
+        require(!ok && !providers.isActive(ID),"permanent disqualification");
+    }
+
+    function testSlashDeductsNativeCustodyAndRetainsExistingExposure() public {
+        bytes32 id = _deposit(2 ether);
+        _deposit(1 ether);
+        _activate(id);
+        bytes32 reservation = collateral.reserveExposure(ID,keccak256("existing agreement"),1 ether);
+        bytes32 key = collateral.holdPenalty(id,keccak256("penalty evidence"),2.5 ether);
+        bytes32 decision = keccak256("final adjudication");
+        vm.prank(OWNER);
+        (bool ok,) = address(collateral).call(abi.encodeCall(collateral.authorizePenalty,(key,decision,OTHER)));
+        require(!ok,"unauthorized penalty");
+        collateral.authorizePenalty(key,decision,OTHER);
+        uint256 before = OTHER.balance;
+        collateral.executePenalty(key,1);
+        require(collateral.penaltyExecuted(key)==2 ether,"bounded first batch");
+        collateral.executePenalty(key,1);
+        require(OTHER.balance==before+2.5 ether,"actual payout");
+        require(collateral.getPosition(id).slashable==0.5 ether && collateral.slashedAmount(id)==2.5 ether,"slash accounting");
+        require(collateral.reconciledTranche(id,2)==0.5 ether && address(vault).balance==0.5 ether,"remainder custody");
+        require(!providers.isActive(ID) && collateral.outstandingReservations(id)==1,"ineligible but obligations retained");
+        (ok,) = address(collateral).call(abi.encodeCall(collateral.executePenalty,(key,uint64(1))));
+        require(!ok,"duplicate execution");
+        collateral.releaseExposure(reservation);
+        require(collateral.outstandingReservations(id)==0,"existing discharge");
+        vm.prank(OWNER);
+        collateral.requestExit(id);
+        vm.warp(collateral.withdrawableAt(id));
+        vm.prank(OWNER);
+        collateral.withdraw(id);
+        require(collateral.withdrawnAmount(id)==0.5 ether && collateral.totalSlashed()==2.5 ether && address(vault).balance==0,"final accounting");
+    }
+
+    function testPenaltyExecutionRollbackOnMissingVaultGrant() public {
+        bytes32 id = _deposit(2 ether);
+        bytes32 key = collateral.holdPenalty(id,keccak256("evidence"),1 ether);
+        collateral.authorizePenalty(key,keccak256("decision"),OTHER);
+        _grant(address(collateral),VaultIds420.ACTION_CANCEL_OBLIGATION,false);
+        (bool ok,) = address(collateral).call(abi.encodeCall(collateral.executePenalty,(key,uint64(1))));
+        require(!ok && collateral.penaltyExecuted(key)==0 && collateral.reconciledTranche(id,1)==2 ether,"atomic rollback");
+        require(collateral.outstandingPenaltyHolds(id)==1 ether,"hold preserved");
     }
 }

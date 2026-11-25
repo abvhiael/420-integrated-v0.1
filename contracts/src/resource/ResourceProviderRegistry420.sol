@@ -7,6 +7,9 @@ import "./ResourceIds420.sol";
 
 interface IResourceProviderCollateral420 {
     function providers() external view returns (address);
+    function reserveExposure(bytes32 providerId, bytes32 obligationRef, uint256 exposure) external returns (bytes32);
+    function releaseExposure(bytes32 key) external;
+    function outstandingReservations(bytes32 position) external view returns (uint256);
     function eligible(bytes32 providerId, bytes32 referenceId, address operator, uint256 minimum) external view returns (bool);
 }
 

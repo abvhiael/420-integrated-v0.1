@@ -1,0 +1,24 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {renderChessScreen} from '../core/chess-ui.js';
+import {chessArt,chessArtPaths} from '../scripts/chess-art.mjs';
+import {fixture} from './chess-fixture.mjs';
+test('Emerald Chess uses owner-uploaded art without enabling anonymous play',()=>{
+ assert.equal(chessArt.length,30);
+ assert.equal(chessArtPaths.size,30);
+ const guest=renderChessScreen('intro',{status:'guest'});
+ assert.match(guest,/chess-logo\.webp/);
+ assert.match(guest,/Starting position preview/);
+ assert.equal((guest.match(/class="chess-piece"/g)||[]).length,32);
+ assert.match(guest,/type="submit" disabled>Start Chess/);
+ assert.doesNotMatch(guest,/data-chess-square=/);
+ const raw=fixture(0);
+ const session={...raw,seat:0,view:raw.privateView};
+ const html=renderChessScreen('play',{status:'ready',session,actions:[{type:'move',uci:'e2e4'}]});
+ assert.equal((html.match(/data-chess-square=/g)||[]).length,64);
+ assert.match(html,/white-king\.webp/);
+ assert.match(html,/black-queen\.webp/);
+ assert.match(html,/aria-label="e2, White pawn"/);
+ assert.match(html,/data-chess-clock="0"/);
+ assert.match(renderChessScreen('play',{status:'ready',session,flipped:true}),/chess-board-frame flipped/);
+});

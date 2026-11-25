@@ -6,6 +6,7 @@ on:
       - 'cmd/bong-goggles-social/**'
       - 'services/bong-goggles-account-social/**'
       - '.github/workflows/bc-4-2-word-salad.yml'
+      - 'docs/games/classics/BC-4-2-*.md'
   workflow_dispatch:
 permissions:
   contents: read
@@ -44,6 +45,12 @@ jobs:
           go-version-file: go.mod
       - name: Word Salad engine, authenticated API and durable replay regression
         run: go test -race -count=1 -tags account420_integration -run '^(TestBC42|TestWordSalad)' -v ./services/bong-goggles-account-social ./cmd/bong-goggles-social
+      - name: Record dictionary identities
+        run: |
+          sha256sum services/bong-goggles-account-social/word_salad_lexicon/{english,cannabis}.txt
+          wc -l services/bong-goggles-account-social/word_salad_lexicon/{english,cannabis}.txt
+      - name: Web catalogue and tile regression
+        run: node --test bong-goggles/web/test/classics-menu.test.js bong-goggles/web/test/word-salad-tiles.test.js
       - name: Static analysis and service build
         run: |
           go vet -tags account420_integration ./services/bong-goggles-account-social ./cmd/bong-goggles-social

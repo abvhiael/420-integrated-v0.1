@@ -1,0 +1,60 @@
+{
+  "schema": "420-resource-genesis-authority-reconciliation-v1",
+  "status": "RESOURCE_NAMESPACE_UNCHANGED_GLOBAL_GENESIS_V3_BLOCKED",
+  "observedResourceHead": "61499e5046b637d942a9c5163d53ff0e55226a55",
+  "frozenGenesisConfigHash": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
+  "frozenManifestBlob": "e01538725780ab81c3667374e8c9bcdb3592c674",
+  "authorityInputs": [
+    {
+      "path": "contracts/config/genesis-address-namespace.json",
+      "frozenBlob": "d9c40056db30513c0445f0c341d261b63dc6a1a5",
+      "observedBranchBlob": "d9c40056db30513c0445f0c341d261b63dc6a1a5",
+      "observedMainBlob": "d9c40056db30513c0445f0c341d261b63dc6a1a5",
+      "disposition": "MATCH"
+    },
+    {
+      "path": "contracts/config/system-addresses.json",
+      "frozenBlob": "50c8d7c860ff48d52f41874bc55ee092cc9c5b6d",
+      "observedBranchBlob": "b3db3f81bd2464b1f3892de293c8da7c64b564c0",
+      "observedMainBlob": "b3db3f81bd2464b1f3892de293c8da7c64b564c0",
+      "disposition": "PREEXISTING_PENDING_V4_AMENDMENT"
+    },
+    {
+      "path": "contracts/config/interfaces/genesis-interface-layer.json",
+      "frozenBlob": "e5fc64b454dcaca4bbf112b1488986377d711128",
+      "observedBranchBlob": "e5fc64b454dcaca4bbf112b1488986377d711128",
+      "observedMainBlob": "e5fc64b454dcaca4bbf112b1488986377d711128",
+      "disposition": "MATCH"
+    },
+    {
+      "path": "config/genesis-applications.json",
+      "frozenBlob": "73a24bfe46787f3c2af043adc1de12eea1f456ab",
+      "observedBranchBlob": "73a24bfe46787f3c2af043adc1de12eea1f456ab",
+      "observedMainBlob": "73a24bfe46787f3c2af043adc1de12eea1f456ab",
+      "disposition": "MATCH"
+    },
+    {
+      "path": "config/genesis-allocations.json",
+      "frozenBlob": "564d67fe2f959a96ed0c54d7862dd21bef30a8e9",
+      "observedBranchBlob": "ebbadebc7f0add8c7b42d4924145b2cd464941c7",
+      "observedMainBlob": "ebbadebc7f0add8c7b42d4924145b2cd464941c7",
+      "disposition": "PREEXISTING_PENDING_V4_AMENDMENT"
+    },
+    {
+      "path": "config/ai-genesis.json",
+      "frozenBlob": "789c750c7fb2eb2cbd6844122789b6611e91fbb0",
+      "observedBranchBlob": "789c750c7fb2eb2cbd6844122789b6611e91fbb0",
+      "observedMainBlob": "789c750c7fb2eb2cbd6844122789b6611e91fbb0",
+      "disposition": "MATCH"
+    }
+  ],
+  "resourceDisposition": "Registry-resolved collateral graph; no modification to any frozen authority input; no new fixed predeploy.",
+  "globalDisposition": "Do not restore superseded founder candidate files, rewrite V3 hashes, bypass Token V3 checks, or assert production readiness. Explicit V4 approval and affected resident rematerialization are required.",
+  "founderCandidate": "FOUNDING_THREE_AMENDMENT_PENDING_V4_RECOMMIT",
+  "fixedAssignmentsUnchanged": true,
+  "changes": [
+    "system-addresses: added founder_wallet_reservations and founder_wallet_slots only",
+    "genesis-allocations: split founder allocation into 500000 locked and 500000 liquid, added non-additive reserve earmarks and pending V4 status"
+  ],
+  "qualification": "Token V3 authority validation remains fail closed. This evidence does not authorize live deployment."
+}

@@ -148,4 +148,49 @@ contract StorageProofProtocol420Test {
         (bool inactiveNode,) = address(e.proofs).call(abi.encodeWithSelector(e.proofs.submitProof.selector, commitmentId, keccak256("challenge-node"), uint64(block.timestamp), bytes("valid-proof")));
         require(!inactiveNode, "suspended node accepted proof");
     }
+
+    function testProviderDisciplineStopsProofWithoutConsumingChallenge() public {
+        Env memory e = setup();
+        bytes32 commitmentId = keccak256("provider-discipline");
+        registerCommitment(e, commitmentId);
+        bytes32 challengeId = keccak256("provider-discipline-challenge");
+        uint64 epoch = uint64(block.timestamp);
+
+        e.providers.setDisciplinarySuspension(e.providerId, true, keccak256("suspension-evidence"));
+        require(e.nodes.getNode(e.nodeId).state == ResourceNodeRegistry420.State.ACTIVE, "node state changed");
+        vm.expectRevert(StorageProofRegistry420.InactiveStoreNode.selector);
+        e.proofs.submitProof(commitmentId, challengeId, epoch, bytes("valid-proof"));
+        require(!e.proofs.challengeConsumed(commitmentId, challengeId), "suspension consumed challenge");
+
+        e.providers.reinstateProvider(e.providerId, keccak256("remediation-evidence"));
+        vm.prank(ALICE); e.providers.setState(e.providerId, ResourceProviderRegistry420.State.ACTIVE);
+        e.proofs.submitProof(commitmentId, challengeId, epoch, bytes("valid-proof"));
+        require(e.proofs.challengeConsumed(commitmentId, challengeId), "reinstated proof rejected");
+
+        bytes32 nextChallenge = keccak256("disqualified-provider-challenge");
+        e.providers.disqualifyProvider(e.providerId, keccak256("disqualification-evidence"));
+        vm.expectRevert(StorageProofRegistry420.InactiveStoreNode.selector);
+        e.proofs.submitProof(commitmentId, nextChallenge, epoch, bytes("valid-proof"));
+        require(!e.proofs.challengeConsumed(commitmentId, nextChallenge), "disqualification consumed challenge");
+    }
+
+    function testNodeSuspensionAndRetirementPreserveUnconsumedChallenges() public {
+        Env memory e = setup();
+        bytes32 commitmentId = keccak256("node-lifecycle");
+        registerCommitment(e, commitmentId);
+        bytes32 challengeId = keccak256("node-lifecycle-challenge");
+        uint64 epoch = uint64(block.timestamp);
+        vm.prank(ALICE); e.nodes.setState(e.nodeId, ResourceNodeRegistry420.State.SUSPENDED);
+        vm.expectRevert(StorageProofRegistry420.InactiveStoreNode.selector);
+        e.proofs.submitProof(commitmentId, challengeId, epoch, bytes("valid-proof"));
+        require(!e.proofs.challengeConsumed(commitmentId, challengeId), "suspension consumed challenge");
+        vm.prank(ALICE); e.nodes.setState(e.nodeId, ResourceNodeRegistry420.State.ACTIVE);
+        e.proofs.submitProof(commitmentId, challengeId, epoch, bytes("valid-proof"));
+
+        bytes32 nextChallenge = keccak256("retired-node-challenge");
+        vm.prank(ALICE); e.nodes.setState(e.nodeId, ResourceNodeRegistry420.State.RETIRED);
+        vm.expectRevert(StorageProofRegistry420.InactiveStoreNode.selector);
+        e.proofs.submitProof(commitmentId, nextChallenge, epoch, bytes("valid-proof"));
+        require(!e.proofs.challengeConsumed(commitmentId, nextChallenge), "retirement consumed challenge");
+    }
 }

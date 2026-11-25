@@ -134,3 +134,29 @@ test('BC-2.1 canonical Labyrinth title, URL and legacy deep links',()=>{
  assert.equal(classicGameById('russian-cribbage')?.title,'Labyrinth Cribbage');
  assert.equal(CLASSIC_ROADMAP[1].href,'/games/labyrinth-cribbage');
 });
+
+test('BC-3.8 authorized catalogue is separate from runtime availability',()=>{
+ assert.equal(classicGameById('chess').status,'playable');
+ const disabled={status:'disabled'},ready={status:'ready'},guest={status:'guest'};
+ for(const chessState of [null,disabled]){
+  for(const pathname of ['/games','/classics']){
+   const html=renderApplicationShell({pathname,chessState});
+   assert.match(html,/Release authorized · Not enabled on this deployment/);
+  }
+  for(const screen of ['intro','setup','play','history']){
+   const html=renderClassicGamePage('chess',{screen,chessState});
+   assert.match(html,/not yet playable on this deployment/);
+   assert.doesNotMatch(html,/data-chess-start|data-chess-square|Play against a computer<\/a>|Play a human opponent<\/a>/);
+  }
+ }
+ for(const pathname of ['/games','/classics']){
+  const html=renderApplicationShell({pathname,chessState:ready});
+  assert.doesNotMatch(html,/Release authorized · Not enabled on this deployment/);
+ }
+ const active=renderClassicGamePage('chess',{chessState:ready});
+ assert.match(active,/Play against a computer/);
+ assert.match(active,/<button type="submit">Start Chess<\/button>/);
+ const anonymous=renderClassicGamePage('chess',{chessState:guest});
+ assert.match(anonymous,/Sign in with 420ID/);
+ assert.match(anonymous,/<button type="submit" disabled>Start Chess<\/button>/);
+});

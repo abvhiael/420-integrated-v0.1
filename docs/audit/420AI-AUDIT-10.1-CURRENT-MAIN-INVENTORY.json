@@ -5782,6 +5782,84 @@
           "scripts/validate-gen-svc-4.py"
         ],
         "scopeMatches": []
+      },
+      {
+        "number": 151,
+        "files": [
+          "clients/greenroad-access-v1/src/scene-engine.js",
+          "clients/greenroad-access-v1/test/scene-engine.test.js",
+          "docs/gaming/TGR-1-1-SCENE-ENGINE.md"
+        ],
+        "scopeMatches": []
+      },
+      {
+        "number": 148,
+        "files": [
+          "contracts/src/bet/VideoPokerV1420.sol",
+          "contracts/test/BetVideoPokerV1420.t.sol"
+        ],
+        "scopeMatches": []
+      },
+      {
+        "number": 105,
+        "files": [
+          "contracts/src/creative/economics/StreamingRevenueAllocator420.sol",
+          "contracts/src/creative/economics/StreamingRoyaltySettlement420.sol",
+          "contracts/src/creative/economics/StreamingSettlementEpoch420.sol",
+          "contracts/test/StreamingRevenueAllocator420.t.sol",
+          "contracts/test/StreamingRoyaltySettlement420.t.sol",
+          "contracts/test/StreamingSettlementEpoch420.t.sol",
+          "creative-indexer/sql/003_streaming_settlement.sql",
+          "creative-indexer/src/streaming-settlement-store.ts",
+          "creative-indexer/test/streaming-settlement-projection.test.ts"
+        ],
+        "scopeMatches": []
+      },
+      {
+        "number": 86,
+        "files": [
+          ".github/workflows/420media-anvil.yml",
+          "contracts/src/media/MediaJobMarket420.sol",
+          "docs/420-MEDIA-PHASE-3-FAILOVER-RECOVERY.md",
+          "docs/420-MEDIA-PHASE-3-GEOGRAPHIC-RESILIENCE.md",
+          "docs/420-MEDIA-PHASE-3-OPERATOR-DISCOVERY.md",
+          "docs/420-MEDIA-PHASE-3-STREAM-ORCHESTRATION.md",
+          "media/controlplane/discovery.go",
+          "media/controlplane/discovery_test.go",
+          "media/discovery/ethereum.go",
+          "media/discovery/ethereum_test.go",
+          "media/discovery/selector.go",
+          "media/discovery/selector_test.go",
+          "media/discovery/source.go",
+          "media/discovery/source_test.go",
+          "media/discovery/types.go",
+          "media/orchestration/anvil_integration_test.go",
+          "media/orchestration/ethereum_lifecycle.go",
+          "media/orchestration/ethereum_lifecycle_test.go",
+          "media/orchestration/failure_domain.go",
+          "media/orchestration/failure_domain_test.go",
+          "media/orchestration/failure_test.go",
+          "media/orchestration/geography_recovery.go",
+          "media/orchestration/geography_recovery_test.go",
+          "media/orchestration/lifecycle.go",
+          "media/orchestration/lifecycle_test.go",
+          "media/orchestration/planner.go",
+          "media/orchestration/planner_test.go",
+          "media/orchestration/recovery.go",
+          "media/orchestration/recovery_anvil_integration_test.go",
+          "media/orchestration/recovery_execution.go",
+          "media/orchestration/recovery_execution_test.go",
+          "media/orchestration/recovery_propagation.go",
+          "media/orchestration/recovery_propagation_test.go",
+          "media/orchestration/recovery_test.go",
+          "media/orchestration/regional_continuity.go",
+          "media/orchestration/regional_continuity_test.go",
+          "media/orchestration/regional_recovery.go",
+          "media/orchestration/regional_recovery_test.go",
+          "media/orchestration/types.go",
+          "scripts/420media-anvil-integration.sh"
+        ],
+        "scopeMatches": []
       }
     ]
   }

@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {withAccountSocialBuildFlags,resolveClassicBuildFlags,ACCOUNT_SOCIAL_BUILD_FLAG,CLASSIC_ROOMS_BUILD_FLAG} from '../scripts/account-social-build-config.mjs';
+import {withAccountSocialBuildFlags,resolveClassicBuildFlags,ACCOUNT_SOCIAL_BUILD_FLAG,CLASSIC_ROOMS_BUILD_FLAG,resolveChessBuildFlag} from '../scripts/account-social-build-config.mjs';
 import {validateRuntimeConfig} from '../core/runtime-config.js';
+import {verifyAccountSocialOutput} from '../scripts/verify-account-social-output.mjs';
 
 const example=JSON.parse(await readFile(new URL('../runtime-config.example.json',import.meta.url),'utf8'));
 const accountFlags=['accountSocial','accountMessaging','accountGames','accountXP'];
@@ -81,4 +82,51 @@ test('BC-1.8 production Pages main activates Classic rooms and messages only wit
  assert.equal(withAccountSocialBuildFlags(example,'true',enabled.rooms,enabled.communications).features.classicCommunications,true);
  const disabled=set({account:'true',pages:'1',branch:'main',rooms:'false',communications:'false'});
  assert.equal(withAccountSocialBuildFlags(example,'true',disabled.rooms,disabled.communications).features.classicCommunications,false);
+});
+
+test('BC-3.8 owner-authorized Pages release remains explicit and rollback safe',()=>{
+ const approved={account:'true',rooms:'true',communications:'true',pages:'1',branch:'main'};
+ assert.equal(resolveChessBuildFlag(approved),'true');
+ assert.equal(resolveChessBuildFlag({...approved,chess:'false'}),'false');
+ for(const change of [{account:'false'},{rooms:'false'},{communications:'false'},{pages:'0'},{branch:'preview'}]){
+  assert.equal(resolveChessBuildFlag({...approved,...change}),'false');
+  assert.throws(()=>resolveChessBuildFlag({...approved,...change,chess:'true'}));
+ }
+ const config=withAccountSocialBuildFlags({...example,environment:'production'},'true','true','true','true');
+ assert.equal(validateRuntimeConfig(config).features.chessRestricted,true);
+ assert.equal(validateRuntimeConfig({...config,features:{...config.features,accountSocial:false}}).features.chessRestricted,false);
+ assert.equal(validateRuntimeConfig({...config,features:{...config.features,classicCommunications:false}}).features.chessRestricted,false);
+ assert.equal(config.features.accountMonetization,false);
+});
+
+test('BC-3.8 independently verifies actual output and rejects unrelated mutations',()=>{
+ const main={BG_ACCOUNT_SOCIAL_ACTIVATION:'true',CF_PAGES:'1',CF_PAGES_BRANCH:'main'};
+ const cases=[
+  [{},'disabled',undefined,undefined,'false'],
+  [{BG_ACCOUNT_SOCIAL_ACTIVATION:'true'},'enabled',undefined,undefined,'false'],
+  [{BG_ACCOUNT_SOCIAL_ACTIVATION:'true',BG_CLASSIC_ROOMS_ACTIVATION:'true',BG_CLASSIC_COMMUNICATIONS_ACTIVATION:'true'},'enabled','true','true','false'],
+  [main,'enabled','true','true','true'],
+  [{...main,BG_CHESS_ACTIVATION:'true'},'enabled','true','true','true'],
+  [{...main,BG_CHESS_ACTIVATION:'false'},'enabled','true','true','false'],
+  [{...main,CF_PAGES_BRANCH:'preview'},'enabled',undefined,undefined,'false'],
+  [{...main,BG_CLASSIC_ROOMS_ACTIVATION:'false'},'enabled','false',undefined,'false'],
+  [{...main,BG_CLASSIC_COMMUNICATIONS_ACTIVATION:'false'},'enabled','true','false','false']
+ ];
+ for(const [env,mode,rooms,communications,chess] of cases){
+  const actual=withAccountSocialBuildFlags(example,env.BG_ACCOUNT_SOCIAL_ACTIVATION,rooms,communications,chess);
+  verifyAccountSocialOutput(example,actual,mode,env);
+  for(const [key,value] of Object.entries(actual.features)){
+   const bad={...actual,features:{...actual.features,[key]:typeof value==='boolean'?!value:'tampered'}};
+   assert.throws(()=>verifyAccountSocialOutput(example,bad,mode,env),/modified another feature or source field/,key);
+  }
+  for(const key of Object.keys(actual).filter(k=>k!=='features')){
+   assert.throws(()=>verifyAccountSocialOutput(example,{...actual,[key]:'tampered'},mode,env),/modified another feature or source field/,key);
+  }
+  assert.throws(()=>verifyAccountSocialOutput(example,{...actual,features:{...actual.features,unexpected:true}},mode,env),/modified another feature or source field/);
+  const missing=structuredClone(actual);delete missing.features.chessRestricted;
+  assert.throws(()=>verifyAccountSocialOutput(example,missing,mode,env),/modified another feature or source field/);
+ }
+ const active=withAccountSocialBuildFlags(example,'true','true','true','true');
+ assert.throws(()=>verifyAccountSocialOutput(example,active,'enabled',{...main,CF_PAGES_BRANCH:'preview',BG_CHESS_ACTIVATION:'true'}),/outside approved/);
+ assert.throws(()=>verifyAccountSocialOutput(example,active,'enabled',{...main,BG_CHESS_ACTIVATION:'TRUE'}),/Invalid Chess activation/);
 });

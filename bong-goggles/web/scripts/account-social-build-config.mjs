@@ -5,7 +5,16 @@ export const ACCOUNT_SOCIAL_BUILD_FLAG = 'BG_ACCOUNT_SOCIAL_ACTIVATION';
 export const CLASSIC_ROOMS_BUILD_FLAG = 'BG_CLASSIC_ROOMS_ACTIVATION';
 export const CLASSIC_COMMUNICATIONS_BUILD_FLAG = 'BG_CLASSIC_COMMUNICATIONS_ACTIVATION';
 
-export function withAccountSocialBuildFlags(example, rawValue, roomsValue, communicationsValue) {
+export const CHESS_BUILD_FLAG = 'BG_CHESS_ACTIVATION';
+export function resolveChessBuildFlag({account,rooms,communications,pages,branch,chess}={}){
+ const approved=pages==='1'&&branch==='main'&&account==='true'&&rooms==='true'&&communications==='true';
+ if(chess!==undefined&&chess!=='true'&&chess!=='false')throw Error('BG_CHESS_ACTIVATION must be exactly true or false');
+ if(chess==='true'&&!approved)throw Error('Chess release requires approved main Pages and active account rooms and communications');
+ return approved&&chess!=='false'?'true':'false';
+}
+export function withAccountSocialBuildFlags(example, rawValue, roomsValue, communicationsValue, chessValue='false') {
+ if(chessValue!=='true'&&chessValue!=='false')throw Error('Invalid Chess activation');
+ if(chessValue==='true'&&(rawValue!=='true'||roomsValue!=='true'||communicationsValue!=='true'))throw Error('Chess requires active account rooms and communications');
   if (communicationsValue !== undefined && communicationsValue !== 'true' && communicationsValue !== 'false')
     throw new Error('BG_CLASSIC_COMMUNICATIONS_ACTIVATION must be exactly true or false');
   if (communicationsValue === 'true' && (rawValue !== 'true' || roomsValue !== 'true'))
@@ -35,6 +44,7 @@ export function withAccountSocialBuildFlags(example, rawValue, roomsValue, commu
       classicRooms: enabled && roomsValue === 'true',
       classicCommunications: enabled && roomsValue === 'true' && communicationsValue === 'true',
       accountXP: enabled,
+      chessRestricted: chessValue==='true',
       accountMonetization: false
     }
   };

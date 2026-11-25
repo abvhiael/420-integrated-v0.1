@@ -165,7 +165,7 @@ func main(){
   os.Getenv("SOCIAL420_CLASSIC_COMMUNICATIONS")=="restricted-acceptance");err!=nil{
   log.Fatal("BC-3.3 Chess activation unavailable: ",err)
  }
- if os.Getenv("SOCIAL420_CHESS_MODE")=="restricted-acceptance"{
+ if mode:=os.Getenv("SOCIAL420_CHESS_MODE");mode=="restricted-acceptance"||mode=="public-play"{
   ctx,done:=context.WithTimeout(context.Background(),10*time.Second)
   err:=store.ReadyClassicMatchRequests(ctx)
   done()

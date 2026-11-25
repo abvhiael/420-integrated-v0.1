@@ -56,5 +56,20 @@
     "system-addresses: added founder_wallet_reservations and founder_wallet_slots only",
     "genesis-allocations: split founder allocation into 500000 locked and 500000 liquid, added non-additive reserve earmarks and pending V4 status"
   ],
-  "qualification": "Token V3 authority validation remains fail closed. This evidence does not authorize live deployment."
+  "qualification": "Token V3 authority validation remains fail closed. This evidence does not authorize live deployment.",
+  "classification": {
+    "category": "INHERITED_GENESIS_V4_DEPENDENCY",
+    "resourceImplementationDefect": false,
+    "owner": "GLOBAL_GENESIS_V4_AUTHORITY_RECOMMITMENT",
+    "resourceAuditDisposition": "RECONCILED_EXTERNAL_DEPENDENCY",
+    "tokenV3DeploymentRehearsal": "BLOCKED_FAIL_CLOSED",
+    "liveDeploymentAllowed": false,
+    "closureCriteria": [
+      "Independent founder authorization",
+      "Explicit Genesis V4 approval and commitment",
+      "Affected resident rematerialization",
+      "Token deployment requalification"
+    ],
+    "decision": "Explicit user direction: classify as an inherited Genesis V4 dependency rather than an outstanding Resource implementation defect."
+  }
 }

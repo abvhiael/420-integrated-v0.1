@@ -33,11 +33,22 @@ contract ResourceProviderRegistry420 is I420System {
     address public immutable governanceTimelock;
     IResourceProviderCollateral420 public collateral;
     bytes32 public collateralCodeHash;
-    uint256 public minimumCollateral;
+    struct CollateralPolicy {
+        uint256 minimumCollateral;
+        uint256 minimumSlashable;
+        uint64 withdrawalDelay;
+        uint32 coverageBps;
+        bool acceptingNew;
+        bytes32 evidenceHash;
+    }
+    uint32 public collateralPolicyRevision;
+    mapping(uint32 => CollateralPolicy) private _collateralPolicies;
+    bool public admissionSuspended;
+    event CollateralPolicyPublished(uint32 indexed revision, bytes32 indexed commitment, bytes32 evidenceHash);
+    event AdmissionSuspensionChanged(bool suspended);
     mapping(bytes32 => bool) public disciplinarySuspension;
     mapping(bytes32 => address) public collateralSponsor;
     event CollateralAuthorityBound(address indexed authority, bytes32 codeHash);
-    event MinimumCollateralChanged(uint256 minimum);
     event ProviderDisciplineChanged(bytes32 indexed providerId, bool suspended);
     event CollateralSponsorChanged(bytes32 indexed providerId, address indexed sponsor);
 
@@ -69,11 +80,44 @@ contract ResourceProviderRegistry420 is I420System {
         emit CollateralAuthorityBound(authority, collateralCodeHash);
     }
 
-    function setMinimumCollateral(uint256 minimum) external {
+    function publishCollateralPolicy(
+        uint256 minimum, uint256 slashable, uint64 delaySeconds, uint32 coverageBps,
+        bool acceptingNew, bytes32 evidenceHash
+    ) external returns (uint32 revision) {
         if (msg.sender != governanceTimelock) revert Unauthorized();
-        if (minimum == 0) revert StakeRequired();
-        minimumCollateral = minimum;
-        emit MinimumCollateralChanged(minimum);
+        if (minimum == 0 || slashable == 0 || slashable > minimum || delaySeconds == 0
+            || coverageBps == 0 || evidenceHash == bytes32(0)) revert InvalidProvider();
+        revision = ++collateralPolicyRevision;
+        _collateralPolicies[revision] = CollateralPolicy(minimum, slashable, delaySeconds, coverageBps, acceptingNew, evidenceHash);
+        emit CollateralPolicyPublished(revision, collateralPolicyCommitment(revision), evidenceHash);
+    }
+
+    function collateralPolicy(uint32 revision) public view returns (CollateralPolicy memory) {
+        if (revision == 0 || revision > collateralPolicyRevision) revert InvalidProvider();
+        return _collateralPolicies[revision];
+    }
+
+    function collateralPolicyCommitment(uint32 revision) public view returns (bytes32) {
+        return keccak256(abi.encode("420/RESOURCE/COLLATERAL/POLICY/V1", block.chainid, address(this), revision, collateralPolicy(revision)));
+    }
+
+    function minimumCollateral() external view returns (uint256) {
+        return _collateralPolicies[collateralPolicyRevision].minimumCollateral;
+    }
+
+    function setAdmissionSuspended(bool suspended) external {
+        if (msg.sender != governanceTimelock) revert Unauthorized();
+        admissionSuspended = suspended;
+        emit AdmissionSuspensionChanged(suspended);
+    }
+
+    /// @notice Required slashable backing for a given aggregate native-420 exposure, rounded up.
+    function requiredSlashable(uint256 exposure) public view returns (uint256) {
+        CollateralPolicy memory policy = collateralPolicy(collateralPolicyRevision);
+        uint256 covered = (exposure / 10000) * policy.coverageBps;
+        uint256 remainder = (exposure % 10000) * policy.coverageBps;
+        covered += (remainder + 9999) / 10000;
+        return covered > policy.minimumSlashable ? covered : policy.minimumSlashable;
     }
 
     function setCollateralSponsor(bytes32 providerId, address sponsor) external {
@@ -174,9 +218,10 @@ contract ResourceProviderRegistry420 is I420System {
     }
 
     function _eligible(bytes32 providerId, Provider storage p) private view returns (bool) {
-        if (disciplinarySuspension[providerId] || minimumCollateral == 0 || address(collateral) == address(0)
+        CollateralPolicy storage policy = _collateralPolicies[collateralPolicyRevision];
+        if (disciplinarySuspension[providerId] || admissionSuspended || !policy.acceptingNew || policy.minimumCollateral == 0 || address(collateral) == address(0)
             || address(collateral).codehash != collateralCodeHash || p.stakeRef == bytes32(0)) return false;
-        try collateral.eligible(providerId, p.stakeRef, p.operatorAccount, minimumCollateral) returns (bool ok) {
+        try collateral.eligible(providerId, p.stakeRef, p.operatorAccount, policy.minimumCollateral) returns (bool ok) {
             return ok;
         } catch { return false; }
     }

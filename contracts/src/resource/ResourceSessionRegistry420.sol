@@ -96,9 +96,9 @@ contract ResourceSessionRegistry420 is I420System {
         ) revert InvalidSession();
 
         uint256 maxSpend420 = uint256(maxUnits) * uint256(o.unitPrice420);
-        collateralReservation[sessionId] = offers.providers().collateral().reserveExposure(
-            offers.nodes().getNode(o.nodeId).providerId, sessionId, maxSpend420
-        );
+        collateralReservation[sessionId] = offers.providers()
+            .collateral()
+            .reserveExposure(offers.nodes().getNode(o.nodeId).providerId, sessionId, maxSpend420);
         _sessions[sessionId] =
             Session(offerId, msg.sender, maxUnits, maxSpend420, uint64(block.timestamp), expiresAt, State.OPEN, true);
         emit SessionOpened(sessionId, offerId, msg.sender, maxUnits, maxSpend420, expiresAt);
@@ -146,18 +146,25 @@ contract ResourceSessionRegistry420 is I420System {
     address public economicSettlementController;
     bytes32 public economicSettlementCodeHash;
 
-    function bindEconomicSettlementController(address controller) external {
-        if (msg.sender != offers.providers().governanceTimelock() || economicSettlementController != address(0)
-            || controller.code.length == 0) revert Unauthorized();
+    function bindEconomicSettlementController(
+        address controller
+    ) external {
+        if (
+            msg.sender != offers.providers().governanceTimelock() || economicSettlementController != address(0)
+                || controller.code.length == 0
+        ) revert Unauthorized();
         economicSettlementController = controller;
         economicSettlementCodeHash = controller.codehash;
     }
 
-    function releaseDischargedSession(bytes32 sessionId) external {
+    function releaseDischargedSession(
+        bytes32 sessionId
+    ) external {
         Session storage s = _get(sessionId);
-        if (msg.sender != economicSettlementController || msg.sender.codehash != economicSettlementCodeHash
-            || (s.state != State.SETTLED && s.state != State.CANCELLED)
-            || collateralReleased[sessionId]) revert Unauthorized();
+        if (
+            msg.sender != economicSettlementController || msg.sender.codehash != economicSettlementCodeHash
+                || (s.state != State.SETTLED && s.state != State.CANCELLED) || collateralReleased[sessionId]
+        ) revert Unauthorized();
         collateralReleased[sessionId] = true;
         offers.providers().collateral().releaseExposure(collateralReservation[sessionId]);
     }

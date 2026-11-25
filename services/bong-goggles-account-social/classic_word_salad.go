@@ -194,7 +194,7 @@ func(r wordSaladRules)View(f RuleFrame,seat int)(json.RawMessage,error){
  if seat<0||seat>=f.SeatCount{return nil,ErrForbidden};p,_,e:=saladVariant(f.Variant,f.SeatCount);if e!=nil{return nil,e};d,e:=saladDecode(f);if e!=nil{return nil,e};pack:=saladPack(p)
  type visibleTile struct{ID int `json:"id"`;Symbol string `json:"symbol"`;Value int64 `json:"value"`}
  rack:=[]visibleTile{};for _,id:=range d.Racks[seat]{rack=append(rack,visibleTile{id,saladSymbols[pack[id]],saladValues[pack[id]]})}
- board:=map[int]string{};for pos,c:=range d.Board{s,e:=saladText(c,pack);if e!=nil{return nil,e};board[pos]=s}
+ board:=map[int]string{};blanks:=[]int{};for pos,c:=range d.Board{s,e:=saladText(c,pack);if e!=nil{return nil,e};board[pos]=s;if c.Blank!=""{blanks=append(blanks,pos)}};sort.Ints(blanks)
  counts:=[]int{};for _,r:=range d.Racks{counts=append(counts,len(r))}
- return json.Marshal(map[string]any{"variant":f.Variant,"board":board,"rack":rack,"rackCounts":counts,"bagCount":len(d.Bag),"scores":f.Scores,"turn":f.Turn,"terminal":f.Terminal,"winners":d.Winners,"forfeit":d.Forfeit,"ending":d.Ending})
+ return json.Marshal(map[string]any{"variant":f.Variant,"board":board,"blankCells":blanks,"rack":rack,"rackCounts":counts,"bagCount":len(d.Bag),"scores":f.Scores,"turn":f.Turn,"terminal":f.Terminal,"winners":d.Winners,"forfeit":d.Forfeit,"ending":d.Ending})
 }

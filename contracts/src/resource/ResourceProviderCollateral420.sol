@@ -31,6 +31,10 @@ contract ResourceProviderCollateral420 is I420System {
     mapping(bytes32 => Position) private positions;
     mapping(bytes32 => mapping(uint64 => bytes32)) public trancheObligation;
     uint256 public totalSlashable;
+    mapping(bytes32 => uint256) public outstandingExposure;
+    mapping(bytes32 => uint32) public exitPolicyRevision;
+    mapping(bytes32 => uint64) public withdrawableAt;
+    event CollateralExitRequested(bytes32 indexed positionId, uint32 indexed revision, uint64 withdrawableAt);
     bool private entered;
     error InvalidBinding();
     error InvalidDeposit();
@@ -98,12 +102,25 @@ contract ResourceProviderCollateral420 is I420System {
         return _registered() && a.reserved >= totalSlashable && a.recordedBalance >= a.reserved + a.claimable
             && address(vault).balance >= a.recordedBalance;
     }
+    function requestExit(bytes32 id) external {
+        Position storage p = positions[id];
+        if (entered || p.state != State.BONDED || p.owner != msg.sender) revert Unauthorized();
+        uint32 revision = providers.collateralPolicyRevision();
+        ResourceProviderRegistry420.CollateralPolicy memory policy = providers.collateralPolicy(revision);
+        uint256 maturity = block.timestamp + policy.withdrawalDelay;
+        if (maturity > type(uint64).max) revert InvalidDeposit();
+        p.state = State.EXITING;
+        exitPolicyRevision[id] = revision;
+        withdrawableAt[id] = uint64(maturity);
+        emit CollateralExitRequested(id, revision, uint64(maturity));
+    }
+
     function eligible(bytes32 providerId, bytes32 referenceId, address operator, uint256 minimum) external view returns (bool) {
         if (minimum == 0 || referenceId != positionId(providerId)) return false;
         Position storage p = positions[referenceId];
         if (p.state != State.BONDED || p.providerId != providerId || p.owner == address(0)
             || (p.owner != operator && p.owner != providers.collateralSponsor(providerId))
-            || p.slashable < minimum || p.trancheCount == 0
+            || p.slashable < minimum || p.slashable < providers.requiredSlashable(outstandingExposure[referenceId]) || p.trancheCount == 0
             || registry.vaultState(vaultId) != VaultRegistry420.VaultState.ACTIVE || !custodyInvariant()) return false;
         // Each deposit is atomically reserved with an immutable Vault controller.
         // Only this authority can cancel or release its obligations; balance changes must update slashable in the same transaction.

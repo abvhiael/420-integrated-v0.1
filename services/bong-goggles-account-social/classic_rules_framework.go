@@ -51,6 +51,12 @@ type RuleReplayCapacity interface { MaxReplayActions()int }
 // separately enumerated non-turn commands. Default modules retain their limits.
 type RuleChessCapacity interface { ChessLegalCapacity() int; ChessDataCapacity() int }
 type RuleChessNonTurn interface { NonTurnLegal(RuleFrame,int,*RuleBudget)([]json.RawMessage,error) }
+// Word Salad placements are submitted, not exhaustively enumerated. Only the
+// concrete trusted Word Salad module may use this path; all other games keep
+// exact legal-list membership. Step still independently checks every move.
+type wordSaladSubmittedAction interface {
+ ValidateSubmitted(RuleFrame,int,json.RawMessage,*RuleBudget)error
+}
 type RuleModule interface {
  Definition() RuleDefinition
  Initial(seed [32]byte,seatCount int,budget *RuleBudget)(RuleFrame,error)
@@ -291,10 +297,19 @@ func (a *RulesAdapter)View(raw json.RawMessage,seat int)(json.RawMessage,error){
 }
 func (a *RulesAdapter)Apply(raw json.RawMessage,seat int,move json.RawMessage)(json.RawMessage,int,bool,*int,error){
  frame,e:=a.decode(raw);if e!=nil{return nil,0,false,nil,e}
- legal,e:=a.legal(frame,seat);if e!=nil{return nil,0,false,nil,e}
  chosen,e:=canonicalRuleAction(move);if e!=nil{return nil,0,false,nil,e}
- allowed:=false;for _,option:=range legal{if bytes.Equal(option,chosen){allowed=true;break}}
- if !allowed{return nil,0,false,nil,ErrInvalid}
+ if submitted,ok:=a.module.(wordSaladSubmittedAction);ok&&a.definition.GameID=="scrabble" {
+  if frame.Terminal||seat<0||seat>=frame.SeatCount||seat!=frame.Turn{return nil,0,false,nil,ErrForbidden}
+  for i:=0;i<2;i++{
+   budget:=NewRuleBudget(100000)
+   if e=submitted.ValidateSubmitted(cloneRuleFrame(frame),seat,append(json.RawMessage(nil),chosen...),budget);e!=nil{return nil,0,false,nil,e}
+   if budget.spent<1{return nil,0,false,nil,ErrUnavailable}
+  }
+ }else{
+  legal,e:=a.legal(frame,seat);if e!=nil{return nil,0,false,nil,e}
+  allowed:=false;for _,option:=range legal{if bytes.Equal(option,chosen){allowed=true;break}}
+  if !allowed{return nil,0,false,nil,ErrInvalid}
+ }
  run:=func()(json.RawMessage,error){
   budget:=NewRuleBudget(100000)
   next,e:=a.module.Step(cloneRuleFrame(frame),seat,append(json.RawMessage(nil),chosen...),budget)

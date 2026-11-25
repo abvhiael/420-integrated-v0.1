@@ -5633,6 +5633,155 @@
           "contracts/test/HzRegistryAuthority420.t.sol",
           "docs/audit/HZ-AUDIT-3-REGISTRY-AUTHORITY-WIRING.md"
         ]
+      },
+      {
+        "number": 555,
+        "files": [
+          "contracts/src/creative/README.md",
+          "contracts/src/creative/economics/StreamingRevenueAllocator420.sol",
+          "contracts/src/creative/economics/StreamingRoyaltySettlement420.sol",
+          "contracts/src/creative/economics/StreamingSettlementEpoch420.sol",
+          "contracts/src/creative/media/StorageSourceRegistry420.sol",
+          "contracts/test/StorageSourceRegistry420.t.sol",
+          "contracts/test/StreamingRevenueAllocator420.t.sol",
+          "contracts/test/StreamingRoyaltySettlement420.t.sol",
+          "contracts/test/StreamingSettlementEpoch420.t.sol",
+          "creative-indexer/README.md",
+          "creative-indexer/sql/003_streaming_settlement.sql",
+          "creative-indexer/src/streaming-settlement-store.ts",
+          "creative-indexer/test/streaming-settlement-projection.test.ts",
+          "docs/apps/420hz/index.md",
+          "docs/audit/420HZ-AUDIT-REMEDIATION-ROADMAP.md",
+          "docs/audit/420HZ-AUDIT-REPORT.md",
+          "mkdocs.yml"
+        ],
+        "scopeMatches": [
+          "contracts/src/creative/media/StorageSourceRegistry420.sol",
+          "contracts/test/StorageSourceRegistry420.t.sol"
+        ]
+      },
+      {
+        "number": 552,
+        "files": [
+          ".github/workflows/puffbuddies-pb15.yml",
+          "docs/puffbuddies/PB-0.19-MASTER-IMPLEMENTATION-ROADMAP.md",
+          "docs/puffbuddies/PB-15-QUALIFICATION-PHASE.md",
+          "docs/puffbuddies/PB-15-QUALIFICATION.md",
+          "docs/puffbuddies/PUFFBUDDIES-ROADMAP.md",
+          "scripts/verify-puffbuddies-pb15.py"
+        ],
+        "scopeMatches": []
+      },
+      {
+        "number": 551,
+        "files": [
+          ".github/workflows/puffbuddies-pb0.yml",
+          ".github/workflows/puffbuddies-pb14.yml",
+          "docs/puffbuddies/PB-0.19-MASTER-IMPLEMENTATION-ROADMAP.md",
+          "docs/puffbuddies/PB-14-BACKEND-API-HARDENING.md",
+          "docs/puffbuddies/PB-14-QUALIFICATION.md",
+          "docs/puffbuddies/PUFFBUDDIES-ROADMAP.md",
+          "puffbuddies/api/__init__.py",
+          "puffbuddies/api/hardening.py",
+          "puffbuddies/api/wsgi.py",
+          "puffbuddies/mobile/core/api-client.js",
+          "puffbuddies/tests/test_pb_14_backend_api_hardening.py",
+          "puffbuddies/web/api-client.js",
+          "scripts/verify-puffbuddies-pb14.py"
+        ],
+        "scopeMatches": []
+      },
+      {
+        "number": 550,
+        "files": [
+          ".github/workflows/puffbuddies-pb13.yml",
+          "docs/puffbuddies/PB-0.19-MASTER-IMPLEMENTATION-ROADMAP.md",
+          "docs/puffbuddies/PB-13-CROSS-APP-INTEGRATION.md",
+          "docs/puffbuddies/PB-13-QUALIFICATION.md",
+          "docs/puffbuddies/PUFFBUDDIES-ROADMAP.md",
+          "puffbuddies/integrations/__init__.py",
+          "puffbuddies/integrations/ecosystem.py",
+          "puffbuddies/tests/test_pb_13_cross_app_integration.py",
+          "puffbuddies/tests/test_pb_13_integration.py",
+          "scripts/verify-puffbuddies-pb13.py"
+        ],
+        "scopeMatches": []
+      },
+      {
+        "number": 549,
+        "files": [
+          ".github/workflows/puffbuddies-pb12.yml",
+          "docs/puffbuddies/PB-0.17-REPOSITORY-STRUCTURE.md",
+          "docs/puffbuddies/PB-0.19-MASTER-IMPLEMENTATION-ROADMAP.md",
+          "docs/puffbuddies/PB-12-MOBILE-APPLICATIONS.md",
+          "docs/puffbuddies/PB-12-QUALIFICATION.md",
+          "docs/puffbuddies/PUFFBUDDIES-ROADMAP.md",
+          "puffbuddies/mobile/android/app/build.gradle.kts",
+          "puffbuddies/mobile/android/app/src/main/AndroidManifest.xml",
+          "puffbuddies/mobile/android/app/src/main/java/org/fourtwenty/puffbuddies/MainActivity.kt",
+          "puffbuddies/mobile/android/app/src/main/java/org/fourtwenty/puffbuddies/PuffBuddiesAuthorityPolicy.kt",
+          "puffbuddies/mobile/android/app/src/main/java/org/fourtwenty/puffbuddies/PuffBuddiesSecureSessionStore.kt",
+          "puffbuddies/mobile/android/build.gradle.kts",
+          "puffbuddies/mobile/android/settings.gradle.kts",
+          "puffbuddies/mobile/core/api-client.js",
+          "puffbuddies/mobile/core/app-shell.js",
+          "puffbuddies/mobile/core/platform-adapters.js",
+          "puffbuddies/mobile/core/screen-model.js",
+          "puffbuddies/mobile/core/state.js",
+          "puffbuddies/mobile/ios/PuffBuddies/AuthorityPolicy.swift",
+          "puffbuddies/mobile/ios/PuffBuddies/Info.plist",
+          "puffbuddies/mobile/ios/PuffBuddies/NativeBridge.swift",
+          "puffbuddies/mobile/ios/PuffBuddies/PuffBuddies.entitlements",
+          "puffbuddies/mobile/ios/PuffBuddies/PuffBuddiesApp.swift",
+          "puffbuddies/mobile/ios/PuffBuddies/SecureSessionStore.swift",
+          "puffbuddies/mobile/ios/project.yml",
+          "puffbuddies/mobile/package.json",
+          "puffbuddies/mobile/runtime-config.json",
+          "puffbuddies/mobile/scripts/build.mjs",
+          "puffbuddies/mobile/scripts/check.mjs",
+          "puffbuddies/mobile/test/mobile.test.js"
+        ],
+        "scopeMatches": []
+      },
+      {
+        "number": 428,
+        "files": [
+          "docs/ROADMAP.md"
+        ],
+        "scopeMatches": []
+      },
+      {
+        "number": 425,
+        "files": [
+          ".github/workflows/registry-reg-audit-8-live.yml",
+          ".github/workflows/registry-reg-audit-8-readiness.yml",
+          "docs/audit/420REGISTRY-COMPLETE-AUDIT-20260928.json",
+          "docs/audit/420REGISTRY-COMPLETE-AUDIT-20260928.md",
+          "docs/audit/REG-AUDIT-8-TESTNET-DEPLOYMENT-QUALIFICATION.json",
+          "docs/audit/REG-AUDIT-8-TESTNET-DEPLOYMENT-QUALIFICATION.md",
+          "docs/audit/templates/REG-AUDIT-8-live-evidence.template.json",
+          "docs/compute-market/CMP-1.3.16-WORKER-REGISTRY-PHASE-CLOSEOUT.md",
+          "docs/operators/REG-AUDIT-8-TESTNET-RUNBOOK.md",
+          "scripts/verify-reg-audit-8-live.py",
+          "scripts/verify-reg-audit-8-repository-readiness.py"
+        ],
+        "scopeMatches": [
+          ".github/workflows/registry-reg-audit-8-live.yml",
+          ".github/workflows/registry-reg-audit-8-readiness.yml",
+          "docs/audit/420REGISTRY-COMPLETE-AUDIT-20260928.json",
+          "docs/audit/420REGISTRY-COMPLETE-AUDIT-20260928.md",
+          "docs/compute-market/CMP-1.3.16-WORKER-REGISTRY-PHASE-CLOSEOUT.md"
+        ]
+      },
+      {
+        "number": 342,
+        "files": [
+          ".github/workflows/gen-svc-4.yml",
+          "config/420classifieds-genesis.json",
+          "docs/genesis-services/GEN-SVC-4-CLASSIFIEDS.md",
+          "scripts/validate-gen-svc-4.py"
+        ],
+        "scopeMatches": []
       }
     ]
   }

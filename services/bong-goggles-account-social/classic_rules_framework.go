@@ -299,7 +299,7 @@ func (a *RulesAdapter)Apply(raw json.RawMessage,seat int,move json.RawMessage)(j
  frame,e:=a.decode(raw);if e!=nil{return nil,0,false,nil,e}
  chosen,e:=canonicalRuleAction(move);if e!=nil{return nil,0,false,nil,e}
  if submitted,ok:=a.module.(wordSaladSubmittedAction);ok&&a.definition.GameID=="scrabble" {
-  if frame.Terminal||seat<0||seat>=frame.SeatCount||seat!=frame.Turn{return nil,0,false,nil,ErrForbidden}
+  if frame.Terminal||seat<0||seat>=frame.SeatCount{return nil,0,false,nil,ErrForbidden}
   for i:=0;i<2;i++{
    budget:=NewRuleBudget(100000)
    if e=submitted.ValidateSubmitted(cloneRuleFrame(frame),seat,append(json.RawMessage(nil),chosen...),budget);e!=nil{return nil,0,false,nil,e}

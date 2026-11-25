@@ -27,6 +27,10 @@ func (s *ClassicSessions) Start(ctx context.Context,viewer,roomID string)(Classi
  return s.startWithClock(ctx,viewer,roomID,"")
 }
 func (s *ClassicSessions) startWithClock(ctx context.Context,viewer,roomID,profile string)(ClassicSessionView,error){
+ return s.startWithSeedSource(ctx,viewer,roomID,profile,deterministicSeed)
+}
+// Internal seam for reproducible qualification; public starts always use crypto randomness.
+func (s *ClassicSessions) startWithSeedSource(ctx context.Context,viewer,roomID,profile string,seedSource func()([32]byte,error))(ClassicSessionView,error){
  var empty ClassicSessionView
  if !uuid.MatchString(viewer)||!uuid.MatchString(roomID){return empty,ErrInvalid}
  tx,e:=s.Store.DB.BeginTx(ctx,nil);if e!=nil{return empty,e};defer tx.Rollback()
@@ -77,7 +81,7 @@ func (s *ClassicSessions) startWithClock(ctx context.Context,viewer,roomID,profi
  var seed [32]byte
  adapter,versioned:=rule.(*RulesAdapter)
  if versioned{
-  seed,e=deterministicSeed();if e!=nil{return empty,e}
+  seed,e=seedSource();if e!=nil{return empty,e}
   state,first,e=adapter.InitialWithSeed(seed,room,seats)
  }else{state,first,e=rule.Initial(room,seats)}
  if e!=nil||!validRuleState(state)||first<0||first>=room.SeatCount{return empty,ErrUnavailable}

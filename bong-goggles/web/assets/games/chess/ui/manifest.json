@@ -1,0 +1,197 @@
+[
+  {
+    "filename": "icon-menu.png",
+    "bbox": [
+      102,
+      20,
+      220,
+      125
+    ],
+    "size": [
+      118,
+      105
+    ]
+  },
+  {
+    "filename": "icon-profile.png",
+    "bbox": [
+      261,
+      20,
+      373,
+      125
+    ],
+    "size": [
+      112,
+      105
+    ]
+  },
+  {
+    "filename": "icon-settings.png",
+    "bbox": [
+      413,
+      20,
+      528,
+      125
+    ],
+    "size": [
+      115,
+      105
+    ]
+  },
+  {
+    "filename": "icon-help.png",
+    "bbox": [
+      567,
+      20,
+      681,
+      125
+    ],
+    "size": [
+      114,
+      105
+    ]
+  },
+  {
+    "filename": "panel-content-large.png",
+    "bbox": [
+      760,
+      45,
+      1421,
+      1033
+    ],
+    "size": [
+      661,
+      988
+    ]
+  },
+  {
+    "filename": "player-card-you.png",
+    "bbox": [
+      62,
+      139,
+      723,
+      272
+    ],
+    "size": [
+      661,
+      133
+    ]
+  },
+  {
+    "filename": "player-card-ai.png",
+    "bbox": [
+      62,
+      283,
+      724,
+      404
+    ],
+    "size": [
+      662,
+      121
+    ]
+  },
+  {
+    "filename": "panel-move-history.png",
+    "bbox": [
+      65,
+      417,
+      721,
+      663
+    ],
+    "size": [
+      656,
+      246
+    ]
+  },
+  {
+    "filename": "button-medium.png",
+    "bbox": [
+      274,
+      678,
+      513,
+      777
+    ],
+    "size": [
+      239,
+      99
+    ]
+  },
+  {
+    "filename": "button-easy.png",
+    "bbox": [
+      57,
+      679,
+      275,
+      774
+    ],
+    "size": [
+      218,
+      95
+    ]
+  },
+  {
+    "filename": "button-hard.png",
+    "bbox": [
+      513,
+      679,
+      729,
+      775
+    ],
+    "size": [
+      216,
+      96
+    ]
+  },
+  {
+    "filename": "button-start-match.png",
+    "bbox": [
+      52,
+      789,
+      731,
+      923
+    ],
+    "size": [
+      679,
+      134
+    ]
+  },
+  {
+    "filename": "button-undo.png",
+    "bbox": [
+      42,
+      941,
+      267,
+      1033
+    ],
+    "size": [
+      225,
+      92
+    ]
+  },
+  {
+    "filename": "button-restart.png",
+    "bbox": [
+      272,
+      941,
+      500,
+      1033
+    ],
+    "size": [
+      228,
+      92
+    ]
+  },
+  {
+    "filename": "button-flip-board.png",
+    "bbox": [
+      505,
+      941,
+      734,
+      1033
+    ],
+    "size": [
+      229,
+      92
+    ]
+  }
+]

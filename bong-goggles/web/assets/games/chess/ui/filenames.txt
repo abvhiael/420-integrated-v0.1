@@ -1,0 +1,15 @@
+icon-menu.png
+icon-profile.png
+icon-settings.png
+icon-help.png
+panel-content-large.png
+player-card-you.png
+player-card-ai.png
+panel-move-history.png
+button-medium.png
+button-easy.png
+button-hard.png
+button-start-match.png
+button-undo.png
+button-restart.png
+button-flip-board.png

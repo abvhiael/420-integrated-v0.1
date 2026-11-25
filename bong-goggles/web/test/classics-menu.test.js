@@ -6,7 +6,7 @@ import {renderGameCatalogue,renderClassicGamePage,renderGamesHub,renderGamesRout
 import {renderClassicsCatalogue} from '../core/classics-ui.js';
 import {renderApplicationShell,navigateWithoutReload} from '../core/app-shell.js';
 
-const main=['Cribbage','Labyrinth Cribbage','Chess','Scrabble','Checkers','Backgammon','Dominoes','Crazy Eights','Euchre','Yahtzee','Go Fish','Hearts','Go','Four-Player Mahjong','Spades','500','Canasta'];
+const main=['Cribbage','Labyrinth Cribbage','Chess','Word Salad','Checkers','Backgammon','Dominoes','Crazy Eights','Euchre','Yahtzee','Go Fish','Hearts','Go','Four-Player Mahjong','Spades','500','Canasta'];
 const canadian=['Tarabish','Forty-Fives (45s)','120s','Deux Cents (200)','Hola','Rook','Nines','Kaiser'];
 
 test('BC-0.2 maintains the exact 25-game order, category and public deep links',()=>{

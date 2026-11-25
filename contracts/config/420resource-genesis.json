@@ -13,6 +13,7 @@
     "ResourceAuthorization420.sol",
     "ResourcePolicyRegistry420.sol",
     "ResourceProviderRegistry420.sol",
+    "ResourceProviderCollateral420.sol",
     "ResourceNodeRegistry420.sol",
     "ResourceOfferRegistry420.sol",
     "ResourceSessionRegistry420.sol",
@@ -30,7 +31,7 @@
     "StorageSettlementRegistry420.sol"
   ],
   "genesis_invariants": [
-    "RESOURCE-INV-001: provider activation requires a nonzero staking reference",
+    "RESOURCE-INV-001: provider activation requires current canonical Vault-backed collateral eligibility",
     "RESOURCE-INV-002: nodes are bound to exactly one canonical service class and active provider",
     "RESOURCE-INV-003: provider/node/session/proof-scheme authority is capability-scoped and default-deny for unrelated actors",
     "RESOURCE-INV-004: offers snapshot service, price, unit cap, terms and expiry before consumption",
@@ -46,7 +47,7 @@
     "RESOURCE-INV-014: storage settlement remains 420Vault-backed and proof-window bounded; provider-local receipts cannot create payment authority"
   ],
   "payment_unit": "native $420",
-  "provider_staking": "required reference for ACTIVE provider state",
+  "provider_staking": "Governance-bound ResourceProviderCollateral420; positive approved policy required; fail closed before configuration",
   "storage_proof_profile": "contracts/config/420storage-proof-v1.json",
   "new_frozen_predeploy_required": false,
   "deployment_package": "contracts/config/resource/resource-audit-8-deployment-package.json"

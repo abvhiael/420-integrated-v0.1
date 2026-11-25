@@ -1,0 +1,117 @@
+name: Archive AI 10.1.C compiler evidence
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+    paths:
+      - '.github/workflows/420ai-10-1-c-evidence-archive.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  archive:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'audit/ai-audit-10-1-c-evidence-archive'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    concurrency:
+      group: ai-10-1-c-evidence-archive
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - name: Retrieve and verify original qualification artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess, zipfile, io
+          root = pathlib.Path("docs/audit/420AI-AUDIT-10.1-C-EVIDENCE")
+          root.mkdir(parents=True, exist_ok=True)
+          repo = os.environ["REPO"]
+          run_id = 45675273175
+          head = "b4c92b6689c77cc2614b1bf6df06e8391f506bad"
+          def api(path):
+              return subprocess.check_output(["gh", "api", path])
+          def digest(data):
+              return hashlib.sha256(data).hexdigest()
+          def require(condition, message):
+              if not condition:
+                  raise RuntimeError(message)
+          def retain(path, data):
+              if path.exists():
+                  require(path.read_bytes() == data, f"Existing evidence differs: {path}")
+              else:
+                  path.write_bytes(data)
+          run = json.loads(api(f"repos/{repo}/actions/runs/{run_id}"))
+          require(run["head_sha"] == head and run["conclusion"] == "success", "Incorrect qualification run")
+          jobs = json.loads(api(f"repos/{repo}/actions/runs/{run_id}/jobs?per_page=100"))
+          require(jobs["total_count"] == 13 and len(jobs["jobs"]) == 13 and all(j["conclusion"] == "success" for j in jobs["jobs"]), "Qualification jobs not all successful")
+          specs = [
+              (15051641915, "420ai-abi-storage-compatibility", 5493,
+               "7c00d2f0d4fd1754792908dd351a64c8da7297a8b5dace420a9fe54d9e5b8aa1",
+               "9d7dc0a6b37fce908169f6e1ee02b86adc6d707ffabb2d5f82cdb7afe20beb57", 91293),
+              (15051437289, "420ai-compiled-inventory", 14630,
+               "1dae5320dea89470be1ef612b962c86575428e81387f45177e1bceb15fd50a12",
+               "76422d1b627f9329452417fd1e4ea217491bb0ac7249a2f193de956249daaff5", 242368),
+          ]
+          records = []
+          checks = {}
+          for artifact_id, name, zip_size, zip_sha, json_sha, json_size in specs:
+              endpoint = f"repos/{repo}/actions/artifacts/{artifact_id}"
+              meta = json.loads(api(endpoint))
+              require(meta["name"] == name and meta["workflow_run"]["id"] == run_id
+                      and meta["workflow_run"]["head_sha"] == head and meta["digest"] == "sha256:" + zip_sha
+                      and meta["size_in_bytes"] == zip_size and not meta["expired"], "Unexpected artifact metadata")
+              # Download actual ZIP bytes; never substitute a regenerated artifact.
+              archive = api(endpoint + "/zip")
+              require(len(archive) == zip_size and digest(archive) == zip_sha, "Archive SHA-256 mismatch")
+              with zipfile.ZipFile(io.BytesIO(archive)) as z:
+                  require(z.namelist() == [name + ".json"], "Unexpected archive contents")
+                  raw = z.read(name + ".json")
+              require(len(raw) == json_size and digest(raw) == json_sha, "JSON SHA-256 mismatch")
+              data = json.loads(raw)
+              require(data.get("qualificationHead", data.get("head")) == head, "Artifact head mismatch")
+              if name == "420ai-abi-storage-compatibility":
+                  checks = data["comparison"]["checks"]
+                  expected = {"sameCompiler", "sameCompilerSettings", "jobsABIUnchanged",
+                      "existingABIEntriesUnchanged", "existingSelectorsUnchanged",
+                      "existingStorageAndNestedMembersUnchanged", "disputeStorageAppended",
+                      "newDisputeInterfacesInventoried"}
+                  require(data["comparison"]["passed"] is True and set(checks) == expected
+                          and all(v is True for v in checks.values()), "Compatibility evidence failed")
+                  require(data["pre"]["commit"] == "2bcf3155d55c442714a25e3d5e49f04ed96749f8"
+                          and data["post"]["commit"] == "00a2b8e68b133aa0e6df2edc1c53526722f526b7", "Baseline mismatch")
+              else:
+                  require(len(data["sources"]) == 19 and data["importClosure"], "Incomplete ABI inventory")
+              retain(root / (name + ".zip"), archive)
+              retain(root / (name + ".json"), raw)
+              records.append({"artifactId": artifact_id, "name": name, "zipSha256": zip_sha,
+                  "zipBytes": zip_size, "jsonSha256": json_sha, "jsonBytes": json_size})
+          manifest = {"schema": "420ai-10.1-c-archival-evidence-v1", "repository": repo,
+              "qualificationHead": head, "workflowRunId": run_id,
+              "workflowConclusion": "success", "jobs": sorted(
+                  [{"name": j["name"], "id": j["id"], "conclusion": j["conclusion"]} for j in jobs["jobs"]],
+                  key=lambda j: j["name"]), "compatibilityChecks": checks, "artifacts": records}
+          retain(root / "manifest.json", (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode())
+          print("Verified both original ZIPs and extracted JSONs, all 13 jobs and all eight compatibility checks.")
+          PY
+      - name: Commit exact archived evidence to audit branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -- docs/audit/420AI-AUDIT-10.1-C-EVIDENCE/
+          if git diff --cached --quiet; then
+            echo "Original evidence already retained."
+          else
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'audit(ai): permanently retain exact 10.1.C compiler evidence'
+            git push origin HEAD:refs/heads/audit/ai-audit-10-1-c-evidence-archive
+          fi

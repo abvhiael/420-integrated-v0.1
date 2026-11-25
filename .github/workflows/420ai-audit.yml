@@ -28,6 +28,7 @@ on:
       - 'docs/apps/ai/**'
       - 'docs/audit/420AI-**'
       - 'scripts/verify-420ai-current-inventory.py'
+      - 'scripts/verify-420ai-abi-storage.py'
       - 'scripts/verify-420ai-audit-state.py'
       - 'scripts/verify-420ai-genesis-compatibility.py'
       - 'scripts/verify-420ai-v1-modules.py'
@@ -54,9 +55,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
+      - name: Compile pinned pre/post ABI and storage compatibility
+        run: python3 scripts/verify-420ai-abi-storage.py --output /tmp/420ai-abi-storage-compatibility.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 420ai-abi-storage-compatibility
+          path: /tmp/420ai-abi-storage-compatibility.json
+          if-no-files-found: error
+          retention-days: 90
       - name: Compile and inventory ABI and import closure
         run: python3 scripts/verify-420ai-current-inventory.py --output /tmp/420ai-compiled-inventory.json
       - uses: actions/upload-artifact@v4
@@ -64,6 +75,7 @@ jobs:
           name: 420ai-compiled-inventory
           path: /tmp/420ai-compiled-inventory.json
           if-no-files-found: error
+          retention-days: 90
 
   audit-state:
     runs-on: ubuntu-latest

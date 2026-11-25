@@ -33,7 +33,7 @@ func TestWordSaladBotGameplay(t *testing.T){
 func TestWordSaladBotDifficulty(t *testing.T){
  // Controlled public rack has a short word, a longer higher-scoring word,
  // and a full-rack word. No hidden state is needed to compare strategies.
- a,e:=NewWordSaladRulesAdapter([]string{"AT","CATS","CATER","CATERED"},[]string{"CATERED"});if e!=nil{t.Fatal(e)}
+ a,e:=NewWordSaladRulesAdapter([]string{"AT","CART","CATER","CATERED"},[]string{"CATERED"});if e!=nil{t.Fatal(e)}
  policies,e:=NewWordSaladBotPolicies(a);if e!=nil{t.Fatal(e)}
  p,_,_:=saladVariant("11:classic-salad",2);pack:=saladPack(p)
  rack:=[]saladBotTile{};used:=map[int]bool{}

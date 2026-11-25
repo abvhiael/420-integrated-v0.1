@@ -172,6 +172,17 @@ interface IAIComputeEntitlement420 {
     function refunded(bytes32 jobId, bytes32 refundRef) external view returns (bool);
 }
 
+interface IAICMPDispute420 {
+    function disputeForJob(bytes32 jobId) external view returns (bytes32);
+    function activeHold(bytes32 jobId) external view returns (bool);
+    function verificationDisputeDisposition(bytes32 disputeId) external view returns (
+        bytes32 jobId, bytes32 verificationRef, bytes32 resultCommitment, address verifier,
+        bytes32 verificationPolicyId, uint32 verificationPolicyRevision,
+        bytes32 verificationPolicyCommitment, bytes32 groundsCode, bytes32 resolutionRef,
+        bool providerWins, bool finalDisposition
+    );
+}
+
 /// @notice Narrow 420AI -> current ComputeMarket adapter.
 /// @dev It never creates compute economics. It validates the signed CMP request, accepted priced match,
 ///      canonical provider/resource/beneficiary, result commitment and entitlement/refund evidence.
@@ -679,6 +690,56 @@ contract AIComputeAdapter420 is I420System {
         emit RefundObserved(aiRequestId, b.computeJobId, j.settlementRef);
     }
 
+    /// @notice Read canonical dispute evidence; no settlement or adjudication authority.
+    function disputeEvidence(bytes32 aiRequestId, bytes32 disputeRef) external view returns (
+        bytes32 computeJobId, bytes32 resultCommitment, bytes32 verificationRef,
+        bool active, bool finalized, bool providerWins, bytes32 resolutionRef
+    ) {
+        Binding storage b = _binding(aiRequestId);
+        if (!b.accepted || b.computeJobId == bytes32(0) || b.resultCommitment == bytes32(0)
+            || disputeRef == bytes32(0)) revert InvalidBinding();
+        IAICMPDispute420 resolver = IAICMPDispute420(computeRouter.disputeResolver());
+        if (address(resolver).code.length == 0 || resolver.disputeForJob(b.computeJobId) != disputeRef)
+            revert EvidenceMismatch();
+        address verifier;
+        bytes32 policyId;
+        uint32 policyRevision;
+        bytes32 policyCommitment;
+        (computeJobId, verificationRef, resultCommitment, verifier, policyId, policyRevision,
+            policyCommitment,, resolutionRef, providerWins, finalized) =
+            resolver.verificationDisputeDisposition(disputeRef);
+        IAIComputeJobRegistry420.Job memory j = computeJobs.job(b.computeJobId);
+        if (computeJobId != b.computeJobId || resultCommitment != b.resultCommitment
+            || j.resultCommitment != resultCommitment || verificationRef == bytes32(0)
+            || j.verificationRef != verificationRef || verifier == address(0) || j.verifier != verifier
+            || j.matchId != b.matchId || j.requestId != b.computeRequestId
+            || j.verificationPolicyId != policyId || j.verificationPolicyRevision != policyRevision
+            || j.verificationPolicyCommitment != policyCommitment
+            || (b.verificationRef != bytes32(0) && b.verificationRef != verificationRef))
+            revert EvidenceMismatch();
+        bytes32 ref = computeEntitlements.entitlementForJob(computeJobId);
+        IAIComputeEntitlement420.Entitlement memory e = computeEntitlements.entitlement(ref);
+        if (ref == bytes32(0) || !e.exists || e.jobId != computeJobId
+            || e.requestId != b.computeRequestId || e.matchId != b.matchId
+            || e.resultCommitment != resultCommitment || e.verificationRef != verificationRef
+            || e.verifier != verifier || e.payer != b.payer || e.beneficiary != b.beneficiary
+            || e.providerId != b.computeProviderId || e.resourceId != b.resourceId
+            || e.acceptedAmount != b.acceptedPrice || e.earnedAmount > b.acceptedPrice
+            || (b.entitlementRef != bytes32(0) && b.entitlementRef != ref)) revert EvidenceMismatch();
+        active = resolver.activeHold(computeJobId);
+        if (active) {
+            if (finalized || j.status != IAIComputeJobRegistry420.Status.DISPUTED
+                || resolutionRef != bytes32(0)) revert EvidenceMismatch();
+        } else {
+            if (!finalized || resolutionRef == bytes32(0)) revert EvidenceMismatch();
+            if (providerWins) {
+                if (j.status != IAIComputeJobRegistry420.Status.VERIFIED
+                    && j.status != IAIComputeJobRegistry420.Status.SETTLED) revert WrongState();
+            } else if (j.status != IAIComputeJobRegistry420.Status.FAILED
+                && j.status != IAIComputeJobRegistry420.Status.REFUNDED) revert WrongState();
+        }
+    }
+
     function getBinding(bytes32 aiRequestId) external view returns (Binding memory) {
         return _binding(aiRequestId);
     }
@@ -709,8 +770,7 @@ contract AIComputeAdapter420 is I420System {
 
     function _verifiedOrLater(IAIComputeJobRegistry420.Status s) private pure returns (bool) {
         return s == IAIComputeJobRegistry420.Status.VERIFIED
-            || s == IAIComputeJobRegistry420.Status.SETTLED
-            || s == IAIComputeJobRegistry420.Status.DISPUTED;
+            || s == IAIComputeJobRegistry420.Status.SETTLED;
     }
 
     function _binding(bytes32 aiRequestId) private view returns (Binding storage b) {

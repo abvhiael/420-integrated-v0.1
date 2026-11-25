@@ -5,6 +5,12 @@ import "../system/SystemAccess.sol";
 import "../interfaces/I420System.sol";
 import "./AIIds420.sol";
 
+interface IAICanonicalDisputeEvidence420 {
+    function disputeEvidence(bytes32 aiJobId, bytes32 disputeRef)
+        external view returns (bytes32 computeJobId, bytes32 resultCommitment,
+            bytes32 verificationRef, bool active, bool finalized, bool providerWins, bytes32 resolutionRef);
+}
+
 contract AIJobManager is SystemAccess, I420System {
     address public constant AI_JOB_ESCROW = address(0x0000000000000000000000000000000000000432);
 
@@ -48,6 +54,27 @@ contract AIJobManager is SystemAccess, I420System {
     mapping(bytes32 => Job) private _jobs;
     address public computeAdapter;
     bool public computeAdapterBound;
+
+    // Append-only storage: do not change Job or the legacy jobs() getter.
+    enum DisputeOutcome { NONE, PROVIDER_WINS, PAYER_WINS }
+    struct DisputeContext {
+        Status originalStatus;
+        bytes32 computeJobId;
+        bytes32 resultCommitment;
+        bytes32 disputeRef;
+        bytes32 verificationRef;
+        uint64 sequence;
+        bytes32 resolutionRef;
+        DisputeOutcome outcome;
+    }
+    mapping(bytes32 => uint64) public disputeSequence;
+    mapping(bytes32 => mapping(uint64 => DisputeContext)) private _disputeContexts;
+    mapping(bytes32 => bool) public disputeReferenceUsed;
+    error InvalidDisputeEvidence();
+    event DisputeContextRecorded(bytes32 indexed jobId, uint64 indexed sequence, bytes32 indexed disputeRef,
+        Status originalStatus, bytes32 computeJobId, bytes32 resultCommitment, bytes32 verificationRef);
+    event DisputeContextResolved(bytes32 indexed jobId, uint64 indexed sequence, bytes32 indexed resolutionRef,
+        DisputeOutcome outcome, Status restoredStatus);
 
     error InvalidJobId();
     error InvalidWorkloadClass();
@@ -267,7 +294,7 @@ contract AIJobManager is SystemAccess, I420System {
         Job storage j = _get(jobId);
         if (
             j.status != Status.FUNDED && j.status != Status.EXPIRED && j.status != Status.FAILED
-                && j.status != Status.DISPUTED
+                
         ) revert InvalidTransition();
         _setStatus(jobId, j, Status.REFUNDED);
     }
@@ -277,7 +304,7 @@ contract AIJobManager is SystemAccess, I420System {
         Job storage j = _get(jobId);
         if (
             j.status != Status.FUNDED && j.status != Status.EXPIRED && j.status != Status.FAILED
-                && j.status != Status.DISPUTED
+                
         ) revert InvalidTransition();
         _setStatus(jobId, j, Status.REFUNDED);
     }
@@ -306,22 +333,62 @@ contract AIJobManager is SystemAccess, I420System {
         _setStatus(jobId, j, Status.FAILED);
     }
 
+    /// @notice Mirror an already-open canonical CMP case. The requester must first
+    /// open the economic dispute at CMP, which installs the actual settlement hold.
     function openDispute(bytes32 jobId, bytes32 disputeRef) external {
         Job storage j = _requester(jobId);
         if (j.status != Status.RESULT_COMMITTED && j.status != Status.VERIFIED) revert InvalidTransition();
-        if (disputeRef == bytes32(0)) revert InvalidReference();
+        if (disputeRef == bytes32(0) || disputeReferenceUsed[disputeRef]) revert InvalidDisputeEvidence();
+        (bytes32 cmpJob, bytes32 result, bytes32 verification, bool active, bool finalized,,) =
+            _canonicalDispute(jobId, disputeRef);
+        if (!active || finalized || cmpJob != j.computeJobId || result != j.resultHash
+            || cmpJob == bytes32(0) || verification == bytes32(0)) revert InvalidDisputeEvidence();
+        uint64 sequence = ++disputeSequence[jobId];
+        _disputeContexts[jobId][sequence] = DisputeContext(
+            j.status, cmpJob, result, disputeRef, verification, sequence, bytes32(0), DisputeOutcome.NONE
+        );
+        disputeReferenceUsed[disputeRef] = true;
+        emit DisputeContextRecorded(jobId, sequence, disputeRef, j.status, cmpJob, result, verification);
         j.disputeRef = disputeRef;
         _setStatus(jobId, j, Status.DISPUTED);
         emit DisputeOpened(jobId, disputeRef);
     }
 
-    /// @notice Governance may resolve only an already-open dispute into a bounded outcome; it cannot assign arbitrary states.
-    function resolveDispute(bytes32 jobId, bool upheld, bytes32 resolutionRef) external onlyGovernance {
+    function getDisputeContext(bytes32 jobId, uint64 sequence) external view returns (DisputeContext memory) {
+        return _disputeContexts[jobId][sequence];
+    }
+
+    /// @notice Compatibility signature: supplied outcome is only an assertion,
+    /// never an adjudication. Anyone may synchronize finalized canonical evidence.
+    function resolveDispute(bytes32 jobId, bool upheld, bytes32 resolutionRef) external {
+        _resolveCanonicalDispute(jobId, upheld, resolutionRef);
+    }
+
+    function _resolveCanonicalDispute(bytes32 jobId, bool upheld, bytes32 resolutionRef) private {
         Job storage j = _get(jobId);
         if (j.status != Status.DISPUTED) revert InvalidTransition();
-        if (resolutionRef == bytes32(0)) revert InvalidReference();
-        _setStatus(jobId, j, upheld ? Status.FAILED : Status.VERIFIED);
+        DisputeContext storage d = _disputeContexts[jobId][disputeSequence[jobId]];
+        if (d.sequence == 0 || d.outcome != DisputeOutcome.NONE || resolutionRef == bytes32(0))
+            revert InvalidDisputeEvidence();
+        (bytes32 cmpJob, bytes32 result, bytes32 verification, bool active, bool finalized,
+            bool providerWins, bytes32 canonicalResolution) = _canonicalDispute(jobId, d.disputeRef);
+        if (active || !finalized || canonicalResolution != resolutionRef || upheld == providerWins
+            || cmpJob != d.computeJobId || cmpJob != j.computeJobId || result != d.resultCommitment
+            || result != j.resultHash || verification != d.verificationRef || j.disputeRef != d.disputeRef)
+            revert InvalidDisputeEvidence();
+        d.resolutionRef = resolutionRef;
+        d.outcome = providerWins ? DisputeOutcome.PROVIDER_WINS : DisputeOutcome.PAYER_WINS;
+        Status next = providerWins ? d.originalStatus : Status.FAILED;
+        _setStatus(jobId, j, next);
         emit DisputeResolved(jobId, upheld, resolutionRef);
+        emit DisputeContextResolved(jobId, d.sequence, resolutionRef, d.outcome, next);
+    }
+
+    function _canonicalDispute(bytes32 jobId, bytes32 disputeRef) private view returns (
+        bytes32, bytes32, bytes32, bool, bool, bool, bytes32
+    ) {
+        if (!computeAdapterBound || computeAdapter.code.length == 0) revert InvalidDisputeEvidence();
+        return IAICanonicalDisputeEvidence420(computeAdapter).disputeEvidence(jobId, disputeRef);
     }
 
     function _create(

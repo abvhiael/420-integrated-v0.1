@@ -21,6 +21,23 @@ contract MockAICustodyManager420 {
     function confirmRefund(bytes32) external { ++refundCalls; }
 }
 
+contract MockAIDisputeEvidence420 is IAICanonicalDisputeEvidence420 {
+    bool public active = true;
+    bool public finalized;
+    bool public providerWins;
+    bytes32 public resolution;
+    function finish(bool wins, bytes32 ref) external {
+        active = false; finalized = true; providerWins = wins; resolution = ref;
+    }
+    function disputeEvidence(bytes32, bytes32 disputeRef) external view returns (
+        bytes32, bytes32, bytes32, bool, bool, bool, bytes32
+    ) {
+        require(disputeRef == keccak256("dispute"), "unknown dispute");
+        return (keccak256("compute-job"), keccak256("result"), keccak256("verification"),
+            active, finalized, providerWins, resolution);
+    }
+}
+
 contract AICustodySettlement420Test {
     VmAICustody420 constant vm =
         VmAICustody420(address(uint160(uint256(keccak256("hevm cheat code")))));
@@ -72,42 +89,92 @@ contract AICustodySettlement420Test {
         require(status == AIJobManager.Status.FUNDED, "funding not reconciled");
     }
 
-    function testCanonicalSettlementIsOneTimeAndDisputeHeld() public {
-        AIJobManager jobs = new AIJobManager(address(this));
-        jobs.bindComputeAdapter(COMPUTE);
-        bytes32 jobId = keccak256("settlement");
+    function _disputed(bool verified) private returns (AIJobManager jobs, MockAIDisputeEvidence420 evidence, bytes32 jobId) {
+        jobs = new AIJobManager(address(this));
+        evidence = new MockAIDisputeEvidence420();
+        jobs.bindComputeAdapter(address(evidence));
+        jobId = keccak256("settlement");
         _create(jobs, jobId, 100);
-
-        vm.prank(COMPUTE);
+        vm.prank(address(evidence));
         jobs.confirmCanonicalFunding(jobId, keccak256("funding-ref"), 80);
-        vm.prank(COMPUTE);
+        vm.prank(address(evidence));
         jobs.matchCompute(jobId, keccak256("request"), keccak256("compute-job"), PROVIDER);
-        vm.prank(COMPUTE);
+        vm.prank(address(evidence));
         jobs.acceptCompute(jobId);
-        vm.prank(COMPUTE);
+        vm.prank(address(evidence));
         jobs.markRunning(jobId);
-        vm.prank(COMPUTE);
+        vm.prank(address(evidence));
         jobs.commitResult(jobId, keccak256("result"), keccak256("manifest"));
-        vm.prank(COMPUTE);
-        jobs.verifyResult(jobId);
-
+        if (verified) {
+            vm.prank(address(evidence));
+            jobs.verifyResult(jobId);
+        }
         vm.prank(REQUESTER);
         jobs.openDispute(jobId, keccak256("dispute"));
+        AIJobManager.DisputeContext memory d = jobs.getDisputeContext(jobId, 1);
+        require(d.originalStatus == (verified ? AIJobManager.Status.VERIFIED : AIJobManager.Status.RESULT_COMMITTED));
+        require(d.computeJobId == keccak256("compute-job") && d.resultCommitment == keccak256("result"));
+        require(d.disputeRef == keccak256("dispute") && d.verificationRef == keccak256("verification"));
+        require(d.sequence == 1 && d.outcome == AIJobManager.DisputeOutcome.NONE);
+    }
 
-        vm.prank(COMPUTE);
+    function testCanonicalSettlementIsOneTimeAndDisputeHeld() public {
+        (AIJobManager jobs, MockAIDisputeEvidence420 evidence, bytes32 jobId) = _disputed(true);
+        vm.prank(address(evidence));
         vm.expectRevert(AIJobManager.InvalidTransition.selector);
         jobs.confirmCanonicalSettlement(jobId);
-
+        vm.expectRevert(AIJobManager.InvalidDisputeEvidence.selector);
         jobs.resolveDispute(jobId, false, keccak256("provider-wins-resolution"));
-
-        vm.prank(COMPUTE);
+        evidence.finish(true, keccak256("provider-wins-resolution"));
+        vm.expectRevert(AIJobManager.InvalidDisputeEvidence.selector);
+        jobs.resolveDispute(jobId, true, keccak256("provider-wins-resolution"));
+        vm.expectRevert(AIJobManager.InvalidDisputeEvidence.selector);
+        jobs.resolveDispute(jobId, false, keccak256("forged"));
+        vm.prank(address(0xBAD));
+        jobs.resolveDispute(jobId, false, keccak256("provider-wins-resolution"));
+        vm.expectRevert(AIJobManager.InvalidTransition.selector);
+        jobs.resolveDispute(jobId, false, keccak256("provider-wins-resolution"));
+        vm.prank(address(evidence));
         jobs.confirmCanonicalSettlement(jobId);
-        vm.prank(COMPUTE);
+        vm.prank(address(evidence));
         vm.expectRevert(AIJobManager.InvalidTransition.selector);
         jobs.confirmCanonicalSettlement(jobId);
-
         (,,,,,,,,,,,,,,,, AIJobManager.Status status) = jobs.jobs(jobId);
         require(status == AIJobManager.Status.SETTLED, "settlement not terminal");
+    }
+
+    function testRejectedPreVerificationDisputeRestoresOriginalState() public {
+        (AIJobManager jobs, MockAIDisputeEvidence420 evidence, bytes32 jobId) = _disputed(false);
+        evidence.finish(true, keccak256("resolved"));
+        jobs.resolveDispute(jobId, false, keccak256("resolved"));
+        (,,,,,,,,,,,,,,,, AIJobManager.Status status) = jobs.jobs(jobId);
+        require(status == AIJobManager.Status.RESULT_COMMITTED, "verification manufactured");
+        vm.prank(address(evidence));
+        vm.expectRevert(AIJobManager.InvalidTransition.selector);
+        jobs.confirmCanonicalSettlement(jobId);
+        vm.prank(REQUESTER);
+        vm.expectRevert(AIJobManager.InvalidDisputeEvidence.selector);
+        jobs.openDispute(jobId, keccak256("dispute"));
+        vm.prank(address(evidence));
+        jobs.verifyResult(jobId);
+    }
+
+    function testPayerOutcomeRequiresCanonicalResolutionBeforeRefund() public {
+        (AIJobManager jobs, MockAIDisputeEvidence420 evidence, bytes32 jobId) = _disputed(false);
+        vm.prank(address(evidence));
+        vm.expectRevert(AIJobManager.InvalidTransition.selector);
+        jobs.confirmCanonicalRefund(jobId);
+        evidence.finish(false, keccak256("payer-wins"));
+        jobs.resolveDispute(jobId, true, keccak256("payer-wins"));
+        AIJobManager.DisputeContext memory d = jobs.getDisputeContext(jobId, 1);
+        require(d.outcome == AIJobManager.DisputeOutcome.PAYER_WINS && d.resolutionRef == keccak256("payer-wins"));
+        vm.prank(address(evidence));
+        vm.expectRevert(AIJobManager.InvalidTransition.selector);
+        jobs.confirmCanonicalSettlement(jobId);
+        vm.prank(address(evidence));
+        jobs.confirmCanonicalRefund(jobId);
+        (,,,,,,,,,,,,,,,, AIJobManager.Status status) = jobs.jobs(jobId);
+        require(status == AIJobManager.Status.REFUNDED);
     }
 
     function testCanonicalRefundIsOneTimeAndCannotRedirectPayer() public {

@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'bong-goggles/web/**'
+      - 'cmd/bong-goggles-social/**'
       - 'services/bong-goggles-account-social/**'
       - '.github/workflows/bc-4-2-word-salad.yml'
   workflow_dispatch:

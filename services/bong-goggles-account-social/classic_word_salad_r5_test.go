@@ -5,7 +5,6 @@ import (
  "encoding/json"
  "fmt"
  "reflect"
- "strings"
  "testing"
  "time"
 )
@@ -79,8 +78,8 @@ func TestWordSaladPlacementGeometryAndScoring(t *testing.T){
   }
  })
  t.Run("full harvest",func(t *testing.T){
-  for _,size:=range []int{11,15}{x:=r5New(size);n:=x.p.rack;word:=strings.Repeat("A",n);r:=r5Rules(t,[]string{word},[]string{"BONG"});tiles:=[]saladPlacement{};mid:=size/2;start:=mid-n/2
-   for i:=0;i<n;i++{tiles=append(tiles,x.tile(t,mid,start+i,"A",""))}
+  for _,size:=range []int{11,15}{x:=r5New(size);n:=x.p.rack;word:="AEINORT";if n==8{word+="S"};r:=r5Rules(t,[]string{word},[]string{"BONG"});tiles:=[]saladPlacement{};mid:=size/2;start:=mid-n/2
+   for i:=0;i<n;i++{tiles=append(tiles,x.tile(t,mid,start+i,string(word[i]),""))}
    var sum,mult int64=0,1;premium:=saladPremium(x.p)
    for i:=0;i<n;i++{switch premium[mid*size+start+i]{case 1:sum+=2;case 2:sum+=3;case 3:sum+=4;case 4,6:sum++;mult*=2;case 5:sum++;mult*=3;default:sum++}}
    want:=sum*mult+50;if n==8{want+=10}
@@ -111,4 +110,39 @@ func TestWordSaladExchangeConservationAndStreak(t *testing.T){
  for _,change:=range []func(*saladData){func(x *saladData){x.Bag=append(x.Bag,x.Bag[0])},func(x *saladData){x.Bag=x.Bag[1:]},func(x *saladData){x.Bag[0]=9999}}{
   x,_:=saladDecode(f);change(&x);bad:=f;bad.Data,_=json.Marshal(x);if _,e=a.encode(bad);e==nil{t.Fatal("corrupt inventory accepted")}
  }
+}
+
+func TestWordSaladPartialDrawAndScorelessReset(t *testing.T){
+ a,e:=NewWordSaladRulesAdapter([]string{"AT","CAT","AA"},[]string{"BONG"});if e!=nil{t.Fatal(e)}
+ var seed [32]byte;raw,e:=a.initialConfigured(seed,2,"11:classic-salad");if e!=nil{t.Fatal(e)}
+ f,_:=a.decode(raw)
+ for _,bagCount:=range []int{1,7}{
+  x:=r5New(11);tiles:=[]saladPlacement{x.tile(t,5,5,"A",""),x.tile(t,5,6,"T","")}
+  for _,sym:=range []string{"C","D","E","F","G"}{x.data.Racks[0]=append(x.data.Racks[0],x.id(t,sym))}
+  x.data.Racks[1]=[]int{x.id(t,"H")};x.data.Streak=5
+  for i:=range x.pack{if x.used[i]{continue};if len(x.data.Bag)<bagCount{x.data.Bag=append(x.data.Bag,i)}else{x.data.Retired=append(x.data.Retired,i)}}
+  frame:=f;frame.Turn=0;frame.Data,_=json.Marshal(x.data);snap,e:=a.encode(frame);if e!=nil{t.Fatal(e)}
+  move,_:=json.Marshal(saladMove{Type:"place",Tiles:tiles})
+  next,_,done,_,e:=a.Apply(snap,0,move);if e!=nil||done{t.Fatal("positive placement",e)}
+  nf,_:=a.decode(next);nd,_:=saladDecode(nf);draw:=2;if bagCount<draw{draw=bagCount}
+  if nd.Streak!=0||len(nd.Racks[0])!=5+draw||len(nd.Bag)!=bagCount-draw||!reflect.DeepEqual(nd.Racks[0][5:],x.data.Bag[:draw])||nf.Scores[0]!=4{t.Fatal("draw or reset",nd,nf.Scores)}
+ }
+ // A legal two-blank opening has zero score and advances the streak.
+ x:=r5New(11);tiles:=[]saladPlacement{x.tile(t,5,5,"?","A"),x.tile(t,5,6,"?","A")};x.data.Racks[1]=[]int{x.id(t,"C")}
+ for i:=range x.pack{if !x.used[i]{x.data.Bag=append(x.data.Bag,i)}}
+ f.Turn=0;f.Data,_=json.Marshal(x.data);snap,e:=a.encode(f);if e!=nil{t.Fatal(e)}
+ move,_:=json.Marshal(saladMove{Type:"place",Tiles:tiles});next,_,_,_,e:=a.Apply(snap,0,move);if e!=nil{t.Fatal(e)}
+ nf,_:=a.decode(next);nd,_:=saladDecode(nf);if nd.Streak!=1||nf.Scores[0]!=0{t.Fatal("zero score streak")}
+}
+
+func TestWordSaladTiedResultAndForfeit(t *testing.T){
+ a:=saladTestAdapter(t);var seed [32]byte;raw,e:=a.initialConfigured(seed,2,"11:classic-salad");if e!=nil{t.Fatal(e)}
+ f,_:=a.decode(raw);d,_:=saladDecode(f);p:=saladProfiles[0];pack:=saladPack(p)
+ for i:=range f.Scores{f.Scores[i]=saladRackValue(d.Racks[i],pack)}
+ d.Streak=5;f.Data,_=json.Marshal(d);snap,e:=a.encode(f);if e!=nil{t.Fatal(e)}
+ next,turn,done,winner,e:=a.Apply(snap,f.Turn,json.RawMessage(`{"type":"pass"}`));if e!=nil||!done||turn!=-1||winner!=nil{t.Fatal("tie result",turn,done,winner,e)}
+ nf,_:=a.decode(next);nd,_:=saladDecode(nf)
+ if !reflect.DeepEqual(nd.Winners,[]int{0,1})||nd.Ending!="scoreless"||!reflect.DeepEqual(nf.Scores,[]int64{0,0}){t.Fatal("tie representation",nd,nf.Scores)}
+ for i:=0;i<2;i++{view,e:=a.View(next,i);if e!=nil{t.Fatal(e)};var v struct{Winners []int};if e=json.Unmarshal(view,&v);e!=nil||!reflect.DeepEqual(v.Winners,[]int{0,1}){t.Fatal("private tie view",e,v)}}
+ if _,_,_,_,e=a.Apply(next,0,json.RawMessage(`{"type":"pass"}`));e==nil{t.Fatal("terminal state changed")}
 }

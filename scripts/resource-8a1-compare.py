@@ -30,11 +30,12 @@ with tempfile.TemporaryDirectory() as tmp:
     for label in ("qualified","baseline"):
         sha = manifest[label]
         work = pathlib.Path(tmp)/label
+        run(["git","fetch","--no-tags","origin",sha],ROOT)
         run(["git","worktree","add","--detach",str(work),sha],ROOT)
         try:
             assert run(["git","rev-parse","HEAD"],work).strip() == sha
             run(["git","submodule","update","--init","--recursive"],work)
-            env = dict(os.environ, FOUNDRY_PROFILE="ci")
+            env = dict(os.environ, FOUNDRY_PROFILE="ci", FOUNDRY_SRC="src/resource", FOUNDRY_TEST="test/__resource_empty__")
             cwd = work/"contracts"
             folder = OUT/label
             folder.mkdir()

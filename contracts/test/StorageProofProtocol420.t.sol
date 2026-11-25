@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import "./helpers/ResourceCollateralFixture420.sol";
 
 import "../src/interfaces/genesis/ICapabilityRegistry420.sol";
 import "../src/resource/ResourceIds420.sol";
@@ -53,17 +54,17 @@ contract StorageProofProtocol420Test {
     function setup() internal returns (Env memory e) {
         e.caps = new MockStorageProofCaps420();
         e.auth = new ResourceAuthorization420(address(e.caps));
-        e.providers = new ResourceProviderRegistry420(address(e.auth));
+        e.providers = new ResourceProviderRegistry420(address(e.auth),address(this));ResourceCollateralFixture420.deploy(e.providers,address(e.caps));
         e.nodes = new ResourceNodeRegistry420(address(e.auth), address(e.providers));
         e.verifier = new MockStorageProofVerifier420();
         e.schemes = new StorageProofSchemeRegistry420(address(e.auth));
-        e.commitments = new StorageCommitmentRegistry420(address(e.auth), address(e.providers), address(e.nodes), address(e.schemes));
+        e.commitments = new StorageCommitmentRegistry420(address(e.auth), address(e.providers), address(e.nodes), address(e.schemes));ResourceCollateralFixture420.enable(e.providers,address(e.commitments));
         e.proofs = new StorageProofRegistry420(address(e.commitments), address(e.schemes), address(e.nodes));
         e.providerId = keccak256("storage-provider");
         e.nodeId = keccak256("storage-node");
         e.schemeId = keccak256("proof-scheme-v1");
 
-        vm.prank(ALICE); e.providers.registerProvider(e.providerId, ALICE, keccak256("provider-meta"), keccak256("stake"));
+        vm.prank(ALICE); e.providers.registerProvider(e.providerId, ALICE, keccak256("provider-meta"), keccak256("stake"));ResourceCollateralFixture420.fund(e.providers,e.providerId,ALICE);
         vm.prank(ALICE); e.providers.setState(e.providerId, ResourceProviderRegistry420.State.ACTIVE);
         vm.prank(ALICE); e.nodes.registerNode(e.nodeId, e.providerId, ResourceIds420.SERVICE_STORE, ALICE, keccak256("endpoint"), keccak256("capacity"));
         vm.prank(ALICE); e.nodes.setState(e.nodeId, ResourceNodeRegistry420.State.ACTIVE);

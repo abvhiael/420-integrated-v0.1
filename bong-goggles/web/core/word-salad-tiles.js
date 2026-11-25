@@ -1,11 +1,11 @@
 import {BOARD_SPECS,scoreWord} from './word-salad-rules.js';
 // Hybrid tiles are standard. Values and bag balance are provisional pending corpus qualification.
-export const HYBRID_SYMBOLS=Object.freeze(['QU','TH','PH','SH','CH','GH']);
+export const HYBRID_SYMBOLS=Object.freeze(['QU','TH','PH','SH','CH','GH','CK','NG','WH','SC','ST','TR','LL','SS','OO']);
 const singles='ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 const values=[1,3,3,2,1,3,3,2,1,6,4,2,3,1,1,3,8,1,1,1,2,4,4,6,3,8];
-export const TILE_VALUES=Object.freeze(Object.fromEntries([...singles.map((s,i)=>[s,values[i]]),...HYBRID_SYMBOLS.map((s,i)=>[s,[8,3,5,3,5,4][i]]),['?',0]]));
+export const TILE_VALUES=Object.freeze(Object.fromEntries([...singles.map((s,i)=>[s,values[i]]),...HYBRID_SYMBOLS.map((s,i)=>[s,[8,3,5,3,5,4,4,3,4,4,2,2,3,2,2][i]]),['?',0]]));
 const weights=[12,3,4,6,16,3,4,4,12,1,2,5,4,9,10,3,1,9,7,8,5,2,2,1,3,1];
-const profiles={11:[2,1,1,1,1,1,1],13:[3,1,2,1,2,2,1],15:[3,1,2,1,2,2,1],17:[4,2,3,2,3,3,2],19:[5,2,4,2,4,4,2],21:[6,3,5,3,5,5,3]};
+const profiles={11:[2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],13:[3,1,2,1,2,2,1,1,1,1,1,2,1,1,1,1],15:[3,1,2,1,2,2,1,2,2,1,1,2,2,1,1,2],17:[4,2,3,2,3,3,2,2,2,1,1,3,2,2,2,2],19:[5,2,4,2,4,4,2,3,3,2,2,4,3,2,2,3],21:[6,3,5,3,5,5,3,3,4,2,2,5,4,3,3,4]};
 export function tileDistribution(size){
  if(!Object.hasOwn(profiles,size))throw RangeError('Unknown board');
  const [blanks,...hybrids]=profiles[size];

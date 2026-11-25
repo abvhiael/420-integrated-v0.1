@@ -4778,6 +4778,233 @@
         "base": "main"
       }
     ],
-    "reviewed": []
+    "reviewed": [
+      {
+        "number": 1411,
+        "files": [
+          ".github/workflows/420ai-audit.yml",
+          "docs/audit/420AI-AUDIT-10.1-CURRENT-MAIN-INVENTORY.json",
+          "scripts/verify-420ai-current-inventory.py"
+        ],
+        "scopeMatches": [
+          ".github/workflows/420ai-audit.yml",
+          "docs/audit/420AI-AUDIT-10.1-CURRENT-MAIN-INVENTORY.json",
+          "scripts/verify-420ai-current-inventory.py"
+        ]
+      },
+      {
+        "number": 1410,
+        "files": [
+          ".github/workflows/bc-3-8-chess-release.yml",
+          "bong-goggles/web/core/app-shell.js",
+          "bong-goggles/web/core/chess-ui.js",
+          "bong-goggles/web/core/classics-ui.js",
+          "bong-goggles/web/core/classics.js",
+          "bong-goggles/web/core/games-ui.js",
+          "bong-goggles/web/core/runtime-config.js",
+          "bong-goggles/web/runtime-config.example.json",
+          "bong-goggles/web/scripts/account-social-build-config.mjs",
+          "bong-goggles/web/scripts/build.mjs",
+          "bong-goggles/web/scripts/verify-account-social-output.mjs",
+          "bong-goggles/web/test/account-social-build-config.test.js",
+          "bong-goggles/web/test/classics-menu.test.js",
+          "bong-goggles/web/test/classics-release-qualification.test.js",
+          "cmd/bong-goggles-social/chess_activation.go",
+          "cmd/bong-goggles-social/chess_activation_test.go",
+          "cmd/bong-goggles-social/main.go",
+          "docs/games/classics/BC-0-12-RELEASE-EVIDENCE.json"
+        ],
+        "scopeMatches": []
+      },
+      {
+        "number": 1405,
+        "files": [
+          ".github/workflows/devcomp-indexer-receipts.yml",
+          ".github/workflows/explorer-exp-next-3.yml",
+          "420-indexer/README.md",
+          "420-indexer/scripts/qualify-compensation-consumers.mjs",
+          "420-indexer/scripts/qualify-compensation-receipts.mjs",
+          "420-indexer/scripts/qualify-fantasy-compensation-consumers.mjs",
+          "420-indexer/src/api-surface.ts",
+          "420-indexer/src/compensation-report.ts",
+          "420-indexer/src/http-transport.ts",
+          "420-indexer/src/query-layer.ts",
+          "420-indexer/src/query-service.ts",
+          "420-indexer/test/compensation-report.test.ts",
+          "analytics/cmd/analytics420/compensation.go",
+          "analytics/cmd/analytics420/compensation_test.go",
+          "analytics/cmd/analytics420/main.go",
+          "analytics/indexerclient/compensation.go",
+          "clients/420bet-fantasy/daily/abi/DevelopmentCompensationVault420.json",
+          "clients/420bet-fantasy/daily/abi/FantasyAdmission420.json",
+          "clients/420bet-fantasy/daily/abi/FantasyContestEngine420.json",
+          "clients/420bet-fantasy/daily/abi/FantasyDisputeController420.json",
+          "clients/420bet-fantasy/daily/abi/FantasySlateBook420.json",
+          "clients/420bet-fantasy/daily/local_fixture.py",
+          "clients/420bet-fantasy/daily/test-flow.mjs",
+          "clients/420bet-fantasy/formats/funded_flow.py",
+          "clients/420bet-fantasy/formats/season_flow.py",
+          "contracts/script/fantasy/FantasyApprovedLocalImports420.sol",
+          "docs/audit/DEVCOMP-06-ACCEPTANCE.md",
+          "explorer/api/compensation.go",
+          "explorer/api/compensation_test.go",
+          "explorer/api/server.go",
+          "explorer/cmd/explorer420/main.go",
+          "explorer/deploy/README.md",
+          "explorer/indexerclient/client.go",
+          "explorer/indexerclient/compensation.go",
+          "explorer/service/compensation.go",
+          "explorer/web/compensation-presentation.test.mjs",
+          "explorer/web/static/app.js",
+          "explorer/web/static/compensation.mjs",
+          "scripts/fantasy/diagnose-approved-formats.py",
+          "scripts/fantasy/diagnose-approved-seasons.py",
+          "scripts/fantasy/qualify-daily-application.py",
+          "scripts/verify-exp-0-1-2-indexer-dependencies.py"
+        ],
+        "scopeMatches": [
+          "420-indexer/README.md",
+          "420-indexer/scripts/qualify-compensation-consumers.mjs",
+          "420-indexer/scripts/qualify-compensation-receipts.mjs",
+          "420-indexer/scripts/qualify-fantasy-compensation-consumers.mjs",
+          "420-indexer/src/api-surface.ts",
+          "420-indexer/src/compensation-report.ts",
+          "420-indexer/src/http-transport.ts",
+          "420-indexer/src/query-layer.ts",
+          "420-indexer/src/query-service.ts",
+          "420-indexer/test/compensation-report.test.ts"
+        ]
+      },
+      {
+        "number": 1403,
+        "files": [
+          "docs/audit/DEVCOMP-06-ACCEPTANCE.md"
+        ],
+        "scopeMatches": []
+      },
+      {
+        "number": 1402,
+        "files": [
+          ".github/workflows/devcomp-indexer-receipts.yml",
+          "420-indexer/README.md",
+          "420-indexer/scripts/qualify-compensation-receipts.mjs",
+          "420-indexer/src/api-surface.ts",
+          "420-indexer/src/compensation-report.ts",
+          "420-indexer/src/http-transport.ts",
+          "420-indexer/test/compensation-report.test.ts",
+          "analytics/cmd/analytics420/compensation.go",
+          "analytics/cmd/analytics420/compensation_test.go",
+          "analytics/cmd/analytics420/main.go",
+          "analytics/indexerclient/compensation.go"
+        ],
+        "scopeMatches": [
+          "420-indexer/README.md",
+          "420-indexer/scripts/qualify-compensation-receipts.mjs",
+          "420-indexer/src/api-surface.ts",
+          "420-indexer/src/compensation-report.ts",
+          "420-indexer/src/http-transport.ts",
+          "420-indexer/test/compensation-report.test.ts"
+        ]
+      },
+      {
+        "number": 1401,
+        "files": [
+          ".github/workflows/explorer-exp-next-3.yml",
+          "420-indexer/scripts/qualify-compensation-receipts.mjs",
+          "420-indexer/src/api-surface.ts",
+          "420-indexer/src/http-transport.ts",
+          "420-indexer/src/query-layer.ts",
+          "420-indexer/src/query-service.ts",
+          "explorer/api/compensation.go",
+          "explorer/api/compensation_test.go",
+          "explorer/api/server.go",
+          "explorer/cmd/explorer420/main.go",
+          "explorer/deploy/README.md",
+          "explorer/indexerclient/client.go",
+          "explorer/indexerclient/compensation.go",
+          "explorer/service/compensation.go",
+          "explorer/web/compensation-presentation.test.mjs",
+          "explorer/web/static/app.js",
+          "explorer/web/static/compensation.mjs",
+          "scripts/verify-exp-0-1-2-indexer-dependencies.py"
+        ],
+        "scopeMatches": [
+          "420-indexer/scripts/qualify-compensation-receipts.mjs",
+          "420-indexer/src/api-surface.ts",
+          "420-indexer/src/http-transport.ts",
+          "420-indexer/src/query-layer.ts",
+          "420-indexer/src/query-service.ts"
+        ]
+      },
+      {
+        "number": 1400,
+        "files": [
+          ".github/workflows/420bet-poker-5a-3-level1.yml",
+          ".github/workflows/420bet-poker-5a-4-level1.yml",
+          ".github/workflows/420bet-poker-ws8-security-level2.yml",
+          ".github/workflows/420bet-sports-5d3.yml",
+          ".github/workflows/420bet-sports-5d4.yml",
+          ".github/workflows/420bet-sports-5d5.yml",
+          ".github/workflows/420bet-sports-5d6-hardening.yml",
+          ".github/workflows/420bet-sports-5d6.yml",
+          ".github/workflows/420bet-sports-5d7.yml",
+          ".github/workflows/420bet-sports-5d8.yml",
+          ".github/workflows/420bet-sports-5d9-level2.yml",
+          ".github/workflows/420bet-sports-5d9.yml",
+          ".github/workflows/devcomp-application-inventory.yml",
+          ".github/workflows/phase2-foundry-coherence.yml",
+          ".github/workflows/reusable-scoped-foundry.yml",
+          "contracts/src/bet/BankrollVault420.sol",
+          "contracts/src/bet/BetCustodyProfitEpochSources420.sol",
+          "contracts/src/bet/BetGenesisCapitalization420.sol",
+          "contracts/src/bet/BetIds420.sol",
+          "contracts/src/bet/BetOperatorRegistry420.sol",
+          "contracts/src/bet/BetProfitAccounting420.sol",
+          "contracts/src/bet/PokerSeatLedger420.sol",
+          "contracts/src/bet/sports/SportsFundedTickets420.sol",
+          "contracts/src/bet/tournament/settlement/PokerTournamentFinanceState420.sol",
+          "contracts/src/bet/tournament/settlement/PokerTournamentPrizeModule420.sol",
+          "contracts/test/BetGenesisCapitalization420.t.sol",
+          "contracts/test/BetPokerSeatLedger53.t.sol",
+          "contracts/test/BetProfitAccounting420.t.sol",
+          "contracts/test/sports-5d4/SportsFundedTickets420.t.sol",
+          "contracts/test/tournament-5c7/PokerTournamentPrizes420.t.sol",
+          "docs/audit/DEVCOMP-06-APPLICATION-REVENUE-INVENTORY.json",
+          "docs/audit/DEVCOMP-06-APPLICATION-REVENUE-INVENTORY.md",
+          "scripts/bet/certify-ws8-level2.py",
+          "scripts/bet/run-scoped-foundry.py",
+          "scripts/bet/scope-foundry-suites.py",
+          "scripts/bet/verify-poker-5a5-execution.py",
+          "scripts/bet/verify-poker-generated-proof-suites.py",
+          "scripts/bet/verify-ws8-casino-ownership.py",
+          "scripts/bet/verify-ws8-inheritance.py",
+          "scripts/ci/verify-phase2-foundry-coherence.py",
+          "scripts/verify-devcomp-revenue-inventory.py"
+        ],
+        "scopeMatches": [
+          "contracts/src/bet/BetOperatorRegistry420.sol"
+        ]
+      },
+      {
+        "number": 1392,
+        "files": [
+          ".github/workflows/dev-compensation-audit.yml",
+          "420-indexer/src/compensation-descriptors.ts",
+          "420-indexer/src/compensation-indexer.ts",
+          "420-indexer/src/index.ts",
+          "420-indexer/src/protocol-decoder.ts",
+          "contracts/src/exchange/ExchangeFeeRouter420.sol",
+          "contracts/test/DevelopmentCompensationEcosystem420.t.sol",
+          "contracts/test/ExchangeFeeSettlement420.t.sol",
+          "scripts/prepare-devcomp-foundry-scope.py"
+        ],
+        "scopeMatches": [
+          "420-indexer/src/compensation-descriptors.ts",
+          "420-indexer/src/compensation-indexer.ts",
+          "420-indexer/src/index.ts",
+          "420-indexer/src/protocol-decoder.ts"
+        ]
+      }
+    ]
   }
 }

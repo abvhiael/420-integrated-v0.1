@@ -27,6 +27,9 @@ contract StorageCommitmentRegistry420 is I420System {
     ResourceNodeRegistry420 public immutable nodes;
     StorageProofSchemeRegistry420 public immutable schemes;
     mapping(bytes32 => Commitment) private _commitments;
+    mapping(bytes32 => bytes32) public collateralReservation;
+    mapping(bytes32 => uint256) public collateralReleaseAfter;
+    mapping(bytes32 => bool) public collateralReleased;
     error ZeroAddress(); error InvalidCommitment(); error CommitmentExists(); error CommitmentNotFound(); error InvalidStoreNode(); error InactiveProofScheme(); error Unauthorized();
     event StorageCommitmentRegistered(bytes32 indexed commitmentId, bytes32 indexed providerId, bytes32 indexed nodeId, bytes32 proofSchemeId, bytes32 contentRoot, bytes32 replicaRoot, uint128 sizeBytes, uint64 startTime, uint64 endTime);
     constructor(address authorization_, address providers_, address nodes_, address schemes_) {
@@ -43,13 +46,21 @@ contract StorageCommitmentRegistry420 is I420System {
         if (node.serviceId != ResourceIds420.SERVICE_STORE || !nodes.isActiveFor(nodeId, ResourceIds420.SERVICE_STORE)) revert InvalidStoreNode();
         ResourceProviderRegistry420.Provider memory provider = providers.getProvider(node.providerId);
         if (msg.sender != node.operatorAccount && msg.sender != provider.operatorAccount && !authorization.isNodeAuthorized(msg.sender, node.providerId, nodeId, StorageProofIds420.ACTION_REGISTER_STORAGE_COMMITMENT)) revert Unauthorized();
+        collateralReservation[commitmentId] = providers.collateral().reserveExposure(node.providerId, commitmentId, 0);
+        collateralReleaseAfter[commitmentId] = uint256(endTime) + schemes.getScheme(proofSchemeId).maxProofDelay;
         _commitments[commitmentId] = Commitment(node.providerId, nodeId, proofSchemeId, contentRoot, replicaRoot, metadataHash, sizeBytes, startTime, endTime, true);
         emit StorageCommitmentRegistered(commitmentId, node.providerId, nodeId, proofSchemeId, contentRoot, replicaRoot, sizeBytes, startTime, endTime);
+    }
+    function releaseExpiredCommitment(bytes32 commitmentId) external {
+        _get(commitmentId);
+        if (collateralReleased[commitmentId] || block.timestamp <= collateralReleaseAfter[commitmentId]) revert InvalidCommitment();
+        collateralReleased[commitmentId] = true;
+        providers.collateral().releaseExposure(collateralReservation[commitmentId]);
     }
     function getCommitment(bytes32 commitmentId) external view returns (Commitment memory) { return _get(commitmentId); }
     function isLive(bytes32 commitmentId) external view returns (bool) {
         Commitment memory c = _commitments[commitmentId];
-        return c.exists && block.timestamp >= c.startTime && block.timestamp <= c.endTime && nodes.isActiveFor(c.nodeId, ResourceIds420.SERVICE_STORE) && schemes.isActive(c.proofSchemeId);
+        return c.exists && block.timestamp >= c.startTime && block.timestamp <= c.endTime && !collateralReleased[commitmentId] && schemes.isActive(c.proofSchemeId);
     }
     function _get(bytes32 commitmentId) private view returns (Commitment storage commitment) { commitment = _commitments[commitmentId]; if (!commitment.exists) revert CommitmentNotFound(); }
 }

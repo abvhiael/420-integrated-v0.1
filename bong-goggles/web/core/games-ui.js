@@ -6,7 +6,7 @@ import {renderSharedGameScreen} from './shared-game-ui.js';
 import {renderGameAccountPanel} from './account-identity.js';
 import {renderCribbageRoute} from './cribbage-ui.js';
 const label=x=>String(x).replaceAll('_',' ').toLowerCase();
-const statusText=(game,chessEnabled=false)=>game.id==='chess'&&game.status==='playable'&&!chessEnabled?'Release authorized · Not enabled on this deployment':game.status==='playable'?'Playable · 420ID':game.status==='account'?'Account multiplayer':game.status==='registry'?'Registry only — not yet playable':'Planned — not yet playable';
+export const statusText=(game,chessEnabled=false,registryLabel='Registry only — not yet playable')=>game.id==='chess'&&game.status==='playable'&&!chessEnabled?'Release authorized · Not enabled on this deployment':game.status==='playable'?'Playable · 420ID':game.status==='account'?'Account multiplayer':game.status==='registry'?registryLabel:'Planned — not yet playable';
 const gameTile=(game,chessEnabled)=>{
 const url='/games/'+game.id;
 return '<article class="games-catalogue__tile"><div><small class="games-catalogue__phase">'+escapeHtml(game.milestone??'More games')+'</small><h3><a href="'+escapeHtml(url)+'" data-route="classic-game">'+escapeHtml(game.title)+'</a></h3><p>'+escapeHtml(game.description||'Traditional tabletop game.')+'</p></div><p class="games-catalogue__meta">'+escapeHtml(game.players)+' players · '+escapeHtml(statusText(game,chessEnabled))+'</p></article>';

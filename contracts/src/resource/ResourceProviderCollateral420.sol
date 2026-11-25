@@ -100,12 +100,11 @@ contract ResourceProviderCollateral420 is I420System {
     }
     function getPosition(bytes32 id) external view returns (Position memory) { return positions[id]; }
     function deposit(bytes32 providerId, bytes32 depositNonce) external payable returns (bytes32 id) {
-        if (depositNonce == bytes32(0)) revert InvalidDeposit();
+        if (entered || depositNonce == bytes32(0) || msg.value == 0) revert InvalidDeposit();
+        entered = true;
         bytes32 depositKey = keccak256(abi.encode("420/RESOURCE/COLLATERAL/DEPOSIT/V1", block.chainid, address(this), msg.sender, depositNonce));
         if (consumedDeposit[depositKey]) revert InvalidDeposit();
-        consumedDeposit[depositKey] = true;
-        if (entered || address(providers.collateral()) != address(this) || msg.value == 0 || !_registered() || registry.vaultState(vaultId) != VaultRegistry420.VaultState.ACTIVE) revert InvalidDeposit();
-        entered = true;
+        if (address(providers.collateral()) != address(this) || !_registered() || registry.vaultState(vaultId) != VaultRegistry420.VaultState.ACTIVE) revert InvalidDeposit();
         ResourceProviderRegistry420.Provider memory provider = providers.getProvider(providerId);
         if ((provider.operatorAccount != msg.sender && providers.collateralSponsor(providerId) != msg.sender) || provider.state == ResourceProviderRegistry420.State.RETIRED || providers.permanentlyDisqualified(providerId)) revert Unauthorized();
         id = positionId(providerId);
@@ -119,14 +118,10 @@ contract ResourceProviderCollateral420 is I420System {
         uint64 index = p.trancheCount + 1;
         bytes32 obligationId = keccak256(abi.encode(TRANCHE_DOMAIN, block.chainid, address(this), vaultId, id, index));
         if (obligationPosition[obligationId] != bytes32(0)) revert InvalidDeposit();
-        VaultAccounting420.AssetAccounting memory beforeA = accounting.getAccounting(vaultId, address(0));
-        uint256 beforeBalance = address(vault).balance;
-        vault.depositNative{value: msg.value}();
-        vault.createObligation(keccak256(abi.encode(obligationId, "RESERVE")), obligationId, address(0), msg.sender, msg.value, COLLATERAL_TYPE, id);
-        VaultAccounting420.AssetAccounting memory afterA = accounting.getAccounting(vaultId, address(0));
-        if (address(vault).balance != beforeBalance + msg.value || afterA.recordedBalance != beforeA.recordedBalance + msg.value
-            || afterA.reserved != beforeA.reserved + msg.value || afterA.claimable != beforeA.claimable
-            || !_validObligation(obligationId, id, msg.sender, msg.value)) revert AccountingMismatch();
+
+        // Commit all local effects before the first mutable external call.
+        // A failed Vault operation or reconciliation rolls these effects back atomically.
+        consumedDeposit[depositKey] = true;
         p.trancheCount = index;
         p.deposited += msg.value;
         p.slashable += msg.value;
@@ -134,8 +129,23 @@ contract ResourceProviderCollateral420 is I420System {
         trancheObligation[id][index] = obligationId;
         obligationPosition[obligationId] = id;
         obligationAmount[obligationId] = msg.value;
+
+        _fundTranche(obligationId, id, msg.sender, msg.value);
         emit CollateralDeposited(id, providerId, msg.sender, obligationId, msg.value);
         entered = false;
+    }
+
+    function _fundTranche(bytes32 obligationId, bytes32 id, address owner, uint256 amount) private {
+        VaultAccounting420.AssetAccounting memory beforeA = accounting.getAccounting(vaultId, address(0));
+        uint256 beforeBalance = address(vault).balance;
+        uint256 beforeCount = accounting.openObligationCount(vaultId);
+        vault.depositNative{value: amount}();
+        vault.createObligation(keccak256(abi.encode(obligationId, "RESERVE")), obligationId, address(0), owner, amount, COLLATERAL_TYPE, id);
+        VaultAccounting420.AssetAccounting memory afterA = accounting.getAccounting(vaultId, address(0));
+        if (address(vault).balance != beforeBalance + amount || afterA.recordedBalance != beforeA.recordedBalance + amount
+            || afterA.reserved != beforeA.reserved + amount || afterA.claimable != beforeA.claimable
+            || afterA.released != beforeA.released || accounting.openObligationCount(vaultId) != beforeCount + 1
+            || !_validObligation(obligationId, id, owner, amount) || !custodyInvariant()) revert AccountingMismatch();
     }
     function reconciledTranche(bytes32 id, uint64 index) external view returns (uint256) {
         Position storage p = positions[id];
@@ -152,7 +162,7 @@ contract ResourceProviderCollateral420 is I420System {
     /// @notice Only governance-qualified protocol controllers can create exposure.
     /// Revoking admission authority does not remove an existing controller's release authority.
     function configureReservationController(address controller, bool enabled) external {
-        if (msg.sender != providers.governanceTimelock()) revert Unauthorized();
+        if (entered || msg.sender != providers.governanceTimelock()) revert Unauthorized();
         if (enabled && controller.code.length == 0) revert InvalidBinding();
         bytes32 hash = enabled ? controller.codehash : bytes32(0);
         reservationControllerCodeHash[controller] = hash;
@@ -356,7 +366,7 @@ contract ResourceProviderCollateral420 is I420System {
     }
 
     function eligible(bytes32 providerId, bytes32 referenceId, address operator, uint256 minimum) external view returns (bool) {
-        if (minimum == 0 || referenceId != positionId(providerId)) return false;
+        if (entered || minimum == 0 || referenceId != positionId(providerId)) return false;
         Position storage p = positions[referenceId];
         if (p.state != State.BONDED || p.providerId != providerId || p.owner == address(0)
             || (p.owner != operator && p.owner != providers.collateralSponsor(providerId))

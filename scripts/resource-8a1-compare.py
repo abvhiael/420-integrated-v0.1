@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Compile both frozen commits and retain actual ABI/storage output; fail on Resource drift."""
-import json, os, pathlib, subprocess, sys, tempfile
+import json, os, pathlib, subprocess, sys, tempfile, importlib.util
+spec = importlib.util.spec_from_file_location('resource_stage', pathlib.Path(__file__).with_name('qualify-resource-solidity.py'))
+stager = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(stager)
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 OUT = pathlib.Path(sys.argv[1]).resolve()
 OUT.mkdir(parents=True, exist_ok=True)
@@ -36,11 +39,14 @@ with tempfile.TemporaryDirectory() as tmp:
             assert run(["git","rev-parse","HEAD"],work).strip() == sha
             run(["git","submodule","update","--init","--recursive"],work)
             env = dict(os.environ, FOUNDRY_PROFILE="ci", FOUNDRY_SRC="src/resource", FOUNDRY_TEST="test/__resource_empty__")
-            cwd = work/"contracts"
+            original = work/"contracts"
+            cwd = pathlib.Path(tmp)/(label+"-compiler")
+            stager.stage(original, cwd, [], [pathlib.Path(p).relative_to("contracts") for p in paths])
             folder = OUT/label
             folder.mkdir()
             (folder/"forge-version.txt").write_text(run(["forge","--version"],cwd,env))
-            (folder/"forge-config.json").write_text(run(["forge","config","--json"],cwd,env))
+            (folder/"forge-config.json").write_text(run(["forge","config","--json"],original,dict(os.environ, FOUNDRY_PROFILE="ci")))
+            (folder/"staged-forge-config.json").write_text(run(["forge","config","--json"],cwd,env))
             results[label] = {}
             for path in paths:
                 source = pathlib.Path(path)

@@ -36,5 +36,6 @@ func TestWordSaladRuntimeActivation(t *testing.T){
  actual:=s.Rules("scrabble");if actual==nil{t.Fatal("missing registered adapter")}
  v,h:=actual.Identity();ev,eh:=expected.Identity()
  if v!=ev||h!=eh||v!="v1"||len(h)!=64{t.Fatal("incorrect production identity",v,h)}
- if s.Rules("cribbage")!=cribbage||s.Rules("chess")!=chess||s.Rules("unregistered")!=nil||len(s.Bots)!=2{t.Fatal("existing rules or bots altered")}
+ if s.Rules("cribbage")!=cribbage||s.Rules("chess")!=chess||s.Rules("unregistered")!=nil||len(s.Bots)!=3{t.Fatal("existing rules or bots altered")}
+ bots:=s.Bots["scrabble"];if bots.Easy==nil||bots.Medium==nil||bots.Hard==nil{t.Fatal("missing Word Salad strategies")}
 }

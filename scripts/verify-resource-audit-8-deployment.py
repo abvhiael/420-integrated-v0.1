@@ -34,8 +34,8 @@ test = TEST.read_text()
 
 need(d.get("schema") == "420-resource-audit-8-deployment-package-v1", "schema drift")
 need(d.get("step") == "RESOURCE-AUDIT-8", "step drift")
-need(d.get("status") == "REPOSITORY_DEPLOYMENT_PACKAGE_READY_LIVE_TESTNET_DEFERRED", "status drift")
-need(d.get("repository_ready") is True, "repository package not marked ready")
+need(d.get("status") == "COLLATERAL_GRAPH_PENDING_QUALIFICATION", "status drift")
+need(d.get("repository_ready") is False, "unqualified package must not be marked ready")
 need(d.get("live_qualified") is False, "fabricated live qualification")
 
 policy = d.get("address_policy", {})
@@ -72,6 +72,9 @@ need(deps.get("capability_registry", {}).get("status") == "CANDIDATE_NOT_DEPLOYE
 need(deps.get("vault", {}).get("binding_model") == "PER_STORAGE_SETTLEMENT_OPEN", "Vault binding model drift")
 need(deps.get("vault", {}).get("constructor_dependency") is False, "Vault incorrectly made constructor dependency")
 
+need(deps.get("collateral_vault", {}).get("constructor_dependency") is True, "missing collateral Vault dependency")
+need(bool(d.get("governance_wiring", {}).get("before_publication")), "missing governance wiring")
+
 active = {x.get("name"): x for x in ns.get("activeNonPredeployReservations", [])}
 cap = active.get("CapabilityRegistry420")
 need(cap is not None, "CapabilityRegistry reservation missing")
@@ -94,11 +97,12 @@ need('RESOURCE_PROTOCOL = keccak256("420/service/resource-protocol/v1")' in serv
 need("function publishRegisteredService(" in proto, "ProtocolRegistry publication API missing")
 
 order = d.get("deployment_order", [])
-need([x.get("order") for x in order] == list(range(1, 17)), "deployment order must be deterministic 1..16")
+need([x.get("order") for x in order] == list(range(1, 18)), "deployment order must be deterministic 1..17")
 expected = [
     ("ResourceAuthorization420", ["CapabilityRegistry420"]),
     ("ResourcePolicyRegistry420", ["GovernanceTimelock"]),
-    ("ResourceProviderRegistry420", ["ResourceAuthorization420"]),
+    ("ResourceProviderRegistry420", ["ResourceAuthorization420", "GovernanceTimelock"]),
+    ("ResourceProviderCollateral420", ["ResourceProviderRegistry420", "AssetVault420", "VaultRegistry420", "VaultAccounting420"]),
     ("ResourceNodeRegistry420", ["ResourceAuthorization420", "ResourceProviderRegistry420"]),
     ("ResourceOfferRegistry420", ["ResourceNodeRegistry420", "ResourceProviderRegistry420", "ResourcePolicyRegistry420", "ResourceAuthorization420"]),
     ("ResourceSessionRegistry420", ["ResourceOfferRegistry420", "ResourceAuthorization420"]),
@@ -121,7 +125,7 @@ for i, (name, args) in enumerate(expected):
     if source.is_file():
         need(f"contract {name}" in source.read_text(), f"source contract declaration drift for {name}")
 
-publication = order[15] if len(order) > 15 else {}
+publication = order[16] if len(order) > 16 else {}
 need(publication.get("contract") == "ProtocolRegistry", "publication target drift")
 need(publication.get("action") == "publishRegisteredService", "publication action drift")
 need(publication.get("service_id_preimage") == identity.get("service_id_preimage"), "publication service ID drift")
@@ -132,7 +136,7 @@ need(publication.get("component_type") == "SERVICE", "publication component type
 artifacts = d.get("artifact_identity", {})
 need(artifacts.get("compiler") == "Solidity 0.8.24", "compiler policy drift")
 need(artifacts.get("build_profile") == "ci", "build profile drift")
-need(len(artifacts.get("artifact_paths", [])) == 15, "artifact inventory must cover 15 deployed contracts")
+need(len(artifacts.get("artifact_paths", [])) == 16, "artifact inventory must cover 16 deployed contracts")
 need("EXTCODEHASH" in artifacts.get("runtime_codehash_commitment", ""), "runtime codehash commitment missing")
 
 checks = d.get("post_deployment_verification", [])
@@ -155,7 +159,7 @@ required_test_fragments = [
     "new CapabilityRegistry420()",
     "new ResourceAuthorization420(address(e.caps))",
     "new ResourcePolicyRegistry420(address(this))",
-    "new ResourceProviderRegistry420(address(e.authorization))",
+    "new ResourceProviderRegistry420(address(e.authorization), address(this))",
     "new ResourceNodeRegistry420(address(e.authorization), address(e.providers))",
     "new ResourceRouter420(address(e.policy), address(e.nodes), address(e.offers))",
     "new StorageSettlementRegistry420(address(e.agreements), address(e.proofs))",
@@ -178,7 +182,7 @@ out = {
         "capability_registry": "candidate-only 0x0000000000000000000000000000000000000447",
         "resource_router_policy": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
         "service_id_preimage": "420/service/resource-protocol/v1",
-        "deployed_contracts": 15,
+        "deployed_contracts": 16,
         "publication_steps": 1,
         "live_evidence_deferred_to": "RESOURCE-AUDIT-9",
     },

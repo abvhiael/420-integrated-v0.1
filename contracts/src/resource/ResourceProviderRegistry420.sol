@@ -50,6 +50,11 @@ contract ResourceProviderRegistry420 is I420System {
     event CollateralPolicyPublished(uint32 indexed revision, bytes32 indexed commitment, bytes32 evidenceHash);
     event AdmissionSuspensionChanged(bool suspended);
     mapping(bytes32 => bool) public disciplinarySuspension;
+    mapping(bytes32 => bool) public permanentlyDisqualified;
+    mapping(bytes32 => bytes32) public disciplineEvidence;
+    mapping(bytes32 => uint64) public disciplineRevision;
+    event ProviderDisqualified(bytes32 indexed providerId, bytes32 indexed evidence);
+    event ProviderReinstated(bytes32 indexed providerId, bytes32 indexed evidence);
     mapping(bytes32 => address) public collateralSponsor;
     event CollateralAuthorityBound(address indexed authority, bytes32 codeHash);
     event ProviderDisciplineChanged(bytes32 indexed providerId, bool suspended);
@@ -130,9 +135,12 @@ contract ResourceProviderRegistry420 is I420System {
         emit CollateralSponsorChanged(providerId, sponsor);
     }
 
-    function setDisciplinarySuspension(bytes32 providerId, bool suspended) external {
+    function setDisciplinarySuspension(bytes32 providerId, bool suspended, bytes32 evidence) external {
         if (msg.sender != governanceTimelock) revert Unauthorized();
         Provider storage p = _get(providerId);
+        if (evidence == bytes32(0) || permanentlyDisqualified[providerId] || !suspended) revert InvalidState();
+        disciplineEvidence[providerId] = evidence;
+        disciplineRevision[providerId]++;
         disciplinarySuspension[providerId] = suspended;
         if (suspended && p.state == State.ACTIVE) {
             p.state = State.SUSPENDED;
@@ -140,6 +148,34 @@ contract ResourceProviderRegistry420 is I420System {
             emit ProviderStateChanged(providerId, State.SUSPENDED);
         }
         emit ProviderDisciplineChanged(providerId, suspended);
+    }
+
+    function disqualifyProvider(bytes32 providerId, bytes32 evidence) external {
+        if (msg.sender != governanceTimelock) revert Unauthorized();
+        Provider storage p = _get(providerId);
+        if (evidence == bytes32(0) || permanentlyDisqualified[providerId]) revert InvalidState();
+        permanentlyDisqualified[providerId] = true;
+        disciplinarySuspension[providerId] = true;
+        disciplineEvidence[providerId] = evidence;
+        disciplineRevision[providerId]++;
+        if (p.state != State.RETIRED) {
+            p.state = State.SUSPENDED;
+            p.revision++;
+            emit ProviderStateChanged(providerId, p.state);
+        }
+        emit ProviderDisqualified(providerId, evidence);
+    }
+
+    function reinstateProvider(bytes32 providerId, bytes32 remediationEvidence) external {
+        if (msg.sender != governanceTimelock) revert Unauthorized();
+        Provider storage p = _get(providerId);
+        if (remediationEvidence == bytes32(0) || permanentlyDisqualified[providerId]
+            || !disciplinarySuspension[providerId] || p.state == State.RETIRED) revert InvalidState();
+        disciplinarySuspension[providerId] = false;
+        if (!_eligible(providerId, p)) revert StakeRequired();
+        disciplineEvidence[providerId] = remediationEvidence;
+        disciplineRevision[providerId]++;
+        emit ProviderReinstated(providerId, remediationEvidence);
     }
 
     function systemName() external pure returns (string memory) {
@@ -222,7 +258,7 @@ contract ResourceProviderRegistry420 is I420System {
 
     function _eligible(bytes32 providerId, Provider storage p) private view returns (bool) {
         CollateralPolicy storage policy = _collateralPolicies[collateralPolicyRevision];
-        if (disciplinarySuspension[providerId] || admissionSuspended || !policy.acceptingNew || policy.minimumCollateral == 0 || address(collateral) == address(0)
+        if (permanentlyDisqualified[providerId] || disciplinarySuspension[providerId] || admissionSuspended || !policy.acceptingNew || policy.minimumCollateral == 0 || address(collateral) == address(0)
             || address(collateral).codehash != collateralCodeHash || p.stakeRef == bytes32(0)) return false;
         try collateral.eligible(providerId, p.stakeRef, p.operatorAccount, policy.minimumCollateral) returns (bool ok) {
             return ok;

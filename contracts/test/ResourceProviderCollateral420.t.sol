@@ -153,4 +153,75 @@ contract ResourceProviderCollateral420Test {
         collateral.withdraw(id);
         require(collateral.getPosition(id).state==ResourceProviderCollateral420.State.WITHDRAWN && collateral.totalSlashable()==0 && address(vault).balance==0,"exit");
     }
+
+    function testExitImmediatelyStopsAdmissionAndFreezesPolicyRevision() public {
+        bytes32 id = _deposit(2 ether);
+        _activate(id);
+        vm.prank(OWNER);
+        collateral.requestExit(id);
+        uint64 maturity = collateral.withdrawableAt(id);
+        require(!providers.isActive(ID) && collateral.exitPolicyRevision(id)==1,"exit admission");
+        (bool ok,) = address(collateral).call(abi.encodeCall(collateral.reserveExposure,(ID,keccak256("after exit"),1)));
+        require(!ok,"exit reservation");
+        providers.publishCollateralPolicy(1 ether,1 ether,1,10000,true,keccak256("shorter test policy"));
+        vm.warp(block.timestamp+1);
+        require(!collateral.canWithdraw(id) && collateral.withdrawableAt(id)==maturity,"policy accelerated exit");
+        vm.warp(maturity);
+        require(collateral.canWithdraw(id),"frozen maturity");
+    }
+    function testPenaltyAndZeroExposureReservationBlockPartialWithdrawal() public {
+        bytes32 id = _deposit(2 ether);
+        _deposit(3 ether);
+        _activate(id);
+        bytes32 reservation = collateral.reserveExposure(ID,keccak256("capacity hold"),0);
+        bytes32 penalty = collateral.holdPenalty(id,keccak256("penalty evidence"),1 ether);
+        vm.prank(OWNER);
+        collateral.requestExit(id);
+        vm.warp(collateral.withdrawableAt(id));
+        require(!collateral.canWithdraw(id),"both holds");
+        collateral.releaseExposure(reservation);
+        require(!collateral.canWithdraw(id),"penalty hold");
+        vm.prank(OWNER);
+        (bool ok,) = address(collateral).call(abi.encodeCall(collateral.dismissPenalty,(penalty)));
+        require(!ok,"owner dismissed penalty");
+        collateral.dismissPenalty(penalty);
+        (ok,) = address(collateral).call(abi.encodeCall(collateral.dismissPenalty,(penalty)));
+        require(!ok,"penalty replay");
+        uint256 before = OWNER.balance;
+        vm.prank(OWNER);
+        collateral.withdraw(id);
+        require(OWNER.balance==before+2 ether && collateral.withdrawnAmount(id)==2 ether,"first payout");
+        require(collateral.getPosition(id).state==ResourceProviderCollateral420.State.EXITING,"partial exit");
+        require(accounting.getAccounting(VID,address(0)).reserved==3 ether,"remaining reserve");
+        vm.prank(OWNER);
+        collateral.withdraw(id);
+        require(OWNER.balance==before+5 ether && collateral.totalWithdrawn()==5 ether,"second payout");
+        require(collateral.getPosition(id).state==ResourceProviderCollateral420.State.WITHDRAWN && collateral.custodyInvariant(),"terminal state");
+        vm.prank(OWNER);
+        (ok,) = address(collateral).call(abi.encodeCall(collateral.withdraw,(id)));
+        require(!ok,"withdrawal replay");
+    }
+    function testWithdrawalGrantFailureIsAtomicAndSponsorReceivesFunds() public {
+        vm.prank(OWNER);
+        providers.setCollateralSponsor(ID,OTHER);
+        vm.deal(OTHER,2 ether);
+        vm.prank(OTHER);
+        bytes32 id = collateral.deposit{value:2 ether}(ID,keccak256("sponsor"));
+        _activate(id);
+        vm.prank(OTHER);
+        collateral.requestExit(id);
+        vm.warp(collateral.withdrawableAt(id));
+        vm.prank(OWNER);
+        (bool ok,) = address(collateral).call(abi.encodeCall(collateral.withdraw,(id)));
+        require(!ok,"operator stole sponsor collateral");
+        _grant(address(collateral),VaultIds420.ACTION_CLAIM,false);
+        vm.prank(OTHER);
+        (ok,) = address(collateral).call(abi.encodeCall(collateral.withdraw,(id)));
+        require(!ok && collateral.withdrawalCursor(id)==0 && collateral.withdrawnAmount(id)==0,"failed claim leaked state");
+        require(collateral.reconciledTranche(id,1)==2 ether,"failed claim unlocked reserve");
+        _grant(address(collateral),VaultIds420.ACTION_CLAIM,true);
+        vm.prank(OTHER);
+        collateral.withdraw(id);
+        require(OTHER.balance==2 ether && address(vault).balance==0,"sponsor payout");
+    }
 }

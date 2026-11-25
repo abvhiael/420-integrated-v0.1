@@ -9,8 +9,8 @@ Rules identity: word-salad-v1. Canonical specification for BongGoggles; not a pl
 | Personal Stash 13x13 | 2–3 | 100 | 7 | 50 | 3 | 19 |
 | Classic 15x15 | 2–4 | 120 | 8 | 60 | 3 | 23 |
 | Big Bud 17x17 (default) | 2–4 | 140 | 8 | 60 | 4 | 32 |
-| The Grow Room 19x19 | 2–6 | 180 | 8 | 60 | 5 | 42 |
-| Mega Stash 21x21 | 2–6 | 220 | 8 | 60 | 6 | 54 |
+| The Grow Room 19x19 | 2–4 | 180 | 8 | 60 | 5 | 42 |
+| Mega Stash 21x21 | 2–4 | 220 | 8 | 60 | 6 | 54 |
 
 Exact eightfold-symmetric board patterns and deterministic tile distributions are defined in bong-goggles/web/core/word-salad-rules.js and word-salad-tiles.js. The profiles are initial balance baselines; changes require new version. Centre is Mother Plant. All boards use 26 single letters, 15 hybrids QU TH PH SH CH GH CK NG WH SC ST TR LL SS OO, and blank. No numeric tiles. Hybrids occupy one square and rack position, read both letters in printed order horizontally and vertically, never split. Blank permanently assigned one A–Z letter when placed, worth zero, no reclaim or hybrid assignment.
 

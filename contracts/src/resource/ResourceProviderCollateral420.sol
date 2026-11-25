@@ -32,6 +32,24 @@ contract ResourceProviderCollateral420 is I420System {
     mapping(bytes32 => mapping(uint64 => bytes32)) public trancheObligation;
     uint256 public totalSlashable;
     mapping(bytes32 => uint256) public outstandingExposure;
+    mapping(bytes32 => uint256) public outstandingReservations;
+    mapping(bytes32 => bytes32) public obligationPosition;
+    mapping(bytes32 => uint256) public obligationAmount;
+    mapping(bytes32 => bool) public consumedDeposit;
+    mapping(bytes32 => uint64) public withdrawalCursor;
+    struct Reservation {
+        bytes32 position;
+        address controller;
+        uint256 exposure;
+        uint32 policyRevision;
+        bool released;
+    }
+    mapping(bytes32 => Reservation) public reservations;
+    mapping(address => bytes32) public reservationControllerCodeHash;
+    event ReservationControllerConfigured(address indexed controller, bytes32 codeHash);
+    event ExposureReserved(bytes32 indexed reservationId, bytes32 indexed position, address indexed controller, uint256 exposure, uint32 policyRevision);
+    event ExposureReleased(bytes32 indexed reservationId, bytes32 indexed position);
+    event CollateralWithdrawn(bytes32 indexed positionId, uint64 indexed tranche, uint256 amount);
     mapping(bytes32 => uint32) public exitPolicyRevision;
     mapping(bytes32 => uint64) public withdrawableAt;
     event CollateralExitRequested(bytes32 indexed positionId, uint32 indexed revision, uint64 withdrawableAt);
@@ -59,7 +77,11 @@ contract ResourceProviderCollateral420 is I420System {
         return keccak256(abi.encode(POSITION_DOMAIN, block.chainid, address(this), address(providers), providerId));
     }
     function getPosition(bytes32 id) external view returns (Position memory) { return positions[id]; }
-    function deposit(bytes32 providerId) external payable returns (bytes32 id) {
+    function deposit(bytes32 providerId, bytes32 depositNonce) external payable returns (bytes32 id) {
+        if (depositNonce == bytes32(0)) revert InvalidDeposit();
+        bytes32 depositKey = keccak256(abi.encode("420/RESOURCE/COLLATERAL/DEPOSIT/V1", block.chainid, address(this), msg.sender, depositNonce));
+        if (consumedDeposit[depositKey]) revert InvalidDeposit();
+        consumedDeposit[depositKey] = true;
         if (entered || msg.value == 0 || !_registered() || registry.vaultState(vaultId) != VaultRegistry420.VaultState.ACTIVE) revert InvalidDeposit();
         entered = true;
         ResourceProviderRegistry420.Provider memory provider = providers.getProvider(providerId);
@@ -74,6 +96,7 @@ contract ResourceProviderCollateral420 is I420System {
         if (p.state != State.BONDED || p.owner != msg.sender) revert InvalidDeposit();
         uint64 index = p.trancheCount + 1;
         bytes32 obligationId = keccak256(abi.encode(TRANCHE_DOMAIN, block.chainid, address(this), vaultId, id, index));
+        if (obligationPosition[obligationId] != bytes32(0)) revert InvalidDeposit();
         VaultAccounting420.AssetAccounting memory beforeA = accounting.getAccounting(vaultId, address(0));
         uint256 beforeBalance = address(vault).balance;
         vault.depositNative{value: msg.value}();
@@ -87,6 +110,8 @@ contract ResourceProviderCollateral420 is I420System {
         p.slashable += msg.value;
         totalSlashable += msg.value;
         trancheObligation[id][index] = obligationId;
+        obligationPosition[obligationId] = id;
+        obligationAmount[obligationId] = msg.value;
         emit CollateralDeposited(id, providerId, msg.sender, obligationId, msg.value);
         entered = false;
     }
@@ -95,13 +120,74 @@ contract ResourceProviderCollateral420 is I420System {
         bytes32 obligationId = trancheObligation[id][index];
         if (obligationId == bytes32(0)) return 0;
         VaultAccounting420.Obligation memory o = accounting.getObligation(obligationId);
-        return _validObligation(obligationId, id, p.owner, o.amount) ? o.amount : 0;
+        return obligationPosition[obligationId] == id && _validObligation(obligationId, id, p.owner, obligationAmount[obligationId]) ? o.amount : 0;
     }
     function custodyInvariant() public view returns (bool) {
         VaultAccounting420.AssetAccounting memory a = accounting.getAccounting(vaultId, address(0));
         return _registered() && a.reserved >= totalSlashable && a.recordedBalance >= a.reserved + a.claimable
             && address(vault).balance >= a.recordedBalance;
     }
+    /// @notice Only governance-qualified protocol controllers can create exposure.
+    /// Revoking admission authority does not remove an existing controller's release authority.
+    function configureReservationController(address controller, bool enabled) external {
+        if (msg.sender != providers.governanceTimelock()) revert Unauthorized();
+        if (enabled && controller.code.length == 0) revert InvalidBinding();
+        bytes32 hash = enabled ? controller.codehash : bytes32(0);
+        reservationControllerCodeHash[controller] = hash;
+        emit ReservationControllerConfigured(controller, hash);
+    }
+
+    function reservationId(address controller, bytes32 obligationRef) public view returns (bytes32) {
+        return keccak256(abi.encode("420/RESOURCE/COLLATERAL/RESERVATION/V1", block.chainid, address(this), controller, obligationRef));
+    }
+
+    function reserveExposure(bytes32 providerId, bytes32 obligationRef, uint256 exposure) external returns (bytes32 key) {
+        if (entered || obligationRef == bytes32(0) || reservationControllerCodeHash[msg.sender] == bytes32(0)
+            || msg.sender.codehash != reservationControllerCodeHash[msg.sender]) revert Unauthorized();
+        if (address(providers.collateral()) != address(this) || !providers.isActive(providerId)) revert InvalidDeposit();
+        bytes32 id = positionId(providerId);
+        key = reservationId(msg.sender, obligationRef);
+        if (reservations[key].controller != address(0)) revert InvalidDeposit();
+        uint256 aggregate = outstandingExposure[id] + exposure;
+        if (positions[id].slashable < providers.requiredSlashable(aggregate)) revert InvalidDeposit();
+        uint32 revision = providers.collateralPolicyRevision();
+        reservations[key] = Reservation(id, msg.sender, exposure, revision, false);
+        outstandingExposure[id] = aggregate;
+        outstandingReservations[id]++;
+        emit ExposureReserved(key, id, msg.sender, exposure, revision);
+    }
+
+    function releaseExposure(bytes32 key) external {
+        Reservation storage r = reservations[key];
+        if (entered || r.controller != msg.sender || r.released) revert Unauthorized();
+        r.released = true;
+        outstandingExposure[r.position] -= r.exposure;
+        outstandingReservations[r.position]--;
+        emit ExposureReleased(key, r.position);
+    }
+
+    /// @notice Withdraw one fully backed tranche after the frozen delay and all reservations clear.
+    function withdraw(bytes32 id) external {
+        Position storage p = positions[id];
+        if (entered || p.owner != msg.sender || p.state != State.EXITING
+            || block.timestamp < withdrawableAt[id] || outstandingReservations[id] != 0
+            || outstandingExposure[id] != 0) revert Unauthorized();
+        entered = true;
+        uint64 index = withdrawalCursor[id] + 1;
+        bytes32 obligationId = trancheObligation[id][index];
+        uint256 amount = obligationAmount[obligationId];
+        if (index > p.trancheCount || amount == 0 || !_validObligation(obligationId, id, p.owner, amount)) revert AccountingMismatch();
+        withdrawalCursor[id] = index;
+        p.slashable -= amount;
+        totalSlashable -= amount;
+        if (index == p.trancheCount) p.state = State.WITHDRAWN;
+        vault.releaseObligation(keccak256(abi.encode(obligationId, "EXIT_RELEASE")), obligationId);
+        vault.claim(keccak256(abi.encode(obligationId, "EXIT_CLAIM")), obligationId);
+        if (accounting.getObligation(obligationId).state != 3 || !custodyInvariant()) revert AccountingMismatch();
+        emit CollateralWithdrawn(id, index, amount);
+        entered = false;
+    }
+
     function requestExit(bytes32 id) external {
         Position storage p = positions[id];
         if (entered || p.state != State.BONDED || p.owner != msg.sender) revert Unauthorized();

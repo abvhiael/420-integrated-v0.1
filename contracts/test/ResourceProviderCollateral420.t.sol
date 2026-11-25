@@ -7,6 +7,7 @@ import "../src/vault/VaultPolicyRegistry420.sol";
 interface VmResourceCollateral420 {
     function prank(address) external;
     function deal(address,uint256) external;
+    function warp(uint256) external;
 }
 contract ResourceProviderCollateral420Test {
     VmResourceCollateral420 constant vm = VmResourceCollateral420(address(uint160(uint256(keccak256("hevm cheat code")))));
@@ -14,6 +15,7 @@ contract ResourceProviderCollateral420Test {
     address constant OTHER = address(0xB0B);
     bytes32 constant ID = keccak256("resource-provider");
     bytes32 constant VID = keccak256("resource-collateral-vault");
+    uint256 nonce;
     MockResourceCaps420 caps;
     VaultAuthorization420 auth;
     VaultRegistry420 registry;
@@ -35,19 +37,25 @@ contract ResourceProviderCollateral420Test {
         policies.setPolicy(d,VaultIds420.POLICY_ACCOUNTING,d,0,true);
         vault = new AssetVault420(VID,address(registry),address(auth),address(accounting),address(this));
         registry.registerVault(VID,address(vault),VaultIds420.VAULT_COLLATERAL,a,b,c,d,0,a,b);
-        providers = new ResourceProviderRegistry420(address(new ResourceAuthorization420(address(caps))));
+        providers = new ResourceProviderRegistry420(address(new ResourceAuthorization420(address(caps))),address(this));
         vm.prank(OWNER);
         providers.registerProvider(ID,OWNER,0,0);
         collateral = new ResourceProviderCollateral420(address(providers),address(vault),address(registry),address(accounting));
+        providers.bindCollateral(address(collateral));
+        providers.publishCollateralPolicy(1 ether,1 ether,1 days,10000,true,keccak256("test policy only"));
+        collateral.configureReservationController(address(this),true);
         _grant(address(collateral),VaultIds420.ACTION_CREATE_OBLIGATION,true);
+        _grant(address(collateral),VaultIds420.ACTION_RELEASE_OBLIGATION,true);
+        _grant(address(collateral),VaultIds420.ACTION_CLAIM,true);
     }
     function _grant(address who,bytes32 action,bool allow) internal {
         caps.set(who,VaultIds420.COMPONENT_VAULT,action,auth.scopeForVault(VID),allow);
     }
     function _deposit(uint256 amount) internal returns(bytes32) {
+        bytes32 n = bytes32(++nonce);
         vm.deal(OWNER,amount);
         vm.prank(OWNER);
-        return collateral.deposit{value:amount}(ID);
+        return collateral.deposit{value:amount}(ID,n);
     }
     function testNativeDepositAndTopupReconcile() public {
         bytes32 id = _deposit(2 ether);
@@ -62,11 +70,11 @@ contract ResourceProviderCollateral420Test {
     }
     function testForeignDepositorAndMissingGrantRollback() public {
         vm.deal(OTHER,1 ether); vm.prank(OTHER);
-        (bool ok,) = address(collateral).call{value:1 ether}(abi.encodeCall(collateral.deposit,(ID)));
+        (bool ok,) = address(collateral).call{value:1 ether}(abi.encodeCall(collateral.deposit,(ID,bytes32(uint256(1)))));
         require(!ok,"foreign owner");
         _grant(address(collateral),VaultIds420.ACTION_CREATE_OBLIGATION,false);
         vm.deal(OWNER,1 ether); vm.prank(OWNER);
-        (ok,) = address(collateral).call{value:1 ether}(abi.encodeCall(collateral.deposit,(ID)));
+        (ok,) = address(collateral).call{value:1 ether}(abi.encodeCall(collateral.deposit,(ID,bytes32(uint256(1)))));
         require(!ok && address(vault).balance == 0 && collateral.totalSlashable() == 0,"atomic rollback");
     }
     function testGenericVaultGrantCannotUnlockResourceCollateral() public {
@@ -92,5 +100,57 @@ contract ResourceProviderCollateral420Test {
         try new ResourceProviderCollateral420(address(providers),address(vault),address(registry),address(other)) {
             revert("incorrect binding accepted");
         } catch {}
+    }
+    function _activate(bytes32 id) internal {
+        vm.prank(OWNER);
+        providers.updateProvider(ID,0,id);
+        vm.prank(OWNER);
+        providers.setState(ID,ResourceProviderRegistry420.State.ACTIVE);
+    }
+    function testReplayCannotCountDepositTwice() public {
+        bytes32 id = _deposit(2 ether);
+        vm.deal(OWNER,2 ether);
+        vm.prank(OWNER);
+        (bool ok,) = address(collateral).call{value:2 ether}(abi.encodeCall(collateral.deposit,(ID,bytes32(uint256(1)))));
+        require(!ok && collateral.getPosition(id).slashable == 2 ether && address(vault).balance == 2 ether,"replayed deposit");
+    }
+    function testPositionCannotActivateSecondProviderOrAlias() public {
+        bytes32 id = _deposit(2 ether);
+        _activate(id);
+        bytes32 second = keccak256("second");
+        vm.prank(OWNER);
+        providers.registerProvider(second,OWNER,0,id);
+        vm.prank(OWNER);
+        (bool ok,) = address(providers).call(abi.encodeCall(providers.setState,(second,ResourceProviderRegistry420.State.ACTIVE)));
+        require(!ok && !providers.isActive(second),"cross-provider reuse");
+        require(!collateral.eligible(ID,keccak256(abi.encode(id)),OWNER,1 ether),"alias");
+    }
+    function testComputeObligationCannotReuseReservedFunds() public {
+        _deposit(2 ether);
+        _grant(OTHER,VaultIds420.ACTION_CREATE_OBLIGATION,true);
+        vm.prank(OTHER);
+        (bool ok,) = address(vault).call(abi.encodeCall(vault.createObligation,(keccak256("op"),keccak256("compute"),address(0),OTHER,2 ether,keccak256("420/CMP/WORKER-COLLATERAL/V1"),ID)));
+        require(!ok && collateral.totalSlashable()==2 ether,"cross protocol reuse");
+    }
+    function testReservationsPreventOverbookingAndWithdrawal() public {
+        bytes32 id = _deposit(2 ether);
+        _activate(id);
+        bytes32 key = collateral.reserveExposure(ID,keccak256("first"),2 ether);
+        (bool ok,) = address(collateral).call(abi.encodeCall(collateral.reserveExposure,(ID,keccak256("second"),1)));
+        require(!ok,"overbook");
+        (ok,) = address(collateral).call(abi.encodeCall(collateral.reserveExposure,(ID,keccak256("first"),0)));
+        require(!ok,"reservation replay");
+        vm.prank(OWNER);
+        collateral.requestExit(id);
+        vm.warp(block.timestamp+1 days);
+        vm.prank(OWNER);
+        (ok,) = address(collateral).call(abi.encodeCall(collateral.withdraw,(id)));
+        require(!ok,"reserved withdrawal");
+        collateral.releaseExposure(key);
+        (ok,) = address(collateral).call(abi.encodeCall(collateral.releaseExposure,(key)));
+        require(!ok,"release replay");
+        vm.prank(OWNER);
+        collateral.withdraw(id);
+        require(collateral.getPosition(id).state==ResourceProviderCollateral420.State.WITHDRAWN && collateral.totalSlashable()==0 && address(vault).balance==0,"exit");
     }
 }

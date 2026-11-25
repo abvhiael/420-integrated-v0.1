@@ -24,6 +24,7 @@ type saladBotTile struct{ID int;Symbol string;Value int64}
 type saladBotView struct{
  Variant string
  Board map[int]string
+ BlankCells []int
  Rack []saladBotTile
  RackCounts []int
  BagCount int
@@ -40,15 +41,14 @@ func (l *saladBotLexicon) score(v saladBotView,p saladProfile,mode string,tiles 
  board:=make(map[int]string,len(v.Board)+len(tiles));for q,s:=range v.Board{board[q]=s}
  fresh:=map[int]int64{};pack:=saladPack(p);premium:=saladPremium(p)
  for _,t:=range tiles{q:=*t.Row*p.size+*t.Col;s:=saladSymbols[pack[*t.ID]];if s=="?"{s=t.Blank};board[q]=s;fresh[q]=saladValues[pack[*t.ID]]}
+ blankCells:=map[int]bool{};for _,q:=range v.BlankCells{blankCells[q]=true}
  seen:=map[[2]int]bool{};var points int64;bonus:=false;count:=0
  for q:=range fresh{for axis,dir:=range [][2]int{{0,1},{1,0}}{
   start:=q;for{prev,ok:=saladNeighbor(start,-dir[0],-dir[1],p.size);if !ok||board[prev]==""{break};start=prev}
   key:=[2]int{axis,start};if seen[key]{continue};seen[key]=true
   var w strings.Builder;var sum int64;mult:=int64(1);cells:=0
   for at:=start;;{s:=board[at];if s==""{break};w.WriteString(s);cells++
-   val,ok:=fresh[at];if ok{switch premium[at]{case 1:val*=2;case 2:val*=3;case 3:val*=4;case 4,6:mult*=2;case 5:mult*=3}}else{
-    // The public board currently omits the blank flag. Its letter is
-    // sufficient for legality; value is an estimate, never authoritative.
+   val,ok:=fresh[at];if ok{switch premium[at]{case 1:val*=2;case 2:val*=3;case 3:val*=4;case 4,6:mult*=2;case 5:mult*=3}}else if !blankCells[at]{
     for i,sym:=range saladSymbols{if sym==s{val=saladValues[i];break}}
    };sum+=val
    next,ok:=saladNeighbor(at,dir[0],dir[1],p.size);if !ok{break};at=next
@@ -67,6 +67,7 @@ func (policy saladBotPolicy) ChooseMove(raw json.RawMessage,level string,legal [
  pack:=saladPack(p);seen:=map[int]bool{}
  for _,t:=range v.Rack{if t.ID<0||t.ID>=len(pack)||seen[t.ID]||t.Symbol!=saladSymbols[pack[t.ID]]||t.Value!=saladValues[pack[t.ID]]{return nil,ErrInvalid};seen[t.ID]=true}
  for q,s:=range v.Board{if q<0||q>=p.size*p.size{return nil,ErrInvalid};ok:=false;for _,sym:=range saladSymbols[:41]{if sym==s{ok=true;break}};if !ok{return nil,ErrInvalid}}
+ blankSeen:=map[int]bool{};for _,q:=range v.BlankCells{sym:=v.Board[q];if len(sym)!=1||blankSeen[q]{return nil,ErrInvalid};blankSeen[q]=true}
  sort.Slice(v.Rack,func(i,j int)bool{return v.Rack[i].ID<v.Rack[j].ID})
  root:=policy.lex.union;if mode=="straight-greens"{root=policy.lex.general}
  // Easy: first legal short play. Medium: highest immediate score in a

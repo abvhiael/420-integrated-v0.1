@@ -9,6 +9,77 @@ interface VmResourceCollateral420 {
     function deal(address,uint256) external;
     function warp(uint256) external;
 }
+
+/** Test-only registered Vault that deliberately calls back at both mutable deposit boundaries. */
+contract CallbackResourceVault420 {
+    bytes32 public immutable vaultId;
+    VaultRegistry420 public immutable registry;
+    VaultAuthorization420 public immutable authorization;
+    VaultAccounting420 public immutable accounting;
+    address public immutable registrationCreator;
+    mapping(bytes32 => address) public payerSafetyController;
+    ResourceProviderCollateral420 public target;
+    ResourceProviderRegistry420 public providers;
+    bytes32 public providerId;
+    bytes32 public reservation;
+    bytes32 public penalty;
+    uint256 public attempts;
+    bool public corrupt;
+    bool public observedEligible;
+
+    constructor(bytes32 id, VaultRegistry420 r, VaultAuthorization420 a, VaultAccounting420 ac) {
+        vaultId = id;
+        registry = r;
+        authorization = a;
+        accounting = ac;
+        registrationCreator = msg.sender;
+    }
+
+    function configure(ResourceProviderCollateral420 c, ResourceProviderRegistry420 p, bytes32 id) external {
+        target = c;
+        providers = p;
+        providerId = id;
+    }
+
+    function setAttack(bytes32 r, bytes32 p, bool bad) external {
+        reservation = r;
+        penalty = p;
+        corrupt = bad;
+    }
+
+    function depositNative() external payable {
+        accounting.recordDeposit(vaultId, address(0), msg.value);
+        _callback();
+    }
+
+    function createObligation(bytes32, bytes32 id, address asset, address beneficiary, uint256 amount, bytes32 kind, bytes32 source) external {
+        accounting.createObligation(vaultId, id, asset, beneficiary, amount, kind, source);
+        payerSafetyController[id] = corrupt ? address(this) : msg.sender;
+        _callback();
+    }
+
+    function reserve(bytes32 ref) external returns (bytes32) {
+        return target.reserveExposure(providerId, ref, 0);
+    }
+
+    function _reject(bytes memory data, uint256 value) private {
+        (bool ok,) = address(target).call{value: value}(data);
+        require(!ok, "mutable callback succeeded");
+        attempts++;
+    }
+
+    function _callback() private {
+        bytes32 id = target.positionId(providerId);
+        _reject(abi.encodeCall(target.deposit, (providerId, keccak256("nested deposit"))), 1 wei);
+        _reject(abi.encodeCall(target.reserveExposure, (providerId, keccak256("nested reserve"), 0)), 0);
+        if (reservation != bytes32(0)) _reject(abi.encodeCall(target.releaseExposure, (reservation)), 0);
+        _reject(abi.encodeCall(target.requestExit, (id)), 0);
+        _reject(abi.encodeCall(target.withdraw, (id)), 0);
+        if (penalty != bytes32(0)) _reject(abi.encodeCall(target.executePenalty, (penalty, uint64(1))), 0);
+        if (providers.isActive(providerId)) observedEligible = true;
+    }
+}
+
 contract ResourceProviderCollateral420Test {
     VmResourceCollateral420 constant vm = VmResourceCollateral420(address(uint160(uint256(keccak256("hevm cheat code")))));
     address constant OWNER = address(0xA11CE);
@@ -23,7 +94,8 @@ contract ResourceProviderCollateral420Test {
     AssetVault420 vault;
     ResourceProviderRegistry420 providers;
     ResourceProviderCollateral420 collateral;
-    function setUp() public {
+    function setUp() public { _setup(false); }
+    function _setup(bool hostile) internal {
         caps = new MockResourceCaps420();
         auth = new VaultAuthorization420(address(caps));
         VaultPolicyRegistry420 policies = new VaultPolicyRegistry420(address(this));
@@ -35,7 +107,11 @@ contract ResourceProviderCollateral420Test {
         policies.setPolicy(b,VaultIds420.POLICY_ASSET,b,0,true);
         policies.setPolicy(c,VaultIds420.POLICY_RELEASE,c,0,true);
         policies.setPolicy(d,VaultIds420.POLICY_ACCOUNTING,d,0,true);
-        vault = new AssetVault420(VID,address(registry),address(auth),address(accounting),address(this));
+        if (hostile) {
+            vault = AssetVault420(payable(address(new CallbackResourceVault420(VID, registry, auth, accounting))));
+        } else {
+            vault = new AssetVault420(VID,address(registry),address(auth),address(accounting),address(this));
+        }
         registry.registerVault(VID,address(vault),VaultIds420.VAULT_COLLATERAL,a,b,c,d,0,a,b);
         providers = new ResourceProviderRegistry420(address(new ResourceAuthorization420(address(caps))),address(this));
         vm.prank(OWNER);
@@ -285,5 +361,56 @@ contract ResourceProviderCollateral420Test {
         (bool ok,) = address(collateral).call(abi.encodeCall(collateral.executePenalty,(key,uint64(1))));
         require(!ok && collateral.penaltyExecuted(key)==0 && collateral.reconciledTranche(id,1)==2 ether,"atomic rollback");
         require(collateral.outstandingPenaltyHolds(id)==1 ether,"hold preserved");
+    }
+
+    function _hostileVault() internal returns (CallbackResourceVault420 v) {
+        _setup(true);
+        v = CallbackResourceVault420(address(vault));
+        v.configure(collateral, providers, ID);
+        collateral.configureReservationController(address(v), true);
+    }
+
+    function testMaliciousVaultCallbacksCannotMutateCollateralOrExposeEligibility() public {
+        CallbackResourceVault420 v = _hostileVault();
+        bytes32 id = _deposit(3 ether);
+        _activate(id);
+        bytes32 reservation = v.reserve(keccak256("existing reservation"));
+        bytes32 penalty = collateral.holdPenalty(id, keccak256("existing evidence"), 1 ether);
+        collateral.authorizePenalty(penalty, keccak256("existing decision"), OTHER);
+        v.setAttack(reservation, penalty, false);
+        uint256 beforeAttempts = v.attempts();
+        require(providers.isActive(ID), "provider initially ineligible");
+        _deposit(2 ether);
+        require(v.attempts() == beforeAttempts + 12, "both callback boundaries not exercised");
+        require(!v.observedEligible() && providers.isActive(ID), "transient eligibility escaped");
+        ResourceProviderCollateral420.Position memory p = collateral.getPosition(id);
+        require(p.deposited == 5 ether && p.slashable == 5 ether && p.trancheCount == 2, "position corrupted");
+        require(collateral.totalSlashable() == 5 ether && collateral.totalWithdrawn() == 0 && collateral.totalSlashed() == 0, "totals corrupted");
+        require(collateral.outstandingReservations(id) == 1 && collateral.outstandingPenaltyHolds(id) == 1 ether, "holds corrupted");
+        require(collateral.penaltyExecuted(penalty) == 0 && collateral.withdrawalCursor(id) == 0, "cursor corrupted");
+        require(collateral.reconciledTranche(id, 1) == 3 ether && collateral.reconciledTranche(id, 2) == 2 ether, "tranches corrupted");
+        VaultAccounting420.AssetAccounting memory a = accounting.getAccounting(VID, address(0));
+        require(a.recordedBalance == 5 ether && a.reserved == 5 ether && a.claimable == 0 && a.released == 0, "accounting corrupted");
+        require(address(vault).balance == 5 ether && address(collateral).balance == 0 && accounting.openObligationCount(VID) == 2 && collateral.custodyInvariant(), "custody corrupted");
+    }
+
+    function testMaliciousVaultBindingMismatchRollsBackDepositAndNonce() public {
+        CallbackResourceVault420 v = _hostileVault();
+        bytes32 id = _deposit(2 ether);
+        bytes32 n = keccak256("retry nonce");
+        bytes32 key = keccak256(abi.encode("420/RESOURCE/COLLATERAL/DEPOSIT/V1", block.chainid, address(collateral), OWNER, n));
+        v.setAttack(bytes32(0), bytes32(0), true);
+        vm.deal(OWNER, 1 ether);
+        vm.prank(OWNER);
+        (bool ok,) = address(collateral).call{value: 1 ether}(abi.encodeCall(collateral.deposit, (ID, n)));
+        require(!ok && !collateral.consumedDeposit(key), "failed deposit consumed nonce");
+        require(OWNER.balance == 1 ether && address(vault).balance == 2 ether && address(collateral).balance == 0, "failed deposit moved funds");
+        require(collateral.totalSlashable() == 2 ether && collateral.getPosition(id).trancheCount == 1 && collateral.trancheObligation(id, 2) == bytes32(0), "failed deposit leaked effects");
+        require(accounting.openObligationCount(VID) == 1 && accounting.getAccounting(VID, address(0)).reserved == 2 ether, "failed deposit leaked reserve");
+        v.setAttack(bytes32(0), bytes32(0), false);
+        vm.prank(OWNER);
+        collateral.deposit{value: 1 ether}(ID, n);
+        require(collateral.consumedDeposit(key) && collateral.reconciledTranche(id, 2) == 1 ether, "retry failed");
+        require(collateral.totalSlashable() == 3 ether && collateral.custodyInvariant(), "retry custody");
     }
 }

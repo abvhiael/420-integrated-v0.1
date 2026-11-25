@@ -5,6 +5,8 @@ on:
     paths:
       - "contracts/src/resource/**"
       - "contracts/test/ResourceGenesis420.t.sol"
+      - "contracts/test/ResourceProviderCollateral420.t.sol"
+      - "contracts/src/vault/AssetVault420.sol"
       - "contracts/test/ResourceDeploymentBinding420.t.sol"
       - "contracts/test/Storage*420.t.sol"
       - "contracts/config/420resource-genesis.json"
@@ -61,6 +63,9 @@ jobs:
       - name: Build Resource contract family
         working-directory: contracts
         run: forge build --root "$RUNNER_TEMP/resource-contracts" src/resource --sizes
+
+      - name: Run Resource collateral custody suite
+        run: forge test --root "$RUNNER_TEMP/resource-contracts" --match-path test/ResourceProviderCollateral420.t.sol -vvvv
 
       - name: Run Resource deployment binding suite
         working-directory: contracts
@@ -182,6 +187,7 @@ jobs:
           cat > ResourceAuditSlitherTarget.sol <<'SOL'
           // SPDX-License-Identifier: GPL-3.0
           pragma solidity ^0.8.24;
+          import "./src/resource/ResourceProviderCollateral420.sol";
           import "./src/resource/ResourceAuthorization420.sol";
           import "./src/resource/ResourcePolicyRegistry420.sol";
           import "./src/resource/ResourceProviderRegistry420.sol";

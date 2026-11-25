@@ -22,3 +22,11 @@
 .chess-history{min-height:5rem}.chess-help{margin-top:1rem}
 @media(max-width:740px){.chess-layout{grid-template-columns:minmax(0,1fr)}.chess-screen{padding:8px}}
 @media(forced-colors:active){.chess-board .chess-square{border:1px solid ButtonText}.chess-board .target:after{border:3px solid Highlight}.chess-board .selected{outline:3px solid Highlight;outline-offset:-3px}}
+/* Printed coordinates are decorative in the master; hide them when flipped.
+   Every playable square always exposes its actual coordinate and piece. */
+.chess-board-frame.flipped:before{content:"";position:absolute;inset:9% 88% 12% 6%;background:#102518}
+.chess-board-frame.flipped:after{content:"";position:absolute;inset:88% 10% 5% 13%;background:#102518}
+.chess-screen [data-chess-flip]{background:#102a19 url('/assets/games/chess/ui/button-flip-board.webp') center/contain no-repeat;color:transparent}
+.chess-screen [data-chess-flip]:focus-visible{outline:3px solid #fff}
+.chess-screen .chess-start{background:#102a19 url('/assets/games/chess/ui/button-start-match.webp') center/contain no-repeat;color:transparent}
+@media(forced-colors:active){.chess-screen :is(.chess-start,[data-chess-flip]){background:ButtonFace;color:ButtonText}}

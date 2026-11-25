@@ -4284,6 +4284,18 @@
       "finding": "Exact ABI, call-site authorization and all state predecessors require further review.",
       "owner": "AI-AUDIT-10.1",
       "status": "open"
+    },
+    {
+      "id": "AI-INV-CURRENT-06",
+      "finding": "AIJobManager.resolveDispute(false) advances DISPUTED to VERIFIED even if dispute opened at RESULT_COMMITTED. Review verification evidence before settlement; no bypass asserted without integrated test.",
+      "owner": "AI-AUDIT-5",
+      "status": "open"
+    },
+    {
+      "id": "AI-INV-CURRENT-07",
+      "finding": "Deployment operational predicate checks provider/model/expiry but not direct offer or policy registry activity. Reconcile downstream CMP checks with frozen architecture.",
+      "owner": "AI-AUDIT-4",
+      "status": "open"
     }
   ],
   "declarationScan": {
@@ -4299,5 +4311,216 @@
       "library": 2,
       "modifier": 4
     }
+  },
+  "jobTransitions": [
+    {
+      "functionName": "create/createRequest",
+      "from": [
+        "NONE"
+      ],
+      "to": [
+        "CREATED"
+      ],
+      "authority": "caller becomes requester",
+      "guard": "unique job ID, recognized workload, nonzero model/input/spend, future deadline; legacy create has max uint and zero policy IDs"
+    },
+    {
+      "functionName": "confirmFunding",
+      "from": [
+        "CREATED"
+      ],
+      "to": [
+        "FUNDED"
+      ],
+      "authority": "frozen AIJobEscrow",
+      "guard": "nonzero funding reference and amount within maxSpend"
+    },
+    {
+      "functionName": "confirmCanonicalFunding",
+      "from": [
+        "CREATED"
+      ],
+      "to": [
+        "FUNDED"
+      ],
+      "authority": "bound ComputeAdapter",
+      "guard": "same limits; canonical CMP/Vault evidence"
+    },
+    {
+      "functionName": "matchCompute",
+      "from": [
+        "FUNDED"
+      ],
+      "to": [
+        "MATCHED"
+      ],
+      "authority": "bound ComputeAdapter",
+      "guard": "nonzero compute request/job/provider"
+    },
+    {
+      "functionName": "acceptCompute",
+      "from": [
+        "MATCHED"
+      ],
+      "to": [
+        "ACCEPTED"
+      ],
+      "authority": "bound ComputeAdapter",
+      "guard": "canonical accepted match"
+    },
+    {
+      "functionName": "markRunning",
+      "from": [
+        "ACCEPTED"
+      ],
+      "to": [
+        "RUNNING"
+      ],
+      "authority": "bound ComputeAdapter",
+      "guard": "canonical execution evidence"
+    },
+    {
+      "functionName": "commitResult",
+      "from": [
+        "RUNNING"
+      ],
+      "to": [
+        "RESULT_COMMITTED"
+      ],
+      "authority": "bound ComputeAdapter",
+      "guard": "nonzero output and manifest hashes"
+    },
+    {
+      "functionName": "verifyResult",
+      "from": [
+        "RESULT_COMMITTED"
+      ],
+      "to": [
+        "VERIFIED"
+      ],
+      "authority": "bound ComputeAdapter",
+      "guard": "verified entitlement evidence"
+    },
+    {
+      "functionName": "confirmSettlement/confirmCanonicalSettlement",
+      "from": [
+        "VERIFIED"
+      ],
+      "to": [
+        "SETTLED"
+      ],
+      "authority": "frozen escrow / bound adapter",
+      "guard": "settlement evidence"
+    },
+    {
+      "functionName": "confirmRefund/confirmCanonicalRefund",
+      "from": [
+        "FUNDED",
+        "EXPIRED",
+        "FAILED",
+        "DISPUTED"
+      ],
+      "to": [
+        "REFUNDED"
+      ],
+      "authority": "frozen escrow / bound adapter",
+      "guard": "refund evidence"
+    },
+    {
+      "functionName": "cancel",
+      "from": [
+        "CREATED"
+      ],
+      "to": [
+        "CANCELLED"
+      ],
+      "authority": "requester",
+      "guard": "no funded cancellation"
+    },
+    {
+      "functionName": "expire",
+      "from": [
+        "CREATED",
+        "FUNDED",
+        "MATCHED",
+        "ACCEPTED"
+      ],
+      "to": [
+        "EXPIRED"
+      ],
+      "authority": "any caller",
+      "guard": "timestamp strictly greater than deadline"
+    },
+    {
+      "functionName": "markFailed",
+      "from": [
+        "MATCHED",
+        "ACCEPTED",
+        "RUNNING"
+      ],
+      "to": [
+        "FAILED"
+      ],
+      "authority": "bound ComputeAdapter",
+      "guard": "canonical failure"
+    },
+    {
+      "functionName": "openDispute",
+      "from": [
+        "RESULT_COMMITTED",
+        "VERIFIED"
+      ],
+      "to": [
+        "DISPUTED"
+      ],
+      "authority": "requester",
+      "guard": "nonzero dispute reference"
+    },
+    {
+      "functionName": "resolveDispute",
+      "from": [
+        "DISPUTED"
+      ],
+      "to": [
+        "FAILED",
+        "VERIFIED"
+      ],
+      "authority": "governance",
+      "guard": "nonzero resolution; upheld -> FAILED, otherwise VERIFIED"
+    }
+  ],
+  "otherStateAuthorities": {
+    "AIProviderRegistry": {
+      "register": "operator self-registration",
+      "activate": "operator REGISTERED -> ACTIVE with nonzero stake reference",
+      "retire": "operator nonretired -> RETIRED",
+      "setActive": "governance ACTIVE <-> SUSPENDED; stake required to reactivate",
+      "metadataAndSettlement": "operator nonretired",
+      "stake": "operator nonactive/nonretired",
+      "computeReference": "operator nonactive/nonretired"
+    },
+    "AIModelDeploymentRegistry420": {
+      "register": "provider operator or scoped grant; model operational; references nonzero",
+      "update": "operator or scoped grant; not ACTIVE or RETIRED",
+      "setState": "operator or scoped grant; REGISTERED -> ACTIVE/RETIRED; ACTIVE -> SUSPENDED/RETIRED; SUSPENDED -> ACTIVE/RETIRED; activation checks provider/model/expiry"
+    },
+    "AIPolicyRegistry420": {
+      "setPolicy": "governance only; revision appended; history retained"
+    },
+    "AIReputationRegistry": {
+      "bindTrustAdapter": "governance once",
+      "applyEvidence": "bound trust adapter only; unique evidence and recognized outcome",
+      "setReputation": "always reverts"
+    },
+    "AIAuthorization420": {
+      "isAuthorized": "delegates known actions and scoped amount to CapabilityRegistry; fails closed on error"
+    }
+  },
+  "branchDiscovery": {
+    "enumerated": 1462,
+    "openPullRequests": 36,
+    "pages": 15,
+    "scope": "Branch names enumerated, not all compared; open PR file review incomplete",
+    "status": "partial"
   }
 }

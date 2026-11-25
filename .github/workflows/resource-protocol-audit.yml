@@ -18,6 +18,9 @@ on:
       - "docs/developers/storage-and-resource-integration.md"
       - "docs/audit/420RESOURCE-*"
       - "scripts/verify-resource-audit-8-deployment.py"
+      - "scripts/qualify-resource-solidity.py"
+      - "contracts/test/fixtures/cadc/upstream/**"
+      - "contracts/test/fixtures/cadc/upstream-manifest.json"
       - ".github/workflows/resource-protocol-audit.yml"
   workflow_dispatch:
 
@@ -47,22 +50,25 @@ jobs:
 
       - uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: stable
+          version: v1.9.0
 
       - name: Verify deterministic Resource deployment package
         run: python scripts/verify-resource-audit-8-deployment.py
 
+      - name: Stage scoped Resource test owners and pinned import closure
+        run: python scripts/qualify-resource-solidity.py --stage "$RUNNER_TEMP/resource-contracts"
+
       - name: Build Resource contract family
         working-directory: contracts
-        run: forge build src/resource --sizes
+        run: forge build --root "$RUNNER_TEMP/resource-contracts" src/resource --sizes
 
       - name: Run Resource deployment binding suite
         working-directory: contracts
-        run: forge test --match-path 'test/ResourceDeploymentBinding420.t.sol' -vvvv
+        run: forge test --root "$RUNNER_TEMP/resource-contracts" --match-path 'test/ResourceDeploymentBinding420.t.sol' -vvvv
 
       - name: Run Resource protocol adversarial suite
         working-directory: contracts
-        run: forge test --match-path 'test/ResourceGenesis420.t.sol' -vvvv
+        run: forge test --root "$RUNNER_TEMP/resource-contracts" --match-path 'test/ResourceGenesis420.t.sol' -vvvv
 
       - name: Check Resource Solidity formatting
         working-directory: contracts
@@ -86,7 +92,10 @@ jobs:
 
       - uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: stable
+          version: v1.9.0
+
+      - name: Stage scoped Resource test owners and pinned import closure
+        run: python scripts/qualify-resource-solidity.py --stage "$RUNNER_TEMP/resource-contracts"
 
       - name: Run storage protocol suites
         working-directory: contracts
@@ -99,7 +108,7 @@ jobs:
             test/StorageAgreementRegistry420.t.sol \
             test/StorageObjectManifestRegistry420.t.sol \
             test/StorageSettlementRegistry420.t.sol; do
-            forge test --match-path "$suite" -vvv
+            forge test --root "$RUNNER_TEMP/resource-contracts" --match-path "$suite" -vvv
           done
 
   resource-runtime-sdk:
@@ -143,7 +152,7 @@ jobs:
 
       - uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: stable
+          version: v1.9.0
 
       - name: Reject dangerous Resource primitives
         shell: bash
@@ -154,11 +163,14 @@ jobs:
             exit 1
           fi
 
+      - name: Stage scoped Resource test owners and pinned import closure
+        run: python scripts/qualify-resource-solidity.py --stage "$RUNNER_TEMP/resource-contracts"
+
       - name: Re-run Resource core under hardening profile
         working-directory: contracts
         env:
           FOUNDRY_PROFILE: hardening
-        run: forge test --match-path 'test/ResourceGenesis420.t.sol' -vvv
+        run: forge test --root "$RUNNER_TEMP/resource-contracts" --match-path 'test/ResourceGenesis420.t.sol' -vvv
 
       - name: Install Slither
         run: python -m pip install --disable-pip-version-check slither-analyzer

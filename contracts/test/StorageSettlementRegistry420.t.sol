@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import "./helpers/ResourceCollateralFixture420.sol";
 
 import "../src/interfaces/genesis/ICapabilityRegistry420.sol";
 import "../src/resource/IStorageProofVerifier420.sol";
@@ -98,17 +99,17 @@ contract StorageSettlementRegistry420Test {
     function _deployRegistries(Env storage e) private {
         e.caps = new MockStorageSettlementCaps420();
         e.auth = new ResourceAuthorization420(address(e.caps));
-        e.providers = new ResourceProviderRegistry420(address(e.auth));
+        e.providers = new ResourceProviderRegistry420(address(e.auth),address(this));ResourceCollateralFixture420.deploy(e.providers,address(e.caps));
         e.nodes = new ResourceNodeRegistry420(address(e.auth), address(e.providers));
         e.policy = new ResourcePolicyRegistry420(address(this));
         e.offers = new ResourceOfferRegistry420(address(e.nodes), address(e.providers), address(e.policy), address(e.auth));
         e.verifier = new MockStorageSettlementVerifier420();
         e.schemes = new StorageProofSchemeRegistry420(address(e.auth));
-        e.commitments = new StorageCommitmentRegistry420(address(e.auth), address(e.providers), address(e.nodes), address(e.schemes));
+        e.commitments = new StorageCommitmentRegistry420(address(e.auth), address(e.providers), address(e.nodes), address(e.schemes));ResourceCollateralFixture420.enable(e.providers,address(e.commitments));
         e.proofs = new StorageProofRegistry420(address(e.commitments), address(e.schemes), address(e.nodes));
-        e.capacity = new StorageCapacityRegistry420(address(e.auth), address(e.nodes), address(e.providers));
-        e.agreements = new StorageAgreementRegistry420(address(e.auth), address(e.offers), address(e.nodes), address(e.providers), address(e.schemes), address(e.commitments), address(e.capacity));
-        e.settlements = new StorageSettlementRegistry420(address(e.agreements), address(e.proofs));
+        e.capacity = new StorageCapacityRegistry420(address(e.auth), address(e.nodes), address(e.providers));ResourceCollateralFixture420.enable(e.providers,address(e.capacity));
+        e.agreements = new StorageAgreementRegistry420(address(e.auth), address(e.offers), address(e.nodes), address(e.providers), address(e.schemes), address(e.commitments), address(e.capacity));ResourceCollateralFixture420.enable(e.providers,address(e.agreements));
+        e.settlements = new StorageSettlementRegistry420(address(e.agreements), address(e.proofs));e.agreements.bindSettlementController(address(e.settlements));
         e.vault = new MockStorageSettlementVault420();
     }
 
@@ -118,7 +119,7 @@ contract StorageSettlementRegistry420Test {
         e.offerId = keccak256("settlement-offer");
         e.schemeId = keccak256("settlement-scheme");
 
-        vm.prank(PROVIDER); e.providers.registerProvider(e.providerId, PROVIDER, keccak256("provider-meta"), keccak256("stake"));
+        vm.prank(PROVIDER); e.providers.registerProvider(e.providerId, PROVIDER, keccak256("provider-meta"), keccak256("stake"));ResourceCollateralFixture420.fund(e.providers,e.providerId,PROVIDER);
         vm.prank(PROVIDER); e.providers.setState(e.providerId, ResourceProviderRegistry420.State.ACTIVE);
         vm.prank(PROVIDER); e.nodes.registerNode(e.nodeId, e.providerId, ResourceIds420.SERVICE_STORE, PROVIDER, keccak256("endpoint"), keccak256("capacity"));
         vm.prank(PROVIDER); e.nodes.setState(e.nodeId, ResourceNodeRegistry420.State.ACTIVE);

@@ -1,0 +1,34 @@
+name: Resource 8A1 compiler reconciliation
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/resource-8a1-baseline.yml'
+      - 'scripts/resource-8a1-compare.py'
+      - 'scripts/qualify-resource-solidity.py'
+      - 'docs/audit/420RESOURCE-8A1-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compiler-comparison:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.9.0
+      - name: Compare exact historical and integrated compiler output
+        run: |
+          mkdir -p "$RUNNER_TEMP/resource-8a1"
+          set -o pipefail
+          python scripts/resource-8a1-compare.py "$RUNNER_TEMP/resource-8a1" 2>&1 | tee "$RUNNER_TEMP/resource-8a1/qualification.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: resource-8a1-compiler-evidence
+          path: ${{ runner.temp }}/resource-8a1
+          if-no-files-found: error

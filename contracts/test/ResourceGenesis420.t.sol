@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import "./helpers/ResourceCollateralFixture420.sol";
 
 import "../src/interfaces/genesis/ICapabilityRegistry420.sol";
 import "../src/resource/ResourceIds420.sol";
@@ -24,8 +25,8 @@ contract ResourceGenesis420Test {
     VmResource420 constant vm=VmResource420(address(uint160(uint256(keccak256("hevm cheat code")))));
     address constant ALICE=address(0xA11CE); address constant BOB=address(0xB0B); address constant SETTLER=address(0x420); address constant DELEGATE=address(0xD311);
     struct Env { MockResourceCaps420 caps; ResourceAuthorization420 auth; ResourcePolicyRegistry420 policy; ResourceProviderRegistry420 providers; ResourceNodeRegistry420 nodes; ResourceOfferRegistry420 offers; ResourceSessionRegistry420 sessions; ResourceReceiptRegistry420 receipts; ResourceRouter420 router; }
-    function setup() internal returns(Env memory e){e.caps=new MockResourceCaps420();e.auth=new ResourceAuthorization420(address(e.caps));e.policy=new ResourcePolicyRegistry420(address(this));e.providers=new ResourceProviderRegistry420(address(e.auth));e.nodes=new ResourceNodeRegistry420(address(e.auth),address(e.providers));e.offers=new ResourceOfferRegistry420(address(e.nodes),address(e.providers),address(e.policy),address(e.auth));e.sessions=new ResourceSessionRegistry420(address(e.offers),address(e.auth));e.receipts=new ResourceReceiptRegistry420(address(e.sessions),address(e.offers),address(e.nodes));e.router=new ResourceRouter420(address(e.policy),address(e.nodes),address(e.offers));e.policy.setPolicy(ResourceIds420.SERVICE_RELAY,keccak256("relay-policy"),3600,1_000_000,true);e.policy.setPolicy(ResourceIds420.SERVICE_STORE,keccak256("store-policy"),86400,1_000_000,true);}
-    function registerRelayNode(Env memory e) internal returns(bytes32 providerId,bytes32 nodeId){providerId=keccak256("provider");nodeId=keccak256("node");vm.prank(ALICE);e.providers.registerProvider(providerId,ALICE,keccak256("meta"),keccak256("stake"));vm.prank(ALICE);e.providers.setState(providerId,ResourceProviderRegistry420.State.ACTIVE);vm.prank(ALICE);e.nodes.registerNode(nodeId,providerId,ResourceIds420.SERVICE_RELAY,ALICE,keccak256("endpoint"),keccak256("capacity"));}
+    function setup() internal returns(Env memory e){e.caps=new MockResourceCaps420();e.auth=new ResourceAuthorization420(address(e.caps));e.policy=new ResourcePolicyRegistry420(address(this));e.providers=new ResourceProviderRegistry420(address(e.auth),address(this));ResourceCollateralFixture420.deploy(e.providers,address(e.caps));e.nodes=new ResourceNodeRegistry420(address(e.auth),address(e.providers));e.offers=new ResourceOfferRegistry420(address(e.nodes),address(e.providers),address(e.policy),address(e.auth));e.sessions=new ResourceSessionRegistry420(address(e.offers),address(e.auth));ResourceCollateralFixture420.enable(e.providers,address(e.sessions));e.receipts=new ResourceReceiptRegistry420(address(e.sessions),address(e.offers),address(e.nodes));e.router=new ResourceRouter420(address(e.policy),address(e.nodes),address(e.offers));e.policy.setPolicy(ResourceIds420.SERVICE_RELAY,keccak256("relay-policy"),3600,1_000_000,true);e.policy.setPolicy(ResourceIds420.SERVICE_STORE,keccak256("store-policy"),86400,1_000_000,true);}
+    function registerRelayNode(Env memory e) internal returns(bytes32 providerId,bytes32 nodeId){providerId=keccak256("provider");nodeId=keccak256("node");vm.prank(ALICE);e.providers.registerProvider(providerId,ALICE,keccak256("meta"),keccak256("stake"));ResourceCollateralFixture420.fund(e.providers,providerId,ALICE);vm.prank(ALICE);e.providers.setState(providerId,ResourceProviderRegistry420.State.ACTIVE);vm.prank(ALICE);e.nodes.registerNode(nodeId,providerId,ResourceIds420.SERVICE_RELAY,ALICE,keccak256("endpoint"),keccak256("capacity"));}
     function activateRelay(Env memory e) internal returns(bytes32 providerId,bytes32 nodeId,bytes32 offerId){(providerId,nodeId)=registerRelayNode(e);offerId=keccak256("offer");vm.prank(ALICE);e.nodes.setState(nodeId,ResourceNodeRegistry420.State.ACTIVE);vm.prank(ALICE);e.offers.publishOffer(offerId,nodeId,2,1000,keccak256("terms"),uint64(block.timestamp+1000));}
     function testProviderNeedsStakeAndDefaultDeny() public {Env memory e=setup();bytes32 p=keccak256("p");vm.prank(BOB);(bool bad,)=address(e.providers).call(abi.encodeWithSelector(e.providers.registerProvider.selector,p,ALICE,bytes32(0),bytes32(0)));require(!bad,"third party register");vm.prank(ALICE);e.providers.registerProvider(p,ALICE,bytes32(0),bytes32(0));vm.prank(ALICE);(bool active,)=address(e.providers).call(abi.encodeWithSelector(e.providers.setState.selector,p,ResourceProviderRegistry420.State.ACTIVE));require(!active,"stake bypass");}
     function testFourServiceClassesAreDistinct() public {require(ResourceIds420.SERVICE_RELAY!=ResourceIds420.SERVICE_STORE&&ResourceIds420.SERVICE_STORE!=ResourceIds420.SERVICE_CACHE&&ResourceIds420.SERVICE_CACHE!=ResourceIds420.SERVICE_GATEWAY,"service collision");}
@@ -47,21 +48,21 @@ contract ResourceGenesis420Test {
         (bool accepted,) = address(e.providers).call(abi.encodeWithSelector(
             e.providers.setState.selector, id, ResourceProviderRegistry420.State.ACTIVE
         ));
-        require(!accepted, "arbitrary nonzero reference activated provider");
+        require(!accepted, "arbitrary nonzero referenceId activated provider");
         require(!e.providers.isActive(id), "forged collateral is economically eligible");
     }
 
-    function testFuzzArbitraryNonzeroStakeReferenceCannotActivate(bytes32 reference) public {
-        if (reference == bytes32(0)) return;
+    function testFuzzArbitraryNonzeroStakeReferenceCannotActivate(bytes32 referenceId) public {
+        if (referenceId == bytes32(0)) return;
         Env memory e = setup();
         bytes32 id = keccak256("fuzz-provider");
         vm.prank(ALICE);
-        e.providers.registerProvider(id, ALICE, keccak256("meta"), reference);
+        e.providers.registerProvider(id, ALICE, keccak256("meta"), referenceId);
         vm.prank(ALICE);
         (bool accepted,) = address(e.providers).call(abi.encodeWithSelector(
             e.providers.setState.selector, id, ResourceProviderRegistry420.State.ACTIVE
         ));
-        require(!accepted, "unfunded reference accepted");
+        require(!accepted, "unfunded referenceId accepted");
     }
 
     function testUnauthorizedProviderActivationCannotUseForgedReference() public {

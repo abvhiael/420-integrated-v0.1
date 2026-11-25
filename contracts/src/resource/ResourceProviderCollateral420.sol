@@ -37,6 +37,18 @@ contract ResourceProviderCollateral420 is I420System {
     mapping(bytes32 => uint256) public obligationAmount;
     mapping(bytes32 => bool) public consumedDeposit;
     mapping(bytes32 => uint64) public withdrawalCursor;
+    mapping(bytes32 => uint256) public withdrawnAmount;
+    uint256 public totalWithdrawn;
+    mapping(bytes32 => uint256) public outstandingPenaltyHolds;
+    struct PenaltyHold {
+        bytes32 position;
+        uint256 amount;
+        bool resolved;
+    }
+    mapping(bytes32 => PenaltyHold) public penaltyHolds;
+    event PenaltyHeld(bytes32 indexed penaltyId, bytes32 indexed positionId, uint256 amount);
+    event PenaltyHoldDismissed(bytes32 indexed penaltyId, bytes32 indexed positionId);
+    event ExitCompleted(bytes32 indexed positionId, address indexed owner, uint256 withdrawn);
     struct Reservation {
         bytes32 position;
         address controller;
@@ -82,7 +94,7 @@ contract ResourceProviderCollateral420 is I420System {
         bytes32 depositKey = keccak256(abi.encode("420/RESOURCE/COLLATERAL/DEPOSIT/V1", block.chainid, address(this), msg.sender, depositNonce));
         if (consumedDeposit[depositKey]) revert InvalidDeposit();
         consumedDeposit[depositKey] = true;
-        if (entered || msg.value == 0 || !_registered() || registry.vaultState(vaultId) != VaultRegistry420.VaultState.ACTIVE) revert InvalidDeposit();
+        if (entered || address(providers.collateral()) != address(this) || msg.value == 0 || !_registered() || registry.vaultState(vaultId) != VaultRegistry420.VaultState.ACTIVE) revert InvalidDeposit();
         entered = true;
         ResourceProviderRegistry420.Provider memory provider = providers.getProvider(providerId);
         if ((provider.operatorAccount != msg.sender && providers.collateralSponsor(providerId) != msg.sender) || provider.state == ResourceProviderRegistry420.State.RETIRED) revert Unauthorized();
@@ -149,7 +161,7 @@ contract ResourceProviderCollateral420 is I420System {
         key = reservationId(msg.sender, obligationRef);
         if (reservations[key].controller != address(0)) revert InvalidDeposit();
         uint256 aggregate = outstandingExposure[id] + exposure;
-        if (positions[id].slashable < providers.requiredSlashable(aggregate)) revert InvalidDeposit();
+        if (positions[id].slashable - outstandingPenaltyHolds[id] < providers.requiredSlashable(aggregate)) revert InvalidDeposit();
         uint32 revision = providers.collateralPolicyRevision();
         reservations[key] = Reservation(id, msg.sender, exposure, revision, false);
         outstandingExposure[id] = aggregate;
@@ -166,24 +178,72 @@ contract ResourceProviderCollateral420 is I420System {
         emit ExposureReleased(key, r.position);
     }
 
+    /// @notice Freeze collateral pending adjudication of a specific penalty.
+    /// @dev The governance timelock must supply a unique evidence reference.
+    function holdPenalty(bytes32 id, bytes32 evidenceRef, uint256 amount) external returns (bytes32 key) {
+        if (entered || msg.sender != providers.governanceTimelock()) revert Unauthorized();
+        Position storage p = positions[id];
+        if ((p.state != State.BONDED && p.state != State.EXITING && p.state != State.DISQUALIFIED)
+            || evidenceRef == bytes32(0) || amount == 0 || amount > p.slashable - outstandingPenaltyHolds[id])
+            revert InvalidDeposit();
+        key = keccak256(abi.encode("420/RESOURCE/COLLATERAL/PENALTY/V1", block.chainid, address(this), id, evidenceRef));
+        if (penaltyHolds[key].position != bytes32(0)) revert InvalidDeposit();
+        penaltyHolds[key] = PenaltyHold(id, amount, false);
+        outstandingPenaltyHolds[id] += amount;
+        emit PenaltyHeld(key, id, amount);
+    }
+
+    /// @notice Dismiss an adjudicated penalty without confiscation; never releases unrelated holds.
+    function dismissPenalty(bytes32 key) external {
+        if (entered || msg.sender != providers.governanceTimelock()) revert Unauthorized();
+        PenaltyHold storage h = penaltyHolds[key];
+        if (h.position == bytes32(0) || h.resolved) revert InvalidDeposit();
+        h.resolved = true;
+        outstandingPenaltyHolds[h.position] -= h.amount;
+        emit PenaltyHoldDismissed(key, h.position);
+    }
+
+    function canWithdraw(bytes32 id) public view returns (bool) {
+        Position storage p = positions[id];
+        return p.state == State.EXITING && withdrawableAt[id] != 0
+            && block.timestamp >= withdrawableAt[id] && outstandingReservations[id] == 0
+            && outstandingExposure[id] == 0 && outstandingPenaltyHolds[id] == 0
+            && p.slashable != 0 && withdrawalCursor[id] < p.trancheCount;
+    }
+
     /// @notice Withdraw one fully backed tranche after the frozen delay and all reservations clear.
+    /// Partial exit payouts are deliberately restricted to whole tranches and require ALL holds to clear.
     function withdraw(bytes32 id) external {
         Position storage p = positions[id];
-        if (entered || p.owner != msg.sender || p.state != State.EXITING
-            || block.timestamp < withdrawableAt[id] || outstandingReservations[id] != 0
-            || outstandingExposure[id] != 0) revert Unauthorized();
+        if (entered || p.owner != msg.sender || !canWithdraw(id)) revert Unauthorized();
         entered = true;
         uint64 index = withdrawalCursor[id] + 1;
         bytes32 obligationId = trancheObligation[id][index];
         uint256 amount = obligationAmount[obligationId];
         if (index > p.trancheCount || amount == 0 || !_validObligation(obligationId, id, p.owner, amount)) revert AccountingMismatch();
+        VaultAccounting420.AssetAccounting memory beforeA = accounting.getAccounting(vaultId, address(0));
+        uint256 beforeBalance = address(vault).balance;
         withdrawalCursor[id] = index;
+        withdrawnAmount[id] += amount;
+        totalWithdrawn += amount;
         p.slashable -= amount;
         totalSlashable -= amount;
         if (index == p.trancheCount) p.state = State.WITHDRAWN;
         vault.releaseObligation(keccak256(abi.encode(obligationId, "EXIT_RELEASE")), obligationId);
         vault.claim(keccak256(abi.encode(obligationId, "EXIT_CLAIM")), obligationId);
-        if (accounting.getObligation(obligationId).state != 3 || !custodyInvariant()) revert AccountingMismatch();
+        VaultAccounting420.AssetAccounting memory afterA = accounting.getAccounting(vaultId, address(0));
+        if (accounting.getObligation(obligationId).state != 3
+            || beforeBalance != address(vault).balance + amount
+            || beforeA.recordedBalance != afterA.recordedBalance + amount
+            || beforeA.reserved != afterA.reserved + amount
+            || beforeA.claimable != afterA.claimable
+            || afterA.released != beforeA.released + amount
+            || p.deposited != p.slashable + withdrawnAmount[id]
+            || !custodyInvariant()) revert AccountingMismatch();
+        if (p.state == State.WITHDRAWN) {
+            if (p.slashable != 0) revert AccountingMismatch();
+            emit ExitCompleted(id, p.owner, withdrawnAmount[id]);
+        }
         emit CollateralWithdrawn(id, index, amount);
         entered = false;
     }
@@ -206,7 +266,7 @@ contract ResourceProviderCollateral420 is I420System {
         Position storage p = positions[referenceId];
         if (p.state != State.BONDED || p.providerId != providerId || p.owner == address(0)
             || (p.owner != operator && p.owner != providers.collateralSponsor(providerId))
-            || p.slashable < minimum || p.slashable < providers.requiredSlashable(outstandingExposure[referenceId]) || p.trancheCount == 0
+            || p.slashable - outstandingPenaltyHolds[referenceId] < minimum || p.slashable - outstandingPenaltyHolds[referenceId] < providers.requiredSlashable(outstandingExposure[referenceId]) || p.trancheCount == 0
             || registry.vaultState(vaultId) != VaultRegistry420.VaultState.ACTIVE || !custodyInvariant()) return false;
         // Each deposit is atomically reserved with an immutable Vault controller.
         // Only this authority can cancel or release its obligations; balance changes must update slashable in the same transaction.

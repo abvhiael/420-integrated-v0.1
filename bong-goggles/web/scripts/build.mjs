@@ -9,6 +9,7 @@ import {verifyChaosVehicleArt} from './verify-chaos-vehicle-art.mjs';
 import {CHAOS_IMAGE_MANIFEST_PATH,createChaosImageManifest} from './verify-chaos-image-manifest.mjs';
 import {verifyChaosMapArt} from './verify-chaos-map-art.mjs';
 import sharp from 'sharp';
+import {chessArt,chessArtPrefix,chessArtPaths,chessArtBudget} from './chess-art.mjs';
 import {LABYRINTH_HOLE_CENTERS} from '../core/labyrinth-hole-survey.js';
 import {verifyChaosCardCatalog} from './verify-chaos-card-catalog.mjs';
 import {validateRuntimeConfig} from '../core/runtime-config.js';
@@ -49,6 +50,19 @@ for(const asset of DASHBOARD_ASSETS){
   await mkdir(dirname(target),{recursive:true});
   await cp(source,target);
 }
+// Publish only the approved Chess art, not raw uploads or placeholder files.
+let chessArtBytes=0;
+for(const [name,width,transparent,cap] of chessArt){
+ const source=resolve(root,chessArtPrefix+name+'.png'),target=resolve(out,chessArtPrefix+name+'.webp');
+ const meta=await sharp(source).metadata();
+ if(meta.format!=='png'||!meta.width||!meta.height||(transparent&&!meta.hasAlpha))throw Error('Invalid Chess artwork '+name);
+ await mkdir(dirname(target),{recursive:true});
+ await sharp(source).resize({width,withoutEnlargement:true}).webp({quality:80,effort:6}).toFile(target);
+ const size=(await stat(target)).size;
+ if(size>cap)throw Error('Chess art exceeds file budget '+name);
+ chessArtBytes+=size;
+}
+if(chessArtBytes>chessArtBudget)throw Error('Chess art exceeds independent image budget');
 if(CHAOS_CARD_ART_SOURCES.length!==49||CHAOS_CARD_ART_OUTPUTS.length!==49||
    new Set(CHAOS_CARD_ART_OUTPUTS).size!==49)throw new Error('Cross-Country Chaos card allowlist mismatch');
 for(let i=0;i<CHAOS_CARD_ART_SOURCES.length;i++){

@@ -76,7 +76,7 @@ try{
  await w.locator('[data-chess-square="a8"]').focus();await w.keyboard.press('ArrowRight');assert.equal(await w.evaluate(()=>document.activeElement.dataset.chessSquare),'b8');
  await w.addScriptTag({url:origin+'/node_modules/axe-core/axe.min.js'});
  const audit=await w.evaluate(async()=>window.axe.run(document.querySelector('.chess-screen'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}}));
- assert.deepEqual(audit.violations.filter(v=>['critical','serious'].includes(v.impact)).map(v=>v.id),[]);
+ assert.deepEqual(audit.violations.filter(v=>['critical','serious'].includes(v.impact)).flatMap(v=>v.nodes.map(n=>({rule:v.id,target:n.target,summary:n.failureSummary}))),[]);
  outage=true;await b.locator('[data-chess-square]').first().waitFor({state:'detached',timeout:15000});
  assert.deepEqual(errors,[]);
  console.log('BC-3.4 Chromium: two independent seats, legal moves, polling, reload, orientation, keyboard, mobile, axe and revocation passed');

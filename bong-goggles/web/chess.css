@@ -1,12 +1,32 @@
-.chess-screen{max-width:1050px;margin:auto;padding:clamp(8px,2vw,24px)}
-.chess-layout{display:grid;grid-template-columns:minmax(0,640px) minmax(180px,1fr);gap:1rem;align-items:start}
-.chess-board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));width:100%;aspect-ratio:1;border:3px solid #594432;overflow:hidden}
-.chess-board .chess-square{position:relative;display:grid;place-items:center;min-width:0;min-height:0;aspect-ratio:1;padding:0;border:0;border-radius:0;line-height:1;font-family:"Segoe UI Symbol","DejaVu Sans",serif;font-size:clamp(18px,5vw,56px);color:#171717}
-.chess-board .light{background:#f0d9b5}.chess-board .dark{background:#b58863}
-.chess-square small{position:absolute;bottom:2px;left:3px;font:10px system-ui;color:#181818}
-.chess-board .last{box-shadow:inset 0 0 0 4px #775500}.chess-board .selected{box-shadow:inset 0 0 0 4px #004a80}
-.chess-board .target:after{content:"";position:absolute;width:24%;height:24%;background:#14532d;border:2px solid #fff;border-radius:50%;pointer-events:none}
-.chess-board .target:has(span:not(:empty)):after{width:80%;height:80%;background:transparent;border:4px solid #14532d}
-.chess-board .chess-square:focus-visible{outline:3px solid #005cba;outline-offset:-4px;z-index:1}
-.chess-screen aside{display:grid;gap:.5rem;min-width:0}.chess-screen form{display:flex;flex-wrap:wrap;gap:1rem;align-items:end}.chess-screen label{display:grid;gap:.25rem}.chess-screen button:not(.chess-square){min-height:44px}.chess-help{margin-top:1rem}
-@media(max-width:740px){.chess-layout{grid-template-columns:minmax(0,1fr)}.chess-screen{padding:8px}.chess-board .chess-square{font-size:clamp(18px,7vw,48px)}}
+.chess-screen{max-width:1200px;margin:auto;padding:clamp(8px,2vw,24px);background:#07180f url('/assets/games/chess/chess-wallpaper.webp') center/cover;border-radius:12px;color:#fff4d0;color-scheme:dark;isolation:isolate}
+.chess-screen a{color:#e9db9b;background:#07180f}.chess-screen .games-screen__nav a{background:#102a19;color:#fff4d0;border-color:#a58c45}.chess-screen :is(h2,h3,p,label,summary){color:inherit}.chess-screen :is(p,li,summary,h3,h4,label){background:#07180f}
+.chess-title img{display:block;width:min(100%,520px);margin:auto;height:auto}
+.chess-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(180px,1fr);gap:1rem;align-items:start}
+.chess-board-frame{position:relative;aspect-ratio:1;background:#142919 url('/assets/games/chess/chess-board.webp') center/100% 100%;border-radius:6px}
+.chess-board{position:absolute;inset:9.6% 10.3% 12.5% 13%;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));overflow:hidden}
+.chess-board .chess-square{position:relative;display:grid;place-items:center;min-width:0;min-height:0;padding:0;border:0;border-radius:0;line-height:1;background:transparent;color:#fff4d0}
+.chess-square>span{display:grid;place-items:center;width:100%;height:100%;pointer-events:none}
+.chess-piece{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 1px 2px #000)}
+.chess-square small{position:absolute;bottom:1px;left:2px;font:9px system-ui;color:#fff4d0;text-shadow:0 1px 2px #000;background:#07180f}
+.chess-board .last{box-shadow:inset 0 0 0 3px #f4c55b}.chess-board .selected{box-shadow:inset 0 0 0 3px #91ff82}
+.chess-board .target:after{content:"";position:absolute;width:24%;height:24%;background:#d2ff8b;border:2px solid #123c16;border-radius:50%;pointer-events:none}
+.chess-board .target:has(span:not(:empty)):after{width:80%;height:80%;background:transparent;border:3px solid #d2ff8b}
+.chess-board .chess-square:focus-visible{outline:3px solid #fff;outline-offset:-4px;z-index:1}
+.chess-screen aside{display:grid;gap:.5rem;min-width:0;padding:1rem;background:#07180f url('/assets/games/chess/ui/panel-content-large.webp') center/100% 100%;border-radius:12px}
+.chess-screen form{display:grid;gap:.7rem}.chess-screen label{display:grid;gap:.25rem}
+.chess-screen :is(button:not(.chess-square),select){min-height:44px;border:1px solid #a58c45;border-radius:8px;background:#102a19;color:#fff4d0}
+.chess-screen .chess-start{background:linear-gradient(#236b28,#103917);border-color:#d7b85d;font-weight:700}
+.chess-screen button:disabled{opacity:.55;cursor:not-allowed}
+.chess-clock,.chess-history{padding:.7rem;border:1px solid #a58c45;border-radius:8px;background:#091a10;margin:0}
+.chess-clock.active{border-color:#8dff8d;box-shadow:inset 0 0 8px #24753c}
+.chess-history{min-height:5rem}.chess-help{margin-top:1rem}
+@media(max-width:740px){.chess-layout{grid-template-columns:minmax(0,1fr)}.chess-screen{padding:8px}}
+@media(forced-colors:active){.chess-board .chess-square{border:1px solid ButtonText}.chess-board .target:after{border:3px solid Highlight}.chess-board .selected{outline:3px solid Highlight;outline-offset:-3px}}
+/* Printed coordinates are decorative in the master; hide them when flipped.
+   Every playable square always exposes its actual coordinate and piece. */
+.chess-board-frame.flipped:before{content:"";position:absolute;inset:9% 88% 12% 6%;background:#102518}
+.chess-board-frame.flipped:after{content:"";position:absolute;inset:88% 10% 5% 13%;background:#102518}
+.chess-screen [data-chess-flip]{background:#102a19;color:#fff4d0}
+.chess-screen [data-chess-flip]:focus-visible{outline:3px solid #fff}
+.chess-screen .chess-start{background:#102a19 ;color:transparent}
+@media(forced-colors:active){.chess-screen :is(.chess-start,[data-chess-flip]){background:ButtonFace;color:ButtonText}}

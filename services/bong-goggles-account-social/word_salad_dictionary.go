@@ -15,7 +15,7 @@ var wordSaladCannabis string
 func NewProductionWordSaladRulesAdapter()(*RulesAdapter,error){
  general:=strings.Fields(wordSaladEnglish)
  cannabis:=strings.Fields(wordSaladCannabis)
- if len(general)!=172823||len(cannabis)!=592{return nil,ErrUnavailable}
+ if len(general)!=172823||len(cannabis)!=24467{return nil,ErrUnavailable}
  return NewWordSaladRulesAdapter(general,cannabis)
 }
 func WordSaladDictionaryHashes()(string,string){

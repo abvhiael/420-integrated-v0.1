@@ -8,6 +8,8 @@ import "../src/resource/ResourceIds420.sol";
 import "../src/resource/ResourceAuthorization420.sol";
 import "../src/resource/ResourcePolicyRegistry420.sol";
 import "../src/resource/ResourceProviderRegistry420.sol";
+import "../src/resource/ResourceProviderCollateral420.sol";
+import "../src/vault/VaultPolicyRegistry420.sol";
 import "../src/resource/ResourceNodeRegistry420.sol";
 import "../src/resource/ResourceOfferRegistry420.sol";
 import "../src/resource/ResourceSessionRegistry420.sol";
@@ -37,6 +39,10 @@ contract ResourceDeploymentBinding420Test {
         ResourceAuthorization420 authorization;
         ResourcePolicyRegistry420 policy;
         ResourceProviderRegistry420 providers;
+        ResourceProviderCollateral420 collateral;
+        VaultRegistry420 vaultRegistry;
+        VaultAccounting420 vaultAccounting;
+        AssetVault420 collateralVault;
         ResourceNodeRegistry420 nodes;
         ResourceOfferRegistry420 offers;
         ResourceSessionRegistry420 sessions;
@@ -61,7 +67,8 @@ contract ResourceDeploymentBinding420Test {
 
         e.authorization = new ResourceAuthorization420(address(e.caps));
         e.policy = new ResourcePolicyRegistry420(address(this));
-        e.providers = new ResourceProviderRegistry420(address(e.authorization));
+        e.providers = new ResourceProviderRegistry420(address(e.authorization), address(this));
+        _deployCollateral(e);
         e.nodes = new ResourceNodeRegistry420(address(e.authorization), address(e.providers));
         e.offers = new ResourceOfferRegistry420(
             address(e.nodes), address(e.providers), address(e.policy), address(e.authorization)
@@ -89,6 +96,11 @@ contract ResourceDeploymentBinding420Test {
         e.settlements = new StorageSettlementRegistry420(address(e.agreements), address(e.proofs));
 
         e.caps.registerProtocolComponent(ResourceIds420.COMPONENT_RESOURCE, address(this));
+        e.collateral.configureReservationController(address(e.sessions), true);
+        e.collateral.configureReservationController(address(e.capacity), true);
+        e.collateral.configureReservationController(address(e.commitments), true);
+        e.collateral.configureReservationController(address(e.agreements), true);
+        e.agreements.bindSettlementController(address(e.settlements));
 
         e.dependencyRoot = keccak256(
             abi.encode(
@@ -97,6 +109,7 @@ contract ResourceDeploymentBinding420Test {
                 address(e.authorization),
                 address(e.policy),
                 address(e.providers),
+                address(e.collateral), address(e.vaultRegistry), address(e.vaultAccounting), address(e.collateralVault),
                 address(e.nodes),
                 address(e.offers),
                 address(e.sessions),
@@ -112,6 +125,7 @@ contract ResourceDeploymentBinding420Test {
                 address(e.authorization).codehash,
                 address(e.policy).codehash,
                 address(e.providers).codehash,
+                address(e.collateral).codehash, address(e.vaultRegistry).codehash, address(e.vaultAccounting).codehash, address(e.collateralVault).codehash,
                 address(e.nodes).codehash,
                 address(e.offers).codehash,
                 address(e.sessions).codehash,
@@ -142,6 +156,7 @@ contract ResourceDeploymentBinding420Test {
         emit DeploymentAddress("ResourceAuthorization420", address(e.authorization));
         emit DeploymentAddress("ResourcePolicyRegistry420", address(e.policy));
         emit DeploymentAddress("ResourceProviderRegistry420", address(e.providers));
+        emit DeploymentAddress("ResourceProviderCollateral420", address(e.collateral));
         emit DeploymentAddress("ResourceNodeRegistry420", address(e.nodes));
         emit DeploymentAddress("ResourceOfferRegistry420", address(e.offers));
         emit DeploymentAddress("ResourceSessionRegistry420", address(e.sessions));
@@ -162,12 +177,42 @@ contract ResourceDeploymentBinding420Test {
         emit ReleaseCommitment("interfaceHash", INTERFACE_HASH);
     }
 
+    function _deployCollateral(Env memory e) private {
+        VaultAuthorization420 auth = new VaultAuthorization420(address(e.caps));
+        VaultPolicyRegistry420 policy = new VaultPolicyRegistry420(address(this));
+        e.vaultRegistry = new VaultRegistry420(address(auth), address(policy));
+        e.vaultAccounting = new VaultAccounting420(address(e.vaultRegistry));
+        bytes32 a = keccak256("resource/auth");
+        bytes32 b = keccak256("resource/asset");
+        bytes32 c = keccak256("resource/release");
+        bytes32 d = keccak256("resource/accounting");
+        policy.setPolicy(a,VaultIds420.POLICY_AUTHORIZATION,a,0,true);
+        policy.setPolicy(b,VaultIds420.POLICY_ASSET,b,0,true);
+        policy.setPolicy(c,VaultIds420.POLICY_RELEASE,c,0,true);
+        policy.setPolicy(d,VaultIds420.POLICY_ACCOUNTING,d,0,true);
+        bytes32 vid = keccak256("420/RESOURCE/COLLATERAL/VAULT/V1");
+        e.collateralVault = new AssetVault420(vid,address(e.vaultRegistry),address(auth),address(e.vaultAccounting),address(this));
+        e.vaultRegistry.registerVault(vid,address(e.collateralVault),VaultIds420.VAULT_COLLATERAL,a,b,c,d,0,a,b);
+        e.collateral = new ResourceProviderCollateral420(address(e.providers),address(e.collateralVault),address(e.vaultRegistry),address(e.vaultAccounting));
+        e.providers.bindCollateral(address(e.collateral));
+        e.caps.registerProtocolComponent(VaultIds420.COMPONENT_VAULT,address(this));
+        bytes32[4] memory actions = [VaultIds420.ACTION_CREATE_OBLIGATION,VaultIds420.ACTION_CANCEL_OBLIGATION,VaultIds420.ACTION_RELEASE_OBLIGATION,VaultIds420.ACTION_CLAIM];
+        for (uint256 i; i < actions.length; ++i) {
+            e.caps.createGrant(keccak256(abi.encode(vid,actions[i])),address(e.collateral),VaultIds420.COMPONENT_VAULT,actions[i],auth.scopeForVault(vid),0,0,0,0,0);
+        }
+        // Deliberately leave numerical production policy unconfigured.
+    }
+
     function testDeploymentOrderAndConstructorBindings() public {
         Env memory e = _deploy();
 
         require(address(e.authorization.capabilityRegistry()) == address(e.caps), "authorization/caps");
         require(e.policy.governanceTimelock() == address(this), "policy/timelock");
         require(address(e.providers.authorization()) == address(e.authorization), "providers/auth");
+        require(e.providers.governanceTimelock()==address(this) && address(e.providers.collateral())==address(e.collateral),"collateral governance");
+        require(address(e.collateral.registry())==address(e.vaultRegistry) && address(e.collateral.accounting())==address(e.vaultAccounting),"collateral dependencies");
+        require(address(e.collateral.vault())==address(e.collateralVault) && e.providers.minimumCollateral()==0,"collateral custody/fail closed");
+        require(e.agreements.settlementController()==address(e.settlements),"settlement binding");
         require(address(e.nodes.authorization()) == address(e.authorization), "nodes/auth");
         require(address(e.nodes.providers()) == address(e.providers), "nodes/providers");
 

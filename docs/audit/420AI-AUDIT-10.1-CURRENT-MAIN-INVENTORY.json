@@ -4522,5 +4522,262 @@
     "pages": 15,
     "scope": "Branch names enumerated, not all compared; open PR file review incomplete",
     "status": "partial"
+  },
+  "openPullRequestReview": {
+    "snapshot": [
+      {
+        "number": 1411,
+        "title": "AI-AUDIT-10.1: reconcile current-main inventory",
+        "head": "audit/ai-audit-10-1-current-main",
+        "sha": "4143cc1784549cffa82d2edc87487ae034c069c7",
+        "base": "main"
+      },
+      {
+        "number": 1410,
+        "title": "BC-3.8 Chess authorized production release and computer-first entry",
+        "head": "feature/bc-3-8-chess-release",
+        "sha": "97e2131800bc6f9d35073b36f1ddcacd08595969",
+        "base": "main"
+      },
+      {
+        "number": 1405,
+        "title": "Qualify Exchange compensation through running Explorer and Analytics",
+        "head": "qualify/devcomp-integrated",
+        "sha": "03b944db68a96c8f6b1fbe74e34d7234ac52d873",
+        "base": "main"
+      },
+      {
+        "number": 1403,
+        "title": "Record DEVCOMP-06 local qualification and remaining acceptance gaps",
+        "head": "docs/devcomp-06-acceptance",
+        "sha": "4318f1f1a7a4e0e77b5ff8bc4767f52416ce5a2e",
+        "base": "main"
+      },
+      {
+        "number": 1402,
+        "title": "Report exact compensation and founder entitlements by period",
+        "head": "feat/devcomp-analytics",
+        "sha": "5f84d3d293a2e574d1dee697d4aa2f0826e92aba",
+        "base": "main"
+      },
+      {
+        "number": 1401,
+        "title": "Show authenticated development compensation on Explorer transactions",
+        "head": "feat/devcomp-explorer",
+        "sha": "3c3285f3b2fe05bafafffa3a047392855e0d96a1",
+        "base": "main"
+      },
+      {
+        "number": 1400,
+        "title": "Track DEVCOMP application revenue routes against canonical catalogues",
+        "head": "audit/devcomp-application-inventory",
+        "sha": "afa0b4bf13cbfe600e07d4c0738a2e6cdb98380e",
+        "base": "main"
+      },
+      {
+        "number": 1392,
+        "title": "DEVCOMP-FINDING-06: local ecosystem discovery and receipt qualification",
+        "head": "test/devcomp-finding-06",
+        "sha": "729b34d6ffa78b015c1031872a4615b187a34046",
+        "base": "main"
+      },
+      {
+        "number": 1377,
+        "title": "fix(verify): live fail-closed readiness and post-merge testnet audit reconciliation",
+        "head": "audit/420verify-testnet-readiness-20261123",
+        "sha": "1db30296a1df414c4cb2e15b1bcfb0441cc55290",
+        "base": "main"
+      },
+      {
+        "number": 1376,
+        "title": "Phase 5: consolidate 420Bet Plinko V2, Video Poker, ecosystem security and Cribbage qualification",
+        "head": "consolidation/bet-bonggoggles-phase5-20261123",
+        "sha": "04585f8b497d2640be4581e81151ec651ea9bfab",
+        "base": "main"
+      },
+      {
+        "number": 1361,
+        "title": "Phase 3: restore Gridcoin G-01 fail-closed feasibility and canonical science qualification",
+        "head": "reconcile/phase3-compute-g01-20261123",
+        "sha": "fa509077cf36070ef9800e8fe5164752cf13009d",
+        "base": "main"
+      },
+      {
+        "number": 1296,
+        "title": "docs(governance): reconcile GOV-REC-4 evidence after REC-3 and REC-4 merges",
+        "head": "audit/420governance-rec-4-lifecycle-20261121",
+        "sha": "e3867a101827b941145072e79f7f2eb2deb495bb",
+        "base": "main"
+      },
+      {
+        "number": 1119,
+        "title": "420Bet Plinko V2: up to 16 rows and 17 buckets, versioned paytables and canonical settlement",
+        "head": "feature/plinko-v2-16-rows-17-buckets-20261111",
+        "sha": "d9dcba51e210e5ad59fc8586eac1cef7f4ae1361",
+        "base": "main"
+      },
+      {
+        "number": 1089,
+        "title": "BET-AUDIT-7: Indexer, Wallet/Identity, Registry and consent-based Notifications/Mail integrations",
+        "head": "audit/bet-audit-7-ecosystem-20261108",
+        "sha": "9321d8ce642a6e14b6210ac420bf7049cd75dc96",
+        "base": "main"
+      },
+      {
+        "number": 1041,
+        "title": "420Bet M8 — Cannabis Cowboy RTP calibration and extreme-tail qualification",
+        "head": "feature/420bet-cannabis-cowboy-m8-math-qualification",
+        "sha": "8c508897fa10bde2d3b0ca160b20e0b9d7fbad30",
+        "base": "main"
+      },
+      {
+        "number": 780,
+        "title": "Mad Buds MB-3.1 — portable character contract and Unity source boundary",
+        "head": "audit/mad-buds-mb3-1-character-contract",
+        "sha": "969732595513691ce55c2a2c49a0d9871f577c58",
+        "base": "main"
+      },
+      {
+        "number": 771,
+        "title": "Sativa Steve Phase E — animation preparation and rigging specification",
+        "head": "docs/sativa-steve-phase-e-animation-prep-20261021",
+        "sha": "ade0268f0b507e5912181e278c6f25923a3472d8",
+        "base": "main"
+      },
+      {
+        "number": 724,
+        "title": "BET-AUDIT-5.5 — exact Video Poker wager liability and canonical settlement",
+        "head": "audit/420bet-video-poker-5-5-liability-settlement-20261018",
+        "sha": "d8a69275f44963e7f62f96afbefdfad28e222eaf",
+        "base": "main"
+      },
+      {
+        "number": 715,
+        "title": "Budtender BUD-CHAR-01 — canonical roadmap and 01.1 art direction draft",
+        "head": "feature/budtender-char-01-1-art-direction",
+        "sha": "2428ffa6626e9b442c06652272d21714fb21a97f",
+        "base": "main"
+      },
+      {
+        "number": 672,
+        "title": "policy(420bet): genesis 1M $420 bankroll earmark and governed profit waterfall",
+        "head": "policy/420bet-genesis-capital-repayment-20261015",
+        "sha": "f39a407cb78def52538defbc4086944b623aefdc",
+        "base": "main"
+      },
+      {
+        "number": 621,
+        "title": "feat(budtender): register Phase 3.15 expansion seams and preview modules",
+        "head": "feature/budtender-3-15-expansion-seams-integration",
+        "sha": "be62acd8a68c4eed13cee35cacd6fa95348544ac",
+        "base": "main"
+      },
+      {
+        "number": 614,
+        "title": "420BnB Phase 2 — BNB-2.15 reconciled Level 3 merge candidate",
+        "head": "audit/420bnb-bnb-2-15-phase2-merge-candidate-20261011",
+        "sha": "e62c76b258ac2ccc972e4a674239b0df8508afae",
+        "base": "main"
+      },
+      {
+        "number": 561,
+        "title": "audit(budtender): repository-grounded qualification and remediation",
+        "head": "audit/budtender-complete-20261007",
+        "sha": "5633265cbdd0bd55c84872765be79e77816b5adb",
+        "base": "main"
+      },
+      {
+        "number": 556,
+        "title": "420Hz audit remediation: recover HZ-4 on current main",
+        "head": "feature/420hz-remediation-20261006",
+        "sha": "9043d2e71e939cd8e80dc20d897245df1e6335d1",
+        "base": "main"
+      },
+      {
+        "number": 555,
+        "title": "420Hz complete audit reconciliation and HZ-4 recovery",
+        "head": "feature/420hz-reconciliation-20261006",
+        "sha": "71521f8ef189b9391aa6056302c79e80e78ddf2e",
+        "base": "main"
+      },
+      {
+        "number": 552,
+        "title": "test(puffbuddies): complete PB-15 Qualification milestone",
+        "head": "puffbuddies-pb15-qualification-20261006",
+        "sha": "b3932d1537f5903179ba03a1a0166b1b8a782681",
+        "base": "puffbuddies-pb14-backend-api-hardening-20261006"
+      },
+      {
+        "number": 551,
+        "title": "feat(puffbuddies): complete PB-14 Backend/API hardening",
+        "head": "puffbuddies-pb14-backend-api-hardening-20261006",
+        "sha": "26810971e8bed3381268236a8a15be85e7ed7710",
+        "base": "puffbuddies-pb13-cross-app-integration-20261006"
+      },
+      {
+        "number": 550,
+        "title": "feat(puffbuddies): complete PB-13 420Integrated cross-app integration",
+        "head": "puffbuddies-pb13-cross-app-integration-20261006",
+        "sha": "f9cc887f46ae17971023d66b3d4b2b9d2168e210",
+        "base": "puffbuddies-pb12-mobile-applications-20261006"
+      },
+      {
+        "number": 549,
+        "title": "feat(puffbuddies): complete PB-12 Mobile applications",
+        "head": "puffbuddies-pb12-mobile-applications-20261006",
+        "sha": "7734cd2dcdda43d2780f9d4f7fa5ad207c1cd777",
+        "base": "puffbuddies-pb11-web-application-20261006"
+      },
+      {
+        "number": 428,
+        "title": "docs(testnet): add GEN-11 live qualification work queue",
+        "head": "docs/add-gen11-testnet-roadmap-20260930",
+        "sha": "c36d79286ab2b6ee8e01feeaa32d72f883f67a82",
+        "base": "main"
+      },
+      {
+        "number": 425,
+        "title": "audit(registry): update REG-AUDIT-8 live-testnet hold condition",
+        "head": "audit/420registry-reg-audit-8-20260930",
+        "sha": "5eb8b8d572a2f14bf82b3c176da2ddc89ccc592d",
+        "base": "main"
+      },
+      {
+        "number": 342,
+        "title": "feat(gen-svc-4): add 420Classifieds Genesis MVP",
+        "head": "feature/gen-svc-4-classifieds",
+        "sha": "7237ccc503b9f1f7de8a0458cafd31dcd69af132",
+        "base": "main"
+      },
+      {
+        "number": 151,
+        "title": "feat(green-road): begin TGR-1.1 reusable scene engine",
+        "head": "feature/green-road-tgr-1-1-scene-engine",
+        "sha": "a43eb3d56735a35c95e709ac163bb526851957cc",
+        "base": "main"
+      },
+      {
+        "number": 148,
+        "title": "feat(420bet): begin Video Poker V1",
+        "head": "feature/420bet-video-poker-v1",
+        "sha": "74e8e91d9028678e9cb61c2b1faede4061fa2f7a",
+        "base": "main"
+      },
+      {
+        "number": 105,
+        "title": "420Hz HZ-4: streaming settlement, allocation & royalty routing",
+        "head": "feature/420hz-hz4-settlement-v1",
+        "sha": "33058b61a8633d69f1eceb466245339362c4c794",
+        "base": "main"
+      },
+      {
+        "number": 86,
+        "title": "feat(420media): add Phase 3 operator discovery foundation",
+        "head": "feature/420media-phase3-operator-discovery-v1",
+        "sha": "a1a1f7d58619e4c93eb4ebc6d89765ee8f55d9d7",
+        "base": "main"
+      }
+    ],
+    "reviewed": []
   }
 }

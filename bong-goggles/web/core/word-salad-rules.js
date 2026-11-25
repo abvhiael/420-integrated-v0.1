@@ -6,8 +6,8 @@ const specs=[
 [13,'Personal Stash',2,3,100,7,[[0,3,4],[0,6,5],[1,1,2],[2,4,1],[3,3,3],[3,6,2],[4,5,4]]],
 [15,'Classic',2,4,120,8,[[0,4,5],[1,1,4],[1,6,2],[2,3,1],[3,5,3],[4,4,4],[5,6,1],[6,7,2]]],
 [17,'Big Bud',2,4,140,8,[[1,1,5],[1,8,4],[2,4,2],[2,6,1],[3,3,3],[3,7,2],[4,0,4],[4,5,1],[5,2,1],[5,6,4],[6,7,1],[8,3,3]]],
-[19,'The Grow Room',2,6,180,8,[[0,0,5],[0,6,4],[1,3,2],[2,2,3],[2,8,1],[3,6,4],[4,4,5],[4,8,2],[5,7,1],[6,9,3],[7,8,4]]],
-[21,'Mega Stash',2,6,220,8,[[0,0,5],[0,5,4],[0,10,5],[1,3,1],[2,2,3],[2,8,2],[3,6,4],[4,4,5],[4,9,1],[5,7,3],[6,6,4],[7,9,2],[8,10,1]]]
+[19,'The Grow Room',2,4,180,8,[[0,0,5],[0,6,4],[1,3,2],[2,2,3],[2,8,1],[3,6,4],[4,4,5],[4,8,2],[5,7,1],[6,9,3],[7,8,4]]],
+[21,'Mega Stash',2,4,220,8,[[0,0,5],[0,5,4],[0,10,5],[1,3,1],[2,2,3],[2,8,2],[3,6,4],[4,4,5],[4,9,1],[5,7,3],[6,6,4],[7,9,2],[8,10,1]]]
 ];
 const types=[null,'sprout','flower','concentrate','hotbox','harvest','mother'];
 export const BOARD_SPECS=Object.freeze(Object.fromEntries(specs.map(([size,name,minPlayers,maxPlayers,tileCount,rackSize,seeds])=>{
@@ -24,7 +24,7 @@ export const MODES=Object.freeze(['classic-salad','extra-dank','straight-greens'
 export function normalizeCannabisWord(word){
  if(typeof word!=='string')throw TypeError('Word required');
  const key=word.normalize('NFC').replace(/[\s\-’']/gu,'').toUpperCase();
- if(!/^[A-Z]{2,21}$/.test(key))throw RangeError('Unplayable word');
+ if(!/^[A-Z]{2,42}$/.test(key))throw RangeError('Unplayable word');
  return key;
 }
 // Scoring primitive: caller supplies authoritative newly occupied premiums,

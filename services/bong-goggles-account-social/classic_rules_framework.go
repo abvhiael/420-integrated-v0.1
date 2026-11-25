@@ -352,6 +352,14 @@ func (a *RulesAdapter)ChooseMoveBounded(raw json.RawMessage,seat int,difficulty 
   if budget.expired(){return nil,fmt.Errorf("%w: bot decision deadline",ErrUnavailable)}
   if e!=nil||budget.spent<1{return nil,fmt.Errorf("%w: bot policy rejected decision",ErrUnavailable)}
   canon,e:=canonicalRuleAction(selected);if e!=nil{return nil,e}
+  // Word Salad uses the same submitted-action authority as human moves.
+  // Never expose the frame to the policy; validate only after it returns.
+  if submitted,ok:=a.module.(wordSaladSubmittedAction);ok&&a.definition.GameID=="scrabble"{
+   var m saladMove;if !strictRuleJSON(canon,&m)||(m.Type!="place"&&m.Type!="exchange"&&m.Type!="pass"){return nil,ErrForbidden}
+   check:=NewRuleBudget(100000)
+   if e:=submitted.ValidateSubmitted(cloneRuleFrame(frame),seat,canon,check);e!=nil||check.spent<1{return nil,ErrForbidden}
+   return canon,nil
+  }
   for _,legal:=range options{if bytes.Equal(legal,canon){return canon,nil}}
   return nil,ErrForbidden
  }

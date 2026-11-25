@@ -21,6 +21,12 @@ contract BankrollVault420 is I420System {
     WithdrawalQueue420 public immutable withdrawalQueue;
     uint64 public immutable withdrawalCooldown;
 
+    address public casinoCapitalOwner;
+    uint256 public casinoOwnedGains;
+    uint256 public casinoOwnedLosses;
+    uint256 public casinoOwnedDeposits;
+    uint256 public casinoOwnedWithdrawals;
+    event CasinoCapitalOwnerBound(address indexed owner);
     uint256 public totalShares;
     mapping(address => uint256) public shareBalance;
     mapping(bytes32 => uint256) public wagerStakeEscrow;
@@ -105,6 +111,19 @@ contract BankrollVault420 is I420System {
     function systemName() external pure returns (string memory) { return "BankrollVault420"; }
     function protocolVersion() external pure returns (uint32) { return 1; }
 
+    function bindCasinoCapitalOwner(address owner) external {
+        _requireSystemAuth(BetIds420.ACTION_VAULT_BIND_CASINO_CAPITAL, 0);
+        if (owner.code.length == 0 || casinoCapitalOwner != address(0) || totalDeposited != 0
+            || activeWagerStakeEscrow != 0 || grossSettledWagers != 0) revert InvalidAmount();
+        casinoCapitalOwner = owner;
+        emit CasinoCapitalOwnerBound(owner);
+    }
+
+    function _casinoEquity() private view returns (uint256) {
+        if (casinoCapitalOwner == address(0) || totalShares == 0) return 0;
+        return shareBalance[casinoCapitalOwner] * accounting.lpEquity(vaultId) / totalShares;
+    }
+
     function depositToken(uint256 amount) external nonReentrant returns (uint256 shares) {
         if (asset == address(0)) revert WrongAsset();
         if (amount == 0) revert InvalidAmount();
@@ -125,6 +144,7 @@ contract BankrollVault420 is I420System {
         _mint(msg.sender, shares);
         accounting.recordDeposit(vaultId, amount);
         totalDeposited += amount;
+        if (msg.sender == casinoCapitalOwner) casinoOwnedDeposits += amount;
         emit Deposited(msg.sender, amount, shares);
     }
 
@@ -138,6 +158,7 @@ contract BankrollVault420 is I420System {
         _mint(msg.sender, shares);
         accounting.recordDeposit(vaultId, msg.value);
         totalDeposited += msg.value;
+        if (msg.sender == casinoCapitalOwner) casinoOwnedDeposits += msg.value;
         emit Deposited(msg.sender, msg.value, shares);
     }
 
@@ -209,7 +230,11 @@ contract BankrollVault420 is I420System {
             equalReturnResolver[wagerId] = msg.sender;
             unclassifiedEqualReturns += stake;
         }
+        uint256 casinoBefore = _casinoEquity();
         accounting.recordWagerSettlement(vaultId, stakeAbsorbed, bankrollOutflow);
+        uint256 casinoAfter = _casinoEquity();
+        if (casinoAfter >= casinoBefore) casinoOwnedGains += casinoAfter - casinoBefore;
+        else casinoOwnedLosses += casinoBefore - casinoAfter;
         emit ProfitSettlementRecorded(wagerId, stake, grossPayout);
         if (grossPayout != 0) _sendExact(player, grossPayout);
 
@@ -253,6 +278,7 @@ contract BankrollVault420 is I420System {
         assets = withdrawalQueue.consume(requestId, msg.sender);
         accounting.completeWithdrawal(vaultId, assets);
         totalWithdrawn += assets;
+        if (msg.sender == casinoCapitalOwner) casinoOwnedWithdrawals += assets;
         _sendExact(msg.sender, assets);
         emit WithdrawalClaimed(requestId, msg.sender, assets);
     }

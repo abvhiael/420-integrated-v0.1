@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 import "./PokerTournamentPrizeFundedFixture420.sol";
+import {BetTournamentProfitEpochSource420} from "../../src/bet/BetCustodyProfitEpochSources420.sol";
+import {IBetProfitEpochSource420} from "../../src/bet/BetGovernedProfitEpoch420.sol";
 abstract contract TournamentPrizeTestsBase420 is TournamentPrizeFundedFixture420 {
     event C7ExecutedHand(bytes32 indexed hand,uint8 button,uint16 mask,uint8[9] holeA,uint8[9] holeB,uint8[5] board,uint256[9] initialChips,uint256[9] finalChips);
     event C7ExecutedHandData(bytes encoded);
@@ -133,7 +135,11 @@ abstract contract TournamentPrizeTestsBase420 is TournamentPrizeFundedFixture420
         (,,,,bytes32 context,,)=host.eventState(EVENT);(,,,,,,bytes32 result,,uint32 unique)=host.standingsState(EVENT);PokerTournamentPurchaseEscrowState420.EventAccount memory e=runtimeEscrow.eventOf(EVENT);
         emit C7PayoutTermsData(abi.encode(EVENT,unique,e.prize,e.fees,prizePolicies.select(PRIZE_PLAN,unique)));
         emit C7FinancialSeedData(abi.encode(runtimeEscrow.FINANCIAL_DOMAIN(),block.chainid,address(runtimeEscrow),EVENT,e.manifest,context,result,prizePolicies.get(PRIZE_PLAN).digest,unique,e.prize,e.fees,runtimeEscrow.developmentFund()));
+        BetTournamentProfitEpochSource420 profitSource=new BetTournamentProfitEpochSource420(address(runtimeEscrow),address(runtimeEscrow).codehash);
+        require(profitSource.profitTotals().reconciled&&profitSource.profitTotals().retainedReceipts==0,"unfinalized tournament");
         runtimeEscrow.beginPrizes(EVENT);for(uint32 i;i<unique;i+=2)runtimeEscrow.loadPrizes(EVENT,2);for(uint32 i;i<unique;i+=2)runtimeEscrow.allocatePrizes(EVENT,2);
+        {IBetProfitEpochSource420.Totals memory profit=profitSource.profitTotals();
+        require(profit.reconciled&&profit.retainedReceipts==e.fees&&profit.separatelyRoutedBasis==e.fees&&profit.freeProtocolCash==0,"finalized tournament exclusion");}
         require(runtimeEscrow.credit(address(feeRecipient))==e.fees&&runtimeEscrow.heldFees()==0);uint256 total;
         for(uint32 i;i<unique;i++){bytes32 person=host.standingsPersonAt(EVENT,i);PokerTournamentPrizeMath420.Row memory row=runtimeEscrow.prizeRow(EVENT,person);total+=row.amount;runtimeEscrow.claimPrize(EVENT,person);}
         require(total==e.prize&&runtimeEscrow.heldPrizes()==0&&runtimeEscrow.solvent());_withdrawAll();_emitFinalMoney();

@@ -79,6 +79,7 @@ contract BetGenesisCapitalization420 {
         if (releaseExecutor.execute(id, commitment) != commitment || expectedAmount != 0
             || address(this).balance != balanceBefore + amount) revert UnexpectedFunds();
         expectedSource = address(0);
+        if (bankroll.casinoCapitalOwner() != address(this)) revert InvalidConfiguration();
         shares = bankroll.depositNative{value: amount}();
         BetVaultAccounting420.VaultState memory afterState = accounting.getVault(bankroll.vaultId());
         if (shares == 0 || bankroll.shareBalance(address(this)) != sharesBefore + shares

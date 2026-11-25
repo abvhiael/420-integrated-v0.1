@@ -103,6 +103,10 @@ def main():
     for owner in OWNERS:
         if owner not in owners:
             raise SystemExit('affected inherited native owner was not executed: ' + owner)
+    # The modified ledger is explicitly not inherited from the WS7 archive.
+    # Require the new actual receipt-custody case in addition to all prior owners.
+    if 'testProfitSourceUsesActualFundedSettlementAndExcludesDonations' not in owners['PokerSeatLedger53Test']:
+        raise SystemExit('fresh changed ledger custody regression missing')
     evaluation_names = [
         'NineTierRakeRemainderCannotDeadlockSettlement',
         'SparseSeatsSplitEachPotAndAssignOddChipsClockwise',

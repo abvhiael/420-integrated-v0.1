@@ -6,6 +6,7 @@ on:
       - 'contracts/src/bet/sports/SportsFundedTickets420.sol'
       - 'contracts/src/bet/sports/SportsOutcomeCertification420.sol'
       - 'contracts/src/bet/sports/SportsOracleOutcomeGate420.sol'
+      - 'scripts/bet/run-scoped-foundry.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -14,9 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: v1.8.6
       - name: Run bounded settlement tests
         working-directory: contracts
-        run: forge test --match-path 'test/sports-5d7/*.t.sol' -vvv
+        run: python3 ../scripts/bet/run-scoped-foundry.py 'test/sports-5d7/*.t.sol' --match-path 'test/sports-5d7/*.t.sol' -vvv

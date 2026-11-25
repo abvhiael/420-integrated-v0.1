@@ -53,6 +53,7 @@ library BetIds420 {
     bytes32 internal constant ACTION_PROMOTION_GRANT = keccak256("BET_PROMOTION_GRANT");
 
     // Bankroll-vault and risk-kernel actions. These are capability scoped; no super-admin exists.
+    bytes32 internal constant ACTION_VAULT_BIND_CASINO_CAPITAL = keccak256("BET_VAULT_BIND_CASINO_CAPITAL");
     bytes32 internal constant ACTION_VAULT_REGISTER = keccak256("BET_VAULT_REGISTER");
     bytes32 internal constant ACTION_VAULT_RECORD_DEPOSIT = keccak256("BET_VAULT_RECORD_DEPOSIT");
     bytes32 internal constant ACTION_VAULT_QUEUE_WITHDRAWAL = keccak256("BET_VAULT_QUEUE_WITHDRAWAL");

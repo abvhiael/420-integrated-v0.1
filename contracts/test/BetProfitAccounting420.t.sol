@@ -2,6 +2,8 @@
 pragma solidity ^0.8.24;
 import "../src/bet/BetCasinoProfitAccounting420.sol";
 import "../src/system/CapabilityRegistry420.sol";
+import {BetBankrollProfitEpochSource420,BetSharedPoolsProfitEpochSource420} from "../src/bet/BetCustodyProfitEpochSources420.sol";
+import {IBetProfitEpochSource420} from "../src/bet/BetGovernedProfitEpoch420.sol";
 
 interface VmProfit420 {
     function deal(address,uint256) external;
@@ -109,6 +111,17 @@ contract BetProfitAccounting420Test is IProfitSettlementFixture420 {
     function settle(BankrollVault420 v,bytes32 id,uint256 stake,uint256 payout) private {
         v.escrowWagerStakeNative{value:stake}(id,PLAYER);
         v.resolveWager(id,payout);
+    }
+    function testActualBankrollAndPoolsEpochSourcesProtectEquityAndPrefunding() public {
+        BetBankrollProfitEpochSource420 b=new BetBankrollProfitEpochSource420(p1,address(v1).codehash);
+        BetSharedPoolsProfitEpochSource420 e=new BetSharedPoolsProfitEpochSource420(economics,address(economics).codehash);
+        settle(v1,keccak256("adapter-win"),100 ether,0);
+        IBetProfitEpochSource420.Totals memory a=b.profitTotals();
+        IBetProfitEpochSource420.Totals memory p=e.profitTotals();
+        require(a.reconciled&&a.retainedReceipts==0&&a.freeProtocolCash==0,"LP profit protected");
+        require(p.reconciled&&p.retainedReceipts==0&&p.freeProtocolCash==0,"prefunding protected");
+        vm.deal(address(v1),1);
+        require(!b.profitTotals().reconciled,"custody mismatch");
     }
     function testCrossVaultNettingAndPrincipal() public {
         settle(v1,keccak256("loss"),100 ether,0);

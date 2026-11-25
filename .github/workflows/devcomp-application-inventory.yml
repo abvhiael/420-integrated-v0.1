@@ -1,0 +1,28 @@
+name: DEVCOMP application revenue inventory
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/**'
+      - 'contracts/config/application-revenue-policy-v1.json'
+      - 'contracts/config/genesis-dapp-contract-map.json'
+      - 'config/genesis-applications.json'
+      - 'config/genesis-application-decision-2.json'
+      - 'config/genesis-consumer-services.json'
+      - 'docs/audit/DEVCOMP-06-APPLICATION-REVENUE-INVENTORY.*'
+      - 'scripts/verify-devcomp-revenue-inventory.py'
+      - '.github/workflows/devcomp-application-inventory.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Validate exact candidate inventory
+        run: python3 scripts/verify-devcomp-revenue-inventory.py

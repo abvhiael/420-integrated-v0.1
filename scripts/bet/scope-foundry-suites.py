@@ -30,6 +30,6 @@ def copy(relative):
                 copy(resolved.relative_to(root))
 
 for name in names:
-    assert re.fullmatch(r"[A-Za-z0-9_]+", name)
+    assert re.fullmatch(r"(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_]+", name)
     copy(pathlib.Path(name + ".t.sol"))
 print("Mandatory test source closure:", ", ".join(sorted(str(p) for p in seen)))

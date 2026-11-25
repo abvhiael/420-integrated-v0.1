@@ -2,6 +2,8 @@
 pragma solidity ^0.8.24;
 import "./BetPokerTableRegistry52.t.sol";
 import "../src/bet/PokerSeatLedger420.sol";
+import "../src/bet/BetCustodyProfitEpochSources420.sol";
+import {IBetProfitEpochSource420} from "../src/bet/BetGovernedProfitEpoch420.sol";
 
 contract PokerCoin53 {
     mapping(address => uint256) public balanceOf;
@@ -46,6 +48,30 @@ contract PokerSeatLedger53Test is BetPokerTableRegistry52Test {
     }
     function _buy() internal {
         vm.prank(PLAYER); ledger.buyIn(TABLE,0,400);
+    }
+    function testProfitSourceUsesActualFundedSettlementAndExcludesDonations() public {
+        _open();
+        BetPokerProtocolRakeCustody420 recipient=new BetPokerProtocolRakeCustody420(address(coin),address(ledger));
+        BetPokerRakeProfitEpochSource420 source=new BetPokerRakeProfitEpochSource420(
+            address(coin),address(ledger),address(ledger).codehash,address(recipient),address(recipient).codehash);
+        cap.grant(ADMIN,ledger.ACTION_BIND_SETTLEMENT(),auth.scopeForTable(TABLE),true);
+        vm.prank(ADMIN);ledger.bindSettlement(TABLE,address(this),address(recipient));
+        _buy();
+        cap.grant(OTHER,BetIds420.ACTION_POKER_BUY_IN,auth.scopeForTable(TABLE),true);
+        coin.mint(OTHER,400);
+        vm.prank(OTHER);coin.approve(address(ledger),400);
+        vm.prank(OTHER);ledger.buyIn(TABLE,1,400);
+        bytes32 hand=keccak256("profit-hand");
+        ledger.reserveHand(TABLE,hand,3,ledger.seatingEpoch(TABLE));
+        require(source.profitTotals().retainedReceipts==0,"unsettled chips");
+        uint256[9] memory chips;chips[0]=500;chips[1]=290;
+        ledger.settleReservedHand(TABLE,hand,chips,10);
+        IBetProfitEpochSource420.Totals memory t=source.profitTotals();
+        require(t.reconciled&&t.retainedReceipts==10&&t.freeProtocolCash==10,"rake");
+        coin.mint(address(recipient),100);
+        require(source.profitTotals().retainedReceipts==10,"donation");
+        coin.mint(address(ledger),1);
+        require(!source.profitTotals().reconciled,"unreconciled custody");
     }
     function testFundedBuyInAndExactChipConservation() public {
         _open(); _buy();

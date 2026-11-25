@@ -2,6 +2,7 @@ name: Phase 2 Canonical Foundry CI Coherence
 on:
   pull_request:
     paths:
+      - 'scripts/bet/run-scoped-foundry.py'
       - '.github/workflows/contracts-foundry.yml'
       - '.github/workflows/reusable-scoped-foundry.yml'
       - 'contracts/scripts/qualify-foundry-shard.sh'

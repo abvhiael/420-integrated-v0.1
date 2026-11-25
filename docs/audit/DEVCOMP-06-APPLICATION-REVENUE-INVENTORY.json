@@ -1,0 +1,812 @@
+{
+  "schema": "420-devcomp-06-application-revenue-inventory-v1",
+  "policy": "420/REVENUE/POLICY/APPLICATION_REVENUE/V1",
+  "catalogues": {
+    "Genesis launch": {
+      "420 AI": "shared",
+      "420 Analytics": "shared",
+      "420 AppStore": "shared",
+      "420 Arbitration": "shared",
+      "420 Attention": "excluded",
+      "420 Bridge": "excluded",
+      "420 Explorer": "shared",
+      "420 Faucet": "release-disabled",
+      "420 Gaming Protocol": "shared",
+      "420 Governance": "shared",
+      "420 Identity": "excluded",
+      "420 Names": "excluded",
+      "420 Notifications": "shared",
+      "420 Pay": "excluded",
+      "420 Registry": "excluded",
+      "420 Search": "shared",
+      "420 Stake": "excluded",
+      "420 Status": "shared",
+      "420 Swap": "excluded",
+      "420 Token": "policy-exception",
+      "420 Verify": "shared",
+      "420 Wallet": "shared"
+    },
+    "Decision 2": {
+      "420Bet": "release-disabled",
+      "420BnB": "release-disabled",
+      "420Calendar": "release-disabled",
+      "420Classifieds": "release-disabled",
+      "420Events": "release-disabled",
+      "420Exchange": "release-disabled",
+      "420Freelance": "release-disabled",
+      "420Grants": "release-disabled",
+      "420Grow": "release-disabled",
+      "420Hz": "release-disabled",
+      "420Launchpad": "release-disabled",
+      "420Learn": "release-disabled",
+      "420Location": "release-disabled",
+      "420Mail": "release-disabled",
+      "420Media": "release-disabled",
+      "420Pay": "release-disabled",
+      "420Reputation": "release-disabled",
+      "420Rights": "release-disabled",
+      "420Travel": "release-disabled",
+      "420Treasury": "release-disabled",
+      "420University": "release-disabled",
+      "BongGoggles": "release-disabled",
+      "DOOBr": "release-disabled",
+      "DoobTube": "release-disabled",
+      "HighStreetMarket": "release-disabled",
+      "LIFTd": "release-disabled",
+      "PuffBuddies": "release-disabled",
+      "ReeferReview": "release-disabled",
+      "TownSquare": "release-disabled"
+    },
+    "Contract ownership": {
+      "420 AI": "shared",
+      "420 Analytics": "shared",
+      "420 AppStore": "shared",
+      "420 Arbitration": "shared",
+      "420 Attention": "excluded",
+      "420 Bridge": "excluded",
+      "420 Civic": "shared",
+      "420 Commons": "shared",
+      "420 ComputeMarket": "excluded",
+      "420 Explorer": "shared",
+      "420 Faucet": "release-disabled",
+      "420 Gaming Protocol": "shared",
+      "420 Grants": "excluded",
+      "420 Identity": "excluded",
+      "420 Launchpad": "shared",
+      "420 Market": "shared",
+      "420 Messenger": "shared",
+      "420 Names": "excluded",
+      "420 Notifications": "shared",
+      "420 Oracle": "shared",
+      "420 Pay": "excluded",
+      "420 Pulse": "shared",
+      "420 Random": "shared",
+      "420 Registry": "excluded",
+      "420 Resource Protocol": "shared",
+      "420 Rights": "shared",
+      "420 Search": "shared",
+      "420 Smart Accounts": "shared",
+      "420 Stake": "excluded",
+      "420 Status": "shared",
+      "420 Swap": "excluded",
+      "420 Token": "policy-exception",
+      "420 Treasury": "shared",
+      "420 Trust": "shared",
+      "420 Vault": "excluded",
+      "420 Verify": "shared",
+      "420 Wallet": "shared",
+      "420-IS": "shared"
+    },
+    "Consumer services": {
+      "420Calendar": "shared",
+      "420Classifieds": "release-disabled",
+      "420Events": "shared",
+      "420Freelance": "release-disabled",
+      "420Launchpad Crowdfunding": "shared",
+      "420Learn + 420Knowledge": "shared",
+      "420Location": "shared",
+      "420Mail": "shared",
+      "420Media": "release-disabled",
+      "420Reputation": "shared",
+      "420Town Community Boards": "shared",
+      "420Travel": "shared",
+      "420University": "shared",
+      "Reefer Review Publishing": "shared"
+    }
+  },
+  "routes": [
+    {
+      "application": "420Exchange",
+      "route": "Retained execution fee",
+      "classification": "eligible",
+      "trace": "Atomic execution settles actual output, checks user minimum after the fee, and sends only the retained fee to the five-way router. The router forwards the declared developer share using the trade reference and canonical policy. A revert rolls back the trade and fee. Launch remains gated under Decision 2.",
+      "sources": [
+        "contracts/src/exchange/ExchangeAtomicRouter420.sol",
+        "contracts/src/exchange/ExchangeFeeRouter420.sol",
+        "contracts/src/exchange/ExchangeFeePolicy420.sol",
+        "contracts/test/ExchangeFeeSettlement420.t.sol",
+        "420-indexer/scripts/qualify-compensation-receipts.mjs"
+      ],
+      "vaultCallers": [
+        "contracts/src/exchange/ExchangeFeeRouter420.sol"
+      ]
+    },
+    {
+      "application": "420Bet",
+      "route": "Daily contest",
+      "classification": "policy-exception",
+      "trace": "Entry funding remains escrowed until dispute finality. Canceled entries refund, prize credits remain payable, and the finalized pool reserves a separate three-percent charge. The vault forwards the per-pool charge and emits incremental basis while preserving cumulative rounding.",
+      "sources": [
+        "contracts/src/bet/fantasy/FantasyContestEngine420.sol",
+        "contracts/src/revenue/DevelopmentCompensationVault420.sol",
+        ".github/workflows/420bet-fantasy-approved-level2.yml"
+      ],
+      "vaultCallers": [
+        "contracts/src/bet/fantasy/FantasyContestEngine420.sol"
+      ]
+    },
+    {
+      "application": "420Bet",
+      "route": "Peer and house-backed formats",
+      "classification": "policy-exception",
+      "trace": "Peer pools reserve fees on qualified entries. House cards settle per entry, reserve prizes and refunds, and queue the cumulative fee when the bankroll becomes releasable. The vault forwards the per-pool charge and emits incremental basis while preserving cumulative rounding.",
+      "sources": [
+        "contracts/src/bet/fantasy/FantasyFormatEscrow420.sol",
+        "contracts/src/revenue/DevelopmentCompensationVault420.sol",
+        ".github/workflows/420bet-fantasy-approved-level2.yml"
+      ],
+      "vaultCallers": [
+        "contracts/src/bet/fantasy/FantasyFormatEscrow420.sol"
+      ]
+    },
+    {
+      "application": "420Bet",
+      "route": "Season escrow",
+      "classification": "policy-exception",
+      "trace": "Entry fees remain escrowed through weekly disputes and final ranking. Cancellation returns refundable balances. Final settlement queues the pool charge. The vault forwards the per-pool charge and emits incremental basis while preserving cumulative rounding.",
+      "sources": [
+        "contracts/src/bet/fantasy/FantasySeasonEscrow420.sol",
+        "contracts/src/revenue/DevelopmentCompensationVault420.sol",
+        ".github/workflows/420bet-fantasy-approved-level2.yml"
+      ],
+      "vaultCallers": [
+        "contracts/src/bet/fantasy/FantasySeasonEscrow420.sol"
+      ]
+    },
+    {
+      "application": "420Bet",
+      "route": "Bankroll gaming results and LP equity",
+      "classification": "excluded",
+      "trace": "Actual settled wagers and payouts reconcile to LP redemption equity; neither third-party LP gains nor losses are protocol receipts. Unclassified equal returns and custody mismatches fail closed.",
+      "sources": [
+        "contracts/config/420bet-capitalization-profit-waterfall-v1.json",
+        "contracts/src/bet/BetCustodyProfitEpochSources420.sol",
+        "contracts/src/bet/BetProfitAccounting420.sol",
+        "contracts/test/BetProfitAccounting420.t.sol"
+      ]
+    },
+    {
+      "application": "420Bet",
+      "route": "Shared fee, reward and promotion pools",
+      "classification": "excluded",
+      "trace": "Prefunded balances and allocated claims are reconciled by funding, reservation and payment counters. Prefunding is not incremental revenue; governed expenses are accounted separately.",
+      "sources": [
+        "contracts/src/bet/BetCustodyProfitEpochSources420.sol",
+        "contracts/src/bet/BetEconomics420.sol",
+        "contracts/test/BetProfitAccounting420.t.sol"
+      ]
+    },
+    {
+      "application": "420Bet",
+      "route": "Poker cash-table protocol rake",
+      "classification": "eligible",
+      "trace": "Only exact settled rake transferred by the canonical seat ledger into dedicated pinned protocol receipt custody is recognized. Player chips, other rake recipients and donations are excluded. Accounting qualification does not authorize withdrawal or vault forwarding.",
+      "sources": [
+        "contracts/config/420bet-capitalization-profit-waterfall-v1.json",
+        "contracts/src/bet/BetCustodyProfitEpochSources420.sol",
+        "contracts/src/bet/PokerSeatLedger420.sol",
+        "contracts/test/BetPokerSeatLedger53.t.sol",
+        ".github/workflows/420bet-poker-5a-3-level1.yml"
+      ]
+    },
+    {
+      "application": "420Bet",
+      "route": "Sportsbook funded tickets and operator collateral",
+      "classification": "excluded",
+      "trace": "Terminal stakes, payouts and collateral movements reconcile to operator-owned collateral and player credits. Operator gain is not protocol revenue. No approved protocol fee is introduced.",
+      "sources": [
+        "contracts/src/bet/BetCustodyProfitEpochSources420.sol",
+        "contracts/src/bet/sports/SportsFundedTickets420.sol",
+        "contracts/test/sports-5d4/SportsFundedTickets420.t.sol",
+        ".github/workflows/420bet-sports-5d4.yml"
+      ]
+    },
+    {
+      "application": "420Bet",
+      "route": "Tournament prize escrow and finalized fee basis",
+      "classification": "policy-exception",
+      "trace": "Prize and refund liabilities remain protected. Finalized development fee credits are counted separately from general retained profit; the adapter reconciles receipts, withdrawals and liabilities. Actual authenticated compensation forwarding remains unqualified.",
+      "sources": [
+        "contracts/src/bet/BetCustodyProfitEpochSources420.sol",
+        "contracts/src/bet/tournament/settlement/PokerTournamentFinanceState420.sol",
+        "contracts/src/bet/tournament/settlement/PokerTournamentPrizeModule420.sol",
+        "contracts/test/tournament-5c7/PokerTournamentPrizes420.t.sol"
+      ]
+    },
+    {
+      "application": "420Bet",
+      "route": "Fantasy compensation exclusion from general epoch",
+      "classification": "excluded",
+      "trace": "The pinned compensation vault reports cumulative forwarded Fantasy entry basis as both gross and separately routed basis; the general epoch excludes it exactly once. Existing per-pool compensation routes remain policy exceptions.",
+      "sources": [
+        "contracts/src/bet/BetFantasyProfitEpochSource420.sol",
+        "contracts/src/bet/BetGovernedProfitEpoch420.sol",
+        "contracts/test/BetGovernedProfitEpoch420.t.sol"
+      ]
+    },
+    {
+      "application": "420Bet",
+      "route": "Governed operating expenses",
+      "classification": "excluded",
+      "trace": "Executed casino-budget releases reduce the eligible basis; the pinned expense adapter reconciles executor-paid amounts to registry execution totals and rejects alternative unaccounted release paths.",
+      "sources": [
+        "contracts/src/bet/BetTreasuryExpenseEpochSource420.sol",
+        "contracts/test/TreasuryNativeVaultIntegration420.t.sol"
+      ]
+    },
+    {
+      "application": "420Bet",
+      "route": "Casino-wide retained profit",
+      "classification": "review-required",
+      "trace": "Per-asset epoch arithmetic and individual custody projections are implemented. Full same-asset production-source epoch reconciliation, including tournament and governed expenses, and exact-candidate evidence are still required; governed activation and distribution remain disabled.",
+      "sources": [
+        "contracts/config/420bet-capitalization-profit-waterfall-v1.json",
+        "contracts/src/bet/BetGovernedProfitEpoch420.sol",
+        "contracts/src/bet/BetCustodyProfitEpochSources420.sol",
+        "contracts/test/BetGovernedProfitEpoch420.t.sol",
+        ".github/workflows/420bet-profit-accounting.yml"
+      ]
+    },
+    {
+      "application": "420 Pay",
+      "route": "Payment and refund settlement",
+      "classification": "excluded",
+      "trace": "The current payment router requires zero protocol fee. Merchant settlement and refundable funds do not accrue compensation on this path.",
+      "sources": [
+        "contracts/src/pay/PaymentRouter420.sol",
+        "contracts/src/pay/RefundManager420.sol"
+      ]
+    },
+    {
+      "application": "420 Swap",
+      "route": "Canonical pool LP fee",
+      "classification": "excluded",
+      "trace": "The constant-product fee is retained in the pool reserves and belongs to liquidity accounting. The separate Exchange execution fee has its own route.",
+      "sources": [
+        "contracts/src/swap/CanonicalConstantProductPool420.sol",
+        "contracts/src/exchange/ExchangeAtomicRouter420.sol"
+      ]
+    },
+    {
+      "application": "420 Token",
+      "route": "Token creation",
+      "classification": "policy-exception",
+      "trace": "Successful deployment deposits the entire 42 native 420 fee to the immutable community revenue vault. A failed deposit reverts deployment.",
+      "sources": [
+        "contracts/src/token/TokenFactory420.sol",
+        "contracts/config/420token-genesis.json"
+      ]
+    },
+    {
+      "application": "420 Stake",
+      "route": "Bond and validator accrual",
+      "classification": "excluded",
+      "trace": "Owned collateral, protocol credit and validator rewards follow staking custody and reward accounting.",
+      "sources": [
+        "contracts/src/apps/Stake420.sol",
+        "contracts/config/application-revenue-policy-v1.json"
+      ]
+    },
+    {
+      "application": "420 Names",
+      "route": "Registration and renewal",
+      "classification": "excluded",
+      "trace": "Commit, register and renew are nonpayable in the current canonical contract.",
+      "sources": [
+        "contracts/src/apps/Names420.sol"
+      ]
+    },
+    {
+      "application": "420 Identity",
+      "route": "Profiles and credentials",
+      "classification": "excluded",
+      "trace": "The current profile and credential registry holds identity records without an independent payment path.",
+      "sources": [
+        "contracts/src/apps/Identity420.sol"
+      ]
+    },
+    {
+      "application": "420 Registry",
+      "route": "Service and component registration",
+      "classification": "excluded",
+      "trace": "Registry publication and resolution establish application authority without collecting commercial receipts.",
+      "sources": [
+        "contracts/src/apps/ProtocolRegistry.sol"
+      ]
+    },
+    {
+      "application": "420 Treasury",
+      "route": "Compensation forwarding",
+      "classification": "shared",
+      "trace": "The vault is an authenticated forwarding boundary for application receipts. Splitter credits and founder claims do not create additional application revenue.",
+      "sources": [
+        "contracts/src/revenue/DevelopmentCompensationVault420.sol",
+        "contracts/src/revenue/FoundingDeveloperCompensationSplitter420.sol"
+      ]
+    },
+    {
+      "application": "420 Explorer",
+      "route": "Indexer read model",
+      "classification": "shared",
+      "trace": "Explorer reads the Indexer API. It does not originate the indexed settlements.",
+      "sources": [
+        "contracts/config/420explorer-genesis.json",
+        "explorer/indexerclient/client.go"
+      ]
+    },
+    {
+      "application": "420 Analytics",
+      "route": "Indexer read model",
+      "classification": "shared",
+      "trace": "Analytics derives metrics from Indexer snapshots. Indexed economic activity is attributed to its originating applications.",
+      "sources": [
+        "analytics/runtime/service.go",
+        "analytics/indexerclient/client.go"
+      ]
+    },
+    {
+      "application": "420 Faucet",
+      "route": "Testnet distribution",
+      "classification": "release-disabled",
+      "trace": "The canonical launch catalogue confines the faucet to testnet.",
+      "sources": [
+        "config/genesis-applications.json"
+      ]
+    },
+    {
+      "application": "420Pay",
+      "route": "Canonical payment service alias",
+      "classification": "shared",
+      "trace": "The Decision 2 entry points to the canonical 420 Pay protocol. Its current payment router requires zero protocol fee.",
+      "sources": [
+        "config/genesis-application-decision-2.json",
+        "contracts/src/pay/PaymentRouter420.sol"
+      ]
+    },
+    {
+      "application": "420 AppStore",
+      "route": "Curated application catalogue",
+      "classification": "shared",
+      "trace": "The catalogue publishes listings and derives application provenance from 420Registry. The canonical service defines no listing or purchase settlement.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/config/420appstore-genesis.json"
+      ]
+    },
+    {
+      "application": "420 Notifications",
+      "route": "Opt-in alerts",
+      "classification": "shared",
+      "trace": "The service derives notifications from registered sources and has no independent custody or settlement.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/config/420notifications-genesis.json"
+      ]
+    },
+    {
+      "application": "420 Search",
+      "route": "Discovery index",
+      "classification": "shared",
+      "trace": "Search presents indexed discovery information. The underlying services own their transactions and associated receipts.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/config/420search-genesis.json"
+      ]
+    },
+    {
+      "application": "420 Status",
+      "route": "Operational status feeds",
+      "classification": "shared",
+      "trace": "The status service reads operational health. Its availability and incident records create no payment obligations.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/config/420status-genesis.json"
+      ]
+    },
+    {
+      "application": "420 Verify",
+      "route": "Build verification",
+      "classification": "shared",
+      "trace": "The service verifies source-to-bytecode correspondence. Its canonical profile has no settlement contract.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/config/420verify-genesis.json"
+      ]
+    },
+    {
+      "application": "420 Wallet",
+      "route": "Client transaction orchestration",
+      "classification": "shared",
+      "trace": "Wallet coordinates account and application transactions. Fees and custody are attributable to the canonical account, network or application that settles each transaction.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/config/420wallet-genesis.json"
+      ]
+    },
+    {
+      "application": "420 Smart Accounts",
+      "classification": "shared",
+      "route": "Account funding and wallet execution",
+      "trace": "Account balances are held for the account owner. Authorized execution spends that account balance and any application receipts belong to the service called.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/accounts/SmartAccount420.sol"
+      ]
+    },
+    {
+      "application": "420-IS",
+      "classification": "shared",
+      "route": "Namespace and checkpoint routing",
+      "trace": "The router resolves interoperable identities and checkpoint authority without collecting a settlement fee.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/interop/InteropRouter420.sol"
+      ]
+    },
+    {
+      "application": "420 Random",
+      "classification": "shared",
+      "route": "Randomness requests and fulfillment",
+      "trace": "The canonical router authenticates requests, provider fulfillment and result delivery without holding a request or provider payment.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/randomness/RandomnessRouter420.sol"
+      ]
+    },
+    {
+      "application": "420 Trust",
+      "classification": "shared",
+      "route": "Trust aggregation",
+      "trace": "The aggregator combines registered signals for downstream consumers without collecting settlement amounts.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/trust/TrustAggregator420.sol"
+      ]
+    },
+    {
+      "application": "420 Commons",
+      "classification": "shared",
+      "route": "Community permissions",
+      "trace": "Space, channel and membership operations set community permissions without a commercial settlement call.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/commons/CommonsRouter420.sol"
+      ]
+    },
+    {
+      "application": "420 Pulse",
+      "classification": "shared",
+      "route": "Publications and interactions",
+      "trace": "The router registers publications and interactions without custodial or paid settlement.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/pulse/PulseRouter420.sol"
+      ]
+    },
+    {
+      "application": "420 Messenger",
+      "classification": "shared",
+      "route": "Message envelopes and receipts",
+      "trace": "Delivery receipts attest to message state and are unrelated to any monetary receipt.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/messenger/MessengerRouter420.sol"
+      ]
+    },
+    {
+      "application": "420 Arbitration",
+      "classification": "shared",
+      "route": "Case and ruling coordination",
+      "trace": "The case and ruling paths authenticate arbitration transitions. The calling application remains responsible for asset custody and enforcing the ruling.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/arbitration/ArbitrationRouter420.sol"
+      ]
+    },
+    {
+      "application": "420 Oracle",
+      "classification": "shared",
+      "route": "Feed and oracle evidence",
+      "trace": "Feed lifecycle and report submissions authenticate data. The router defines no independent revenue collection.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/oracle/OracleRouter420.sol"
+      ]
+    },
+    {
+      "application": "420 Gaming Protocol",
+      "classification": "shared",
+      "route": "Game registry and entitlement authority",
+      "trace": "The registry and associated claim and entitlement records authenticate game state. Funded play and settlement belong to the game application.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/gaming/GameRegistry420.sol"
+      ]
+    },
+    {
+      "application": "420 Civic",
+      "classification": "shared",
+      "route": "Governance execution",
+      "trace": "Governor execution may carry proposal-supplied funds to the timelock for the authorized target calls. Such execution value is budgeted expenditure rather than a charge to a customer.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/governance/CivicGovernor420.sol"
+      ]
+    },
+    {
+      "application": "420 Governance",
+      "classification": "shared",
+      "route": "Canonical governance authority",
+      "trace": "The governance service authorizes proposal execution and associated timelock operations. It defines no independently retained service receipt.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/governance/Governance420.sol"
+      ]
+    },
+    {
+      "application": "420 Vault",
+      "classification": "excluded",
+      "route": "Governed asset custody",
+      "trace": "Deposits create vault accounting balances and withdrawals retire custody amounts. The deposited principal is excluded under the application revenue policy.",
+      "sources": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/vault/AssetVault420.sol"
+      ]
+    },
+    {
+      "application": "420Town Community Boards",
+      "classification": "shared",
+      "route": "Community boards",
+      "trace": "The Genesis profile covers community posts, threads, votes and moderation. Supporting identity, storage and search supply the underlying services.",
+      "sources": [
+        "config/genesis-consumer-services.json"
+      ]
+    },
+    {
+      "application": "420Travel",
+      "classification": "shared",
+      "route": "Travel discovery",
+      "trace": "The Genesis MVP covers maps, places, events, reviews and discovery. The separate Decision 2 entry keeps production release disabled.",
+      "sources": [
+        "config/genesis-consumer-services.json"
+      ]
+    },
+    {
+      "application": "420Reputation",
+      "classification": "shared",
+      "route": "Derived reputation",
+      "trace": "The canonical profile derives reputation for verified interactions from identity, verification and arbitration.",
+      "sources": [
+        "config/genesis-consumer-services.json"
+      ]
+    },
+    {
+      "application": "420Events",
+      "classification": "shared",
+      "route": "Event objects and discovery",
+      "trace": "The Genesis service profile specifies event objects, discovery and scheduling dependencies. Ticket or sale settlement is outside this profile.",
+      "sources": [
+        "config/genesis-consumer-services.json"
+      ]
+    },
+    {
+      "application": "420Location",
+      "classification": "shared",
+      "route": "Place discovery",
+      "trace": "The Genesis profile supplies a place registry and geospatial lookup with provider abstraction. It defines no independent settlement.",
+      "sources": [
+        "config/genesis-consumer-services.json"
+      ]
+    },
+    {
+      "application": "420Learn + 420Knowledge",
+      "classification": "shared",
+      "route": "Learning and credentials",
+      "trace": "The Genesis profile covers courses, lessons, progress, questions and credentials. It defines no tuition or provider settlement.",
+      "sources": [
+        "config/genesis-consumer-services.json"
+      ]
+    },
+    {
+      "application": "420University",
+      "classification": "shared",
+      "route": "Navigation and schema",
+      "trace": "The Genesis profile limits the umbrella shell to navigation and a shared schema.",
+      "sources": [
+        "config/genesis-consumer-services.json"
+      ]
+    },
+    {
+      "application": "420Mail",
+      "classification": "shared",
+      "route": "Identity-addressed inbox",
+      "trace": "The shared inbox delegates messaging, storage and notifications to the corresponding services.",
+      "sources": [
+        "config/genesis-consumer-services.json"
+      ]
+    },
+    {
+      "application": "420Calendar",
+      "classification": "shared",
+      "route": "Scheduling and reminders",
+      "trace": "The shared scheduling profile covers RSVPs and reminders using identity and notification services.",
+      "sources": [
+        "config/genesis-consumer-services.json"
+      ]
+    },
+    {
+      "application": "420Freelance",
+      "classification": "release-disabled",
+      "route": "Deferred freelance commerce",
+      "trace": "The Genesis scope supplies interfaces for gigs and milestone escrow. The user-facing application is classified post-Genesis and release disabled.",
+      "sources": [
+        "config/genesis-consumer-services.json",
+        "config/genesis-application-decision-2.json"
+      ]
+    },
+    {
+      "application": "420 AI",
+      "classification": "shared",
+      "route": "Compute job settlement",
+      "trace": "Direct AI funding is disabled. The AI adapter binds Compute provider entitlement and already-executed payer refund evidence, so those receipts belong to the Compute settlement.",
+      "sources": [
+        "contracts/src/ai/AIJobEscrow.sol",
+        "contracts/src/ai/AIComputeAdapter420.sol"
+      ]
+    },
+    {
+      "application": "420 Attention",
+      "classification": "excluded",
+      "route": "Campaign funding and reward delivery",
+      "trace": "Campaign balances fund beneficiary rewards. Authorized releases satisfy the recorded campaign obligations and do not create retained protocol revenue.",
+      "sources": [
+        "contracts/src/system/AttentionTreasury.sol",
+        "contracts/src/attention/AttentionRewardRegistry420.sol"
+      ]
+    },
+    {
+      "application": "420 Bridge",
+      "classification": "excluded",
+      "route": "Backing custody and external network fees",
+      "trace": "Bridge custody transfers backing assets. Bitcoin miner fees, CCTP fees and LayerZero message fees compensate their external systems.",
+      "sources": [
+        "contracts/src/bridge/BridgeValueCustody420.sol",
+        "contracts/src/bridge/bitcoin/BitcoinCustody420.sol",
+        "contracts/src/bridge/adapters/USDCCCTPAdapter.sol",
+        "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol"
+      ]
+    },
+    {
+      "application": "420 ComputeMarket",
+      "classification": "excluded",
+      "route": "Fixed-price provider work and residual refunds",
+      "trace": "Payer funding is reserved with payer-safety obligations. Verified work allocates provider payment and payer residual claims. Terminal failure and dispute refunds remain obligations.",
+      "sources": [
+        "contracts/src/compute/ComputeEscrowFunding420.sol",
+        "contracts/src/compute/ComputeVerifiedEntitlement420.sol"
+      ]
+    },
+    {
+      "application": "420 Grants",
+      "classification": "excluded",
+      "route": "Grant obligations",
+      "trace": "The grant router exposes program and award state, and the award registry records recipient funding obligations rather than commercial charges.",
+      "sources": [
+        "contracts/src/grants/GrantRouter420.sol",
+        "contracts/src/grants/GrantAwardRegistry420.sol"
+      ]
+    },
+    {
+      "application": "420 Launchpad",
+      "classification": "shared",
+      "route": "Crowdfunding payment and refund reconciliation",
+      "trace": "Crowdfunding records canonical 420 Pay settlement references and confirms actual refund delivery before attaching evidence. Project receipts and refunds remain attributed to the Pay path.",
+      "sources": [
+        "contracts/src/launchpad/LaunchpadCrowdfundingIntegration420.sol",
+        "contracts/src/pay/PaymentRouter420.sol"
+      ]
+    },
+    {
+      "application": "420 Market",
+      "classification": "shared",
+      "route": "Order and settlement evidence",
+      "trace": "The order registry reserves inventory and records reporter-authenticated payment and refund references. The settlement adapter, rather than the order record, owns the asset path.",
+      "sources": [
+        "contracts/src/market/OrderRegistry420.sol",
+        "contracts/src/market/MarketPolicyRegistry420.sol"
+      ]
+    },
+    {
+      "application": "420 Resource Protocol",
+      "classification": "shared",
+      "route": "Resource and storage settlement records",
+      "trace": "Resource receipts and storage settlement status provide registered evidence for provider obligations. The registries do not custody user payment or retain a protocol fee.",
+      "sources": [
+        "contracts/src/resource/ResourceReceiptRegistry420.sol",
+        "contracts/src/resource/StorageSettlementRegistry420.sol"
+      ]
+    },
+    {
+      "application": "420 Rights",
+      "classification": "shared",
+      "route": "License and effective-use resolution",
+      "trace": "The rights router resolves effective use from canonical rights and license records. Any separate commercial payment path would require its own revenue attribution.",
+      "sources": [
+        "contracts/src/rights/RightsRouter420.sol",
+        "contracts/src/rights/RightsLicenseRegistry420.sol"
+      ]
+    },
+    {
+      "application": "420Classifieds",
+      "classification": "release-disabled",
+      "route": "Marketplace MVP",
+      "trace": "The launch amendment disables production release. The consumer profile delegates planned settlement to Pay and disputes to Arbitration.",
+      "sources": [
+        "config/genesis-consumer-services.json",
+        "config/genesis-application-decision-2.json"
+      ]
+    },
+    {
+      "application": "420Launchpad Crowdfunding",
+      "classification": "shared",
+      "route": "Project funding via canonical Pay",
+      "trace": "This consumer profile uses contract-backed settlement. The crowdfunding integration binds canonical Pay payment and delivered refund references, sharing the Launchpad route.",
+      "sources": [
+        "config/genesis-consumer-services.json",
+        "contracts/src/launchpad/LaunchpadCrowdfundingIntegration420.sol"
+      ]
+    },
+    {
+      "application": "420Media",
+      "classification": "release-disabled",
+      "route": "Media publishing and livestreaming",
+      "trace": "The consumer profile names Pay as a dependency, and the launch amendment disables production release.",
+      "sources": [
+        "config/genesis-consumer-services.json",
+        "config/genesis-application-decision-2.json"
+      ]
+    },
+    {
+      "application": "Reefer Review Publishing",
+      "classification": "shared",
+      "route": "Editorial and publishing service",
+      "trace": "The Genesis publishing profile covers editorial and publishing tools using Rights, Storage and Search. The related ReeferReview application remains release-disabled.",
+      "sources": [
+        "config/genesis-consumer-services.json",
+        "config/genesis-application-decision-2.json"
+      ]
+    },
+    {
+      "application": "420Bet",
+      "route": "Paid poker tournament purchase fee",
+      "classification": "policy-exception",
+      "trace": "The approved policy places the whole buy-in in prize escrow and separately charges a rounded-down 3% fee. Before tournament finality the fee remains refundable. The prize module credits the development recipient at final prize allocation. Route qualification requires authenticated vault forwarding and founder claim evidence, and the fee must be excluded from the general waterfall basis.",
+      "sources": [
+        "docs/bet/BET-AUDIT-5C.1-TOURNAMENT-DECISIONS.md",
+        "docs/bet/BET-AUDIT-5C.1-TOURNAMENT-POLICY.md",
+        "contracts/src/bet/tournament/settlement/PokerTournamentPrizeModule420.sol",
+        "contracts/src/bet/tournament/settlement/PokerTournamentPrizeEscrow420.sol"
+      ]
+    }
+  ]
+}

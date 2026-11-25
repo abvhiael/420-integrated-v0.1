@@ -113,6 +113,13 @@ for key, suite in json.loads(financial_raw.read_text(encoding="utf-8")).items():
 assert set(actual_financial) == expected_financial
 assert financial["suites"] == actual_financial
 paths += [financial_path, financial_raw]
+# Recompute ownership evidence from actual raw results at certificate issuance.
+subprocess.run([sys.executable,str(root/'scripts/bet/verify-ws8-casino-ownership.py'),
+                str(financial_path.parent)],check=True)
+ownership_path = financial_path.parent / "casino-ownership-execution.json"
+ownership_raw = financial_path.parent / "sports-ownership-results.json"
+ownership = json.loads(ownership_path.read_text(encoding="utf-8"))
+paths += [ownership_path, ownership_raw]
 assert crypto["genuineProofsVerified"] == 41
 assert len(funded["mandatoryTests"]) == 11 and set(funded["mandatoryTests"].values()) == {"Success"}
 assert funded["totalPassed"] >= 15
@@ -129,7 +136,7 @@ report = {"level": 2, "qualifiedSHA": sha, "acceptance": "passed", "genuineProof
     "genuineWinnerProofsVerified": 41, "newWinnerProofsGenerated": 36, "reusedWinnerProofs": 5,
     "winnerBalances": winnerReplay['balances'], "winnerFee": winnerReplay['fee'],
     "evaluation5A6Tests": betting["evaluation5A6Tests"],
-    "betting5A5Tests": betting['mandatoryTests'], "freshNativeOwners": betting['nativeOwners'], "freshFinancialOwners": actual_financial,
+    "betting5A5Tests": betting['mandatoryTests'], "freshNativeOwners": betting['nativeOwners'], "freshFinancialOwners": actual_financial, "freshCasinoOwnership": ownership,
     "scope": "Level 2 local rules and cryptographic integration; not Level 3 or live deployment acceptance",
     "liveDeploymentReady": runtime['liveDeploymentReady'], "compiledRuntimeSizes": runtime['contracts'],
     "constructorGasUsed": runtime['constructorGasUsed'],

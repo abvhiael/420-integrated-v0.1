@@ -23,7 +23,7 @@ contract PokerTournamentPrizeModule420 is PokerTournamentFinanceModule420 {
             uint32 index=f.allocated++;PokerTournamentPrizeMath420.Row storage r=f.rows[index];r.amount=PokerTournamentPrizeMath420.assign(snapshot,index,prefix);f.allocatedSum+=r.amount;if(r.amount!=0)f.positiveClaims++;
             f.financialRoot=keccak256(abi.encode(f.financialRoot,r.person,r.payee,r.receipt,r.first,r.last,r.amount));emit C7PrizeRow(id,r.person,r.payee,r.receipt,r.first,r.last,r.amount,f.financialRoot);
         }
-        if(f.allocated==f.unique){EventAccount storage e=events_[id];if(f.allocatedSum!=f.prize||e.prize!=f.prize||e.fees!=f.fees)revert Invalid();e.fees=0;e.sponsored=0;heldFees-=f.fees;_credit(id,developmentFund,f.fees);emit C7FinancialCredit(id,1,0,0,developmentFund,0,f.fees);f.mode=f.prize==0?Mode.PAID:Mode.CLAIMABLE;_solvent();emit C7FinancialState(id,uint8(f.mode),f.financialRoot,f.prize,f.fees);}
+        if(f.allocated==f.unique){EventAccount storage e=events_[id];if(f.allocatedSum!=f.prize||e.prize!=f.prize||e.fees!=f.fees)revert Invalid();e.fees=0;e.sponsored=0;heldFees-=f.fees;_financial().finalizedDevelopmentFees+=f.fees;_credit(id,developmentFund,f.fees);emit C7FinancialCredit(id,1,0,0,developmentFund,0,f.fees);f.mode=f.prize==0?Mode.PAID:Mode.CLAIMABLE;_solvent();emit C7FinancialState(id,uint8(f.mode),f.financialRoot,f.prize,f.fees);}
     }
     function claimPrize(bytes32 id,bytes32 person)external onlyBank guarded{
         Financial storage f=_financial().events[id];uint32 index=f.index[person];if((f.mode!=Mode.CLAIMABLE&&f.mode!=Mode.PAID)||index==0)revert Invalid();PokerTournamentPrizeMath420.Row storage r=f.rows[index-1];if(r.claimed)revert Invalid();r.claimed=true;

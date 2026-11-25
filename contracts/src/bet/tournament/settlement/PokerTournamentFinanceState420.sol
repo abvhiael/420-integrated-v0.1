@@ -9,7 +9,8 @@ abstract contract PokerTournamentFinanceState420 is PokerTournamentPurchaseEscro
     PokerTournamentPrizePolicies420 public immutable prizePolicies;
     enum Mode {NONE,LOADING,ALLOCATING,CLAIMABLE,PAID,REFUNDING,REFUNDED}
     struct Financial {Mode mode;uint64 recoveryAnchor;uint64 recoveryDeadline;uint64 receiptEnd;uint64 refundCursor;uint32 unique;uint32 loaded;uint32 allocated;uint32 positiveClaims;uint256 prize;uint256 fees;uint256 allocatedSum;bytes32 standingsRoot;bytes32 financialRoot;PokerTournamentPrizeMath420.Row[] rows;mapping(bytes32=>uint32) index;}
-    struct FinancialStore {mapping(bytes32=>Financial) events;}
+    struct FinancialStore {mapping(bytes32=>Financial) events; uint256 finalizedDevelopmentFees;}
+    function finalizedDevelopmentFees() external view returns(uint256){return _financial().finalizedDevelopmentFees;}
     bytes32 private constant SLOT=keccak256("420.bet.tournament.financial.settlement.v1");
     event C7FinancialCredit(bytes32 indexed eventId,uint8 kind,bytes32 person,uint64 receipt,address payee,uint256 prize,uint256 fee);
     event C7FinancialState(bytes32 indexed eventId,uint8 mode,bytes32 root,uint256 prize,uint256 fees);

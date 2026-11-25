@@ -5,6 +5,7 @@ on:
       - 'contracts/src/bet/sports/SportsFundedTickets420.sol'
       - 'contracts/test/sports-5d8/**'
       - '.github/workflows/420bet-sports-5d8.yml'
+      - 'scripts/bet/run-scoped-foundry.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -21,4 +22,4 @@ jobs:
           version: v1.8.6
       - name: Scoped exposure, emergency and inherited regression
         working-directory: contracts
-        run: forge test --match-path 'test/sports-5d8/*.t.sol' -vvv
+        run: python3 ../scripts/bet/run-scoped-foundry.py 'test/sports-5d8/*.t.sol' --match-path 'test/sports-5d8/*.t.sol' -vvv

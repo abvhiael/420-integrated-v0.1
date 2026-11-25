@@ -48,7 +48,24 @@ financial = {
     "contracts/src/bet/BetEconomics420.sol",
     "contracts/src/bet/SettlementEngine420.sol",
 }
-paths = [p for p in paths if p not in fresh | financial]
+# These two shared identifiers are the only permitted additive source edits.
+# Compare their entire remaining byte streams against BOTH historical baselines.
+# Their new behavior must be qualified by the exact-candidate ownership gates.
+ownership_additions = {
+    "contracts/src/bet/BetIds420.sol":
+        b'    bytes32 internal constant ACTION_VAULT_BIND_CASINO_CAPITAL = keccak256("BET_VAULT_BIND_CASINO_CAPITAL");\n',
+    "contracts/src/bet/BetOperatorRegistry420.sol":
+        b'    bytes32 public constant CASINO_OPERATOR_ID = keccak256("420/BET/OPERATOR/420BET/V1");\n',
+}
+def verify_ownership_additions(baseline):
+    for path, line in ownership_additions.items():
+        original = subprocess.check_output(["git", "show", baseline + ":" + path])
+        current = subprocess.check_output(["git", "show", "HEAD:" + path])
+        assert original.count(line) == 0 and current.count(line) == 1, path
+        assert current.replace(line, b"", 1) == original, path
+
+verify_ownership_additions(SOURCE)
+paths = [p for p in paths if p not in fresh | financial | ownership_additions.keys()]
 subprocess.run(["git", "diff", "--exit-code", SOURCE, "HEAD", "--", *paths], check=True)
 repo = os.environ["GITHUB_REPOSITORY"]
 def get(path):
@@ -83,6 +100,9 @@ subprocess.run(["git", "fetch", "--no-tags", "origin", REPLACEMENT], check=True)
 # own qualification workflows remain required independently.
 financial_related = {
     "contracts/src/bet/BetCasinoProfitAccounting420.sol",
+    "contracts/src/bet/BetCustodyProfitEpochSources420.sol",
+    "contracts/src/bet/PokerSeatLedger420.sol",
+    "contracts/test/BetPokerSeatLedger53.t.sol",
     "contracts/src/bet/BetFantasyProfitEpochSource420.sol",
     "contracts/src/bet/BetGenesisCapitalization420.sol",
     "contracts/src/bet/BetGovernedProfitEpoch420.sol",
@@ -96,6 +116,11 @@ financial_related = {
     "contracts/test/BetTerminalPathInvariant420.t.sol",
 }
 other_application = {
+    "contracts/src/bet/sports/SportsFundedTickets420.sol",
+    "contracts/test/sports-5d4/SportsFundedTickets420.t.sol",
+    "contracts/src/bet/tournament/settlement/PokerTournamentFinanceState420.sol",
+    "contracts/src/bet/tournament/settlement/PokerTournamentPrizeModule420.sol",
+    "contracts/test/tournament-5c7/PokerTournamentPrizes420.t.sol",
     "contracts/src/bet/fantasy/FantasyContestEngine420.sol",
     "contracts/src/bet/fantasy/FantasyDisputeController420.sol",
     "contracts/src/bet/fantasy/FantasyFormatEscrow420.sol",
@@ -116,12 +141,14 @@ changed = set(subprocess.check_output([
     "contracts/remappings.txt", "contracts/lib", "clients/420bet-poker",
     ".github/workflows/420bet-poker-ws7-consolidated-adversarial.yml",
 ], text=True).splitlines())
-unexpected = changed - financial - financial_related - other_application
+verify_ownership_additions(REPLACEMENT)
+unexpected = changed - financial - financial_related - other_application - ownership_additions.keys()
 if unexpected:
     raise RuntimeError("Unclassified historical source drift: " + repr(sorted(unexpected)))
 print(json.dumps({
     "historicalProofInputsUnchanged": True,
     "freshFinancialOwners": sorted(changed & financial),
+    "freshCasinoOwnershipIdentifiers": sorted(changed & ownership_additions.keys()),
     "freshFinancialRelated": sorted(changed & financial_related),
     "otherApplicationChangesNotInherited": sorted(changed & other_application),
     "qualifiedSHA": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
@@ -191,6 +218,15 @@ for ident, (name, digest, files) in expected.items():
             original = subprocess.check_output(["git", "show", REPLACEMENT + ":" + path])
             current = subprocess.check_output(["git", "show", "HEAD:" + path])
             assert hashlib.sha256(original).hexdigest() == checksum
-            assert hashlib.sha256(current).hexdigest() == checksum
+            current_digest = hashlib.sha256(current).hexdigest()
+            if current_digest != checksum:
+                # The sole changed artifact member is the explicitly classified
+                # ledger. Historical archive integrity remains mandatory; its
+                # current native result must be supplied by fresh WS8 execution.
+                assert path == "contracts/src/bet/PokerSeatLedger420.sol", path
+                assert path in changed & financial_related and name == "ws7-native-exact-sha"
+                print(f"Historical checksum verified; current ledger {current_digest} requires fresh native execution")
+            else:
+                assert current_digest == checksum, path
     print(f"Verified replacement artifact {ident}: {name}, archive and all source checksums")
 print("Historical run/job/source identities retained; replacement WS7 exact-SHA crypto and native evidence verified; changed 5A.5 and financial owners REQUIRE fresh execution; no historical integrated financial approval is claimed")

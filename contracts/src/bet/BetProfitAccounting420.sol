@@ -33,6 +33,10 @@ contract BetProfitAccounting420 {
         uint256 freeLiquidity;
         bool reconciled;
         uint256 eligibleRevenue;
+        uint256 casinoEquity;
+        uint256 casinoOwnedGains;
+        uint256 casinoOwnedLosses;
+        uint256 protectedCasinoCapital;
     }
     error InvalidConfiguration();
     constructor(address vault_, address capital_) {
@@ -71,10 +75,20 @@ contract BetProfitAccounting420 {
             && r.gamingResult == r.recordedPnl && r.custody == r.assets + r.escrow
             && r.assets >= r.liability + r.pendingWithdrawals + r.safetyReserve
             && r.deposits + r.grossWagers == r.withdrawals + r.grossPayouts + r.assets;
-        // Gross gaming gain is not protocol revenue: current share redemption owns
-        // all net vault equity. No expense/fee/LP policy or finalized epoch is assumed.
-        // Fail closed until the subsequent governed waterfall and epoch adapter exist.
-        r.eligibleRevenue = 0;
+        address owner = bankroll.casinoCapitalOwner();
+        if (owner != address(0)) {
+            r.casinoEquity = bankroll.previewRedeem(bankroll.shareBalance(owner));
+            r.otherLpEquity = r.lpEquity - r.casinoEquity;
+            r.casinoOwnedGains = bankroll.casinoOwnedGains();
+            r.casinoOwnedLosses = bankroll.casinoOwnedLosses();
+            // Retain the original operating capital even after debt repayment.
+            r.protectedCasinoCapital = bankroll.casinoOwnedDeposits();
+            if (address(capitalization) != address(0) && owner != address(capitalization)) r.reconciled = false;
+            uint256 protected = r.otherLpEquity + r.protectedCasinoCapital;
+            uint256 surplus = r.lpEquity > protected ? r.lpEquity - protected : 0;
+            uint256 riskFree = r.freeLiquidity > protected ? r.freeLiquidity - protected : 0;
+            if (r.reconciled) r.eligibleRevenue = surplus < riskFree ? surplus : riskFree;
+        }
     }
 
     function _signed(uint256 amount) private pure returns (int256) {

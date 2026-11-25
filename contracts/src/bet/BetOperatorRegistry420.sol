@@ -6,6 +6,7 @@ import "./BetAuthorization420.sol";
 import "./BetIds420.sol";
 
 contract BetOperatorRegistry420 is I420System {
+    bytes32 public constant CASINO_OPERATOR_ID = keccak256("420/BET/OPERATOR/420BET/V1");
     enum OperatorStatus { NONE, REGISTERED, ACTIVE, PAUSED, REVOKED }
 
     struct Operator {

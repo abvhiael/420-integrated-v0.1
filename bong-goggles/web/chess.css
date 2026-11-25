@@ -1,5 +1,5 @@
 .chess-screen{max-width:1200px;margin:auto;padding:clamp(8px,2vw,24px);background:#07180f url('/assets/games/chess/chess-wallpaper.webp') center/cover;border-radius:12px;color:#fff4d0;color-scheme:dark;isolation:isolate}
-.chess-screen a{color:#e9db9b}.chess-screen :is(h2,h3,p,label,summary){color:inherit}
+.chess-screen a{color:#e9db9b;background:#07180f}.chess-screen .games-screen__nav a{background:#102a19;color:#fff4d0;border-color:#a58c45}.chess-screen :is(h2,h3,p,label,summary){color:inherit}.chess-screen :is(p,li,summary,h3,h4,label){background:#07180f}
 .chess-title img{display:block;width:min(100%,520px);margin:auto;height:auto}
 .chess-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(180px,1fr);gap:1rem;align-items:start}
 .chess-board-frame{position:relative;aspect-ratio:1;background:#142919 url('/assets/games/chess/chess-board.webp') center/100% 100%;border-radius:6px}
@@ -7,7 +7,7 @@
 .chess-board .chess-square{position:relative;display:grid;place-items:center;min-width:0;min-height:0;padding:0;border:0;border-radius:0;line-height:1;background:transparent;color:#fff4d0}
 .chess-square>span{display:grid;place-items:center;width:100%;height:100%;pointer-events:none}
 .chess-piece{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 1px 2px #000)}
-.chess-square small{position:absolute;bottom:1px;left:2px;font:9px system-ui;color:#fff4d0;text-shadow:0 1px 2px #000;background:#07180fbf}
+.chess-square small{position:absolute;bottom:1px;left:2px;font:9px system-ui;color:#fff4d0;text-shadow:0 1px 2px #000;background:#07180f}
 .chess-board .last{box-shadow:inset 0 0 0 3px #f4c55b}.chess-board .selected{box-shadow:inset 0 0 0 3px #91ff82}
 .chess-board .target:after{content:"";position:absolute;width:24%;height:24%;background:#d2ff8b;border:2px solid #123c16;border-radius:50%;pointer-events:none}
 .chess-board .target:has(span:not(:empty)):after{width:80%;height:80%;background:transparent;border:3px solid #d2ff8b}
@@ -26,7 +26,7 @@
    Every playable square always exposes its actual coordinate and piece. */
 .chess-board-frame.flipped:before{content:"";position:absolute;inset:9% 88% 12% 6%;background:#102518}
 .chess-board-frame.flipped:after{content:"";position:absolute;inset:88% 10% 5% 13%;background:#102518}
-.chess-screen [data-chess-flip]{background:#102a19 url('/assets/games/chess/ui/button-flip-board.webp') center/contain no-repeat;color:transparent}
+.chess-screen [data-chess-flip]{background:#102a19;color:#fff4d0}
 .chess-screen [data-chess-flip]:focus-visible{outline:3px solid #fff}
-.chess-screen .chess-start{background:#102a19 url('/assets/games/chess/ui/button-start-match.webp') center/contain no-repeat;color:transparent}
+.chess-screen .chess-start{background:#102a19 ;color:transparent}
 @media(forced-colors:active){.chess-screen :is(.chess-start,[data-chess-flip]){background:ButtonFace;color:ButtonText}}

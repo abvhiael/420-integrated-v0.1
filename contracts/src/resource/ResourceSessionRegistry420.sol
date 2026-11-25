@@ -6,6 +6,7 @@ import "./ResourceOfferRegistry420.sol";
 import "./ResourcePolicyRegistry420.sol";
 import "./ResourceAuthorization420.sol";
 import "./ResourceIds420.sol";
+import "./ResourceProviderRegistry420.sol";
 
 contract ResourceSessionRegistry420 is I420System {
     enum State {
@@ -30,6 +31,8 @@ contract ResourceSessionRegistry420 is I420System {
     ResourceOfferRegistry420 public immutable offers;
     ResourceAuthorization420 public immutable authorization;
     mapping(bytes32 => Session) private _sessions;
+    mapping(bytes32 => bytes32) public collateralReservation;
+    mapping(bytes32 => bool) public collateralReleased;
 
     error InvalidSession();
     error SessionExists();
@@ -93,6 +96,9 @@ contract ResourceSessionRegistry420 is I420System {
         ) revert InvalidSession();
 
         uint256 maxSpend420 = uint256(maxUnits) * uint256(o.unitPrice420);
+        collateralReservation[sessionId] = offers.providers().collateral().reserveExposure(
+            offers.nodes().getNode(o.nodeId).providerId, sessionId, maxSpend420
+        );
         _sessions[sessionId] =
             Session(offerId, msg.sender, maxUnits, maxSpend420, uint64(block.timestamp), expiresAt, State.OPEN, true);
         emit SessionOpened(sessionId, offerId, msg.sender, maxUnits, maxSpend420, expiresAt);
@@ -132,6 +138,28 @@ contract ResourceSessionRegistry420 is I420System {
 
         s.state = State.SETTLED;
         emit SessionSettled(sessionId, settledAmount420);
+    }
+
+    /// @notice Release only after the canonical economic settlement authority has
+    /// confirmed discharge. A legacy SETTLED/CANCELLED marker alone is not payment evidence.
+    /// Governance must bind the actual settlement controller before release is possible.
+    address public economicSettlementController;
+    bytes32 public economicSettlementCodeHash;
+
+    function bindEconomicSettlementController(address controller) external {
+        if (msg.sender != offers.providers().governanceTimelock() || economicSettlementController != address(0)
+            || controller.code.length == 0) revert Unauthorized();
+        economicSettlementController = controller;
+        economicSettlementCodeHash = controller.codehash;
+    }
+
+    function releaseDischargedSession(bytes32 sessionId) external {
+        Session storage s = _get(sessionId);
+        if (msg.sender != economicSettlementController || msg.sender.codehash != economicSettlementCodeHash
+            || (s.state != State.SETTLED && s.state != State.CANCELLED)
+            || collateralReleased[sessionId]) revert Unauthorized();
+        collateralReleased[sessionId] = true;
+        offers.providers().collateral().releaseExposure(collateralReservation[sessionId]);
     }
 
     function getSession(

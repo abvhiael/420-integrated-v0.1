@@ -26,7 +26,7 @@ export const CLASSIC_COLLECTIONS=Object.freeze([
  ])}),
  Object.freeze({id:'board',title:'Boards & Tiles',games:Object.freeze([
   item('chess','Chess','2','registry','Canonical two-player session registry only.'),
-  item('scrabble','Word Salad','2–6','planned','Six board sizes, cannabis vocabulary bonuses and original premium squares; dictionary rights must be resolved before play.'),
+  item('scrabble','Word Salad','2–4','planned','Six board sizes, cannabis vocabulary bonuses and original premium squares; dictionary rights must be resolved before play.'),
   item('checkers','Checkers','2','registry','Canonical two-player session registry only.'),
   item('backgammon','Backgammon','2','registry','Canonical two-player session registry only.'),
   item('dominoes','Dominoes','2–4','registry','Canonical two-player session registry only.'),

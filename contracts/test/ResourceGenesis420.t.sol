@@ -38,4 +38,42 @@ contract ResourceGenesis420Test {
     function testReceiptsMustAdvanceAndBeNonzero() public {Env memory e=setup();(,,bytes32 offerId)=activateRelay(e);bytes32 sessionId=e.sessions.canonicalSessionId(BOB,offerId,11);vm.prank(BOB);e.sessions.openSession(sessionId,offerId,10,uint64(block.timestamp+100));bytes32 zeroUsage=keccak256("zero");bytes32 zeroReceiptId=e.receipts.canonicalReceiptId(sessionId,0,zeroUsage);vm.prank(ALICE);(bool zeroOk,)=address(e.receipts).call(abi.encodeWithSelector(e.receipts.submitReceipt.selector,zeroReceiptId,sessionId,uint128(0),zeroUsage));require(!zeroOk,"zero receipt accepted");bytes32 firstUsage=keccak256("first");bytes32 firstReceiptId=e.receipts.canonicalReceiptId(sessionId,2,firstUsage);vm.prank(ALICE);e.receipts.submitReceipt(firstReceiptId,sessionId,2,firstUsage);bytes32 equalUsage=keccak256("equal");bytes32 equalReceiptId=e.receipts.canonicalReceiptId(sessionId,2,equalUsage);vm.prank(ALICE);(bool equalOk,)=address(e.receipts).call(abi.encodeWithSelector(e.receipts.submitReceipt.selector,equalReceiptId,sessionId,uint128(2),equalUsage));require(!equalOk,"non-advancing receipt accepted");}
     function testConsumerCanCancelOpenSessionOnly() public {Env memory e=setup();(,,bytes32 offerId)=activateRelay(e);bytes32 sessionId=e.sessions.canonicalSessionId(BOB,offerId,12);vm.prank(BOB);e.sessions.openSession(sessionId,offerId,10,uint64(block.timestamp+100));vm.prank(ALICE);(bool unauthorized,)=address(e.sessions).call(abi.encodeWithSelector(e.sessions.cancelSession.selector,sessionId));require(!unauthorized,"third-party cancellation");vm.prank(BOB);e.sessions.cancelSession(sessionId);require(e.sessions.getSession(sessionId).state==ResourceSessionRegistry420.State.CANCELLED,"session not cancelled");}
 
+    function testForgedNonzeroStakeCannotActivateProvider() public {
+        Env memory e = setup();
+        bytes32 id = keccak256("forged-provider");
+        vm.prank(ALICE);
+        e.providers.registerProvider(id, ALICE, keccak256("meta"), keccak256("fabricated-collateral"));
+        vm.prank(ALICE);
+        (bool accepted,) = address(e.providers).call(abi.encodeWithSelector(
+            e.providers.setState.selector, id, ResourceProviderRegistry420.State.ACTIVE
+        ));
+        require(!accepted, "arbitrary nonzero reference activated provider");
+        require(!e.providers.isActive(id), "forged collateral is economically eligible");
+    }
+
+    function testFuzzArbitraryNonzeroStakeReferenceCannotActivate(bytes32 reference) public {
+        if (reference == bytes32(0)) return;
+        Env memory e = setup();
+        bytes32 id = keccak256("fuzz-provider");
+        vm.prank(ALICE);
+        e.providers.registerProvider(id, ALICE, keccak256("meta"), reference);
+        vm.prank(ALICE);
+        (bool accepted,) = address(e.providers).call(abi.encodeWithSelector(
+            e.providers.setState.selector, id, ResourceProviderRegistry420.State.ACTIVE
+        ));
+        require(!accepted, "unfunded reference accepted");
+    }
+
+    function testUnauthorizedProviderActivationCannotUseForgedReference() public {
+        Env memory e = setup();
+        bytes32 id = keccak256("unauthorized-activation");
+        vm.prank(ALICE);
+        e.providers.registerProvider(id, ALICE, keccak256("meta"), keccak256("fabricated"));
+        vm.prank(BOB);
+        (bool accepted,) = address(e.providers).call(abi.encodeWithSelector(
+            e.providers.setState.selector, id, ResourceProviderRegistry420.State.ACTIVE
+        ));
+        require(!accepted, "unauthorized activation");
+        require(!e.providers.isActive(id), "unexpected active provider");
+    }
 }

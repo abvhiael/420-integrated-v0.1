@@ -1434,7 +1434,84 @@
         "componentIdPreimage": "420/component/ai/authorization/v1",
         "protocolVersion": "1.0.0",
         "address": null
-      }
+      },
+      "imports": [
+        "import \"../interfaces/I420System.sol\";",
+        "import \"../interfaces/genesis/ICapabilityRegistry420.sol\";",
+        "import \"./AIIds420.sol\";"
+      ],
+      "declarations": [
+        {
+          "kind": "contract",
+          "name": "AIAuthorization420",
+          "declaration": "contract AIAuthorization420"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidRegistry",
+          "declaration": "error InvalidRegistry()"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidScope",
+          "declaration": "error InvalidScope()"
+        },
+        {
+          "kind": "function",
+          "name": "systemName",
+          "declaration": "function systemName()"
+        },
+        {
+          "kind": "function",
+          "name": "protocolVersion",
+          "declaration": "function protocolVersion()"
+        },
+        {
+          "kind": "function",
+          "name": "scopeProvider",
+          "declaration": "function scopeProvider(bytes32 id)"
+        },
+        {
+          "kind": "function",
+          "name": "scopeDeployment",
+          "declaration": "function scopeDeployment(bytes32 id)"
+        },
+        {
+          "kind": "function",
+          "name": "scopeRequest",
+          "declaration": "function scopeRequest(bytes32 id)"
+        },
+        {
+          "kind": "function",
+          "name": "isAuthorized",
+          "declaration": "function isAuthorized(address p,bytes32 a,bytes32 s,uint256 amount)"
+        },
+        {
+          "kind": "function",
+          "name": "isProviderAuthorized",
+          "declaration": "function isProviderAuthorized(address p,bytes32 id,bytes32 a)"
+        },
+        {
+          "kind": "function",
+          "name": "isDeploymentAuthorized",
+          "declaration": "function isDeploymentAuthorized(address p,bytes32 id,bytes32 a)"
+        },
+        {
+          "kind": "function",
+          "name": "isRequestAuthorized",
+          "declaration": "function isRequestAuthorized(address p,bytes32 id,bytes32 a,uint256 amount)"
+        },
+        {
+          "kind": "function",
+          "name": "_scope",
+          "declaration": "function _scope(bytes32 k,bytes32 id)"
+        },
+        {
+          "kind": "function",
+          "name": "_known",
+          "declaration": "function _known(bytes32 a)"
+        }
+      ]
     },
     {
       "path": "contracts/src/ai/AIComputeAdapter420.sol",
@@ -1447,7 +1524,319 @@
         "componentIdPreimage": "420/component/ai/compute-adapter/v1",
         "protocolVersion": "2.0.0",
         "address": null
-      }
+      },
+      "imports": [
+        "import \"../interfaces/I420System.sol\";",
+        "import \"../compute/ICompute420.sol\";",
+        "import \"./AIIds420.sol\";",
+        "import \"./AIAuthorization420.sol\";",
+        "import \"./AIJobManager.sol\";",
+        "import \"./AIProviderRegistry.sol\";",
+        "import \"./AIModelRegistry.sol\";",
+        "import \"./AIModelDeploymentRegistry420.sol\";"
+      ],
+      "declarations": [
+        {
+          "kind": "interface",
+          "name": "IAIComputeRequestAuthority420",
+          "declaration": "interface IAIComputeRequestAuthority420"
+        },
+        {
+          "kind": "struct",
+          "name": "Request",
+          "declaration": "struct Request { address owner; address payer; bytes32 requestCommitment; bytes32 manifestHash; bytes32 workloadType; bytes32 inputCommitment; bytes32 outputSchemaCommitment; uint64 deadline; uint64 authorizationExpiry; uint256 maxSpend; uint256 nonce; bool exists; }"
+        },
+        {
+          "kind": "function",
+          "name": "getRequest",
+          "declaration": "function getRequest(bytes32 requestId)"
+        },
+        {
+          "kind": "interface",
+          "name": "IAIComputeJobRegistry420",
+          "declaration": "interface IAIComputeJobRegistry420"
+        },
+        {
+          "kind": "enum",
+          "name": "Status",
+          "declaration": "enum Status { NONE, CREATED, FUNDED, MATCHED, ACCEPTED, RUNNING, RESULT_COMMITTED, VERIFIED, SETTLED, CANCELLED, EXPIRED, FAILED, DISPUTED, REFUNDED }"
+        },
+        {
+          "kind": "struct",
+          "name": "Job",
+          "declaration": "struct Job { address owner; bytes32 requestId; bytes32 requestCommitment; bytes32 manifestHash; bytes32 workloadType; bytes32 inputCommitment; bytes32 outputSchemaCommitment; bytes32 matchId; bytes32 fundingRef; bytes32 acceptanceRef; bytes32 assignmentRef; address worker; bytes32 resultCommitment; address verifier; bytes32 verificationRef; bytes32 settlementRef; bytes32 verificationPolicyId; bytes32 verificationPolicyCommitment; uint32 verificationPolicyRevision; uint64 deadline; uint64 revision; Status status; }"
+        },
+        {
+          "kind": "function",
+          "name": "job",
+          "declaration": "function job(bytes32 jobId)"
+        },
+        {
+          "kind": "function",
+          "name": "requestEvidence",
+          "declaration": "function requestEvidence()"
+        },
+        {
+          "kind": "interface",
+          "name": "IAIComputeAcceptedMatch420",
+          "declaration": "interface IAIComputeAcceptedMatch420"
+        },
+        {
+          "kind": "struct",
+          "name": "Match",
+          "declaration": "struct Match { bytes32 jobId; bytes32 requestId; bytes32 manifestHash; bytes32 offerId; bytes32 resourceId; bytes32 providerId; bytes32 nodeId; uint64 resourceRevision; address owner; address operator; bytes32 priceReservationRef; bytes32 acceptanceRef; bool exists; }"
+        },
+        {
+          "kind": "struct",
+          "name": "PriceReservation",
+          "declaration": "struct PriceReservation { bytes32 jobId; bytes32 matchId; bytes32 offerId; bytes32 requestId; address owner; address payer; bytes32 providerId; bytes32 resourceId; uint64 resourceRevision; address beneficiary; bytes32 pricingPolicyId; uint32 pricingVersion; uint256 acceptedAmount; uint256 fundedAmount; uint256 payerMaximum; bytes32 disputePolicyId; uint32 disputePolicyVersion; uint64 challengeWindow; uint64 responseWindow; uint64 decisionWindow; uint64 appealWindow; uint64 acceptedAt; bool exists; }"
+        },
+        {
+          "kind": "function",
+          "name": "getMatch",
+          "declaration": "function getMatch(bytes32 matchId)"
+        },
+        {
+          "kind": "function",
+          "name": "priceReservationForJob",
+          "declaration": "function priceReservationForJob(bytes32 jobId)"
+        },
+        {
+          "kind": "function",
+          "name": "priceReservation",
+          "declaration": "function priceReservation(bytes32 priceRef)"
+        },
+        {
+          "kind": "interface",
+          "name": "IAIComputeProviderRegistry420",
+          "declaration": "interface IAIComputeProviderRegistry420"
+        },
+        {
+          "kind": "enum",
+          "name": "Status",
+          "declaration": "enum Status { NONE, REGISTERED, ACTIVE, SUSPENDED, RETIRED }"
+        },
+        {
+          "kind": "struct",
+          "name": "Provider",
+          "declaration": "struct Provider { address registrant; address operator; address settlementAccount; bytes32 manifestHash; bytes32 securityReference; uint64 createdAt; uint64 revision; Status status; }"
+        },
+        {
+          "kind": "function",
+          "name": "provider",
+          "declaration": "function provider(bytes32 providerId)"
+        },
+        {
+          "kind": "interface",
+          "name": "IAIComputeFunding420",
+          "declaration": "interface IAIComputeFunding420"
+        },
+        {
+          "kind": "struct",
+          "name": "Credit",
+          "declaration": "struct Credit { bytes32 requestId; address owner; address payer; uint256 deposited; uint256 maximumSpend; uint64 deadline; bytes32 obligationId; bool exists; bool refunded; bool allocated; uint256 earnedAllocated; bytes32 providerObligationId; bytes32 payerResidualObligationId; bytes32 disputeRefundObligationId; }"
+        },
+        {
+          "kind": "function",
+          "name": "credit",
+          "declaration": "function credit(bytes32 jobId)"
+        },
+        {
+          "kind": "function",
+          "name": "funded",
+          "declaration": "function funded(bytes32 jobId, address owner, bytes32 fundingRef)"
+        },
+        {
+          "kind": "interface",
+          "name": "IAIComputeEntitlement420",
+          "declaration": "interface IAIComputeEntitlement420"
+        },
+        {
+          "kind": "struct",
+          "name": "Entitlement",
+          "declaration": "struct Entitlement { bytes32 jobId; bytes32 requestId; bytes32 matchId; bytes32 priceReservationRef; bytes32 verificationRef; bytes32 resultCommitment; address verifier; address payer; bytes32 providerId; bytes32 resourceId; address beneficiary; bytes32 pricingPolicyId; uint32 pricingVersion; uint256 acceptedAmount; uint256 earnedAmount; uint256 fundedAmount; uint256 payerMaximum; uint64 finalizedAt; bool exists; }"
+        },
+        {
+          "kind": "function",
+          "name": "entitlementForJob",
+          "declaration": "function entitlementForJob(bytes32 jobId)"
+        },
+        {
+          "kind": "function",
+          "name": "entitlement",
+          "declaration": "function entitlement(bytes32 entitlementRef)"
+        },
+        {
+          "kind": "function",
+          "name": "settled",
+          "declaration": "function settled(bytes32 jobId, bytes32 verificationRef, bytes32 settlementRef)"
+        },
+        {
+          "kind": "function",
+          "name": "refunded",
+          "declaration": "function refunded(bytes32 jobId, bytes32 refundRef)"
+        },
+        {
+          "kind": "contract",
+          "name": "AIComputeAdapter420",
+          "declaration": "contract AIComputeAdapter420"
+        },
+        {
+          "kind": "struct",
+          "name": "Binding",
+          "declaration": "struct Binding { bytes32 computeRequestId; bytes32 computeJobId; bytes32 computeGraphHash; bytes32 deploymentId; bytes32 aiProviderId; bytes32 computeProviderId; bytes32 modelVersionId; bytes32 workloadClass; bytes32 computeRequirementId; bytes32 privacyPolicyId; bytes32 verificationProfileId; bytes32 outputSchemaCommitment; bytes32 matchId; bytes32 offerId; bytes32 resourceId; address payer; address beneficiary; uint256 maxSpend; uint256 acceptedPrice; uint64 deadline; bytes32 resultCommitment; bytes32 verificationRef; bytes32 entitlementRef; bytes32 settlementRef; bytes32 refundRef; bool exists; bool accepted; }"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidDependency",
+          "declaration": "error InvalidDependency()"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidBinding",
+          "declaration": "error InvalidBinding()"
+        },
+        {
+          "kind": "error",
+          "name": "BindingExists",
+          "declaration": "error BindingExists()"
+        },
+        {
+          "kind": "error",
+          "name": "Unauthorized",
+          "declaration": "error Unauthorized()"
+        },
+        {
+          "kind": "error",
+          "name": "WrongState",
+          "declaration": "error WrongState()"
+        },
+        {
+          "kind": "error",
+          "name": "ConstraintBroadened",
+          "declaration": "error ConstraintBroadened()"
+        },
+        {
+          "kind": "error",
+          "name": "EvidenceMismatch",
+          "declaration": "error EvidenceMismatch()"
+        },
+        {
+          "kind": "event",
+          "name": "ComputeRequestBound",
+          "declaration": "event ComputeRequestBound( bytes32 indexed aiRequestId, bytes32 indexed computeRequestId, bytes32 indexed deploymentId, bytes32 computeGraphHash )"
+        },
+        {
+          "kind": "event",
+          "name": "ComputeJobBound",
+          "declaration": "event ComputeJobBound(bytes32 indexed aiRequestId, bytes32 indexed computeJobId)"
+        },
+        {
+          "kind": "event",
+          "name": "AcceptedComputeBound",
+          "declaration": "event AcceptedComputeBound( bytes32 indexed aiRequestId, bytes32 indexed computeJobId, bytes32 indexed matchId, bytes32 resourceId, uint256 acceptedPrice, address payer, address beneficiary )"
+        },
+        {
+          "kind": "event",
+          "name": "ComputeResultSynchronized",
+          "declaration": "event ComputeResultSynchronized( bytes32 indexed aiRequestId, bytes32 indexed computeJobId, bytes32 resultCommitment, AIJobManager.Status aiStatus )"
+        },
+        {
+          "kind": "event",
+          "name": "VerifiedEntitlementBound",
+          "declaration": "event VerifiedEntitlementBound( bytes32 indexed aiRequestId, bytes32 indexed computeJobId, bytes32 indexed entitlementRef, bytes32 verificationRef )"
+        },
+        {
+          "kind": "event",
+          "name": "SettlementObserved",
+          "declaration": "event SettlementObserved(bytes32 indexed aiRequestId, bytes32 indexed computeJobId, bytes32 settlementRef)"
+        },
+        {
+          "kind": "event",
+          "name": "RefundObserved",
+          "declaration": "event RefundObserved(bytes32 indexed aiRequestId, bytes32 indexed computeJobId, bytes32 refundRef)"
+        },
+        {
+          "kind": "function",
+          "name": "systemName",
+          "declaration": "function systemName()"
+        },
+        {
+          "kind": "function",
+          "name": "protocolVersion",
+          "declaration": "function protocolVersion()"
+        },
+        {
+          "kind": "function",
+          "name": "computeManifestHash",
+          "declaration": "function computeManifestHash( bytes32 aiRequestId, bytes32 deploymentId, bytes32 modelVersionId, bytes32 computeRequirementId, bytes32 privacyPolicyId, bytes32 verificationProfileId, bytes32 workloadClass, bytes32 inputCommitment, bytes32 outputSchemaCommitment, uint256 maxSpend, uint64 deadline )"
+        },
+        {
+          "kind": "function",
+          "name": "bindComputeRequest",
+          "declaration": "function bindComputeRequest( bytes32 aiRequestId, bytes32 computeRequestId, bytes32 deploymentId, bytes32 expectedComputeGraphHash )"
+        },
+        {
+          "kind": "function",
+          "name": "bindComputeJob",
+          "declaration": "function bindComputeJob(bytes32 aiRequestId, bytes32 computeJobId)"
+        },
+        {
+          "kind": "function",
+          "name": "syncAcceptedMatch",
+          "declaration": "function syncAcceptedMatch(bytes32 aiRequestId)"
+        },
+        {
+          "kind": "function",
+          "name": "syncExecution",
+          "declaration": "function syncExecution(bytes32 aiRequestId)"
+        },
+        {
+          "kind": "function",
+          "name": "syncVerifiedEntitlement",
+          "declaration": "function syncVerifiedEntitlement(bytes32 aiRequestId)"
+        },
+        {
+          "kind": "function",
+          "name": "observeSettlement",
+          "declaration": "function observeSettlement(bytes32 aiRequestId)"
+        },
+        {
+          "kind": "function",
+          "name": "observeRefund",
+          "declaration": "function observeRefund(bytes32 aiRequestId)"
+        },
+        {
+          "kind": "function",
+          "name": "getBinding",
+          "declaration": "function getBinding(bytes32 aiRequestId)"
+        },
+        {
+          "kind": "function",
+          "name": "_acceptedOrLater",
+          "declaration": "function _acceptedOrLater(IAIComputeJobRegistry420.Status s)"
+        },
+        {
+          "kind": "function",
+          "name": "_runningOrLater",
+          "declaration": "function _runningOrLater(IAIComputeJobRegistry420.Status s)"
+        },
+        {
+          "kind": "function",
+          "name": "_resultOrLater",
+          "declaration": "function _resultOrLater(IAIComputeJobRegistry420.Status s)"
+        },
+        {
+          "kind": "function",
+          "name": "_verifiedOrLater",
+          "declaration": "function _verifiedOrLater(IAIComputeJobRegistry420.Status s)"
+        },
+        {
+          "kind": "function",
+          "name": "_binding",
+          "declaration": "function _binding(bytes32 aiRequestId)"
+        }
+      ]
     },
     {
       "path": "contracts/src/ai/AIContributionVerifier420.sol",
@@ -1455,7 +1844,29 @@
       "previousBlob": "21e50cfa4cffd6247c5a432909e498bd86abe298",
       "owner": "Contribution evidence verification; source dependency not established",
       "classification": "implemented_production_binding_unverified",
-      "deployment": null
+      "deployment": null,
+      "imports": [
+        "import \"./IAIContributionVerifier420.sol\";",
+        "import \"./IAIContributionSource420.sol\";",
+        "import \"./AIRewardTypes420.sol\";"
+      ],
+      "declarations": [
+        {
+          "kind": "contract",
+          "name": "AIContributionVerifier420",
+          "declaration": "contract AIContributionVerifier420"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidSource",
+          "declaration": "error InvalidSource()"
+        },
+        {
+          "kind": "function",
+          "name": "verifyContribution",
+          "declaration": "function verifyContribution( bytes32 contributionType, bytes32 sourceId, address beneficiary, bytes32 evidenceHash )"
+        }
+      ]
     },
     {
       "path": "contracts/src/ai/AIIds420.sol",
@@ -1463,7 +1874,20 @@
       "previousBlob": "1ef7eedd98e2c6a8480bce69ff5ea8391ae70942",
       "owner": "Identity and workload constants",
       "classification": "non_deployable_interface_or_library",
-      "deployment": null
+      "deployment": null,
+      "imports": [],
+      "declarations": [
+        {
+          "kind": "library",
+          "name": "AIIds420",
+          "declaration": "library AIIds420"
+        },
+        {
+          "kind": "function",
+          "name": "isWorkload",
+          "declaration": "function isWorkload(bytes32 x)"
+        }
+      ]
     },
     {
       "path": "contracts/src/ai/AIJobEscrow.sol",
@@ -1476,7 +1900,178 @@
         "address": "0x0000000000000000000000000000000000000432",
         "componentIdPreimage": "420/component/ai/job-escrow/v1",
         "protocolVersion": "2.0.0"
-      }
+      },
+      "imports": [
+        "import \"../system/SystemAccess.sol\";",
+        "import \"../interfaces/I420System.sol\";"
+      ],
+      "declarations": [
+        {
+          "kind": "interface",
+          "name": "IAIJobManagerEscrow420",
+          "declaration": "interface IAIJobManagerEscrow420 { function confirmFunding(bytes32 jobId, bytes32 fundingRef, uint256 amount) external; function confirmSettlement(bytes32 jobId) external; function confirmRefund(bytes32 jobId) external; }"
+        },
+        {
+          "kind": "contract",
+          "name": "AIJobEscrow",
+          "declaration": "contract AIJobEscrow"
+        },
+        {
+          "kind": "enum",
+          "name": "EscrowState",
+          "declaration": "enum EscrowState { NONE, FUNDED, CLAIMABLE, REFUNDABLE, CLOSED }"
+        },
+        {
+          "kind": "struct",
+          "name": "Escrow",
+          "declaration": "struct Escrow { address payer; address beneficiary; bytes32 providerId; bytes32 vaultRef; bytes32 fundingRef; bytes32 settlementRef; uint256 amount; EscrowState state; }"
+        },
+        {
+          "kind": "error",
+          "name": "DirectCustodyDisabled",
+          "declaration": "error DirectCustodyDisabled()"
+        },
+        {
+          "kind": "error",
+          "name": "AdapterAlreadyBound",
+          "declaration": "error AdapterAlreadyBound()"
+        },
+        {
+          "kind": "error",
+          "name": "NotVaultAdapter",
+          "declaration": "error NotVaultAdapter()"
+        },
+        {
+          "kind": "error",
+          "name": "NotSettlementAdapter",
+          "declaration": "error NotSettlementAdapter()"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidEscrow",
+          "declaration": "error InvalidEscrow()"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidStateTransition",
+          "declaration": "error InvalidStateTransition()"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidRecipient",
+          "declaration": "error InvalidRecipient()"
+        },
+        {
+          "kind": "event",
+          "name": "VaultAdapterBound",
+          "declaration": "event VaultAdapterBound(address indexed adapter)"
+        },
+        {
+          "kind": "event",
+          "name": "SettlementAdapterBound",
+          "declaration": "event SettlementAdapterBound(address indexed adapter)"
+        },
+        {
+          "kind": "event",
+          "name": "Funded",
+          "declaration": "event Funded(bytes32 indexed jobId, address indexed payer, bytes32 indexed providerId, uint256 amount)"
+        },
+        {
+          "kind": "event",
+          "name": "FundingBound",
+          "declaration": "event FundingBound(bytes32 indexed jobId, bytes32 vaultRef, bytes32 fundingRef, address beneficiary, uint256 amount)"
+        },
+        {
+          "kind": "event",
+          "name": "Released",
+          "declaration": "event Released(bytes32 indexed jobId, address indexed to, uint256 amount)"
+        },
+        {
+          "kind": "event",
+          "name": "Refunded",
+          "declaration": "event Refunded(bytes32 indexed jobId, address indexed to, uint256 amount)"
+        },
+        {
+          "kind": "event",
+          "name": "SettlementReferenceBound",
+          "declaration": "event SettlementReferenceBound(bytes32 indexed jobId, bytes32 settlementRef, EscrowState state)"
+        },
+        {
+          "kind": "function",
+          "name": "systemName",
+          "declaration": "function systemName()"
+        },
+        {
+          "kind": "function",
+          "name": "protocolVersion",
+          "declaration": "function protocolVersion()"
+        },
+        {
+          "kind": "function",
+          "name": "bindVaultAdapter",
+          "declaration": "function bindVaultAdapter(address adapter)"
+        },
+        {
+          "kind": "function",
+          "name": "bindSettlementAdapter",
+          "declaration": "function bindSettlementAdapter(address adapter)"
+        },
+        {
+          "kind": "function",
+          "name": "fund",
+          "declaration": "function fund(bytes32, bytes32)"
+        },
+        {
+          "kind": "function",
+          "name": "confirmCanonicalVaultFunding",
+          "declaration": "function confirmCanonicalVaultFunding( bytes32 jobId, address payer, bytes32 vaultRef, bytes32 fundingRef, uint256 amount )"
+        },
+        {
+          "kind": "function",
+          "name": "bindSettlementBeneficiary",
+          "declaration": "function bindSettlementBeneficiary(bytes32 jobId, bytes32 providerId, address beneficiary)"
+        },
+        {
+          "kind": "function",
+          "name": "confirmVaultFunding",
+          "declaration": "function confirmVaultFunding( bytes32 jobId, address payer, bytes32 providerId, address beneficiary, bytes32 vaultRef, bytes32 fundingRef, uint256 amount )"
+        },
+        {
+          "kind": "function",
+          "name": "markClaimable",
+          "declaration": "function markClaimable(bytes32 jobId, bytes32 settlementRef)"
+        },
+        {
+          "kind": "function",
+          "name": "markRefundable",
+          "declaration": "function markRefundable(bytes32 jobId, bytes32 settlementRef)"
+        },
+        {
+          "kind": "function",
+          "name": "release",
+          "declaration": "function release(bytes32 jobId, address payable to)"
+        },
+        {
+          "kind": "function",
+          "name": "refund",
+          "declaration": "function refund(bytes32 jobId)"
+        },
+        {
+          "kind": "function",
+          "name": "_get",
+          "declaration": "function _get(bytes32 jobId)"
+        },
+        {
+          "kind": "modifier",
+          "name": "onlyVaultAdapter",
+          "declaration": "modifier onlyVaultAdapter()"
+        },
+        {
+          "kind": "modifier",
+          "name": "onlySettlementAdapter",
+          "declaration": "modifier onlySettlementAdapter()"
+        }
+      ]
     },
     {
       "path": "contracts/src/ai/AIJobManager.sol",
@@ -1489,7 +2084,279 @@
         "address": "0x0000000000000000000000000000000000000431",
         "componentIdPreimage": "420/component/ai/job-manager/v1",
         "protocolVersion": "2.0.0"
-      }
+      },
+      "imports": [
+        "import \"../system/SystemAccess.sol\";",
+        "import \"../interfaces/I420System.sol\";",
+        "import \"./AIIds420.sol\";"
+      ],
+      "declarations": [
+        {
+          "kind": "contract",
+          "name": "AIJobManager",
+          "declaration": "contract AIJobManager"
+        },
+        {
+          "kind": "enum",
+          "name": "Status",
+          "declaration": "enum Status { NONE, CREATED, FUNDED, MATCHED, ACCEPTED, RUNNING, RESULT_COMMITTED, VERIFIED, SETTLED, CANCELLED, EXPIRED, FAILED, DISPUTED, REFUNDED }"
+        },
+        {
+          "kind": "struct",
+          "name": "Job",
+          "declaration": "struct Job { address requester; bytes32 modelVersionId; bytes32 workloadClass; bytes32 requestHash; bytes32 privacyPolicyId; bytes32 verificationProfileId; uint256 maxSpend; uint64 deadline; bytes32 fundingRef; uint256 fundedAmount; bytes32 computeRequestId; bytes32 computeJobId; bytes32 providerId; bytes32 resultHash; bytes32 resultManifestHash; bytes32 disputeRef; Status status; }"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidJobId",
+          "declaration": "error InvalidJobId()"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidWorkloadClass",
+          "declaration": "error InvalidWorkloadClass()"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidDeadline",
+          "declaration": "error InvalidDeadline()"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidSpend",
+          "declaration": "error InvalidSpend()"
+        },
+        {
+          "kind": "error",
+          "name": "JobExists",
+          "declaration": "error JobExists()"
+        },
+        {
+          "kind": "error",
+          "name": "JobNotFound",
+          "declaration": "error JobNotFound()"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidTransition",
+          "declaration": "error InvalidTransition()"
+        },
+        {
+          "kind": "error",
+          "name": "NotRequester",
+          "declaration": "error NotRequester()"
+        },
+        {
+          "kind": "error",
+          "name": "NotEscrow",
+          "declaration": "error NotEscrow()"
+        },
+        {
+          "kind": "error",
+          "name": "NotComputeAdapter",
+          "declaration": "error NotComputeAdapter()"
+        },
+        {
+          "kind": "error",
+          "name": "AdapterAlreadyBound",
+          "declaration": "error AdapterAlreadyBound()"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidReference",
+          "declaration": "error InvalidReference()"
+        },
+        {
+          "kind": "error",
+          "name": "FundingExceedsMaximum",
+          "declaration": "error FundingExceedsMaximum()"
+        },
+        {
+          "kind": "event",
+          "name": "ComputeAdapterBound",
+          "declaration": "event ComputeAdapterBound(address indexed adapter)"
+        },
+        {
+          "kind": "event",
+          "name": "JobCreated",
+          "declaration": "event JobCreated( bytes32 indexed jobId, address indexed requester, bytes32 indexed modelVersionId, bytes32 workloadClass, uint256 maxSpend, uint64 deadline )"
+        },
+        {
+          "kind": "event",
+          "name": "FundingConfirmed",
+          "declaration": "event FundingConfirmed(bytes32 indexed jobId, bytes32 fundingRef, uint256 amount)"
+        },
+        {
+          "kind": "event",
+          "name": "ComputeMatched",
+          "declaration": "event ComputeMatched(bytes32 indexed jobId, bytes32 computeRequestId, bytes32 computeJobId, bytes32 providerId)"
+        },
+        {
+          "kind": "event",
+          "name": "JobStatus",
+          "declaration": "event JobStatus(bytes32 indexed jobId, Status previousStatus, Status newStatus)"
+        },
+        {
+          "kind": "event",
+          "name": "ResultCommitted",
+          "declaration": "event ResultCommitted(bytes32 indexed jobId, bytes32 resultHash, bytes32 resultManifestHash)"
+        },
+        {
+          "kind": "event",
+          "name": "DisputeOpened",
+          "declaration": "event DisputeOpened(bytes32 indexed jobId, bytes32 disputeRef)"
+        },
+        {
+          "kind": "event",
+          "name": "DisputeResolved",
+          "declaration": "event DisputeResolved(bytes32 indexed jobId, bool upheld, bytes32 resolutionRef)"
+        },
+        {
+          "kind": "function",
+          "name": "systemName",
+          "declaration": "function systemName()"
+        },
+        {
+          "kind": "function",
+          "name": "protocolVersion",
+          "declaration": "function protocolVersion()"
+        },
+        {
+          "kind": "function",
+          "name": "jobs",
+          "declaration": "function jobs(bytes32 jobId)"
+        },
+        {
+          "kind": "function",
+          "name": "bindComputeAdapter",
+          "declaration": "function bindComputeAdapter(address adapter)"
+        },
+        {
+          "kind": "function",
+          "name": "create",
+          "declaration": "function create(bytes32 jobId, bytes32, bytes32 modelId, bytes32 requestHash)"
+        },
+        {
+          "kind": "function",
+          "name": "createRequest",
+          "declaration": "function createRequest( bytes32 jobId, bytes32 modelVersionId, bytes32 workloadClass, bytes32 requestHash, bytes32 privacyPolicyId, bytes32 verificationProfileId, uint256 maxSpend, uint64 deadline )"
+        },
+        {
+          "kind": "function",
+          "name": "confirmFunding",
+          "declaration": "function confirmFunding(bytes32 jobId, bytes32 fundingRef, uint256 amount)"
+        },
+        {
+          "kind": "function",
+          "name": "confirmCanonicalFunding",
+          "declaration": "function confirmCanonicalFunding(bytes32 jobId, bytes32 fundingRef, uint256 amount)"
+        },
+        {
+          "kind": "function",
+          "name": "matchCompute",
+          "declaration": "function matchCompute(bytes32 jobId, bytes32 computeRequestId, bytes32 computeJobId, bytes32 providerId)"
+        },
+        {
+          "kind": "function",
+          "name": "acceptCompute",
+          "declaration": "function acceptCompute(bytes32 jobId)"
+        },
+        {
+          "kind": "function",
+          "name": "markRunning",
+          "declaration": "function markRunning(bytes32 jobId)"
+        },
+        {
+          "kind": "function",
+          "name": "commitResult",
+          "declaration": "function commitResult(bytes32 jobId, bytes32 resultHash, bytes32 resultManifestHash)"
+        },
+        {
+          "kind": "function",
+          "name": "verifyResult",
+          "declaration": "function verifyResult(bytes32 jobId)"
+        },
+        {
+          "kind": "function",
+          "name": "confirmSettlement",
+          "declaration": "function confirmSettlement(bytes32 jobId)"
+        },
+        {
+          "kind": "function",
+          "name": "confirmCanonicalSettlement",
+          "declaration": "function confirmCanonicalSettlement(bytes32 jobId)"
+        },
+        {
+          "kind": "function",
+          "name": "confirmRefund",
+          "declaration": "function confirmRefund(bytes32 jobId)"
+        },
+        {
+          "kind": "function",
+          "name": "confirmCanonicalRefund",
+          "declaration": "function confirmCanonicalRefund(bytes32 jobId)"
+        },
+        {
+          "kind": "function",
+          "name": "cancel",
+          "declaration": "function cancel(bytes32 jobId)"
+        },
+        {
+          "kind": "function",
+          "name": "expire",
+          "declaration": "function expire(bytes32 jobId)"
+        },
+        {
+          "kind": "function",
+          "name": "markFailed",
+          "declaration": "function markFailed(bytes32 jobId)"
+        },
+        {
+          "kind": "function",
+          "name": "openDispute",
+          "declaration": "function openDispute(bytes32 jobId, bytes32 disputeRef)"
+        },
+        {
+          "kind": "function",
+          "name": "resolveDispute",
+          "declaration": "function resolveDispute(bytes32 jobId, bool upheld, bytes32 resolutionRef)"
+        },
+        {
+          "kind": "function",
+          "name": "_create",
+          "declaration": "function _create( bytes32 jobId, bytes32 modelVersionId, bytes32 workloadClass, bytes32 requestHash, bytes32 privacyPolicyId, bytes32 verificationProfileId, uint256 maxSpend, uint64 deadline )"
+        },
+        {
+          "kind": "function",
+          "name": "_advance",
+          "declaration": "function _advance(bytes32 jobId, Status from, Status to)"
+        },
+        {
+          "kind": "function",
+          "name": "_setStatus",
+          "declaration": "function _setStatus(bytes32 jobId, Job storage j, Status next)"
+        },
+        {
+          "kind": "function",
+          "name": "_requester",
+          "declaration": "function _requester(bytes32 jobId)"
+        },
+        {
+          "kind": "function",
+          "name": "_get",
+          "declaration": "function _get(bytes32 jobId)"
+        },
+        {
+          "kind": "modifier",
+          "name": "onlyComputeAdapter",
+          "declaration": "modifier onlyComputeAdapter()"
+        },
+        {
+          "kind": "function",
+          "name": "_validWorkload",
+          "declaration": "function _validWorkload(bytes32 x)"
+        }
+      ]
     },
     {
       "path": "contracts/src/ai/AIModelDeploymentRegistry420.sol",
@@ -1502,7 +2369,126 @@
         "componentIdPreimage": "420/component/ai/deployment-registry/v1",
         "protocolVersion": "1.0.0",
         "address": null
-      }
+      },
+      "imports": [
+        "import \"../interfaces/I420System.sol\";",
+        "import \"./AIIds420.sol\";",
+        "import \"./AIAuthorization420.sol\";",
+        "import \"./AIProviderRegistry.sol\";",
+        "import \"./AIModelRegistry.sol\";"
+      ],
+      "declarations": [
+        {
+          "kind": "contract",
+          "name": "AIModelDeploymentRegistry420",
+          "declaration": "contract AIModelDeploymentRegistry420"
+        },
+        {
+          "kind": "enum",
+          "name": "State",
+          "declaration": "enum State{NONE,REGISTERED,ACTIVE,SUSPENDED,RETIRED}"
+        },
+        {
+          "kind": "struct",
+          "name": "Deployment",
+          "declaration": "struct Deployment{bytes32 providerId;bytes32 modelVersionId;bytes32 computeOfferRef;bytes32 servicePricingPolicyId;bytes32 endpointManifestHash;uint64 endpointExpiry;bytes32 regionPolicyHash;bytes32 slaPolicyId;uint64 createdAt;uint32 revision;State state;bool exists;}"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidDependency",
+          "declaration": "error InvalidDependency()"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidDeployment",
+          "declaration": "error InvalidDeployment()"
+        },
+        {
+          "kind": "error",
+          "name": "DeploymentExists",
+          "declaration": "error DeploymentExists()"
+        },
+        {
+          "kind": "error",
+          "name": "DeploymentNotFound",
+          "declaration": "error DeploymentNotFound()"
+        },
+        {
+          "kind": "error",
+          "name": "Unauthorized",
+          "declaration": "error Unauthorized()"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidState",
+          "declaration": "error InvalidState()"
+        },
+        {
+          "kind": "event",
+          "name": "DeploymentRegistered",
+          "declaration": "event DeploymentRegistered(bytes32 indexed deploymentId,bytes32 indexed providerId,bytes32 indexed modelVersionId,bytes32 computeOfferRef)"
+        },
+        {
+          "kind": "event",
+          "name": "DeploymentUpdated",
+          "declaration": "event DeploymentUpdated(bytes32 indexed deploymentId,bytes32 endpointManifestHash,uint32 revision)"
+        },
+        {
+          "kind": "event",
+          "name": "DeploymentStateChanged",
+          "declaration": "event DeploymentStateChanged(bytes32 indexed deploymentId,State previousState,State newState,uint32 revision)"
+        },
+        {
+          "kind": "function",
+          "name": "systemName",
+          "declaration": "function systemName()"
+        },
+        {
+          "kind": "function",
+          "name": "protocolVersion",
+          "declaration": "function protocolVersion()"
+        },
+        {
+          "kind": "function",
+          "name": "registerDeployment",
+          "declaration": "function registerDeployment(bytes32 id,bytes32 pid,bytes32 vid,bytes32 offer,bytes32 pricing,bytes32 endpoint,uint64 expiry,bytes32 region,bytes32 sla)"
+        },
+        {
+          "kind": "function",
+          "name": "updateDeployment",
+          "declaration": "function updateDeployment(bytes32 id,bytes32 offer,bytes32 pricing,bytes32 endpoint,uint64 expiry,bytes32 region,bytes32 sla)"
+        },
+        {
+          "kind": "function",
+          "name": "setState",
+          "declaration": "function setState(bytes32 id,State next)"
+        },
+        {
+          "kind": "function",
+          "name": "getDeployment",
+          "declaration": "function getDeployment(bytes32 id)"
+        },
+        {
+          "kind": "function",
+          "name": "isOperational",
+          "declaration": "function isOperational(bytes32 id)"
+        },
+        {
+          "kind": "function",
+          "name": "_deps",
+          "declaration": "function _deps(Deployment storage d)"
+        },
+        {
+          "kind": "function",
+          "name": "_operator",
+          "declaration": "function _operator(bytes32 id)"
+        },
+        {
+          "kind": "function",
+          "name": "_get",
+          "declaration": "function _get(bytes32 id)"
+        }
+      ]
     },
     {
       "path": "contracts/src/ai/AIModelRegistry.sol",
@@ -1515,7 +2501,278 @@
         "address": "0x0000000000000000000000000000000000000430",
         "componentIdPreimage": "420/component/ai/model-registry/v1",
         "protocolVersion": "2.0.0"
-      }
+      },
+      "imports": [
+        "import \"../system/SystemAccess.sol\";",
+        "import \"../interfaces/I420System.sol\";"
+      ],
+      "declarations": [
+        {
+          "kind": "contract",
+          "name": "AIModelRegistry",
+          "declaration": "contract AIModelRegistry"
+        },
+        {
+          "kind": "enum",
+          "name": "ModelState",
+          "declaration": "enum ModelState { NONE, ACTIVE, SUSPENDED, RETIRED }"
+        },
+        {
+          "kind": "enum",
+          "name": "VersionState",
+          "declaration": "enum VersionState { NONE, ACTIVE, DEPRECATED }"
+        },
+        {
+          "kind": "enum",
+          "name": "TrainingRightsMode",
+          "declaration": "enum TrainingRightsMode { DENIED, GRANT_ONLY }"
+        },
+        {
+          "kind": "struct",
+          "name": "Model",
+          "declaration": "struct Model { address creator; bytes32 metadataHash; bytes32 licensePolicyId; uint64 createdAt; uint32 revision; ModelState state; bool exists; }"
+        },
+        {
+          "kind": "struct",
+          "name": "ModelVersion",
+          "declaration": "struct ModelVersion { bytes32 modelId; uint32 version; bytes32 artifactManifestHash; bytes32 artifactHash; bytes32 runtimeProfileId; bytes32 computeRequirementId; bytes32 schemaHash; bytes32 verificationProfileId; bytes32 licensePolicyId; uint64 createdAt; VersionState state; bool exists; }"
+        },
+        {
+          "kind": "struct",
+          "name": "Model420Metadata",
+          "declaration": "struct Model420Metadata { bytes32 architectureHash; bytes32 capabilitiesHash; bytes32 aiDisclosureHash; bytes32 trainingRightsDeclarationHash; address trainingRightsController; TrainingRightsMode trainingRightsMode; bool exists; }"
+        },
+        {
+          "kind": "struct",
+          "name": "Model420Registration",
+          "declaration": "struct Model420Registration { bytes32 modelVersionId; bytes32 modelId; uint32 version; bytes32 storageManifestHash; bytes32 weightsHash; bytes32 runtimeProfileId; bytes32 computeRequirementId; bytes32 schemaHash; bytes32 verificationProfileId; bytes32 licensePolicyId; bytes32 architectureHash; bytes32 capabilitiesHash; bytes32 aiDisclosureHash; bytes32 trainingRightsDeclarationHash; address trainingRightsController; TrainingRightsMode trainingRightsMode; }"
+        },
+        {
+          "kind": "struct",
+          "name": "TrainingGrant",
+          "declaration": "struct TrainingGrant { bytes32 modelVersionId; address grantee; bytes32 scopeHash; uint64 grantedAt; uint64 expiresAt; bool revoked; bool exists; }"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidId",
+          "declaration": "error InvalidId()"
+        },
+        {
+          "kind": "error",
+          "name": "AlreadyExists",
+          "declaration": "error AlreadyExists()"
+        },
+        {
+          "kind": "error",
+          "name": "NotFound",
+          "declaration": "error NotFound()"
+        },
+        {
+          "kind": "error",
+          "name": "NotCreator",
+          "declaration": "error NotCreator()"
+        },
+        {
+          "kind": "error",
+          "name": "NotTrainingRightsController",
+          "declaration": "error NotTrainingRightsController()"
+        },
+        {
+          "kind": "error",
+          "name": "TrainingRightsDenied",
+          "declaration": "error TrainingRightsDenied()"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidStateTransition",
+          "declaration": "error InvalidStateTransition()"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidVersion",
+          "declaration": "error InvalidVersion()"
+        },
+        {
+          "kind": "error",
+          "name": "InvalidGrant",
+          "declaration": "error InvalidGrant()"
+        },
+        {
+          "kind": "event",
+          "name": "ModelRegistered",
+          "declaration": "event ModelRegistered(bytes32 indexed modelId, address indexed creator, bytes32 metadataHash, bytes32 licensePolicyId)"
+        },
+        {
+          "kind": "event",
+          "name": "ModelUpdated",
+          "declaration": "event ModelUpdated(bytes32 indexed modelId, bytes32 metadataHash, bytes32 licensePolicyId, uint32 revision)"
+        },
+        {
+          "kind": "event",
+          "name": "ModelStateChanged",
+          "declaration": "event ModelStateChanged(bytes32 indexed modelId, ModelState previousState, ModelState newState, uint32 revision)"
+        },
+        {
+          "kind": "event",
+          "name": "ModelVersionRegistered",
+          "declaration": "event ModelVersionRegistered( bytes32 indexed modelVersionId, bytes32 indexed modelId, uint32 version, bytes32 artifactHash, bytes32 artifactManifestHash )"
+        },
+        {
+          "kind": "event",
+          "name": "Model420Declared",
+          "declaration": "event Model420Declared( bytes32 indexed modelVersionId, bytes32 architectureHash, bytes32 capabilitiesHash, bytes32 aiDisclosureHash, bytes32 trainingRightsDeclarationHash, address indexed trainingRightsController, TrainingRightsMode trainingRightsMode )"
+        },
+        {
+          "kind": "event",
+          "name": "TrainingRightsControllerTransferred",
+          "declaration": "event TrainingRightsControllerTransferred( bytes32 indexed modelVersionId, address indexed previousController, address indexed newController )"
+        },
+        {
+          "kind": "event",
+          "name": "TrainingGrantCreated",
+          "declaration": "event TrainingGrantCreated( bytes32 indexed grantId, bytes32 indexed modelVersionId, address indexed grantee, bytes32 scopeHash, uint64 expiresAt )"
+        },
+        {
+          "kind": "event",
+          "name": "TrainingGrantRevoked",
+          "declaration": "event TrainingGrantRevoked(bytes32 indexed grantId, bytes32 indexed modelVersionId, address indexed grantee)"
+        },
+        {
+          "kind": "event",
+          "name": "ModelVersionDeprecated",
+          "declaration": "event ModelVersionDeprecated(bytes32 indexed modelVersionId)"
+        },
+        {
+          "kind": "function",
+          "name": "systemName",
+          "declaration": "function systemName()"
+        },
+        {
+          "kind": "function",
+          "name": "protocolVersion",
+          "declaration": "function protocolVersion()"
+        },
+        {
+          "kind": "function",
+          "name": "modelVersions",
+          "declaration": "function modelVersions(bytes32 modelVersionId)"
+        },
+        {
+          "kind": "function",
+          "name": "registerModel",
+          "declaration": "function registerModel(bytes32 modelId, bytes32 metadataHash, bytes32 licensePolicyId)"
+        },
+        {
+          "kind": "function",
+          "name": "register",
+          "declaration": "function register(bytes32 modelId, bytes32, bytes32 artifactHash, bytes32 metadataHash, uint32 version)"
+        },
+        {
+          "kind": "function",
+          "name": "updateModel",
+          "declaration": "function updateModel(bytes32 modelId, bytes32 metadataHash, bytes32 licensePolicyId)"
+        },
+        {
+          "kind": "function",
+          "name": "registerVersion",
+          "declaration": "function registerVersion( bytes32 modelVersionId, bytes32 modelId, uint32 version, bytes32 artifactManifestHash, bytes32 artifactHash, bytes32 runtimeProfileId, bytes32 computeRequirementId, bytes32 schemaHash, bytes32 verificationProfileId, bytes32 licensePolicyId )"
+        },
+        {
+          "kind": "function",
+          "name": "registerModel420Version",
+          "declaration": "function registerModel420Version(Model420Registration calldata r)"
+        },
+        {
+          "kind": "function",
+          "name": "model420",
+          "declaration": "function model420(bytes32 modelVersionId)"
+        },
+        {
+          "kind": "function",
+          "name": "transferTrainingRightsController",
+          "declaration": "function transferTrainingRightsController(bytes32 modelVersionId, address newController)"
+        },
+        {
+          "kind": "function",
+          "name": "grantTraining",
+          "declaration": "function grantTraining(bytes32 modelVersionId, address grantee, bytes32 scopeHash, uint64 expiresAt)"
+        },
+        {
+          "kind": "function",
+          "name": "revokeTrainingGrant",
+          "declaration": "function revokeTrainingGrant(bytes32 grantId)"
+        },
+        {
+          "kind": "function",
+          "name": "trainingGrantId",
+          "declaration": "function trainingGrantId(bytes32 modelVersionId, address grantee, bytes32 scopeHash)"
+        },
+        {
+          "kind": "function",
+          "name": "isTrainingAuthorized",
+          "declaration": "function isTrainingAuthorized(bytes32 modelVersionId, address grantee, bytes32 scopeHash)"
+        },
+        {
+          "kind": "function",
+          "name": "deprecateVersion",
+          "declaration": "function deprecateVersion(bytes32 modelVersionId)"
+        },
+        {
+          "kind": "function",
+          "name": "suspendModel",
+          "declaration": "function suspendModel(bytes32 modelId)"
+        },
+        {
+          "kind": "function",
+          "name": "reactivateModel",
+          "declaration": "function reactivateModel(bytes32 modelId)"
+        },
+        {
+          "kind": "function",
+          "name": "retireModel",
+          "declaration": "function retireModel(bytes32 modelId)"
+        },
+        {
+          "kind": "function",
+          "name": "isVersionOperational",
+          "declaration": "function isVersionOperational(bytes32 modelVersionId)"
+        },
+        {
+          "kind": "function",
+          "name": "_storeVersion",
+          "declaration": "function _storeVersion( bytes32 modelVersionId, bytes32 modelId, uint32 version, bytes32 artifactManifestHash, bytes32 artifactHash, bytes32 runtimeProfileId, bytes32 computeRequirementId, bytes32 schemaHash, bytes32 verificationProfileId, bytes32 licensePolicyId )"
+        },
+        {
+          "kind": "function",
+          "name": "_declareModel420",
+          "declaration": "function _declareModel420( bytes32 modelVersionId, bytes32 architectureHash, bytes32 capabilitiesHash, bytes32 aiDisclosureHash, bytes32 trainingRightsDeclarationHash, address trainingRightsController, TrainingRightsMode trainingRightsMode )"
+        },
+        {
+          "kind": "function",
+          "name": "_validateNewVersion",
+          "declaration": "function _validateNewVersion( bytes32 modelVersionId, bytes32 modelId, uint32 version, bytes32 artifactManifestHash, bytes32 artifactHash )"
+        },
+        {
+          "kind": "function",
+          "name": "_trainingController",
+          "declaration": "function _trainingController(bytes32 modelVersionId)"
+        },
+        {
+          "kind": "function",
+          "name": "_creator",
+          "declaration": "function _creator(bytes32 modelId)"
+        },
+        {
+          "kind": "function",
+          "name": "_getModel",
+          "declaration": "function _getModel(bytes32 modelId)"
+        },
+        {
+          "kind": "function",
+          "name": "_setModelState",
+          "declaration": "function _setModelState(bytes32 modelId, Model storage m, ModelState next)"
+        }
+      ]
     },
     {
       "path": "contracts/src/ai/AIPolicyRegistry420.sol",

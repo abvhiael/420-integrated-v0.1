@@ -4,6 +4,11 @@ on:
     paths:
       - 'bong-goggles/web/**'
       - '.github/workflows/bc-4-4-2-browser.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'bong-goggles/web/**'
+      - '.github/workflows/bc-4-4-2-browser.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -46,7 +51,7 @@ jobs:
   live-authenticated:
     # Never expose secrets to fork code. Require opt-in and a protected environment
     # with reviewers before supplying dedicated, short-lived test credentials.
-    if: vars.BC442_LIVE_ENABLED == 'true' && (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' || github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+    if: vars.BC442_LIVE_ENABLED == 'true' && github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || github.event_name == 'push')
     environment: bc442-live-acceptance
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -57,7 +62,7 @@ jobs:
       # Live credentials are used only with trusted main code, never PR code.
       - uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -72,7 +77,9 @@ jobs:
           BC442_SESSION_ID: ${{ secrets.BC442_SESSION_ID }}
           BC442_RULES_HASH: ${{ vars.BC442_RULES_HASH }}
         run: |
-          export BC442_SHA="$(git rev-parse HEAD)"
+          export BC442_SHA="${{ github.sha }}"
+          test "$(git rev-parse HEAD)" = "$BC442_SHA"
+          test -f test/word-salad-browser.mjs
           node test/word-salad-browser.mjs --live
       - uses: actions/upload-artifact@v4
         if: always()

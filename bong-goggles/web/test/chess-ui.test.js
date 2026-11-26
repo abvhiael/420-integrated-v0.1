@@ -44,3 +44,17 @@ test('BC-3.4 no speculative moves, authoritative refresh and account revocation'
  await c.act({type:'move',uci:'e2e4'});assert.equal(posts,1);assert.equal(c.state.session.sequence,2);
  subject=null;await c.refresh(id);assert.equal(c.state.session,null);assert.deepEqual(c.state.actions,[]);
 });
+
+import {validateRuntimeConfig} from '../core/runtime-config.js';
+import {readFileSync} from 'node:fs';
+test('BC-3 release requires explicit activation and all account dependencies in production',()=>{
+ const config=JSON.parse(readFileSync(new URL('../runtime-config.example.json',import.meta.url),'utf8'));
+ config.environment='production';
+ config.features={...config.features,accountSocial:true,accountGames:true,classicRooms:true,classicCommunications:true,chessRestricted:true};
+ assert.equal(validateRuntimeConfig(config).features.chessRestricted,true);
+ for(const key of ['accountSocial','accountGames','classicRooms','classicCommunications','chessRestricted']){
+  assert.equal(validateRuntimeConfig({...config,features:{...config.features,[key]:false}}).features.chessRestricted,false,key);
+ }
+ const disabled=renderApplicationShell({pathname:'/games/chess',chessState:{status:'disabled'}});
+ assert.match(disabled,/not enabled in this deployment/);assert.doesNotMatch(disabled,/data-chess-start/);
+});

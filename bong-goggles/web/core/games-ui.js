@@ -27,6 +27,7 @@ export function renderClassicGamePage(gameId,{screen='intro',view=null,cribbageS
 const game=classicGameById(gameId);
 if(!game)return card({title:'Game unavailable',body:emptyState({title:'Game not found',message:'Choose a title from the Games catalogue.'})});
 if(game.id==='chess'&&chessState&&chessState.status!=='disabled')return renderChessScreen(screen,chessState);
+if(game.id==='chess')return card({title:'Chess',body:'<p><a href="/games" data-route="games">← All Games</a></p><p class="games-game-page__notice" role="status">Chess is release-authorized but not enabled in this deployment.</p><p>Zero-wager game. A wallet is not required.</p>'});
 if(game.id==='cribbage')return renderCribbageRoute({screen,state:cribbageState,identity:[accountIdentityState,accountIdentityEnabled]});
 const step=CLASSIC_ROADMAP.find(item=>item.id===gameId);
 const playLink=game.status==='account'?'<a class="ccc-link" href="/classics/cross-country-chaos" data-route="chaos-game">Play Cross-Country Chaos online</a> <a class="ccc-link" href="/classics/cross-country-chaos/practice" data-route="chaos-game">Play against computers</a>':game.status==='playable'?'<a class="ccc-link" href="/games/rooms" data-route="classic-rooms">Play in a room</a> <a class="ccc-link" href="/games/'+escapeHtml(game.id)+'/history" data-route="classic-game">My Games</a>':'';

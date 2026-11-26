@@ -9,6 +9,15 @@
       "approval": "repository-owner",
       "result": "developer-authorized-release",
       "evidenceVersion": 2
+    },
+    "chess": {
+      "gameId": "chess",
+      "sourceSha": "0c9760f30bdee9a3c04a36691d2b6c56d476b18e",
+      "rulesHash": "fe037f8feae11b0b7284407cdd334ad6f11ed4bcbd37c7506f815bdcb2bad526",
+      "deployedOrigin": "https://bonggoggles.420integrated.org",
+      "approval": "repository-owner",
+      "result": "developer-authorized-release",
+      "evidenceVersion": 2
     }
   }
 }

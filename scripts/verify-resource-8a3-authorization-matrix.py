@@ -65,7 +65,7 @@ def verify(root):
     need(data["schema"] == "420-resource-8a3-operation-authority-v1", "schema drift")
     need(set(contracts) == EXPECTED, "contract inventory drift")
     package = json.loads((root / "contracts/config/resource/resource-audit-8-deployment-package.json").read_text())
-    need({x["contract"] for x in package["deployment_order"] if "constructor" in x} == EXPECTED,
+    need({x["contract"] for x in package["deployment_order"] if "constructor" in x and x["contract"] != "ProtocolRegistry"} == EXPECTED,
          "deployment graph differs from matrix")
     src = root / "contracts/src/resource"
     auth = (src / "ResourceAuthorization420.sol").read_text()

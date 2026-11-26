@@ -94,3 +94,10 @@ body{background:var(--bg);color:var(--text)}
 .games-account__actions a:focus-visible,.games-account__actions button:focus-visible{outline:3px solid #b27c10;outline-offset:3px}
 @media(max-width:760px){.app-header .account-logout,.app-header .account-auth-retry{width:100%;min-height:46px}.games-account{padding:12px}}
 @media(forced-colors:active){.games-account,.app-header .account-logout,.app-header .account-auth-retry{border:2px solid CanvasText;background:Canvas;color:CanvasText}}
+
+/* Keep authenticated navigation within the viewport without clipping controls. */
+.app-header{flex-wrap:wrap;min-width:0}
+.app-header .dashboard-topnav{flex-wrap:wrap;min-width:0}
+.app-header .header-state{flex-wrap:wrap;min-width:0;max-width:100%}
+.app-header .account-auth-link{min-width:0;max-width:100%;overflow-wrap:anywhere}
+@media(min-width:761px) and (max-width:1500px){.app-header .dashboard-topnav{flex:1 1 auto}.app-header .header-state{flex:0 1 auto}}

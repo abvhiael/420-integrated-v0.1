@@ -72,7 +72,10 @@ async function inspect(page,n,view){
   }
   const box=node=>node.getBoundingClientRect(),tr=box(el),br=box(board),sr=box(scroll);
   if(tr.left< -1||tr.right>innerWidth+1)bad.push('table overflows viewport');
-  if(document.documentElement.scrollWidth>innerWidth+2)bad.push('document horizontal overflow');
+  if(document.documentElement.scrollWidth>innerWidth+2){
+   const offenders=[...document.querySelectorAll('body *')].filter(node=>!scroll.contains(node)&&getComputedStyle(node).position!=='fixed').map(node=>({node,r:box(node)})).filter(({r})=>r.right>innerWidth+2||r.left< -2).slice(0,15).map(({node,r})=>({tag:node.tagName,classes:typeof node.className==='string'?node.className:'',left:Math.round(r.left),right:Math.round(r.right)}));
+   bad.push('document horizontal overflow: '+JSON.stringify({viewport:innerWidth,document:document.documentElement.scrollWidth,offenders}));
+  }
   if(Math.abs(br.width-br.height)>2)bad.push('board not square');
   if(sr.right>tr.right+1)bad.push('board scroll container escapes table');
   for(const node of el.querySelectorAll('.ws-rack,.ws-side,.ws-panel,.ws-action,.ws-blank-picker')){

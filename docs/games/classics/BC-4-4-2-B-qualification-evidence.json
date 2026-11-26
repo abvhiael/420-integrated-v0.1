@@ -1,0 +1,445 @@
+{
+  "qualifiedHead": "68cd7d8a43fccbe2d7208d83644401b5bfe4040f",
+  "run": 45894232989,
+  "job": 140164044661,
+  "artifact": {
+    "id": 15152159875,
+    "bytes": 22383112,
+    "sha256": "b045d90f44c92f4785182c09b18dc9e31fe08427a8f5fe12e73c619edb00c0d7",
+    "files": 25,
+    "retentionDays": 7
+  },
+  "workflows": [
+    {
+      "id": 45894232967,
+      "name": "BC-4.2 Word Salad Backend Qualification",
+      "event": "pull_request",
+      "conclusion": "success"
+    },
+    {
+      "id": 45894232995,
+      "name": "Bong Goggles Web Verification",
+      "event": "pull_request",
+      "conclusion": "success"
+    },
+    {
+      "id": 45894232998,
+      "name": "420Docs Qualification",
+      "event": "pull_request",
+      "conclusion": "success"
+    },
+    {
+      "id": 45894233082,
+      "name": "BC-2.4 Labyrinth 325-Point Interface and Source Art Gate",
+      "event": "pull_request",
+      "conclusion": "success"
+    },
+    {
+      "id": 45894232989,
+      "name": "BC-4.4.2-B Word Salad Browser Qualification",
+      "event": "pull_request",
+      "conclusion": "success"
+    },
+    {
+      "id": 45894233009,
+      "name": "BC-1.4 Cribbage Player Frontend",
+      "event": "pull_request",
+      "conclusion": "success"
+    },
+    {
+      "id": 45894232986,
+      "name": "BC-3.6 Chess History and Social Integration",
+      "event": "pull_request",
+      "conclusion": "success"
+    },
+    {
+      "id": 45894232992,
+      "name": "BC-3.5 Chess Player Interface",
+      "event": "pull_request",
+      "conclusion": "success"
+    },
+    {
+      "id": 45894233001,
+      "name": "BC-3.7 Chess Automated and Adversarial Qualification",
+      "event": "pull_request",
+      "conclusion": "success"
+    },
+    {
+      "id": 45894232969,
+      "name": "BC-3.4 Chess Player Interface",
+      "event": "pull_request",
+      "conclusion": "success"
+    },
+    {
+      "id": 45894233015,
+      "name": "AUTH-8/9/10/11 Wallet-Independent BongGoggles Social",
+      "event": "pull_request",
+      "conclusion": "success"
+    },
+    {
+      "id": 45894225731,
+      "name": "Bong Goggles Web Verification",
+      "event": "push",
+      "conclusion": "success"
+    }
+  ],
+  "report": {
+    "mode": "fixture-backed-real-app",
+    "sha": "68cd7d8a43fccbe2d7208d83644401b5bfe4040f",
+    "results": [
+      {
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "board": 11,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 766,
+        "boardHeight": 766,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 1366,
+          "height": 768
+        },
+        "board": 11,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 400,
+        "boardHeight": 400,
+        "scrollable": true,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "board": 11,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 516.28125,
+        "boardHeight": 516.28125,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "board": 11,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 400,
+        "boardHeight": 400,
+        "scrollable": true,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "board": 13,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 766,
+        "boardHeight": 766,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 1366,
+          "height": 768
+        },
+        "board": 13,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 440,
+        "boardHeight": 440,
+        "scrollable": true,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "board": 13,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 516.28125,
+        "boardHeight": 516.28125,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "board": 13,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 440,
+        "boardHeight": 440,
+        "scrollable": true,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "board": 15,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 766,
+        "boardHeight": 766,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 1366,
+          "height": 768
+        },
+        "board": 15,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 480,
+        "boardHeight": 480,
+        "scrollable": true,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "board": 15,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 516.28125,
+        "boardHeight": 516.28125,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "board": 15,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 480,
+        "boardHeight": 480,
+        "scrollable": true,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "board": 17,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 766,
+        "boardHeight": 766,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 1366,
+          "height": 768
+        },
+        "board": 17,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 544,
+        "boardHeight": 544,
+        "scrollable": true,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "board": 17,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 544,
+        "boardHeight": 544,
+        "scrollable": true,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "board": 17,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 544,
+        "boardHeight": 544,
+        "scrollable": true,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "board": 19,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 766,
+        "boardHeight": 766,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 1366,
+          "height": 768
+        },
+        "board": 19,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 608,
+        "boardHeight": 608,
+        "scrollable": true,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "board": 19,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 608,
+        "boardHeight": 608,
+        "scrollable": true,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "board": 19,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 608,
+        "boardHeight": 608,
+        "scrollable": true,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "board": 21,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 766,
+        "boardHeight": 766,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 1366,
+          "height": 768
+        },
+        "board": 21,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 672,
+        "boardHeight": 672,
+        "scrollable": true,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "board": 21,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 672,
+        "boardHeight": 672,
+        "scrollable": true,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "board": 21,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 672,
+        "boardHeight": 672,
+        "scrollable": true,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      }
+    ],
+    "status": "passed"
+  },
+  "manualReview": {
+    "reviewed": 24,
+    "method": "Visual review of four contact sheets generated from all 24 original full-page Chromium captures",
+    "findings": [
+      "1920x1080: artwork and controls render; unused right-hand space.",
+      "1366x768: constrained board viewport and significant unused right-hand space; internal scroll is reachable per automated test.",
+      "768x1024: stacked board and two-column panels; large variants internally scroll.",
+      "390x844: fixed bottom navigation overlays part of board at capture position; no claim of full unobscured interaction."
+    ],
+    "disposition": "Automated fixture qualification passed; visual usability concerns remain."
+  },
+  "live": {
+    "status": "skipped",
+    "job": 140164046700,
+    "reason": "Protected live workflow not executed; connector does not permit inspection of environment variables or secrets. No authenticated production gameplay claim."
+  }
+}

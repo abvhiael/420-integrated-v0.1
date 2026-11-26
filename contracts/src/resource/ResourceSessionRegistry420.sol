@@ -76,12 +76,23 @@ contract ResourceSessionRegistry420 is I420System {
         return keccak256(abi.encode("420/RESOURCE/SESSION/V1", block.chainid, address(this), consumer, offerId, nonce));
     }
 
+    // Preserve the legacy selector but reject caller-chosen, unverifiable session IDs.
     function openSession(
-        bytes32 sessionId,
+        bytes32,
+        bytes32,
+        uint128,
+        uint64
+    ) external pure {
+        revert InvalidSession();
+    }
+
+    function openCanonicalSession(
         bytes32 offerId,
         uint128 maxUnits,
-        uint64 expiresAt
-    ) external {
+        uint64 expiresAt,
+        uint256 nonce
+    ) external returns (bytes32 sessionId) {
+        sessionId = canonicalSessionId(msg.sender, offerId, nonce);
         if (
             sessionId == bytes32(0) || offerId == bytes32(0) || maxUnits == 0 || expiresAt <= block.timestamp
                 || !offers.isEffective(offerId)

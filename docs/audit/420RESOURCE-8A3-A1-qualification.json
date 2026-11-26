@@ -1,0 +1,105 @@
+{
+  "schema": "420-resource-8a3-a1-coverage-evidence-v1",
+  "disposition": "A1_COVERAGE_PASSED_NOT_FULL_SECURITY_QUALIFICATION",
+  "qualifiedHead": "840b52fe70bb43b01a2ad15a5a57b2e89a3b2fff",
+  "pr": 1435,
+  "workflow": {
+    "id": 45885217577,
+    "name": "420ResourceProtocol Audit Qualification",
+    "conclusion": "failure"
+  },
+  "job": {
+    "id": 140134127426,
+    "name": "resource-contract-core",
+    "conclusion": "failure",
+    "steps": [
+      {
+        "name": "Checkout exact qualification head",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2
+      },
+      {
+        "name": "Verify exact qualification head",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3
+      },
+      {
+        "name": "Verify Resource 8A3 operation authorization matrix",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5
+      },
+      {
+        "name": "Post Checkout exact qualification head",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 30
+      }
+    ]
+  },
+  "sources": {
+    "contracts/config/resource/resource-8a3-authorization-matrix.json": "c76750b7bfd2a4adb518c46dfad525925e72067e",
+    "scripts/verify-resource-8a3-authorization-matrix.py": "b5e9ab939873d82bd47aa2f0f35e7bf09375d348",
+    ".github/workflows/resource-protocol-audit.yml": "672b628f15670cbe76c033cb463d1dcf22c1f6d5"
+  },
+  "output": {
+    "contracts": 16,
+    "delegatedActions": 15,
+    "operations": 59,
+    "pass": true,
+    "status": "SOURCE_RECONCILED_NOT_SECURITY_QUALIFIED"
+  },
+  "actualLog": [
+    "2026-11-26T19:39:40.3149013Z HEAD is now at 840b52fe Gate Resource qualification on complete authorization matrix",
+    "2026-11-26T19:39:40.3491694Z   EXPECTED_SHA: 840b52fe70bb43b01a2ad15a5a57b2e89a3b2fff",
+    "2026-11-26T19:39:43.8856636Z ##[group]Run python scripts/verify-resource-8a3-authorization-matrix.py",
+    "2026-11-26T19:39:43.8857068Z \u001b[36;1mpython scripts/verify-resource-8a3-authorization-matrix.py\u001b[0m",
+    "2026-11-26T19:39:43.9295918Z {\"contracts\": 16, \"delegatedActions\": 15, \"operations\": 59, \"pass\": true, \"status\": \"SOURCE_RECONCILED_NOT_SECURITY_QUALIFIED\"}"
+  ],
+  "otherFailures": [
+    {
+      "job": "resource-security",
+      "steps": [
+        "Re-run Resource core under hardening profile"
+      ],
+      "excerpt": [
+        "2026-11-26T19:40:27.0617380Z [FAIL: Unauthorized()] testActiveAndClosedSessionBlockCollateralWithdrawalUntilDischarge() (gas: 19986770)",
+        "2026-11-26T19:40:27.0984503Z [FAIL: Unauthorized()] testSettlementIsCapabilityScoped() (gas: 19763607)",
+        "2026-11-26T19:40:27.1249738Z Failing tests:",
+        "2026-11-26T19:40:27.1250316Z [FAIL: Unauthorized()] testActiveAndClosedSessionBlockCollateralWithdrawalUntilDischarge() (gas: 19986770)",
+        "2026-11-26T19:40:27.1250672Z [FAIL: Unauthorized()] testSettlementIsCapabilityScoped() (gas: 19763607)",
+        "2026-11-26T19:40:27.1250926Z Encountered a total of 2 failing tests, 12 tests succeeded",
+        "2026-11-26T19:40:27.1262097Z ##[error]Process completed with exit code 1."
+      ]
+    },
+    {
+      "job": "resource-contract-core",
+      "steps": [
+        "Run Resource protocol adversarial suite"
+      ],
+      "excerpt": [
+        "2026-11-26T19:48:28.3034195Z [FAIL: Unauthorized()] testActiveAndClosedSessionBlockCollateralWithdrawalUntilDischarge() (gas: 19986770)",
+        "2026-11-26T19:48:28.4998602Z [FAIL: Unauthorized()] testSettlementIsCapabilityScoped() (gas: 19763607)",
+        "2026-11-26T19:48:28.5210350Z Failing tests:",
+        "2026-11-26T19:48:28.5210763Z [FAIL: Unauthorized()] testActiveAndClosedSessionBlockCollateralWithdrawalUntilDischarge() (gas: 19986770)",
+        "2026-11-26T19:48:28.5210914Z [FAIL: Unauthorized()] testSettlementIsCapabilityScoped() (gas: 19763607)",
+        "2026-11-26T19:48:28.5211027Z Encountered a total of 2 failing tests, 12 tests succeeded",
+        "2026-11-26T19:48:28.5220162Z ##[error]Process completed with exit code 1."
+      ]
+    },
+    {
+      "job": "reconcile",
+      "workflow": "Resource 8A2 compiler artifact reconciliation",
+      "steps": [
+        "Generate and reconcile compiler artifacts"
+      ],
+      "excerpt": [
+        "2026-11-26T19:40:02.7990269Z Traceback (most recent call last):",
+        "2026-11-26T19:40:02.7997576Z subprocess.CalledProcessError: Command '['git', 'diff', '--exit-code', '6837f137229ff0d9496d2d74d1cb0bea50680de5', 'HEAD', '--', 'contracts/src/resource']' returned non-zero exit status 1.",
+        "2026-11-26T19:40:02.8129634Z ##[error]Process completed with exit code 1."
+      ]
+    }
+  ]
+}

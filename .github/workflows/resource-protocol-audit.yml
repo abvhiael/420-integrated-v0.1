@@ -25,6 +25,7 @@ on:
       - "scripts/verify-resource-audit-8-deployment.py"
       - "scripts/verify-resource-8a2-policy-disposition.py"
       - "scripts/qualify-resource-solidity.py"
+      - "scripts/verify-resource-8a3-authorization-matrix.py"
       - "contracts/test/fixtures/cadc/upstream/**"
       - "contracts/test/fixtures/cadc/upstream-manifest.json"
       - ".github/workflows/resource-protocol-audit.yml"
@@ -57,6 +58,9 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: v1.9.0
+
+      - name: Verify Resource 8A3 operation authorization matrix
+        run: python scripts/verify-resource-8a3-authorization-matrix.py
 
       - name: Verify C6 production policy disposition
         run: python scripts/verify-resource-8a2-policy-disposition.py

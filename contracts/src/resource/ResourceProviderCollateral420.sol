@@ -99,9 +99,17 @@ contract ResourceProviderCollateral420 is I420System {
         return keccak256(abi.encode(POSITION_DOMAIN, block.chainid, address(this), address(providers), providerId));
     }
     function getPosition(bytes32 id) external view returns (Position memory) { return positions[id]; }
-    function deposit(bytes32 providerId, bytes32 depositNonce) external payable returns (bytes32 id) {
-        if (entered || depositNonce == bytes32(0) || msg.value == 0) revert InvalidDeposit();
+    // One shared lock protects every value-moving operation, including callbacks
+    // into other entry points that read entered. Keep the existing storage slot.
+    modifier nonReentrant() {
+        if (entered) revert InvalidDeposit();
         entered = true;
+        _;
+        entered = false;
+    }
+
+    function deposit(bytes32 providerId, bytes32 depositNonce) external payable nonReentrant returns (bytes32 id) {
+        if (depositNonce == bytes32(0) || msg.value == 0) revert InvalidDeposit();
         bytes32 depositKey = keccak256(abi.encode("420/RESOURCE/COLLATERAL/DEPOSIT/V1", block.chainid, address(this), msg.sender, depositNonce));
         if (consumedDeposit[depositKey]) revert InvalidDeposit();
         if (address(providers.collateral()) != address(this) || !_registered() || registry.vaultState(vaultId) != VaultRegistry420.VaultState.ACTIVE) revert InvalidDeposit();
@@ -132,7 +140,6 @@ contract ResourceProviderCollateral420 is I420System {
 
         _fundTranche(obligationId, id, msg.sender, msg.value);
         emit CollateralDeposited(id, providerId, msg.sender, obligationId, msg.value);
-        entered = false;
     }
 
     function _fundTranche(bytes32 obligationId, bytes32 id, address owner, uint256 amount) private {

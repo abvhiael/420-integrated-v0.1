@@ -232,4 +232,39 @@ contract StorageSettlementRegistry420Test {
         require(s.state == StorageSettlementRegistry420.State.CANCELLED, "not cancelled");
         require(e.vault.cancelled() == 20_000 && e.vault.reserved() == 0, "abort refund");
     }
+
+    function testAgreementAndPendingSettlementBlockCollateralWithdrawalUntilDischarge() public {
+        Env storage e=env;
+        (bytes32 agreementId,bytes32 commitmentId,,uint64 endTime)=activateAgreement(e);
+        bytes32 settlementId=openAndFund(e,agreementId);
+        ResourceProviderCollateral420 c=ResourceProviderCollateral420(address(e.providers.collateral()));
+        bytes32 id=c.positionId(e.providerId);
+        vm.prank(PROVIDER);
+        c.requestExit(id);
+        vm.warp(c.withdrawableAt(id));
+        vm.prank(PROVIDER);
+        (bool ok,)=address(c).call(abi.encodeCall(c.withdraw,(id)));
+        require(!ok && c.outstandingReservations(id)==3,"active agreement withdrawal");
+        uint256 maturity=e.commitments.collateralReleaseAfter(commitmentId);
+        if (maturity < endTime) maturity=endTime;
+        vm.warp(maturity+1);
+        // Clear independent capacity and commitment obligations first, to isolate the settlement hold.
+        StorageAgreementRegistry420.Agreement memory a=e.agreements.getAgreement(agreementId);
+        e.capacity.releaseCapacity(a.capacityReservationId);
+        e.commitments.releaseExpiredCommitment(commitmentId);
+        e.agreements.completeAgreement(agreementId);
+        require(c.outstandingReservations(id)==1 && !e.agreements.collateralReleased(agreementId),"pending settlement released agreement");
+        vm.prank(PROVIDER);
+        (ok,)=address(c).call(abi.encodeCall(c.withdraw,(id)));
+        require(!ok,"pending settlement withdrawal");
+        for (uint32 i; i<4; ++i) {
+            (,uint64 deadline)=e.settlements.windowTiming(settlementId,i);
+            if (block.timestamp<=deadline) vm.warp(uint256(deadline)+1);
+            e.settlements.refundMissedWindow(settlementId,i);
+        }
+        require(e.agreements.collateralReleased(agreementId) && c.outstandingReservations(id)==0,"final settlement did not discharge");
+        vm.prank(PROVIDER);
+        c.withdraw(id);
+        require(c.getPosition(id).slashable==0 && c.custodyInvariant(),"discharged storage exit");
+    }
 }

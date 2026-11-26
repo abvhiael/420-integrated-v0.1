@@ -42,7 +42,7 @@ if __name__=="__main__":
     p.add_argument("--stage",required=True,type=Path)
     a=p.parse_args()
     root=Path(__file__).resolve().parents[1]/"contracts"
-    names=["ResourceProviderCollateral420","ResourceGenesis420","ResourceDeploymentBinding420","StorageCapacityRegistry420","StorageProofProtocol420","StorageAgreementRegistry420","StorageObjectManifestRegistry420","StorageSettlementRegistry420"]
+    names=["ResourceCollateralPolicy420","ResourceCollateralInvariant420","ResourceProviderCollateral420","ResourceGenesis420","ResourceDeploymentBinding420","StorageCapacityRegistry420","StorageProofProtocol420","StorageAgreementRegistry420","StorageObjectManifestRegistry420","StorageSettlementRegistry420"]
     owners=[Path("test")/(n+".t.sol") for n in names]
     sources=[s.relative_to(root) for s in (root/"src/resource").glob("*.sol")]
     stage(root,a.stage,owners,sources)

@@ -1,0 +1,363 @@
+{
+  "qualifiedHead": "30c4909592dde12a0c427366408fbaaec3c37e06",
+  "run": 45900684702,
+  "job": 140185415486,
+  "artifact": {
+    "id": 15156206110,
+    "bytes": 38202004,
+    "sha256": "a4aeb78177ee4664f52ea7e36bb21be989ea98492b024ad2d08721193038a416",
+    "retentionDays": 7
+  },
+  "report": {
+    "mode": "fixture-backed-real-app",
+    "sha": "30c4909592dde12a0c427366408fbaaec3c37e06",
+    "results": [
+      {
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "board": 11,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 1000,
+        "boardHeight": 1000,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 1366,
+          "height": 768
+        },
+        "board": 11,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 939.375,
+        "boardHeight": 939.375,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "board": 11,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 703.28125,
+        "boardHeight": 703.28125,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "board": 11,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 400,
+        "boardHeight": 400,
+        "scrollable": true,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "board": 13,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 1000,
+        "boardHeight": 1000,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 1366,
+          "height": 768
+        },
+        "board": 13,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 939.375,
+        "boardHeight": 939.375,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "board": 13,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 703.28125,
+        "boardHeight": 703.28125,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "board": 13,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 440,
+        "boardHeight": 440,
+        "scrollable": true,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "board": 15,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 1000,
+        "boardHeight": 1000,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 1366,
+          "height": 768
+        },
+        "board": 15,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 939.375,
+        "boardHeight": 939.375,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "board": 15,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 703.28125,
+        "boardHeight": 703.28125,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "board": 15,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 480,
+        "boardHeight": 480,
+        "scrollable": true,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "board": 17,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 1000,
+        "boardHeight": 1000,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 1366,
+          "height": 768
+        },
+        "board": 17,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 939.375,
+        "boardHeight": 939.375,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "board": 17,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 703.28125,
+        "boardHeight": 703.28125,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "board": 17,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 544,
+        "boardHeight": 544,
+        "scrollable": true,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "board": 19,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 1000,
+        "boardHeight": 1000,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 1366,
+          "height": 768
+        },
+        "board": 19,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 939.375,
+        "boardHeight": 939.375,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "board": 19,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 703.28125,
+        "boardHeight": 703.28125,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "board": 19,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 608,
+        "boardHeight": 608,
+        "scrollable": true,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "board": 21,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 1000,
+        "boardHeight": 1000,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 1366,
+          "height": 768
+        },
+        "board": 21,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 939.375,
+        "boardHeight": 939.375,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "board": 21,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 703.28125,
+        "boardHeight": 703.28125,
+        "scrollable": false,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "board": 21,
+        "bad": [],
+        "minContrast": 7.3076722563040715,
+        "boardWidth": 672,
+        "boardHeight": 672,
+        "scrollable": true,
+        "interaction": "draft, rejected move, recall",
+        "status": "passed"
+      }
+    ],
+    "status": "passed"
+  },
+  "visualAcceptance": {
+    "status": "approved by user",
+    "scope": "updated screenshots; no further visual redesign requested"
+  },
+  "live": {
+    "status": "failed before authentication",
+    "job": 140185415195,
+    "reason": "Trusted main checkout lacked runner; live job now restricted to exact main push or main manual dispatch after integration. No production gameplay claim."
+  }
+}

@@ -157,6 +157,14 @@ Next canonical step: **RESOURCE-AUDIT-9 — production-equivalent testnet deploy
 
 Exit: **SATISFIED — RESOURCE-AUDIT-8 COMPLETE.**
 
+### RESOURCE-AUDIT-8A.2 C6 — production collateral policy disposition
+
+**Status: DISPOSITIONED — production economic approval deferred to pre-testnet governance; repository qualification not blocked.**
+
+The canonical [policy record](../../contracts/config/resource/resource-8a2-collateral-policy.json) retains null minimum collateral, minimum slashable backing, coverage basis points and withdrawal delay; acceptingNew is false. No approval evidence, approved revision or activation transaction is asserted. Provider admission remains fail-closed through ResourceProviderRegistry420._eligible and governance-only policy publication. Existing test fixture values are not production values.
+
+The outstanding external approval and activation preparation is owned by [GOV-PRE-RESOURCE-COLLATERAL](420GOVERNANCE-AUDIT-REMEDIATION-ROADMAP.md#gov-pre-resource-collateral--resource-provider-economic-policy). Governance must approve Resource-specific values before production-equivalent admission; verified deployment and authorized on-chain publication/readback are retained under RESOURCE-AUDIT-9. No validator or Compute policy inheritance is authorized. This disposition does not assert live readiness.
+
 ## RESOURCE-AUDIT-9 — production-equivalent testnet deployment
 
 Status: **BLOCKED — TESTNET/INFRASTRUCTURE**

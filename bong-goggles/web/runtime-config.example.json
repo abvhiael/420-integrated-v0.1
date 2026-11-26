@@ -23,6 +23,7 @@
     "classicRooms": false,
     "classicCommunications": false,
     "accountXP": false,
-    "accountMonetization": false
+    "accountMonetization": false,
+    "chessRestricted": false
   }
 }

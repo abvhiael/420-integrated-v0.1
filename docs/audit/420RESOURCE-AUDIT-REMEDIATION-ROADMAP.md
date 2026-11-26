@@ -176,6 +176,22 @@ On the canonical production-equivalent testnet retain:
 
 Repository simulation is not a substitute.
 
+### RESOURCE-AUDIT-9 — C5.2 deferred collateral SDK qualification
+
+Status: **DEFERRED TO TESTNET — USER-APPROVED 2026-11-25**
+
+Repository SDK implementation and controlled RPC regression tests: PR #1427, exact tested implementation head `b9e3e9acc1c66fa1d0cd5d44cffee7a20497977e`. Resource protocol and Reefer Review RR-5 workflows passed. This is repository qualification, not deployed-contract integration evidence.
+
+At testnet launch:
+- Bind the SDK to the verified chain ID, genesis hash, ProtocolRegistry runtime identity, published Resource Router and code-hash-bound collateral authority.
+- Exercise actual contract reads for positions, policies, discipline, reservations, penalties, exit maturity and withdrawal eligibility; reconcile full-width amounts with contract state.
+- Prepare, explicitly authorize and submit deposit/top-up, exit and withdrawal transactions; verify receipts, nonce replay rejection, unauthorized callers, premature withdrawal and outstanding-obligation rejection.
+- Verify wrong-chain, stale/reorganized block, unavailable RPC, incorrect code hash and unverified authority rejection; ensure no HTTP transport response is treated as authoritative collateral state.
+- Retain exact SDK and deployment commits, block hashes, transaction receipts, reconciliation reports and negative-path results; close deferred C5.2 integration only upon passing.
+
+No production policy activation, live authority or deployed-contract readiness is implied by this deferral.
+
+
 ## RESOURCE-AUDIT-10 — Genesis acceptance closeout
 
 Status: **BLOCKED BY RESOURCE-AUDIT-8/9**

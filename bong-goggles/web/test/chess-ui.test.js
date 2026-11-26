@@ -44,3 +44,43 @@ test('BC-3.4 no speculative moves, authoritative refresh and account revocation'
  await c.act({type:'move',uci:'e2e4'});assert.equal(posts,1);assert.equal(c.state.session.sequence,2);
  subject=null;await c.refresh(id);assert.equal(c.state.session,null);assert.deepEqual(c.state.actions,[]);
 });
+
+import {validateRuntimeConfig} from '../core/runtime-config.js';
+import {readFileSync} from 'node:fs';
+test('BC-3 release requires explicit activation and all account dependencies in production',()=>{
+ const config=JSON.parse(readFileSync(new URL('../runtime-config.example.json',import.meta.url),'utf8'));
+ config.environment='production';
+ config.features={...config.features,accountSocial:true,accountGames:true,classicRooms:true,classicCommunications:true,chessRestricted:true};
+ assert.equal(validateRuntimeConfig(config).features.chessRestricted,true);
+ for(const key of ['accountSocial','accountGames','classicRooms','classicCommunications','chessRestricted']){
+  assert.equal(validateRuntimeConfig({...config,features:{...config.features,[key]:false}}).features.chessRestricted,false,key);
+ }
+ const disabled=renderApplicationShell({pathname:'/games/chess',chessState:{status:'disabled'}});
+ assert.match(disabled,/not enabled in this deployment/);assert.match(disabled,/data-game-screen="intro"/);assert.doesNotMatch(disabled,/data-chess-start/);
+ const setup=renderApplicationShell({pathname:'/games/chess/setup',chessState:{status:'disabled'}});
+ assert.match(setup,/<fieldset disabled>/);assert.match(setup,/Seat 2/);assert.doesNotMatch(setup,/data-chess-start/);
+});
+
+test('BC-3.7 a legal click during polling submits once and stale read cannot overwrite the result',async()=>{
+ let seq=1,posts=0,hold=false,release,entered;
+ const blocked=new Promise(r=>{release=r}),started=new Promise(r=>{entered=r});
+ const c=new ChessController({enabled:true,fetchImpl:async(url,opts)=>{
+  let data;
+  if(url.endsWith('/v1/me'))data={walletRequired:false,profile:{subject:actor}};
+  else if(url.endsWith('/chess-actions'))data=envelope({sequence:seq,actions:seq===1?[{type:'move',uci:'e2e4'}]:[{type:'resign'}]}).data;
+  else{
+   if(opts.method==='POST'){posts++;assert.equal(JSON.parse(opts.body).expectedSequence,2);seq++;}
+   const s=fixture();s.sequence=seq;if(seq===2){s.turnSeat=1;s.privateView.turn=1;s.privateView.lastSAN='e4';s.privateView.lastMove='e2e4';}
+   data=envelope({session:s}).data;
+   if(hold&&opts.method==='GET'){hold=false;entered();await blocked;}
+  }
+  return new Response(JSON.stringify(data),{headers:{'content-type':'application/json'}});
+ }});
+ await c.refresh(id);hold=true;const polling=c.refresh(id);await started;
+ const action=c.act({type:'move',uci:'e2e4'});
+ await c.act({type:'move',uci:'e2e4'});
+ await action;assert.equal(posts,1);assert.equal(c.state.session.sequence,2);
+ release();await polling;
+ assert.equal(c.state.session.sequence,2);assert.equal(c.state.session.view.lastSAN,'e4');
+ assert.match(renderChessScreen('play',c.state),/Last move: e4/);
+});

@@ -35,6 +35,12 @@ const flags=resolveClassicBuildFlags({account:accountFlag,rooms:process.env[CLAS
  communications:process.env[CLASSIC_COMMUNICATIONS_BUILD_FLAG],pages:process.env.CF_PAGES,
  branch:process.env.CF_PAGES_BRANCH});
 const runtimeConfig=withAccountSocialBuildFlags(example,accountFlag,flags.rooms,flags.communications);
+// BC-3 release: main Pages only by default; explicit false is an operator rollback.
+const chessFlag=process.env.BG_CHESS_ACTIVATION;
+if(chessFlag!==undefined&&!['true','false'].includes(chessFlag))throw Error('BG_CHESS_ACTIVATION must be exactly true or false');
+const chessOn=chessFlag==='true'||(chessFlag===undefined&&process.env.CF_PAGES==='1'&&process.env.CF_PAGES_BRANCH==='main'&&runtimeConfig.features.classicCommunications);
+if(chessOn&&!runtimeConfig.features.classicCommunications)throw Error('Chess requires authenticated Classic rooms and communications');
+runtimeConfig.features.chessRestricted=Boolean(chessOn);
 validateRuntimeConfig(runtimeConfig);
 
 for(const item of ['index.html','app.js','styles.css','game-kit.css','classic-communications.css','settings.css','branding.css','feed-branding.css','dashboard.css','classics.css','ccc-tabletop.css','ccc-practice.css','cribbage.css','labyrinth.css','chess.css','word-salad.css','welcome-landscape.svg','core','_headers']){

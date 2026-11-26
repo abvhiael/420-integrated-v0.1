@@ -82,3 +82,34 @@ test('BC-1.8 production Pages main activates Classic rooms and messages only wit
  const disabled=set({account:'true',pages:'1',branch:'main',rooms:'false',communications:'false'});
  assert.equal(withAccountSocialBuildFlags(example,'true',disabled.rooms,disabled.communications).features.classicCommunications,false);
 });
+
+import {verifyAccountSocialOutput} from '../scripts/verify-account-social-output.mjs';
+test('BC-3 output verifier covers Chess default, production, preview, rollback and dependency gates',()=>{
+ const main={CF_PAGES:'1',CF_PAGES_BRANCH:'main',BG_ACCOUNT_SOCIAL_ACTIVATION:'true'};
+ const preview={...main,CF_PAGES_BRANCH:'preview'};
+ const explicit={BG_ACCOUNT_SOCIAL_ACTIVATION:'true',BG_CLASSIC_ROOMS_ACTIVATION:'true',BG_CLASSIC_COMMUNICATIONS_ACTIVATION:'true'};
+ for(const [env,enabled,rooms,communications,chess] of [
+  [{},false,false,false,false],
+  [main,true,true,true,true],
+  [preview,true,false,false,false],
+  [{...preview,...explicit},true,true,true,false],
+  [{...preview,...explicit,BG_CHESS_ACTIVATION:'true'},true,true,true,true],
+  [{...main,BG_CHESS_ACTIVATION:'false'},true,true,true,false],
+  [{...main,BG_CLASSIC_ROOMS_ACTIVATION:'false'},true,false,false,false],
+  [{...main,BG_CLASSIC_COMMUNICATIONS_ACTIVATION:'false'},true,true,false,false],
+  [{...main,BG_ACCOUNT_SOCIAL_ACTIVATION:'false'},false,false,false,false],
+  [explicit,true,true,true,false]
+ ]){
+  const out={...example,features:{...example.features,accountSocial:enabled,accountMessaging:enabled,
+   accountGames:enabled,accountXP:enabled,classicRooms:rooms,classicCommunications:communications,chessRestricted:chess}};
+  const mode=enabled?'enabled':'disabled';
+  assert.equal(verifyAccountSocialOutput(example,out,mode,env),chess);
+  assert.throws(()=>verifyAccountSocialOutput(example,{...out,features:{...out.features,chessRestricted:!chess}},mode,env),/modified another/);
+  assert.throws(()=>verifyAccountSocialOutput(example,{...out,chainId:1},mode,env),/modified another/);
+  assert.throws(()=>verifyAccountSocialOutput(example,{...out,features:{...out.features,accountMonetization:true}},mode,env),/modified another/);
+ }
+ for(const env of [{BG_CHESS_ACTIVATION:'true'},{...main,BG_CLASSIC_ROOMS_ACTIVATION:'false',BG_CHESS_ACTIVATION:'true'},{...main,BG_CLASSIC_COMMUNICATIONS_ACTIVATION:'false',BG_CHESS_ACTIVATION:'true'}]){
+  assert.throws(()=>verifyAccountSocialOutput(example,example,env.BG_ACCOUNT_SOCIAL_ACTIVATION==='true'?'enabled':'disabled',env),/Chess requires/);
+ }
+ for(const bad of ['TRUE','1','',' true'])assert.throws(()=>verifyAccountSocialOutput(example,example,'disabled',{BG_CHESS_ACTIVATION:bad}),/BG_CHESS_ACTIVATION/);
+});

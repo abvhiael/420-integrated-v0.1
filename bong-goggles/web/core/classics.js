@@ -25,7 +25,7 @@ export const CLASSIC_COLLECTIONS=Object.freeze([
   item('asshole','Asshole','4','planned','Four-player climbing/shedding game with President and Asshole exchanges.')
  ])}),
  Object.freeze({id:'board',title:'Boards & Tiles',games:Object.freeze([
-  item('chess','Chess','2','registry','Canonical two-player session registry only.'),
+  item('chess','Chess','2','playable','Orthodox chess; 420ID, human or computer opponents.'),
   item('scrabble','Word Salad','2–4','planned','Six board sizes, cannabis vocabulary bonuses and original premium squares; public Play remains gated pending release qualification.'),
   item('checkers','Checkers','2','registry','Canonical two-player session registry only.'),
   item('backgammon','Backgammon','2','registry','Canonical two-player session registry only.'),

@@ -103,4 +103,44 @@ contract ResourceGenesis420Test {
         c.withdraw(id);
         require(c.getPosition(id).slashable==0 && c.custodyInvariant(),"discharged session exit");
     }
+
+    function testRealSettlementGrantLifecycleAndLimits() public {
+        Env memory e = setup();
+        (,,bytes32 offerId) = activateRelay(e);
+        vm.prank(BOB);
+        bytes32 sessionId = e.sessions.openCanonicalSession(offerId,10,uint64(block.timestamp+100),101);
+        vm.prank(BOB);
+        e.sessions.closeSession(sessionId);
+        bytes32 scope = e.auth.scopeSession(sessionId);
+        bytes32 action = ResourceIds420.ACTION_SETTLE;
+        bytes32 component = ResourceIds420.COMPONENT_RESOURCE;
+        bytes32 id = keccak256("future settlement");
+        e.caps.createGrant(id,SETTLER,component,action,scope,20,0,0,uint64(block.timestamp+10),uint64(block.timestamp+20));
+        require(!e.auth.isSessionAuthorized(SETTLER,sessionId,action,20),"future grant");
+        vm.warp(block.timestamp+10);
+        require(e.auth.isSessionAuthorized(SETTLER,sessionId,action,20),"valid exact limit");
+        require(!e.auth.isSessionAuthorized(SETTLER,sessionId,action,21),"over limit");
+        require(!e.auth.isSessionAuthorized(ALICE,sessionId,action,20),"wrong principal");
+        require(!e.auth.isSessionAuthorized(SETTLER,bytes32(uint256(123)),action,20),"wrong scope");
+        require(!e.auth.isSessionAuthorized(SETTLER,sessionId,ResourceIds420.ACTION_UPDATE_PROVIDER,20),"wrong action");
+        vm.warp(block.timestamp+10);
+        require(e.auth.isSessionAuthorized(SETTLER,sessionId,action,20),"exact expiration boundary");
+        vm.warp(block.timestamp+1);
+        require(!e.auth.isSessionAuthorized(SETTLER,sessionId,action,20),"expired");
+        bytes32 metered = keccak256("metered settlement");
+        e.caps.createGrant(metered,SETTLER,component,action,scope,20,20,60,0,0);
+        require(!e.auth.isSessionAuthorized(SETTLER,sessionId,action,20),"unconsumed period allowance");
+        require(e.caps.grant(id).revoked,"old grant not replaced");
+        bytes32 valid = keccak256("valid settlement");
+        e.caps.createGrant(valid,SETTLER,component,action,scope,20,0,0,0,0);
+        e.caps.revokeGrant(valid);
+        require(!e.auth.isSessionAuthorized(SETTLER,sessionId,action,20),"revoked");
+        bytes32 finalGrant = keccak256("final settlement");
+        e.caps.createGrant(finalGrant,SETTLER,component,action,scope,20,0,0,0,0);
+        vm.prank(SETTLER);
+        e.sessions.markSettled(sessionId,20);
+        vm.prank(SETTLER);
+        (bool replay,) = address(e.sessions).call(abi.encodeCall(e.sessions.markSettled,(sessionId,20)));
+        require(!replay,"settlement replay");
+    }
 }

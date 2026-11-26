@@ -33,6 +33,7 @@ contract StorageCapacityRegistry420 is I420System {
 
     mapping(bytes32 => Capacity) private _capacities;
     mapping(bytes32 => Reservation) private _reservations;
+    mapping(bytes32 => bytes32) public collateralReservation;
 
     error ZeroAddress();
     error InvalidCapacity();
@@ -114,6 +115,7 @@ contract StorageCapacityRegistry420 is I420System {
         reservationId = canonicalReservationId(nodeId, agreementId);
         if (_reservations[reservationId].exists) revert ReservationExists();
 
+        collateralReservation[reservationId] = providers.collateral().reserveExposure(node.providerId, reservationId, 0);
         capacity.reservedBytes += sizeBytes;
         _reservations[reservationId] = Reservation({
             nodeId: nodeId,
@@ -134,6 +136,7 @@ contract StorageCapacityRegistry420 is I420System {
         Capacity storage capacity = _capacities[reservation.nodeId];
         capacity.reservedBytes -= reservation.sizeBytes;
         reservation.active = false;
+        providers.collateral().releaseExposure(collateralReservation[reservationId]);
         emit StorageCapacityReleased(reservationId, reservation.nodeId, reservation.sizeBytes);
     }
 

@@ -1,0 +1,739 @@
+{
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "NativeDeposited",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "TokenDeposited",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "obligationId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "controller",
+          "type": "address"
+        }
+      ],
+      "name": "PayerSafetyControllerBound",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "operationId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "Withdrawal",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "operationId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "obligationId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "ObligationOperation",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "CMP_PAYER_SAFETY_TYPE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidAmount",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidRecipient",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidState",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ProtectedPayerSafetyObligation",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Reentrancy",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Replay",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "TransferFailed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Unauthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "UnexpectedTokenDelta",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "WrongVaultRegistration",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroAddress",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "accounting",
+      "outputs": [
+        {
+          "internalType": "contract VaultAccounting420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "authorization",
+      "outputs": [
+        {
+          "internalType": "contract VaultAuthorization420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "canClose",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "depositNative",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "protocolVersion",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "registrationCreator",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "registry",
+      "outputs": [
+        {
+          "internalType": "contract VaultRegistry420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "systemName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "vaultId",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "depositToken",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "executedOperation",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "payerSafetyController",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "operationId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "withdraw",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "operationId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "obligationId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "beneficiary",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "obligationType",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "sourceRef",
+          "type": "bytes32"
+        }
+      ],
+      "name": "createObligation",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "operationId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "obligationId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "cancelObligation",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "operationId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "obligationId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "claim",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "operationId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "obligationId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "releaseObligation",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "vaultId_",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "registry_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "authorization_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "accounting_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "registrationCreator_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "stateMutability": "payable",
+      "type": "receive"
+    }
+  ],
+  "creationBytecode": {
+    "bytes": 8032,
+    "immutableReferences": {},
+    "linkReferences": {},
+    "sha256": "d70dade91676cf9ae02d7529c9b634e1e1845b379cc2269d3341dbd7b9add751"
+  },
+  "runtimeBytecodeTemplate": {
+    "bytes": 7440,
+    "immutableReferences": {
+      "6914": [
+        {
+          "length": 32,
+          "start": 286
+        },
+        {
+          "length": 32,
+          "start": 592
+        },
+        {
+          "length": 32,
+          "start": 1454
+        },
+        {
+          "length": 32,
+          "start": 2183
+        },
+        {
+          "length": 32,
+          "start": 2655
+        },
+        {
+          "length": 32,
+          "start": 3937
+        },
+        {
+          "length": 32,
+          "start": 4385
+        },
+        {
+          "length": 32,
+          "start": 4555
+        },
+        {
+          "length": 32,
+          "start": 5456
+        },
+        {
+          "length": 32,
+          "start": 5678
+        },
+        {
+          "length": 32,
+          "start": 6057
+        },
+        {
+          "length": 32,
+          "start": 6948
+        }
+      ],
+      "6917": [
+        {
+          "length": 32,
+          "start": 2713
+        },
+        {
+          "length": 32,
+          "start": 3425
+        },
+        {
+          "length": 32,
+          "start": 5722
+        },
+        {
+          "length": 32,
+          "start": 6101
+        },
+        {
+          "length": 32,
+          "start": 7003
+        }
+      ],
+      "6920": [
+        {
+          "length": 32,
+          "start": 706
+        },
+        {
+          "length": 32,
+          "start": 1419
+        },
+        {
+          "length": 32,
+          "start": 2288
+        },
+        {
+          "length": 32,
+          "start": 3150
+        },
+        {
+          "length": 32,
+          "start": 3595
+        },
+        {
+          "length": 32,
+          "start": 4659
+        }
+      ],
+      "6923": [
+        {
+          "length": 32,
+          "start": 332
+        },
+        {
+          "length": 32,
+          "start": 778
+        },
+        {
+          "length": 32,
+          "start": 1267
+        },
+        {
+          "length": 32,
+          "start": 1638
+        },
+        {
+          "length": 32,
+          "start": 2367
+        },
+        {
+          "length": 32,
+          "start": 2781
+        },
+        {
+          "length": 32,
+          "start": 3883
+        },
+        {
+          "length": 32,
+          "start": 4734
+        },
+        {
+          "length": 32,
+          "start": 5385
+        }
+      ],
+      "6925": [
+        {
+          "length": 32,
+          "start": 1200
+        }
+      ]
+    },
+    "linkReferences": {},
+    "sha256": "d46bfb75a7bffb4acb84b6c90b03ca97381241e2df73a572368ae9d521fb5f4d"
+  },
+  "source": "contracts/src/vault/AssetVault420.sol",
+  "sourceBlob": "c4dbcc6c60588c8487de53c9203b887a04852f89",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 6934,
+        "contract": "src/vault/AssetVault420.sol:AssetVault420",
+        "label": "payerSafetyController",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_address)"
+      },
+      {
+        "astId": 6938,
+        "contract": "src/vault/AssetVault420.sol:AssetVault420",
+        "label": "executedOperation",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_bytes32,t_bool)"
+      },
+      {
+        "astId": 6940,
+        "contract": "src/vault/AssetVault420.sol:AssetVault420",
+        "label": "_entered",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_uint256"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_bytes32,t_address)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => address)",
+        "numberOfBytes": "32",
+        "value": "t_address"
+      },
+      "t_mapping(t_bytes32,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

@@ -1,0 +1,432 @@
+{
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "metadataHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "stakeRef",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "revision",
+          "type": "uint32"
+        }
+      ],
+      "name": "ProviderUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum ResourceProviderRegistry420.State",
+          "name": "state",
+          "type": "uint8"
+        }
+      ],
+      "name": "ProviderStateChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operatorAccount",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "stakeRef",
+          "type": "bytes32"
+        }
+      ],
+      "name": "ProviderRegistered",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidProvider",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidState",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ProviderExists",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ProviderNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "StakeRequired",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Unauthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "authorization",
+      "outputs": [
+        {
+          "internalType": "contract ResourceAuthorization420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "protocolVersion",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "systemName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "authorization_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "operatorAccount",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "metadataHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "stakeRef",
+          "type": "bytes32"
+        }
+      ],
+      "name": "registerProvider",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "metadataHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "stakeRef",
+          "type": "bytes32"
+        }
+      ],
+      "name": "updateProvider",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "enum ResourceProviderRegistry420.State",
+          "name": "next",
+          "type": "uint8"
+        }
+      ],
+      "name": "setState",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getProvider",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "operatorAccount",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "metadataHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "stakeRef",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "revision",
+              "type": "uint32"
+            },
+            {
+              "internalType": "enum ResourceProviderRegistry420.State",
+              "name": "state",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct ResourceProviderRegistry420.Provider",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isActive",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "creationBytecode": {
+    "bytes": 2950,
+    "immutableReferences": {},
+    "linkReferences": {},
+    "sha256": "de6947962909aea1017b3dc7c779757268f4af47a1989e9607af79cef659b7ea"
+  },
+  "runtimeBytecodeTemplate": {
+    "bytes": 2740,
+    "immutableReferences": {
+      "1605": [
+        {
+          "length": 32,
+          "start": 411
+        },
+        {
+          "length": 32,
+          "start": 703
+        },
+        {
+          "length": 32,
+          "start": 1154
+        },
+        {
+          "length": 32,
+          "start": 2155
+        }
+      ]
+    },
+    "linkReferences": {},
+    "sha256": "99900b01a770288305a31e63028e57110f7a4600207c4f7a53be5a26d823c6c0"
+  },
+  "source": "contracts/src/resource/ResourceProviderRegistry420.sol",
+  "sourceBlob": "1af202c8d0d0a22bb3dfd3f9c25edc6829596efe",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 1610,
+        "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+        "label": "_providers",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_struct(Provider)1602_storage)"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_enum(State)1588": {
+        "encoding": "inplace",
+        "label": "enum ResourceProviderRegistry420.State",
+        "numberOfBytes": "1"
+      },
+      "t_mapping(t_bytes32,t_struct(Provider)1602_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct ResourceProviderRegistry420.Provider)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Provider)1602_storage"
+      },
+      "t_struct(Provider)1602_storage": {
+        "encoding": "inplace",
+        "label": "struct ResourceProviderRegistry420.Provider",
+        "members": [
+          {
+            "astId": 1590,
+            "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+            "label": "operatorAccount",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address"
+          },
+          {
+            "astId": 1592,
+            "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+            "label": "metadataHash",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 1594,
+            "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+            "label": "stakeRef",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 1596,
+            "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+            "label": "revision",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint32"
+          },
+          {
+            "astId": 1599,
+            "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+            "label": "state",
+            "offset": 4,
+            "slot": "3",
+            "type": "t_enum(State)1588"
+          },
+          {
+            "astId": 1601,
+            "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+            "label": "exists",
+            "offset": 5,
+            "slot": "3",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "128"
+      },
+      "t_uint32": {
+        "encoding": "inplace",
+        "label": "uint32",
+        "numberOfBytes": "4"
+      }
+    }
+  }
+}

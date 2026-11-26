@@ -1,0 +1,97 @@
+name: Resource 8A2 compiler artifact reconciliation
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/**'
+      - 'contracts/foundry.toml'
+      - 'contracts/config/resource/**'
+      - 'scripts/resource-8a2-artifacts.py'
+      - 'scripts/qualify-resource-solidity.py'
+      - 'docs/audit/420RESOURCE-8A2-artifacts/**'
+      - '.github/workflows/resource-8a2-artifact-reconciliation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.9.0
+      - name: Generate and reconcile compiler artifacts
+        run: |
+          set -euo pipefail
+          archive=docs/audit/420RESOURCE-8A2-artifacts
+          args=()
+          if test -f "$archive/sha256.json"; then args+=(--check "$archive"); fi
+          python scripts/resource-8a2-artifacts.py --out "$RUNNER_TEMP/resource-8a2-artifacts" "${args[@]}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: resource-8a2-compiler-evidence
+          path: ${{ runner.temp }}/resource-8a2-artifacts
+          if-no-files-found: error
+          retention-days: 90
+
+  retain-original-evidence:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'audit/resource-8a2-provider-collateral'
+    needs: reconcile
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Retain original verified compiler archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          BRANCH: audit/resource-8a2-provider-collateral
+        run: |
+          set -euo pipefail
+          archive=docs/audit/420RESOURCE-8A2-artifacts
+          if test -f "$archive/sha256.json"; then exit 0; fi
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/15079861513/zip" > "$RUNNER_TEMP/original.zip"
+          echo "764683eb0bea887910573dec69cbc137975e1f34a10b14a4f2eda91dcaae8739  $RUNNER_TEMP/original.zip" | sha256sum --check
+          mkdir -p "$archive"
+          unzip -q "$RUNNER_TEMP/original.zip" -d "$archive"
+          python - "$archive" <<'PY'
+          import hashlib, json, pathlib, sys
+          root = pathlib.Path(sys.argv[1])
+          manifest = json.loads((root/"sha256.json").read_text())
+          assert len(manifest) == 20
+          assert set(manifest) == {str(f.relative_to(root)) for f in root.rglob("*.json")} - {"sha256.json"}
+          for path, digest in manifest.items():
+              assert hashlib.sha256((root/path).read_bytes()).hexdigest() == digest, path
+          comparison = json.loads((root/"comparison.json").read_text())
+          assert comparison["qualified"] == "6837f137229ff0d9496d2d74d1cb0bea50680de5"
+          assert comparison["baseline"] == "b1a7ad6bed675655385c082ce9df5dd87ecce2de"
+          PY
+      - uses: actions/download-artifact@v4
+        with:
+          name: resource-8a2-compiler-evidence
+          path: ${{ runner.temp }}/regenerated
+      - name: Verify deterministic regeneration and commit retained files
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          BRANCH: audit/resource-8a2-provider-collateral
+        run: |
+          set -euo pipefail
+          archive=docs/audit/420RESOURCE-8A2-artifacts
+          diff -r "$archive" "$RUNNER_TEMP/regenerated"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- "$archive"
+          if git diff --cached --quiet; then exit 0; fi
+          test "$(git ls-remote origin "refs/heads/$BRANCH" | cut -f1)" = "$EXPECTED_HEAD"
+          git commit -m "Archive verified RESOURCE-AUDIT-8A.2 compiler evidence"
+          git push origin "HEAD:refs/heads/$BRANCH"

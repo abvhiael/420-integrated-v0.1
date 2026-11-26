@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import "./helpers/ResourceCollateralFixture420.sol";
 
 import "../src/interfaces/genesis/ICapabilityRegistry420.sol";
 import "../src/resource/ResourceIds420.sol";
@@ -24,8 +25,8 @@ contract ResourceGenesis420Test {
     VmResource420 constant vm=VmResource420(address(uint160(uint256(keccak256("hevm cheat code")))));
     address constant ALICE=address(0xA11CE); address constant BOB=address(0xB0B); address constant SETTLER=address(0x420); address constant DELEGATE=address(0xD311);
     struct Env { MockResourceCaps420 caps; ResourceAuthorization420 auth; ResourcePolicyRegistry420 policy; ResourceProviderRegistry420 providers; ResourceNodeRegistry420 nodes; ResourceOfferRegistry420 offers; ResourceSessionRegistry420 sessions; ResourceReceiptRegistry420 receipts; ResourceRouter420 router; }
-    function setup() internal returns(Env memory e){e.caps=new MockResourceCaps420();e.auth=new ResourceAuthorization420(address(e.caps));e.policy=new ResourcePolicyRegistry420(address(this));e.providers=new ResourceProviderRegistry420(address(e.auth));e.nodes=new ResourceNodeRegistry420(address(e.auth),address(e.providers));e.offers=new ResourceOfferRegistry420(address(e.nodes),address(e.providers),address(e.policy),address(e.auth));e.sessions=new ResourceSessionRegistry420(address(e.offers),address(e.auth));e.receipts=new ResourceReceiptRegistry420(address(e.sessions),address(e.offers),address(e.nodes));e.router=new ResourceRouter420(address(e.policy),address(e.nodes),address(e.offers));e.policy.setPolicy(ResourceIds420.SERVICE_RELAY,keccak256("relay-policy"),3600,1_000_000,true);e.policy.setPolicy(ResourceIds420.SERVICE_STORE,keccak256("store-policy"),86400,1_000_000,true);}
-    function registerRelayNode(Env memory e) internal returns(bytes32 providerId,bytes32 nodeId){providerId=keccak256("provider");nodeId=keccak256("node");vm.prank(ALICE);e.providers.registerProvider(providerId,ALICE,keccak256("meta"),keccak256("stake"));vm.prank(ALICE);e.providers.setState(providerId,ResourceProviderRegistry420.State.ACTIVE);vm.prank(ALICE);e.nodes.registerNode(nodeId,providerId,ResourceIds420.SERVICE_RELAY,ALICE,keccak256("endpoint"),keccak256("capacity"));}
+    function setup() internal returns(Env memory e){e.caps=new MockResourceCaps420();e.auth=new ResourceAuthorization420(address(e.caps));e.policy=new ResourcePolicyRegistry420(address(this));e.providers=new ResourceProviderRegistry420(address(e.auth),address(this));ResourceCollateralFixture420.deploy(e.providers,address(e.caps));e.nodes=new ResourceNodeRegistry420(address(e.auth),address(e.providers));e.offers=new ResourceOfferRegistry420(address(e.nodes),address(e.providers),address(e.policy),address(e.auth));e.sessions=new ResourceSessionRegistry420(address(e.offers),address(e.auth));ResourceCollateralFixture420.enable(e.providers,address(e.sessions));e.receipts=new ResourceReceiptRegistry420(address(e.sessions),address(e.offers),address(e.nodes));e.router=new ResourceRouter420(address(e.policy),address(e.nodes),address(e.offers));e.policy.setPolicy(ResourceIds420.SERVICE_RELAY,keccak256("relay-policy"),3600,1_000_000,true);e.policy.setPolicy(ResourceIds420.SERVICE_STORE,keccak256("store-policy"),86400,1_000_000,true);}
+    function registerRelayNode(Env memory e) internal returns(bytes32 providerId,bytes32 nodeId){providerId=keccak256("provider");nodeId=keccak256("node");vm.prank(ALICE);e.providers.registerProvider(providerId,ALICE,keccak256("meta"),keccak256("stake"));ResourceCollateralFixture420.fund(e.providers,providerId,ALICE);vm.prank(ALICE);e.providers.setState(providerId,ResourceProviderRegistry420.State.ACTIVE);vm.prank(ALICE);e.nodes.registerNode(nodeId,providerId,ResourceIds420.SERVICE_RELAY,ALICE,keccak256("endpoint"),keccak256("capacity"));}
     function activateRelay(Env memory e) internal returns(bytes32 providerId,bytes32 nodeId,bytes32 offerId){(providerId,nodeId)=registerRelayNode(e);offerId=keccak256("offer");vm.prank(ALICE);e.nodes.setState(nodeId,ResourceNodeRegistry420.State.ACTIVE);vm.prank(ALICE);e.offers.publishOffer(offerId,nodeId,2,1000,keccak256("terms"),uint64(block.timestamp+1000));}
     function testProviderNeedsStakeAndDefaultDeny() public {Env memory e=setup();bytes32 p=keccak256("p");vm.prank(BOB);(bool bad,)=address(e.providers).call(abi.encodeWithSelector(e.providers.registerProvider.selector,p,ALICE,bytes32(0),bytes32(0)));require(!bad,"third party register");vm.prank(ALICE);e.providers.registerProvider(p,ALICE,bytes32(0),bytes32(0));vm.prank(ALICE);(bool active,)=address(e.providers).call(abi.encodeWithSelector(e.providers.setState.selector,p,ResourceProviderRegistry420.State.ACTIVE));require(!active,"stake bypass");}
     function testFourServiceClassesAreDistinct() public {require(ResourceIds420.SERVICE_RELAY!=ResourceIds420.SERVICE_STORE&&ResourceIds420.SERVICE_STORE!=ResourceIds420.SERVICE_CACHE&&ResourceIds420.SERVICE_CACHE!=ResourceIds420.SERVICE_GATEWAY,"service collision");}
@@ -38,4 +39,75 @@ contract ResourceGenesis420Test {
     function testReceiptsMustAdvanceAndBeNonzero() public {Env memory e=setup();(,,bytes32 offerId)=activateRelay(e);bytes32 sessionId=e.sessions.canonicalSessionId(BOB,offerId,11);vm.prank(BOB);e.sessions.openSession(sessionId,offerId,10,uint64(block.timestamp+100));bytes32 zeroUsage=keccak256("zero");bytes32 zeroReceiptId=e.receipts.canonicalReceiptId(sessionId,0,zeroUsage);vm.prank(ALICE);(bool zeroOk,)=address(e.receipts).call(abi.encodeWithSelector(e.receipts.submitReceipt.selector,zeroReceiptId,sessionId,uint128(0),zeroUsage));require(!zeroOk,"zero receipt accepted");bytes32 firstUsage=keccak256("first");bytes32 firstReceiptId=e.receipts.canonicalReceiptId(sessionId,2,firstUsage);vm.prank(ALICE);e.receipts.submitReceipt(firstReceiptId,sessionId,2,firstUsage);bytes32 equalUsage=keccak256("equal");bytes32 equalReceiptId=e.receipts.canonicalReceiptId(sessionId,2,equalUsage);vm.prank(ALICE);(bool equalOk,)=address(e.receipts).call(abi.encodeWithSelector(e.receipts.submitReceipt.selector,equalReceiptId,sessionId,uint128(2),equalUsage));require(!equalOk,"non-advancing receipt accepted");}
     function testConsumerCanCancelOpenSessionOnly() public {Env memory e=setup();(,,bytes32 offerId)=activateRelay(e);bytes32 sessionId=e.sessions.canonicalSessionId(BOB,offerId,12);vm.prank(BOB);e.sessions.openSession(sessionId,offerId,10,uint64(block.timestamp+100));vm.prank(ALICE);(bool unauthorized,)=address(e.sessions).call(abi.encodeWithSelector(e.sessions.cancelSession.selector,sessionId));require(!unauthorized,"third-party cancellation");vm.prank(BOB);e.sessions.cancelSession(sessionId);require(e.sessions.getSession(sessionId).state==ResourceSessionRegistry420.State.CANCELLED,"session not cancelled");}
 
+    function testForgedNonzeroStakeCannotActivateProvider() public {
+        Env memory e = setup();
+        bytes32 id = keccak256("forged-provider");
+        vm.prank(ALICE);
+        e.providers.registerProvider(id, ALICE, keccak256("meta"), keccak256("fabricated-collateral"));
+        vm.prank(ALICE);
+        (bool accepted,) = address(e.providers).call(abi.encodeWithSelector(
+            e.providers.setState.selector, id, ResourceProviderRegistry420.State.ACTIVE
+        ));
+        require(!accepted, "arbitrary nonzero referenceId activated provider");
+        require(!e.providers.isActive(id), "forged collateral is economically eligible");
+    }
+
+    function testFuzzArbitraryNonzeroStakeReferenceCannotActivate(bytes32 referenceId) public {
+        if (referenceId == bytes32(0)) return;
+        Env memory e = setup();
+        bytes32 id = keccak256("fuzz-provider");
+        vm.prank(ALICE);
+        e.providers.registerProvider(id, ALICE, keccak256("meta"), referenceId);
+        vm.prank(ALICE);
+        (bool accepted,) = address(e.providers).call(abi.encodeWithSelector(
+            e.providers.setState.selector, id, ResourceProviderRegistry420.State.ACTIVE
+        ));
+        require(!accepted, "unfunded referenceId accepted");
+    }
+
+    function testUnauthorizedProviderActivationCannotUseForgedReference() public {
+        Env memory e = setup();
+        bytes32 id = keccak256("unauthorized-activation");
+        vm.prank(ALICE);
+        e.providers.registerProvider(id, ALICE, keccak256("meta"), keccak256("fabricated"));
+        vm.prank(BOB);
+        (bool accepted,) = address(e.providers).call(abi.encodeWithSelector(
+            e.providers.setState.selector, id, ResourceProviderRegistry420.State.ACTIVE
+        ));
+        require(!accepted, "unauthorized activation");
+        require(!e.providers.isActive(id), "unexpected active provider");
+    }
+
+    function testActiveAndClosedSessionBlockCollateralWithdrawalUntilDischarge() public {
+        Env memory e=setup();
+        (bytes32 providerId,,bytes32 offerId)=activateRelay(e);
+        ResourceProviderCollateral420 c=ResourceProviderCollateral420(address(e.providers.collateral()));
+        bytes32 id=c.positionId(providerId);
+        bytes32 session=e.sessions.canonicalSessionId(BOB,offerId,99);
+        vm.prank(BOB);
+        e.sessions.openSession(session,offerId,10,uint64(block.timestamp+100));
+        e.sessions.bindEconomicSettlementController(address(this));
+        vm.prank(ALICE);
+        c.requestExit(id);
+        vm.warp(c.withdrawableAt(id));
+        vm.prank(ALICE);
+        (bool ok,)=address(c).call(abi.encodeCall(c.withdraw,(id)));
+        require(!ok && c.outstandingReservations(id)==1,"active session withdrawal");
+        vm.prank(BOB);
+        e.sessions.closeSession(session);
+        (ok,)=address(e.sessions).call(abi.encodeCall(e.sessions.releaseDischargedSession,(session)));
+        require(!ok,"closed session premature discharge");
+        e.caps.set(SETTLER,ResourceIds420.COMPONENT_RESOURCE,ResourceIds420.ACTION_SETTLE,e.auth.scopeSession(session),true);
+        vm.prank(SETTLER);
+        e.sessions.markSettled(session,20);
+        vm.prank(ALICE);
+        (ok,)=address(c).call(abi.encodeCall(c.withdraw,(id)));
+        require(!ok,"legacy settled marker released collateral");
+        e.sessions.releaseDischargedSession(session);
+        (ok,)=address(e.sessions).call(abi.encodeCall(e.sessions.releaseDischargedSession,(session)));
+        require(!ok && c.outstandingReservations(id)==0,"session discharge replay");
+        vm.prank(ALICE);
+        c.withdraw(id);
+        require(c.getPosition(id).slashable==0 && c.custodyInvariant(),"discharged session exit");
+    }
 }

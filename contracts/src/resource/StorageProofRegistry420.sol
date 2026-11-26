@@ -33,6 +33,7 @@ contract StorageProofRegistry420 is I420System {
         StorageCommitmentRegistry420.Commitment memory commitment = commitments.getCommitment(commitmentId);
         if (challengeEpoch < commitment.startTime || challengeEpoch > commitment.endTime) revert ChallengeOutsideCommitment();
         if (block.timestamp < challengeEpoch) revert ProofTooEarly();
+        if (commitments.collateralReservation(commitmentId) == bytes32(0) || commitments.collateralReleased(commitmentId)) revert InactiveStoreNode();
         if (!nodes.isActiveFor(commitment.nodeId, ResourceIds420.SERVICE_STORE)) revert InactiveStoreNode();
         StorageProofSchemeRegistry420.Scheme memory scheme = schemes.getScheme(commitment.proofSchemeId);
         if (!scheme.active) revert InactiveProofScheme();

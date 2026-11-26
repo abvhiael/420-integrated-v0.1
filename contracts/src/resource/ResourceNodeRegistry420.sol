@@ -70,6 +70,7 @@ contract ResourceNodeRegistry420 is I420System {
                 || endpointHash == 0 || capacityHash == 0
         ) revert InvalidNode();
         if (_nodes[nodeId].exists) revert NodeExists();
+        if (!providers.isActive(providerId)) revert InvalidState();
 
         ResourceProviderRegistry420.Provider memory p = providers.getProvider(providerId);
         if (

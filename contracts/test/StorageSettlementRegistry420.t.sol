@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import "./helpers/ResourceCollateralFixture420.sol";
 
 import "../src/interfaces/genesis/ICapabilityRegistry420.sol";
 import "../src/resource/IStorageProofVerifier420.sol";
@@ -98,17 +99,17 @@ contract StorageSettlementRegistry420Test {
     function _deployRegistries(Env storage e) private {
         e.caps = new MockStorageSettlementCaps420();
         e.auth = new ResourceAuthorization420(address(e.caps));
-        e.providers = new ResourceProviderRegistry420(address(e.auth));
+        e.providers = new ResourceProviderRegistry420(address(e.auth),address(this));ResourceCollateralFixture420.deploy(e.providers,address(e.caps));
         e.nodes = new ResourceNodeRegistry420(address(e.auth), address(e.providers));
         e.policy = new ResourcePolicyRegistry420(address(this));
         e.offers = new ResourceOfferRegistry420(address(e.nodes), address(e.providers), address(e.policy), address(e.auth));
         e.verifier = new MockStorageSettlementVerifier420();
         e.schemes = new StorageProofSchemeRegistry420(address(e.auth));
-        e.commitments = new StorageCommitmentRegistry420(address(e.auth), address(e.providers), address(e.nodes), address(e.schemes));
+        e.commitments = new StorageCommitmentRegistry420(address(e.auth), address(e.providers), address(e.nodes), address(e.schemes));ResourceCollateralFixture420.enable(e.providers,address(e.commitments));
         e.proofs = new StorageProofRegistry420(address(e.commitments), address(e.schemes), address(e.nodes));
-        e.capacity = new StorageCapacityRegistry420(address(e.auth), address(e.nodes), address(e.providers));
-        e.agreements = new StorageAgreementRegistry420(address(e.auth), address(e.offers), address(e.nodes), address(e.providers), address(e.schemes), address(e.commitments), address(e.capacity));
-        e.settlements = new StorageSettlementRegistry420(address(e.agreements), address(e.proofs));
+        e.capacity = new StorageCapacityRegistry420(address(e.auth), address(e.nodes), address(e.providers));ResourceCollateralFixture420.enable(e.providers,address(e.capacity));
+        e.agreements = new StorageAgreementRegistry420(address(e.auth), address(e.offers), address(e.nodes), address(e.providers), address(e.schemes), address(e.commitments), address(e.capacity));ResourceCollateralFixture420.enable(e.providers,address(e.agreements));
+        e.settlements = new StorageSettlementRegistry420(address(e.agreements), address(e.proofs));e.agreements.bindSettlementController(address(e.settlements));
         e.vault = new MockStorageSettlementVault420();
     }
 
@@ -118,7 +119,7 @@ contract StorageSettlementRegistry420Test {
         e.offerId = keccak256("settlement-offer");
         e.schemeId = keccak256("settlement-scheme");
 
-        vm.prank(PROVIDER); e.providers.registerProvider(e.providerId, PROVIDER, keccak256("provider-meta"), keccak256("stake"));
+        vm.prank(PROVIDER); e.providers.registerProvider(e.providerId, PROVIDER, keccak256("provider-meta"), keccak256("stake"));ResourceCollateralFixture420.fund(e.providers,e.providerId,PROVIDER);
         vm.prank(PROVIDER); e.providers.setState(e.providerId, ResourceProviderRegistry420.State.ACTIVE);
         vm.prank(PROVIDER); e.nodes.registerNode(e.nodeId, e.providerId, ResourceIds420.SERVICE_STORE, PROVIDER, keccak256("endpoint"), keccak256("capacity"));
         vm.prank(PROVIDER); e.nodes.setState(e.nodeId, ResourceNodeRegistry420.State.ACTIVE);
@@ -230,5 +231,40 @@ contract StorageSettlementRegistry420Test {
         StorageSettlementRegistry420.Settlement memory s = e.settlements.getSettlement(settlementId);
         require(s.state == StorageSettlementRegistry420.State.CANCELLED, "not cancelled");
         require(e.vault.cancelled() == 20_000 && e.vault.reserved() == 0, "abort refund");
+    }
+
+    function testAgreementAndPendingSettlementBlockCollateralWithdrawalUntilDischarge() public {
+        Env storage e=env;
+        (bytes32 agreementId,bytes32 commitmentId,,uint64 endTime)=activateAgreement(e);
+        bytes32 settlementId=openAndFund(e,agreementId);
+        ResourceProviderCollateral420 c=ResourceProviderCollateral420(address(e.providers.collateral()));
+        bytes32 id=c.positionId(e.providerId);
+        vm.prank(PROVIDER);
+        c.requestExit(id);
+        vm.warp(c.withdrawableAt(id));
+        vm.prank(PROVIDER);
+        (bool ok,)=address(c).call(abi.encodeCall(c.withdraw,(id)));
+        require(!ok && c.outstandingReservations(id)==3,"active agreement withdrawal");
+        uint256 maturity=e.commitments.collateralReleaseAfter(commitmentId);
+        if (maturity < endTime) maturity=endTime;
+        vm.warp(maturity+1);
+        // Clear independent capacity and commitment obligations first, to isolate the settlement hold.
+        StorageAgreementRegistry420.Agreement memory a=e.agreements.getAgreement(agreementId);
+        e.capacity.releaseCapacity(a.capacityReservationId);
+        e.commitments.releaseExpiredCommitment(commitmentId);
+        e.agreements.completeAgreement(agreementId);
+        require(c.outstandingReservations(id)==1 && !e.agreements.collateralReleased(agreementId),"pending settlement released agreement");
+        vm.prank(PROVIDER);
+        (ok,)=address(c).call(abi.encodeCall(c.withdraw,(id)));
+        require(!ok,"pending settlement withdrawal");
+        for (uint32 i; i<4; ++i) {
+            (,uint64 deadline)=e.settlements.windowTiming(settlementId,i);
+            if (block.timestamp<=deadline) vm.warp(uint256(deadline)+1);
+            e.settlements.refundMissedWindow(settlementId,i);
+        }
+        require(e.agreements.collateralReleased(agreementId) && c.outstandingReservations(id)==0,"final settlement did not discharge");
+        vm.prank(PROVIDER);
+        c.withdraw(id);
+        require(c.getPosition(id).slashable==0 && c.custodyInvariant(),"discharged storage exit");
     }
 }

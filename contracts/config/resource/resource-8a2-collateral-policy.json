@@ -1,0 +1,20 @@
+{
+  "schema": "420-resource-collateral-policy-v1",
+  "status": "GOVERNANCE_PARAMETER_APPROVAL_REQUIRED",
+  "unit": "native $420 base units",
+  "minimumCollateral": null,
+  "minimumSlashable": null,
+  "withdrawalDelaySeconds": null,
+  "coverageBps": null,
+  "acceptingNew": false,
+  "evidence": [
+    "docs/architecture/infrastructure/storage-resource-infrastructure.md",
+    "docs/architecture/protocols/storage-proof-resource-protocol.md",
+    "contracts/config/420resource-genesis.json",
+    "contracts/config/compute-market/cmp-1.5.3-policy-minimum-collateral.json",
+    "docs/VALIDATOR-ECONOMICS-v0.3.md"
+  ],
+  "rationale": "Inspected Resource specifications require staking but do not establish numeric Resource collateral policy. Compute and validator parameters apply to distinct collateral authorities and are not imported. Governance must publish positive Resource-specific values with evidence commitment; unconfigured policy denies admission.",
+  "coverage": "ceil(aggregate native exposure * coverageBps / 10000), floored at minimumSlashable",
+  "withdrawal": "Snapshot policy revision and maturity at exit request; actual withdrawal must additionally require discharged obligations."
+}

@@ -1,0 +1,1194 @@
+{
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "suspended",
+          "type": "bool"
+        }
+      ],
+      "name": "AdmissionSuspensionChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "authority",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "codeHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "CollateralAuthorityBound",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "suspended",
+          "type": "bool"
+        }
+      ],
+      "name": "ProviderDisciplineChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "metadataHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "stakeRef",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "revision",
+          "type": "uint32"
+        }
+      ],
+      "name": "ProviderUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum ResourceProviderRegistry420.State",
+          "name": "state",
+          "type": "uint8"
+        }
+      ],
+      "name": "ProviderStateChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operatorAccount",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "stakeRef",
+          "type": "bytes32"
+        }
+      ],
+      "name": "ProviderRegistered",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sponsor",
+          "type": "address"
+        }
+      ],
+      "name": "CollateralSponsorChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "evidence",
+          "type": "bytes32"
+        }
+      ],
+      "name": "ProviderDisqualified",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "evidence",
+          "type": "bytes32"
+        }
+      ],
+      "name": "ProviderReinstated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint32",
+          "name": "revision",
+          "type": "uint32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "commitment",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "evidenceHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "CollateralPolicyPublished",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidProvider",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidState",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ProviderExists",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ProviderNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "StakeRequired",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Unauthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "admissionSuspended",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "authorization",
+      "outputs": [
+        {
+          "internalType": "contract ResourceAuthorization420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "collateral",
+      "outputs": [
+        {
+          "internalType": "contract IResourceProviderCollateral420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "collateralCodeHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "collateralPolicyRevision",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "governanceTimelock",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "minimumCollateral",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "protocolVersion",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "systemName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "authority",
+          "type": "address"
+        }
+      ],
+      "name": "bindCollateral",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "authorization_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "governanceTimelock_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bool",
+          "name": "suspended",
+          "type": "bool"
+        }
+      ],
+      "name": "setAdmissionSuspended",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "collateralSponsor",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "disciplinarySuspension",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "disciplineEvidence",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "disciplineRevision",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "permanentlyDisqualified",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "operatorAccount",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "metadataHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "stakeRef",
+          "type": "bytes32"
+        }
+      ],
+      "name": "registerProvider",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "sponsor",
+          "type": "address"
+        }
+      ],
+      "name": "setCollateralSponsor",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bool",
+          "name": "suspended",
+          "type": "bool"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "evidence",
+          "type": "bytes32"
+        }
+      ],
+      "name": "setDisciplinarySuspension",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "evidence",
+          "type": "bytes32"
+        }
+      ],
+      "name": "disqualifyProvider",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "metadataHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "stakeRef",
+          "type": "bytes32"
+        }
+      ],
+      "name": "updateProvider",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "remediationEvidence",
+          "type": "bytes32"
+        }
+      ],
+      "name": "reinstateProvider",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "enum ResourceProviderRegistry420.State",
+          "name": "next",
+          "type": "uint8"
+        }
+      ],
+      "name": "setState",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getProvider",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "operatorAccount",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "metadataHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "stakeRef",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "revision",
+              "type": "uint32"
+            },
+            {
+              "internalType": "enum ResourceProviderRegistry420.State",
+              "name": "state",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct ResourceProviderRegistry420.Provider",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isActive",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "exposure",
+          "type": "uint256"
+        }
+      ],
+      "name": "requiredSlashable",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "minimum",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "slashable",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint64",
+          "name": "delaySeconds",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint32",
+          "name": "coverageBps",
+          "type": "uint32"
+        },
+        {
+          "internalType": "bool",
+          "name": "acceptingNew",
+          "type": "bool"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "evidenceHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "publishCollateralPolicy",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "revision",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "revision",
+          "type": "uint32"
+        }
+      ],
+      "name": "collateralPolicy",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "minimumCollateral",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "minimumSlashable",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint64",
+              "name": "withdrawalDelay",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint32",
+              "name": "coverageBps",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bool",
+              "name": "acceptingNew",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "evidenceHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct ResourceProviderRegistry420.CollateralPolicy",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "revision",
+          "type": "uint32"
+        }
+      ],
+      "name": "collateralPolicyCommitment",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "creationBytecode": {
+    "bytes": 7212,
+    "immutableReferences": {},
+    "linkReferences": {},
+    "sha256": "1e8db845918303bdf4592e380be4911985275977e16fc3c039326143de87969d"
+  },
+  "runtimeBytecodeTemplate": {
+    "bytes": 6880,
+    "immutableReferences": {
+      "4540": [
+        {
+          "length": 32,
+          "start": 840
+        },
+        {
+          "length": 32,
+          "start": 2626
+        },
+        {
+          "length": 32,
+          "start": 3069
+        },
+        {
+          "length": 32,
+          "start": 4517
+        }
+      ],
+      "4547": [
+        {
+          "length": 32,
+          "start": 381
+        },
+        {
+          "length": 32,
+          "start": 1400
+        },
+        {
+          "length": 32,
+          "start": 1881
+        },
+        {
+          "length": 32,
+          "start": 2207
+        },
+        {
+          "length": 32,
+          "start": 3436
+        },
+        {
+          "length": 32,
+          "start": 4669
+        },
+        {
+          "length": 32,
+          "start": 5086
+        }
+      ]
+    },
+    "linkReferences": {},
+    "sha256": "7f7bfe901a60e3380625666114faad198fc348ad04eb1fc9635371c41ec28ce4"
+  },
+  "source": "contracts/src/resource/ResourceProviderRegistry420.sol",
+  "sourceBlob": "3ec1220ce303f3667f706f54d26b9a7a764492a9",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 4545,
+        "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+        "label": "_providers",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_struct(Provider)4537_storage)"
+      },
+      {
+        "astId": 4550,
+        "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+        "label": "collateral",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_contract(IResourceProviderCollateral420)4515"
+      },
+      {
+        "astId": 4552,
+        "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+        "label": "collateralCodeHash",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_bytes32"
+      },
+      {
+        "astId": 4567,
+        "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+        "label": "collateralPolicyRevision",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_uint32"
+      },
+      {
+        "astId": 4572,
+        "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+        "label": "_collateralPolicies",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_mapping(t_uint32,t_struct(CollateralPolicy)4565_storage)"
+      },
+      {
+        "astId": 4574,
+        "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+        "label": "admissionSuspended",
+        "offset": 0,
+        "slot": "5",
+        "type": "t_bool"
+      },
+      {
+        "astId": 4590,
+        "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+        "label": "disciplinarySuspension",
+        "offset": 0,
+        "slot": "6",
+        "type": "t_mapping(t_bytes32,t_bool)"
+      },
+      {
+        "astId": 4594,
+        "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+        "label": "permanentlyDisqualified",
+        "offset": 0,
+        "slot": "7",
+        "type": "t_mapping(t_bytes32,t_bool)"
+      },
+      {
+        "astId": 4598,
+        "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+        "label": "disciplineEvidence",
+        "offset": 0,
+        "slot": "8",
+        "type": "t_mapping(t_bytes32,t_bytes32)"
+      },
+      {
+        "astId": 4602,
+        "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+        "label": "disciplineRevision",
+        "offset": 0,
+        "slot": "9",
+        "type": "t_mapping(t_bytes32,t_uint64)"
+      },
+      {
+        "astId": 4618,
+        "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+        "label": "collateralSponsor",
+        "offset": 0,
+        "slot": "10",
+        "type": "t_mapping(t_bytes32,t_address)"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_contract(IResourceProviderCollateral420)4515": {
+        "encoding": "inplace",
+        "label": "contract IResourceProviderCollateral420",
+        "numberOfBytes": "20"
+      },
+      "t_enum(State)4523": {
+        "encoding": "inplace",
+        "label": "enum ResourceProviderRegistry420.State",
+        "numberOfBytes": "1"
+      },
+      "t_mapping(t_bytes32,t_address)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => address)",
+        "numberOfBytes": "32",
+        "value": "t_address"
+      },
+      "t_mapping(t_bytes32,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      },
+      "t_mapping(t_bytes32,t_bytes32)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => bytes32)",
+        "numberOfBytes": "32",
+        "value": "t_bytes32"
+      },
+      "t_mapping(t_bytes32,t_struct(Provider)4537_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct ResourceProviderRegistry420.Provider)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Provider)4537_storage"
+      },
+      "t_mapping(t_bytes32,t_uint64)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => uint64)",
+        "numberOfBytes": "32",
+        "value": "t_uint64"
+      },
+      "t_mapping(t_uint32,t_struct(CollateralPolicy)4565_storage)": {
+        "encoding": "mapping",
+        "key": "t_uint32",
+        "label": "mapping(uint32 => struct ResourceProviderRegistry420.CollateralPolicy)",
+        "numberOfBytes": "32",
+        "value": "t_struct(CollateralPolicy)4565_storage"
+      },
+      "t_struct(CollateralPolicy)4565_storage": {
+        "encoding": "inplace",
+        "label": "struct ResourceProviderRegistry420.CollateralPolicy",
+        "members": [
+          {
+            "astId": 4554,
+            "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+            "label": "minimumCollateral",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 4556,
+            "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+            "label": "minimumSlashable",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 4558,
+            "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+            "label": "withdrawalDelay",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 4560,
+            "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+            "label": "coverageBps",
+            "offset": 8,
+            "slot": "2",
+            "type": "t_uint32"
+          },
+          {
+            "astId": 4562,
+            "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+            "label": "acceptingNew",
+            "offset": 12,
+            "slot": "2",
+            "type": "t_bool"
+          },
+          {
+            "astId": 4564,
+            "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+            "label": "evidenceHash",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_bytes32"
+          }
+        ],
+        "numberOfBytes": "128"
+      },
+      "t_struct(Provider)4537_storage": {
+        "encoding": "inplace",
+        "label": "struct ResourceProviderRegistry420.Provider",
+        "members": [
+          {
+            "astId": 4525,
+            "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+            "label": "operatorAccount",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address"
+          },
+          {
+            "astId": 4527,
+            "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+            "label": "metadataHash",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 4529,
+            "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+            "label": "stakeRef",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 4531,
+            "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+            "label": "revision",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint32"
+          },
+          {
+            "astId": 4534,
+            "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+            "label": "state",
+            "offset": 4,
+            "slot": "3",
+            "type": "t_enum(State)4523"
+          },
+          {
+            "astId": 4536,
+            "contract": "src/resource/ResourceProviderRegistry420.sol:ResourceProviderRegistry420",
+            "label": "exists",
+            "offset": 5,
+            "slot": "3",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "128"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      },
+      "t_uint32": {
+        "encoding": "inplace",
+        "label": "uint32",
+        "numberOfBytes": "4"
+      },
+      "t_uint64": {
+        "encoding": "inplace",
+        "label": "uint64",
+        "numberOfBytes": "8"
+      }
+    }
+  }
+}

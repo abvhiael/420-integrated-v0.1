@@ -5,6 +5,11 @@ on:
     paths:
       - "contracts/src/resource/**"
       - "contracts/test/ResourceGenesis420.t.sol"
+      - "contracts/test/ResourceProviderCollateral420.t.sol"
+      - "contracts/test/ResourceCollateralPolicy420.t.sol"
+      - "contracts/test/ResourceCollateralInvariant420.t.sol"
+      - "contracts/test/helpers/ResourceCollateralFixture420.sol"
+      - "contracts/src/vault/AssetVault420.sol"
       - "contracts/test/ResourceDeploymentBinding420.t.sol"
       - "contracts/test/Storage*420.t.sol"
       - "contracts/config/420resource-genesis.json"
@@ -61,6 +66,15 @@ jobs:
       - name: Build Resource contract family
         working-directory: contracts
         run: forge build --root "$RUNNER_TEMP/resource-contracts" src/resource --sizes
+
+      - name: Run Resource collateral custody suite
+        run: forge test --root "$RUNNER_TEMP/resource-contracts" --match-path test/ResourceProviderCollateral420.t.sol -vvvv
+
+      - name: Run Resource collateral policy suite
+        run: forge test --root "$RUNNER_TEMP/resource-contracts" --match-path test/ResourceCollateralPolicy420.t.sol -vvv
+
+      - name: Run Resource stateful collateral invariants
+        run: forge test --root "$RUNNER_TEMP/resource-contracts" --match-path test/ResourceCollateralInvariant420.t.sol -vvv
 
       - name: Run Resource deployment binding suite
         working-directory: contracts
@@ -172,6 +186,15 @@ jobs:
           FOUNDRY_PROFILE: hardening
         run: forge test --root "$RUNNER_TEMP/resource-contracts" --match-path 'test/ResourceGenesis420.t.sol' -vvv
 
+      - name: Re-run collateral custody and policy under hardening profile
+        env:
+          FOUNDRY_PROFILE: hardening
+        run: |
+          set -euo pipefail
+          for suite in ResourceProviderCollateral420 ResourceCollateralPolicy420 ResourceCollateralInvariant420; do
+            forge test --root "$RUNNER_TEMP/resource-contracts" --match-path "test/$suite.t.sol" -vvv
+          done
+
       - name: Install Slither
         run: python -m pip install --disable-pip-version-check slither-analyzer
 
@@ -182,6 +205,7 @@ jobs:
           cat > ResourceAuditSlitherTarget.sol <<'SOL'
           // SPDX-License-Identifier: GPL-3.0
           pragma solidity ^0.8.24;
+          import "./src/resource/ResourceProviderCollateral420.sol";
           import "./src/resource/ResourceAuthorization420.sol";
           import "./src/resource/ResourcePolicyRegistry420.sol";
           import "./src/resource/ResourceProviderRegistry420.sol";
@@ -229,7 +253,8 @@ jobs:
                   "check": detector.get("check"),
                   "impact": detector.get("impact"),
                   "confidence": detector.get("confidence"),
-                  "description": detector.get("description", "").splitlines()[0],
+                  "description": detector.get("description", ""),
+                  "elements": resource_elements if detector.get("impact") == "High" else [],
               }
               findings.append(item)
               if detector.get("impact") == "High":

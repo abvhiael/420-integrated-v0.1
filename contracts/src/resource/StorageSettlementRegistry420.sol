@@ -111,6 +111,7 @@ contract StorageSettlementRegistry420 is I420System {
 
         settlementId = canonicalSettlementId(agreementId, vault);
         if (_settlements[settlementId].exists) revert SettlementExists();
+        agreements.registerSettlement(agreementId, settlementId);
         _settlements[settlementId] = Settlement({
             agreementId: agreementId,
             consumer: msg.sender,
@@ -204,6 +205,7 @@ contract StorageSettlementRegistry420 is I420System {
         emit StorageSettlementAborting(settlementId);
         if (settlement.reservedWindows == 0) {
             settlement.state = State.CANCELLED;
+            agreements.finalizeSettlement(settlement.agreementId, settlementId);
             emit StorageSettlementCancelled(settlementId, 0);
         }
     }
@@ -225,6 +227,7 @@ contract StorageSettlementRegistry420 is I420System {
         }
         if (settlement.finalizedWindows == settlement.reservedWindows) {
             settlement.state = State.CANCELLED;
+            agreements.finalizeSettlement(settlement.agreementId, settlementId);
             emit StorageSettlementCancelled(settlementId, settlement.refunded420);
         }
     }
@@ -252,6 +255,7 @@ contract StorageSettlementRegistry420 is I420System {
     function _finishIfComplete(bytes32 settlementId, Settlement storage settlement) private {
         if (settlement.finalizedWindows == settlement.windowCount) {
             settlement.state = State.COMPLETE;
+            agreements.finalizeSettlement(settlement.agreementId, settlementId);
             emit StorageSettlementCompleted(settlementId, settlement.paid420, settlement.refunded420);
         }
     }

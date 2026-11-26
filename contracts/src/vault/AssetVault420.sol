@@ -25,6 +25,7 @@ contract AssetVault420 is I420System {
     // immutable controller. A future generic Vault grant cannot authorize another
     // principal to release or cancel that obligation.
     bytes32 public constant CMP_PAYER_SAFETY_TYPE = keccak256("420/CMP/PAYER-SAFETY/V1");
+    bytes32 public constant RESOURCE_PROVIDER_COLLATERAL_TYPE = keccak256("420/RESOURCE/PROVIDER-COLLATERAL/V1");
     mapping(bytes32 => address) public payerSafetyController;
 
     mapping(bytes32 => bool) public executedOperation;
@@ -131,7 +132,7 @@ contract AssetVault420 is I420System {
         if (!authorization.isAuthorized(msg.sender, vaultId, VaultIds420.ACTION_CREATE_OBLIGATION, amount)) revert Unauthorized();
         _consume(operationId);
         accounting.createObligation(vaultId, obligationId, asset, beneficiary, amount, obligationType, sourceRef);
-        if (obligationType == CMP_PAYER_SAFETY_TYPE) {
+        if (obligationType == CMP_PAYER_SAFETY_TYPE || obligationType == RESOURCE_PROVIDER_COLLATERAL_TYPE) {
             payerSafetyController[obligationId] = msg.sender;
             emit PayerSafetyControllerBound(obligationId, msg.sender);
         }

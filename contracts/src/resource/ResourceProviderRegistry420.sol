@@ -5,6 +5,27 @@ import "../interfaces/I420System.sol";
 import "./ResourceAuthorization420.sol";
 import "./ResourceIds420.sol";
 
+interface IResourceProviderCollateral420 {
+    function providers() external view returns (address);
+    function reserveExposure(
+        bytes32 providerId,
+        bytes32 obligationRef,
+        uint256 exposure
+    ) external returns (bytes32);
+    function releaseExposure(
+        bytes32 key
+    ) external;
+    function outstandingReservations(
+        bytes32 position
+    ) external view returns (uint256);
+    function eligible(
+        bytes32 providerId,
+        bytes32 referenceId,
+        address operator,
+        uint256 minimum
+    ) external view returns (bool);
+}
+
 contract ResourceProviderRegistry420 is I420System {
     enum State {
         NONE,
@@ -25,6 +46,33 @@ contract ResourceProviderRegistry420 is I420System {
 
     ResourceAuthorization420 public immutable authorization;
     mapping(bytes32 => Provider) private _providers;
+    address public immutable governanceTimelock;
+    IResourceProviderCollateral420 public collateral;
+    bytes32 public collateralCodeHash;
+
+    struct CollateralPolicy {
+        uint256 minimumCollateral;
+        uint256 minimumSlashable;
+        uint64 withdrawalDelay;
+        uint32 coverageBps;
+        bool acceptingNew;
+        bytes32 evidenceHash;
+    }
+    uint32 public collateralPolicyRevision;
+    mapping(uint32 => CollateralPolicy) private _collateralPolicies;
+    bool public admissionSuspended;
+    event CollateralPolicyPublished(uint32 indexed revision, bytes32 indexed commitment, bytes32 evidenceHash);
+    event AdmissionSuspensionChanged(bool suspended);
+    mapping(bytes32 => bool) public disciplinarySuspension;
+    mapping(bytes32 => bool) public permanentlyDisqualified;
+    mapping(bytes32 => bytes32) public disciplineEvidence;
+    mapping(bytes32 => uint64) public disciplineRevision;
+    event ProviderDisqualified(bytes32 indexed providerId, bytes32 indexed evidence);
+    event ProviderReinstated(bytes32 indexed providerId, bytes32 indexed evidence);
+    mapping(bytes32 => address) public collateralSponsor;
+    event CollateralAuthorityBound(address indexed authority, bytes32 codeHash);
+    event ProviderDisciplineChanged(bytes32 indexed providerId, bool suspended);
+    event CollateralSponsorChanged(bytes32 indexed providerId, address indexed sponsor);
 
     error InvalidProvider();
     error ProviderExists();
@@ -38,10 +86,149 @@ contract ResourceProviderRegistry420 is I420System {
     event ProviderStateChanged(bytes32 indexed providerId, State state);
 
     constructor(
-        address authorization_
+        address authorization_,
+        address governanceTimelock_
     ) {
-        require(authorization_ != address(0), "dependency");
+        require(authorization_ != address(0) && governanceTimelock_ != address(0), "dependency");
+        governanceTimelock = governanceTimelock_;
         authorization = ResourceAuthorization420(authorization_);
+    }
+
+    function bindCollateral(
+        address authority
+    ) external {
+        if (msg.sender != governanceTimelock) revert Unauthorized();
+        if (
+            address(collateral) != address(0) || authority.code.length == 0
+                || IResourceProviderCollateral420(authority).providers() != address(this)
+        ) revert InvalidProvider();
+        collateral = IResourceProviderCollateral420(authority);
+        collateralCodeHash = authority.codehash;
+        emit CollateralAuthorityBound(authority, collateralCodeHash);
+    }
+
+    function publishCollateralPolicy(
+        uint256 minimum,
+        uint256 slashable,
+        uint64 delaySeconds,
+        uint32 coverageBps,
+        bool acceptingNew,
+        bytes32 evidenceHash
+    ) external returns (uint32 revision) {
+        if (msg.sender != governanceTimelock) revert Unauthorized();
+        if (
+            minimum == 0 || slashable == 0 || slashable > minimum || delaySeconds == 0 || coverageBps == 0
+                || evidenceHash == bytes32(0)
+        ) revert InvalidProvider();
+        revision = ++collateralPolicyRevision;
+        _collateralPolicies[revision] =
+            CollateralPolicy(minimum, slashable, delaySeconds, coverageBps, acceptingNew, evidenceHash);
+        emit CollateralPolicyPublished(revision, collateralPolicyCommitment(revision), evidenceHash);
+    }
+
+    function collateralPolicy(
+        uint32 revision
+    ) public view returns (CollateralPolicy memory) {
+        if (revision == 0 || revision > collateralPolicyRevision) revert InvalidProvider();
+        return _collateralPolicies[revision];
+    }
+
+    function collateralPolicyCommitment(
+        uint32 revision
+    ) public view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                "420/RESOURCE/COLLATERAL/POLICY/V1", block.chainid, address(this), revision, collateralPolicy(revision)
+            )
+        );
+    }
+
+    function minimumCollateral() external view returns (uint256) {
+        return _collateralPolicies[collateralPolicyRevision].minimumCollateral;
+    }
+
+    function setAdmissionSuspended(
+        bool suspended
+    ) external {
+        if (msg.sender != governanceTimelock) revert Unauthorized();
+        admissionSuspended = suspended;
+        emit AdmissionSuspensionChanged(suspended);
+    }
+
+    /// @notice Required slashable backing for a given aggregate native-420 exposure, rounded up.
+    function requiredSlashable(
+        uint256 exposure
+    ) public view returns (uint256) {
+        CollateralPolicy memory policy = collateralPolicy(collateralPolicyRevision);
+        uint256 covered = (exposure / 10000) * policy.coverageBps;
+        uint256 remainder = (exposure % 10000) * policy.coverageBps;
+        covered += (remainder + 9999) / 10000;
+        return covered > policy.minimumSlashable ? covered : policy.minimumSlashable;
+    }
+
+    function setCollateralSponsor(
+        bytes32 providerId,
+        address sponsor
+    ) external {
+        Provider storage p = _get(providerId);
+        if (msg.sender != p.operatorAccount) revert Unauthorized();
+        collateralSponsor[providerId] = sponsor;
+        emit CollateralSponsorChanged(providerId, sponsor);
+    }
+
+    function setDisciplinarySuspension(
+        bytes32 providerId,
+        bool suspended,
+        bytes32 evidence
+    ) external {
+        if (msg.sender != governanceTimelock) revert Unauthorized();
+        Provider storage p = _get(providerId);
+        if (evidence == bytes32(0) || permanentlyDisqualified[providerId] || !suspended) revert InvalidState();
+        disciplineEvidence[providerId] = evidence;
+        disciplineRevision[providerId]++;
+        disciplinarySuspension[providerId] = suspended;
+        if (suspended && p.state == State.ACTIVE) {
+            p.state = State.SUSPENDED;
+            p.revision++;
+            emit ProviderStateChanged(providerId, State.SUSPENDED);
+        }
+        emit ProviderDisciplineChanged(providerId, suspended);
+    }
+
+    function disqualifyProvider(
+        bytes32 providerId,
+        bytes32 evidence
+    ) external {
+        if (msg.sender != governanceTimelock) revert Unauthorized();
+        Provider storage p = _get(providerId);
+        if (evidence == bytes32(0) || permanentlyDisqualified[providerId]) revert InvalidState();
+        permanentlyDisqualified[providerId] = true;
+        disciplinarySuspension[providerId] = true;
+        disciplineEvidence[providerId] = evidence;
+        disciplineRevision[providerId]++;
+        if (p.state != State.RETIRED) {
+            p.state = State.SUSPENDED;
+            p.revision++;
+            emit ProviderStateChanged(providerId, p.state);
+        }
+        emit ProviderDisqualified(providerId, evidence);
+    }
+
+    function reinstateProvider(
+        bytes32 providerId,
+        bytes32 remediationEvidence
+    ) external {
+        if (msg.sender != governanceTimelock) revert Unauthorized();
+        Provider storage p = _get(providerId);
+        if (
+            remediationEvidence == bytes32(0) || permanentlyDisqualified[providerId]
+                || !disciplinarySuspension[providerId] || p.state == State.RETIRED
+        ) revert InvalidState();
+        disciplinarySuspension[providerId] = false;
+        if (!_eligible(providerId, p)) revert StakeRequired();
+        disciplineEvidence[providerId] = remediationEvidence;
+        disciplineRevision[providerId]++;
+        emit ProviderReinstated(providerId, remediationEvidence);
     }
 
     function systemName() external pure returns (string memory) {
@@ -84,7 +271,7 @@ contract ResourceProviderRegistry420 is I420System {
             || (old == State.ACTIVE && (next == State.SUSPENDED || next == State.RETIRED))
             || (old == State.SUSPENDED && (next == State.ACTIVE || next == State.RETIRED));
         if (!ok) revert InvalidState();
-        if (next == State.ACTIVE && p.stakeRef == 0) revert StakeRequired();
+        if (next == State.ACTIVE && !_eligible(providerId, p)) revert StakeRequired();
 
         p.state = next;
         p.revision++;
@@ -118,7 +305,25 @@ contract ResourceProviderRegistry420 is I420System {
     function isActive(
         bytes32 providerId
     ) external view returns (bool) {
-        return _providers[providerId].exists && _providers[providerId].state == State.ACTIVE;
+        Provider storage p = _providers[providerId];
+        return p.exists && p.state == State.ACTIVE && _eligible(providerId, p);
+    }
+
+    function _eligible(
+        bytes32 providerId,
+        Provider storage p
+    ) private view returns (bool) {
+        CollateralPolicy storage policy = _collateralPolicies[collateralPolicyRevision];
+        if (
+            permanentlyDisqualified[providerId] || disciplinarySuspension[providerId] || admissionSuspended
+                || !policy.acceptingNew || policy.minimumCollateral == 0 || address(collateral) == address(0)
+                || address(collateral).codehash != collateralCodeHash || p.stakeRef == bytes32(0)
+        ) return false;
+        try collateral.eligible(providerId, p.stakeRef, p.operatorAccount, policy.minimumCollateral) returns (bool ok) {
+            return ok;
+        } catch {
+            return false;
+        }
     }
 
     function _get(

@@ -1,0 +1,2066 @@
+{
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "controller",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "codeHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "ReservationControllerConfigured",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "penaltyId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "decision",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        }
+      ],
+      "name": "PenaltyAuthorized",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "penaltyId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "positionId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "cumulative",
+          "type": "uint256"
+        }
+      ],
+      "name": "PenaltyExecuted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "penaltyId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "positionId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "PenaltyHeld",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "penaltyId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "positionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "PenaltyHoldDismissed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "positionId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "withdrawn",
+          "type": "uint256"
+        }
+      ],
+      "name": "ExitCompleted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "positionId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "obligationId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "CollateralDeposited",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "positionId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint32",
+          "name": "revision",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "withdrawableAt",
+          "type": "uint64"
+        }
+      ],
+      "name": "CollateralExitRequested",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "positionId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint64",
+          "name": "tranche",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "CollateralWithdrawn",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "reservationId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "position",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "controller",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "exposure",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "policyRevision",
+          "type": "uint32"
+        }
+      ],
+      "name": "ExposureReserved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "reservationId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "position",
+          "type": "bytes32"
+        }
+      ],
+      "name": "ExposureReleased",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "AccountingMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "COLLATERAL_TYPE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidBinding",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidDeposit",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "POSITION_DOMAIN",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "SLASH_DISTRIBUTION_TYPE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "TRANCHE_DOMAIN",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "Unauthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "accounting",
+      "outputs": [
+        {
+          "internalType": "contract VaultAccounting420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "custodyInvariant",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "protocolVersion",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "providers",
+      "outputs": [
+        {
+          "internalType": "contract ResourceProviderRegistry420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "registry",
+      "outputs": [
+        {
+          "internalType": "contract VaultRegistry420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "systemName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalSlashable",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalSlashed",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalWithdrawn",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "vault",
+      "outputs": [
+        {
+          "internalType": "contract AssetVault420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "vaultId",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "reservationControllerCodeHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "controller",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "enabled",
+          "type": "bool"
+        }
+      ],
+      "name": "configureReservationController",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "controller",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "obligationRef",
+          "type": "bytes32"
+        }
+      ],
+      "name": "reservationId",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "providers_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "vault_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "registry_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "accounting_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "name": "trancheObligation",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "consumedDeposit",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "consumedPenaltyDecision",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "exitPolicyRevision",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "obligationAmount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "obligationPosition",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "outstandingExposure",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "outstandingPenaltyHolds",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "outstandingReservations",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "penaltyDecision",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "penaltyExecuted",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "penaltyHolds",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "position",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "resolved",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "penaltyRecipient",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "reservations",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "position",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "controller",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "exposure",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint32",
+          "name": "policyRevision",
+          "type": "uint32"
+        },
+        {
+          "internalType": "bool",
+          "name": "released",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "slashCursor",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "slashedAmount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "withdrawableAt",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "withdrawalCursor",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "withdrawnAmount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "evidenceRef",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "holdPenalty",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "key",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "index",
+          "type": "uint64"
+        }
+      ],
+      "name": "reconciledTranche",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        }
+      ],
+      "name": "canWithdraw",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getPosition",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "providerId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "deposited",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "slashable",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint64",
+              "name": "trancheCount",
+              "type": "uint64"
+            },
+            {
+              "internalType": "enum ResourceProviderCollateral420.State",
+              "name": "state",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct ResourceProviderCollateral420.Position",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        }
+      ],
+      "name": "requestExit",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        }
+      ],
+      "name": "withdraw",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "key",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "decision",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        }
+      ],
+      "name": "authorizePenalty",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "key",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "maxTranches",
+          "type": "uint64"
+        }
+      ],
+      "name": "executePenalty",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "key",
+          "type": "bytes32"
+        }
+      ],
+      "name": "dismissPenalty",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "key",
+          "type": "bytes32"
+        }
+      ],
+      "name": "releaseExposure",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "depositNonce",
+          "type": "bytes32"
+        }
+      ],
+      "name": "deposit",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "obligationRef",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "exposure",
+          "type": "uint256"
+        }
+      ],
+      "name": "reserveExposure",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "key",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "referenceId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "minimum",
+          "type": "uint256"
+        }
+      ],
+      "name": "eligible",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "positionId",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "creationBytecode": {
+    "bytes": 20327,
+    "immutableReferences": {},
+    "linkReferences": {},
+    "sha256": "7174f999663e2d68863edfb1d578046bdb9e24c38796d9ee600a707d35afc32b"
+  },
+  "runtimeBytecodeTemplate": {
+    "bytes": 18276,
+    "immutableReferences": {
+      "1633": [
+        {
+          "length": 32,
+          "start": 752
+        },
+        {
+          "length": 32,
+          "start": 977
+        },
+        {
+          "length": 32,
+          "start": 2091
+        },
+        {
+          "length": 32,
+          "start": 7751
+        },
+        {
+          "length": 32,
+          "start": 8614
+        },
+        {
+          "length": 32,
+          "start": 8912
+        },
+        {
+          "length": 32,
+          "start": 10119
+        },
+        {
+          "length": 32,
+          "start": 10611
+        },
+        {
+          "length": 32,
+          "start": 15281
+        },
+        {
+          "length": 32,
+          "start": 15505
+        },
+        {
+          "length": 32,
+          "start": 16806
+        }
+      ],
+      "1636": [
+        {
+          "length": 32,
+          "start": 684
+        },
+        {
+          "length": 32,
+          "start": 2895
+        },
+        {
+          "length": 32,
+          "start": 2994
+        },
+        {
+          "length": 32,
+          "start": 3061
+        },
+        {
+          "length": 32,
+          "start": 3156
+        },
+        {
+          "length": 32,
+          "start": 3244
+        },
+        {
+          "length": 32,
+          "start": 3423
+        },
+        {
+          "length": 32,
+          "start": 5880
+        },
+        {
+          "length": 32,
+          "start": 7560
+        },
+        {
+          "length": 32,
+          "start": 11400
+        },
+        {
+          "length": 32,
+          "start": 11482
+        },
+        {
+          "length": 32,
+          "start": 11830
+        },
+        {
+          "length": 32,
+          "start": 11917
+        },
+        {
+          "length": 32,
+          "start": 12629
+        },
+        {
+          "length": 32,
+          "start": 12722
+        },
+        {
+          "length": 32,
+          "start": 12860
+        },
+        {
+          "length": 32,
+          "start": 12964
+        },
+        {
+          "length": 32,
+          "start": 13046
+        },
+        {
+          "length": 32,
+          "start": 13156
+        },
+        {
+          "length": 32,
+          "start": 13238
+        },
+        {
+          "length": 32,
+          "start": 13829
+        },
+        {
+          "length": 32,
+          "start": 16592
+        },
+        {
+          "length": 32,
+          "start": 17302
+        },
+        {
+          "length": 32,
+          "start": 17748
+        }
+      ],
+      "1639": [
+        {
+          "length": 32,
+          "start": 4682
+        },
+        {
+          "length": 32,
+          "start": 7241
+        },
+        {
+          "length": 32,
+          "start": 15074
+        },
+        {
+          "length": 32,
+          "start": 17683
+        }
+      ],
+      "1642": [
+        {
+          "length": 32,
+          "start": 2785
+        },
+        {
+          "length": 32,
+          "start": 2943
+        },
+        {
+          "length": 32,
+          "start": 3364
+        },
+        {
+          "length": 32,
+          "start": 3724
+        },
+        {
+          "length": 32,
+          "start": 5490
+        },
+        {
+          "length": 32,
+          "start": 5814
+        },
+        {
+          "length": 32,
+          "start": 6318
+        },
+        {
+          "length": 32,
+          "start": 6407
+        },
+        {
+          "length": 32,
+          "start": 12567
+        },
+        {
+          "length": 32,
+          "start": 13357
+        },
+        {
+          "length": 32,
+          "start": 13444
+        },
+        {
+          "length": 32,
+          "start": 16271
+        },
+        {
+          "length": 32,
+          "start": 16506
+        },
+        {
+          "length": 32,
+          "start": 17156
+        }
+      ],
+      "1644": [
+        {
+          "length": 32,
+          "start": 2434
+        },
+        {
+          "length": 32,
+          "start": 2728
+        },
+        {
+          "length": 32,
+          "start": 2849
+        },
+        {
+          "length": 32,
+          "start": 3313
+        },
+        {
+          "length": 32,
+          "start": 3677
+        },
+        {
+          "length": 32,
+          "start": 4638
+        },
+        {
+          "length": 32,
+          "start": 5764
+        },
+        {
+          "length": 32,
+          "start": 6267
+        },
+        {
+          "length": 32,
+          "start": 9458
+        },
+        {
+          "length": 32,
+          "start": 12517
+        },
+        {
+          "length": 32,
+          "start": 13307
+        },
+        {
+          "length": 32,
+          "start": 15026
+        },
+        {
+          "length": 32,
+          "start": 16447
+        },
+        {
+          "length": 32,
+          "start": 17529
+        },
+        {
+          "length": 32,
+          "start": 17633
+        }
+      ]
+    },
+    "linkReferences": {},
+    "sha256": "7e86cb471d6641c21ec8cde968d6c5ce400739c1cc2a4beabf1b416b82659992"
+  },
+  "source": "contracts/src/resource/ResourceProviderCollateral420.sol",
+  "sourceBlob": "ddad1a8bb19831666980ecdb691f9ab112bf2b84",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 1649,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "positions",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_struct(Position)1630_storage)"
+      },
+      {
+        "astId": 1655,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "trancheObligation",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_bytes32,t_mapping(t_uint64,t_bytes32))"
+      },
+      {
+        "astId": 1657,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "totalSlashable",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 1661,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "outstandingExposure",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_mapping(t_bytes32,t_uint256)"
+      },
+      {
+        "astId": 1665,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "outstandingReservations",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_mapping(t_bytes32,t_uint256)"
+      },
+      {
+        "astId": 1669,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "obligationPosition",
+        "offset": 0,
+        "slot": "5",
+        "type": "t_mapping(t_bytes32,t_bytes32)"
+      },
+      {
+        "astId": 1673,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "obligationAmount",
+        "offset": 0,
+        "slot": "6",
+        "type": "t_mapping(t_bytes32,t_uint256)"
+      },
+      {
+        "astId": 1677,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "consumedDeposit",
+        "offset": 0,
+        "slot": "7",
+        "type": "t_mapping(t_bytes32,t_bool)"
+      },
+      {
+        "astId": 1681,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "withdrawalCursor",
+        "offset": 0,
+        "slot": "8",
+        "type": "t_mapping(t_bytes32,t_uint64)"
+      },
+      {
+        "astId": 1685,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "withdrawnAmount",
+        "offset": 0,
+        "slot": "9",
+        "type": "t_mapping(t_bytes32,t_uint256)"
+      },
+      {
+        "astId": 1687,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "totalWithdrawn",
+        "offset": 0,
+        "slot": "10",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 1689,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "totalSlashed",
+        "offset": 0,
+        "slot": "11",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 1693,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "slashedAmount",
+        "offset": 0,
+        "slot": "12",
+        "type": "t_mapping(t_bytes32,t_uint256)"
+      },
+      {
+        "astId": 1697,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "slashCursor",
+        "offset": 0,
+        "slot": "13",
+        "type": "t_mapping(t_bytes32,t_uint64)"
+      },
+      {
+        "astId": 1701,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "penaltyExecuted",
+        "offset": 0,
+        "slot": "14",
+        "type": "t_mapping(t_bytes32,t_uint256)"
+      },
+      {
+        "astId": 1705,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "penaltyRecipient",
+        "offset": 0,
+        "slot": "15",
+        "type": "t_mapping(t_bytes32,t_address)"
+      },
+      {
+        "astId": 1709,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "penaltyDecision",
+        "offset": 0,
+        "slot": "16",
+        "type": "t_mapping(t_bytes32,t_bytes32)"
+      },
+      {
+        "astId": 1713,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "consumedPenaltyDecision",
+        "offset": 0,
+        "slot": "17",
+        "type": "t_mapping(t_bytes32,t_bool)"
+      },
+      {
+        "astId": 1740,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "outstandingPenaltyHolds",
+        "offset": 0,
+        "slot": "18",
+        "type": "t_mapping(t_bytes32,t_uint256)"
+      },
+      {
+        "astId": 1752,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "penaltyHolds",
+        "offset": 0,
+        "slot": "19",
+        "type": "t_mapping(t_bytes32,t_struct(PenaltyHold)1747_storage)"
+      },
+      {
+        "astId": 1790,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "reservations",
+        "offset": 0,
+        "slot": "20",
+        "type": "t_mapping(t_bytes32,t_struct(Reservation)1785_storage)"
+      },
+      {
+        "astId": 1794,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "reservationControllerCodeHash",
+        "offset": 0,
+        "slot": "21",
+        "type": "t_mapping(t_address,t_bytes32)"
+      },
+      {
+        "astId": 1830,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "exitPolicyRevision",
+        "offset": 0,
+        "slot": "22",
+        "type": "t_mapping(t_bytes32,t_uint32)"
+      },
+      {
+        "astId": 1834,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "withdrawableAt",
+        "offset": 0,
+        "slot": "23",
+        "type": "t_mapping(t_bytes32,t_uint64)"
+      },
+      {
+        "astId": 1844,
+        "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+        "label": "entered",
+        "offset": 0,
+        "slot": "24",
+        "type": "t_bool"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_enum(State)1616": {
+        "encoding": "inplace",
+        "label": "enum ResourceProviderCollateral420.State",
+        "numberOfBytes": "1"
+      },
+      "t_mapping(t_address,t_bytes32)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => bytes32)",
+        "numberOfBytes": "32",
+        "value": "t_bytes32"
+      },
+      "t_mapping(t_bytes32,t_address)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => address)",
+        "numberOfBytes": "32",
+        "value": "t_address"
+      },
+      "t_mapping(t_bytes32,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      },
+      "t_mapping(t_bytes32,t_bytes32)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => bytes32)",
+        "numberOfBytes": "32",
+        "value": "t_bytes32"
+      },
+      "t_mapping(t_bytes32,t_mapping(t_uint64,t_bytes32))": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => mapping(uint64 => bytes32))",
+        "numberOfBytes": "32",
+        "value": "t_mapping(t_uint64,t_bytes32)"
+      },
+      "t_mapping(t_bytes32,t_struct(PenaltyHold)1747_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct ResourceProviderCollateral420.PenaltyHold)",
+        "numberOfBytes": "32",
+        "value": "t_struct(PenaltyHold)1747_storage"
+      },
+      "t_mapping(t_bytes32,t_struct(Position)1630_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct ResourceProviderCollateral420.Position)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Position)1630_storage"
+      },
+      "t_mapping(t_bytes32,t_struct(Reservation)1785_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct ResourceProviderCollateral420.Reservation)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Reservation)1785_storage"
+      },
+      "t_mapping(t_bytes32,t_uint256)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => uint256)",
+        "numberOfBytes": "32",
+        "value": "t_uint256"
+      },
+      "t_mapping(t_bytes32,t_uint32)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => uint32)",
+        "numberOfBytes": "32",
+        "value": "t_uint32"
+      },
+      "t_mapping(t_bytes32,t_uint64)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => uint64)",
+        "numberOfBytes": "32",
+        "value": "t_uint64"
+      },
+      "t_mapping(t_uint64,t_bytes32)": {
+        "encoding": "mapping",
+        "key": "t_uint64",
+        "label": "mapping(uint64 => bytes32)",
+        "numberOfBytes": "32",
+        "value": "t_bytes32"
+      },
+      "t_struct(PenaltyHold)1747_storage": {
+        "encoding": "inplace",
+        "label": "struct ResourceProviderCollateral420.PenaltyHold",
+        "members": [
+          {
+            "astId": 1742,
+            "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+            "label": "position",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 1744,
+            "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+            "label": "amount",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 1746,
+            "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+            "label": "resolved",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "96"
+      },
+      "t_struct(Position)1630_storage": {
+        "encoding": "inplace",
+        "label": "struct ResourceProviderCollateral420.Position",
+        "members": [
+          {
+            "astId": 1618,
+            "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+            "label": "providerId",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 1620,
+            "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+            "label": "owner",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_address"
+          },
+          {
+            "astId": 1622,
+            "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+            "label": "deposited",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 1624,
+            "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+            "label": "slashable",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 1626,
+            "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+            "label": "trancheCount",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 1629,
+            "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+            "label": "state",
+            "offset": 8,
+            "slot": "4",
+            "type": "t_enum(State)1616"
+          }
+        ],
+        "numberOfBytes": "160"
+      },
+      "t_struct(Reservation)1785_storage": {
+        "encoding": "inplace",
+        "label": "struct ResourceProviderCollateral420.Reservation",
+        "members": [
+          {
+            "astId": 1776,
+            "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+            "label": "position",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 1778,
+            "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+            "label": "controller",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_address"
+          },
+          {
+            "astId": 1780,
+            "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+            "label": "exposure",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 1782,
+            "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+            "label": "policyRevision",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint32"
+          },
+          {
+            "astId": 1784,
+            "contract": "src/resource/ResourceProviderCollateral420.sol:ResourceProviderCollateral420",
+            "label": "released",
+            "offset": 4,
+            "slot": "3",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "128"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      },
+      "t_uint32": {
+        "encoding": "inplace",
+        "label": "uint32",
+        "numberOfBytes": "4"
+      },
+      "t_uint64": {
+        "encoding": "inplace",
+        "label": "uint64",
+        "numberOfBytes": "8"
+      }
+    }
+  }
+}

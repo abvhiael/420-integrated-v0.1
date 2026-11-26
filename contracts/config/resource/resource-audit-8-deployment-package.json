@@ -1,8 +1,8 @@
 {
   "schema": "420-resource-audit-8-deployment-package-v1",
   "step": "RESOURCE-AUDIT-8",
-  "status": "REPOSITORY_DEPLOYMENT_PACKAGE_READY_LIVE_TESTNET_DEFERRED",
-  "repository_ready": true,
+  "status": "COLLATERAL_GRAPH_PENDING_QUALIFICATION",
+  "repository_ready": false,
   "live_qualified": false,
   "address_policy": {
     "namespace_authority": "contracts/config/genesis-address-namespace.json",
@@ -31,6 +31,16 @@
       "binding_model": "PER_STORAGE_SETTLEMENT_OPEN",
       "constructor_dependency": false,
       "binding_rule": "EACH_LIVE_SETTLEMENT_MUST_USE_A_VERIFIED_REGISTERED_420VAULT_ADDRESS_AND_ASSET"
+    },
+    "collateral_vault": {
+      "binding_model": "REGISTERED_RESOURCE_COLLATERAL_VAULT",
+      "constructor_dependency": true,
+      "required": [
+        "AssetVault420",
+        "VaultRegistry420",
+        "VaultAccounting420"
+      ],
+      "address": null
     }
   },
   "protocol_registry_identity": {
@@ -42,41 +52,182 @@
     "metadata_hash_preimage": "420/RESOURCE/RELEASE/METADATA/V1",
     "manifest_hash_preimage": "420/RESOURCE/AUDIT-8/DEPLOYMENT-PACKAGE/V1",
     "interface_hash_preimage": "420/RESOURCE/RESOURCE_ROUTER/INTERFACE/V1",
-    "dependency_root_policy": "keccak256(abi.encode(ordered deployed Resource/Storage addresses and runtime code hashes plus verified external CapabilityRegistry and GovernanceTimelock identities))",
+    "dependency_root_policy": "keccak256(abi.encode(ordered deployed Resource/Storage addresses and runtime code hashes plus verified external CapabilityRegistry and GovernanceTimelock identities)) including ResourceProviderCollateral420 and its registered Vault, registry and accounting addresses and code hashes",
     "component_registration": {
       "status": "NOT_PUBLISHED_NO_CANONICAL_COMPONENT_ID_APPROVED",
       "rule": "Do not invent a 420/APP Resource router component identifier; service publication is canonical until an approved component ID is added by Registry/Genesis authority."
     }
   },
   "deployment_order": [
-    {"order":1,"contract":"ResourceAuthorization420","source":"contracts/src/resource/ResourceAuthorization420.sol","constructor":["CapabilityRegistry420"]},
-    {"order":2,"contract":"ResourcePolicyRegistry420","source":"contracts/src/resource/ResourcePolicyRegistry420.sol","constructor":["GovernanceTimelock"]},
-    {"order":3,"contract":"ResourceProviderRegistry420","source":"contracts/src/resource/ResourceProviderRegistry420.sol","constructor":["ResourceAuthorization420"]},
-    {"order":4,"contract":"ResourceNodeRegistry420","source":"contracts/src/resource/ResourceNodeRegistry420.sol","constructor":["ResourceAuthorization420","ResourceProviderRegistry420"]},
-    {"order":5,"contract":"ResourceOfferRegistry420","source":"contracts/src/resource/ResourceOfferRegistry420.sol","constructor":["ResourceNodeRegistry420","ResourceProviderRegistry420","ResourcePolicyRegistry420","ResourceAuthorization420"]},
-    {"order":6,"contract":"ResourceSessionRegistry420","source":"contracts/src/resource/ResourceSessionRegistry420.sol","constructor":["ResourceOfferRegistry420","ResourceAuthorization420"]},
-    {"order":7,"contract":"ResourceReceiptRegistry420","source":"contracts/src/resource/ResourceReceiptRegistry420.sol","constructor":["ResourceSessionRegistry420","ResourceOfferRegistry420","ResourceNodeRegistry420"]},
-    {"order":8,"contract":"ResourceRouter420","source":"contracts/src/resource/ResourceRouter420.sol","constructor":["ResourcePolicyRegistry420","ResourceNodeRegistry420","ResourceOfferRegistry420"]},
-    {"order":9,"contract":"StorageProofSchemeRegistry420","source":"contracts/src/resource/StorageProofSchemeRegistry420.sol","constructor":["ResourceAuthorization420"]},
-    {"order":10,"contract":"StorageCapacityRegistry420","source":"contracts/src/resource/StorageCapacityRegistry420.sol","constructor":["ResourceAuthorization420","ResourceNodeRegistry420","ResourceProviderRegistry420"]},
-    {"order":11,"contract":"StorageCommitmentRegistry420","source":"contracts/src/resource/StorageCommitmentRegistry420.sol","constructor":["ResourceAuthorization420","ResourceProviderRegistry420","ResourceNodeRegistry420","StorageProofSchemeRegistry420"]},
-    {"order":12,"contract":"StorageProofRegistry420","source":"contracts/src/resource/StorageProofRegistry420.sol","constructor":["StorageCommitmentRegistry420","StorageProofSchemeRegistry420","ResourceNodeRegistry420"]},
-    {"order":13,"contract":"StorageAgreementRegistry420","source":"contracts/src/resource/StorageAgreementRegistry420.sol","constructor":["ResourceAuthorization420","ResourceOfferRegistry420","ResourceNodeRegistry420","ResourceProviderRegistry420","StorageProofSchemeRegistry420","StorageCommitmentRegistry420","StorageCapacityRegistry420"]},
-    {"order":14,"contract":"StorageObjectManifestRegistry420","source":"contracts/src/resource/StorageObjectManifestRegistry420.sol","constructor":["StorageAgreementRegistry420","StorageCommitmentRegistry420"]},
-    {"order":15,"contract":"StorageSettlementRegistry420","source":"contracts/src/resource/StorageSettlementRegistry420.sol","constructor":["StorageAgreementRegistry420","StorageProofRegistry420"]},
     {
-      "order":16,
-      "contract":"ProtocolRegistry",
-      "action":"publishRegisteredService",
-      "service_id_preimage":"420/service/resource-protocol/v1",
-      "implementation":"ResourceRouter420",
-      "version":1,
-      "active":true,
-      "component_type":"SERVICE",
-      "metadata_hash_preimage":"420/RESOURCE/RELEASE/METADATA/V1",
-      "manifest_hash_preimage":"420/RESOURCE/AUDIT-8/DEPLOYMENT-PACKAGE/V1",
-      "dependency_root_policy":"canonical dependency_root_policy",
-      "interface_hash_preimage":"420/RESOURCE/RESOURCE_ROUTER/INTERFACE/V1"
+      "order": 1,
+      "contract": "ResourceAuthorization420",
+      "source": "contracts/src/resource/ResourceAuthorization420.sol",
+      "constructor": [
+        "CapabilityRegistry420"
+      ]
+    },
+    {
+      "order": 2,
+      "contract": "ResourcePolicyRegistry420",
+      "source": "contracts/src/resource/ResourcePolicyRegistry420.sol",
+      "constructor": [
+        "GovernanceTimelock"
+      ]
+    },
+    {
+      "order": 3,
+      "contract": "ResourceProviderRegistry420",
+      "source": "contracts/src/resource/ResourceProviderRegistry420.sol",
+      "constructor": [
+        "ResourceAuthorization420",
+        "GovernanceTimelock"
+      ]
+    },
+    {
+      "contract": "ResourceProviderCollateral420",
+      "source": "contracts/src/resource/ResourceProviderCollateral420.sol",
+      "constructor": [
+        "ResourceProviderRegistry420",
+        "AssetVault420",
+        "VaultRegistry420",
+        "VaultAccounting420"
+      ],
+      "order": 4
+    },
+    {
+      "order": 5,
+      "contract": "ResourceNodeRegistry420",
+      "source": "contracts/src/resource/ResourceNodeRegistry420.sol",
+      "constructor": [
+        "ResourceAuthorization420",
+        "ResourceProviderRegistry420"
+      ]
+    },
+    {
+      "order": 6,
+      "contract": "ResourceOfferRegistry420",
+      "source": "contracts/src/resource/ResourceOfferRegistry420.sol",
+      "constructor": [
+        "ResourceNodeRegistry420",
+        "ResourceProviderRegistry420",
+        "ResourcePolicyRegistry420",
+        "ResourceAuthorization420"
+      ]
+    },
+    {
+      "order": 7,
+      "contract": "ResourceSessionRegistry420",
+      "source": "contracts/src/resource/ResourceSessionRegistry420.sol",
+      "constructor": [
+        "ResourceOfferRegistry420",
+        "ResourceAuthorization420"
+      ]
+    },
+    {
+      "order": 8,
+      "contract": "ResourceReceiptRegistry420",
+      "source": "contracts/src/resource/ResourceReceiptRegistry420.sol",
+      "constructor": [
+        "ResourceSessionRegistry420",
+        "ResourceOfferRegistry420",
+        "ResourceNodeRegistry420"
+      ]
+    },
+    {
+      "order": 9,
+      "contract": "ResourceRouter420",
+      "source": "contracts/src/resource/ResourceRouter420.sol",
+      "constructor": [
+        "ResourcePolicyRegistry420",
+        "ResourceNodeRegistry420",
+        "ResourceOfferRegistry420"
+      ]
+    },
+    {
+      "order": 10,
+      "contract": "StorageProofSchemeRegistry420",
+      "source": "contracts/src/resource/StorageProofSchemeRegistry420.sol",
+      "constructor": [
+        "ResourceAuthorization420"
+      ]
+    },
+    {
+      "order": 11,
+      "contract": "StorageCapacityRegistry420",
+      "source": "contracts/src/resource/StorageCapacityRegistry420.sol",
+      "constructor": [
+        "ResourceAuthorization420",
+        "ResourceNodeRegistry420",
+        "ResourceProviderRegistry420"
+      ]
+    },
+    {
+      "order": 12,
+      "contract": "StorageCommitmentRegistry420",
+      "source": "contracts/src/resource/StorageCommitmentRegistry420.sol",
+      "constructor": [
+        "ResourceAuthorization420",
+        "ResourceProviderRegistry420",
+        "ResourceNodeRegistry420",
+        "StorageProofSchemeRegistry420"
+      ]
+    },
+    {
+      "order": 13,
+      "contract": "StorageProofRegistry420",
+      "source": "contracts/src/resource/StorageProofRegistry420.sol",
+      "constructor": [
+        "StorageCommitmentRegistry420",
+        "StorageProofSchemeRegistry420",
+        "ResourceNodeRegistry420"
+      ]
+    },
+    {
+      "order": 14,
+      "contract": "StorageAgreementRegistry420",
+      "source": "contracts/src/resource/StorageAgreementRegistry420.sol",
+      "constructor": [
+        "ResourceAuthorization420",
+        "ResourceOfferRegistry420",
+        "ResourceNodeRegistry420",
+        "ResourceProviderRegistry420",
+        "StorageProofSchemeRegistry420",
+        "StorageCommitmentRegistry420",
+        "StorageCapacityRegistry420"
+      ]
+    },
+    {
+      "order": 15,
+      "contract": "StorageObjectManifestRegistry420",
+      "source": "contracts/src/resource/StorageObjectManifestRegistry420.sol",
+      "constructor": [
+        "StorageAgreementRegistry420",
+        "StorageCommitmentRegistry420"
+      ]
+    },
+    {
+      "order": 16,
+      "contract": "StorageSettlementRegistry420",
+      "source": "contracts/src/resource/StorageSettlementRegistry420.sol",
+      "constructor": [
+        "StorageAgreementRegistry420",
+        "StorageProofRegistry420"
+      ]
+    },
+    {
+      "order": 17,
+      "contract": "ProtocolRegistry",
+      "action": "publishRegisteredService",
+      "service_id_preimage": "420/service/resource-protocol/v1",
+      "implementation": "ResourceRouter420",
+      "version": 1,
+      "active": true,
+      "component_type": "SERVICE",
+      "metadata_hash_preimage": "420/RESOURCE/RELEASE/METADATA/V1",
+      "manifest_hash_preimage": "420/RESOURCE/AUDIT-8/DEPLOYMENT-PACKAGE/V1",
+      "dependency_root_policy": "canonical dependency_root_policy",
+      "interface_hash_preimage": "420/RESOURCE/RESOURCE_ROUTER/INTERFACE/V1"
     }
   ],
   "artifact_identity": {
@@ -86,6 +237,7 @@
       "contracts/out/ResourceAuthorization420.sol/ResourceAuthorization420.json",
       "contracts/out/ResourcePolicyRegistry420.sol/ResourcePolicyRegistry420.json",
       "contracts/out/ResourceProviderRegistry420.sol/ResourceProviderRegistry420.json",
+      "contracts/out/ResourceProviderCollateral420.sol/ResourceProviderCollateral420.json",
       "contracts/out/ResourceNodeRegistry420.sol/ResourceNodeRegistry420.json",
       "contracts/out/ResourceOfferRegistry420.sol/ResourceOfferRegistry420.json",
       "contracts/out/ResourceSessionRegistry420.sol/ResourceSessionRegistry420.json",
@@ -154,5 +306,18 @@
     "capability_grant_revocation_receipts": [],
     "vault_binding_receipts": [],
     "smoke_transactions": []
+  },
+  "governance_wiring": {
+    "before_publication": [
+      "Register dedicated collateral Vault with canonical VaultRegistry420 and policies",
+      "Verify VaultAccounting420 and VaultAuthorization420 identities",
+      "Bind collateral authority once through GovernanceTimelock",
+      "Grant collateral authority CREATE_OBLIGATION, CANCEL_OBLIGATION, RELEASE_OBLIGATION, CLAIM scoped to collateral vault ID only",
+      "Configure session, capacity, commitment and agreement reservation controllers",
+      "Bind storage settlement controller",
+      "Publish approved collateral policy before admitting providers"
+    ],
+    "session_discharge": "UNBOUND_PENDING_RESOURCE_AUDIT_8A5",
+    "production_policy": "contracts/config/resource/resource-8a2-collateral-policy.json"
   }
 }

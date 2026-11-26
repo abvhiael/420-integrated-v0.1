@@ -409,3 +409,13 @@ Level 3 reconciliation against current `main` is performed at the repository/tes
 The baseline repository does **not** justify calling 420ResourceProtocol fully complete or production-ready solely from the historical SR-0–SR-10 COMPLETE roadmap labels.
 
 The repository contains a substantial and mature Resource/Storage implementation, runtime, SDK and operations/documentation stack. The audit nevertheless found enforceable core-policy gaps, incomplete mutation provenance, unreachable lifecycle state and unused declared authority that required source remediation. Even after those code repairs qualify, live deployment, runtime codehash verification, ProtocolRegistry publication and production-equivalent network evidence remain distinct blockers to testnet/Genesis/production readiness.
+
+
+## RESOURCE-AUDIT-8A.2 — C7 retained collateral qualification
+
+Original qualified source: `6837f137229ff0d9496d2d74d1cb0bea50680de5`, run 45731694723. Custody 20/20, policy 6/6, Resource adversarial 14/14, deployment binding 3/3, Storage 31/31; 150,000 policy fuzz runs; 2,048 x 256 and 4,096 x 384 invariant profiles (2,097,152 calls, zero unexpected reverts); zero high-severity Slither findings. The counts are for the original standard/hardening qualification, not a sum of subsequent reruns.
+
+The [consolidated evidence manifest](420RESOURCE-8A2-qualification/manifest.json) binds retained actual timestamped CI extracts, job/step outcomes, local-EVM deployment emissions, test configuration and source commitments to their respective exact revisions. The [compiler archive](420RESOURCE-8A2-artifacts/sha256.json) retains before/after ABI, storage layout and bytecode commitments for ten contracts. C5.2 SDK repository tests passed; deployed-contract integration was explicitly deferred. C5.3 verified 44 events and real PostgreSQL recovery using a controlled chain source, with three tests passed and none skipped. C6 retains unapproved economic parameters and disabled admission; approval is assigned to GOV-PRE-RESOURCE-COLLATERAL. The inherited Genesis V4 authority dependency is not a Resource implementation defect and remains fail-closed. Session economic discharge binding remains owned by RESOURCE-AUDIT-8A5.
+
+C7 records historical, repository-scoped evidence, not live deployment authorization. C8 final integrated closeout remains separate. All live deployment evidence remains empty; RESOURCE-AUDIT-9 owns testnet verification.
+

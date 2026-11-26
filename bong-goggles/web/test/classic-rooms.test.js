@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {ROOM_LIMITS,ClassicRoomsController,renderClassicRooms} from '../core/classic-rooms.js';
+import {ROOM_LIMITS,ClassicRoomsController,renderClassicRooms,classicRequestFailure} from '../core/classic-rooms.js';
 import {CLASSIC_ROADMAP} from '../core/classics.js';
 import {resolveRoute,routeAccess} from '../core/routes.js';
 import {renderApplicationShell} from '../core/app-shell.js';
@@ -262,4 +262,11 @@ test('Cribbage room link resolves only same-420ID rule-bound match and returns t
  const fallback=renderClassicRooms(revoked,{enabled:true,roomId});
  assert.match(fallback,/Find this game in My Games/);
  assert.doesNotMatch(fallback,/play\\?session=/);
+});
+
+test('room lifecycle diagnostics distinguish HTTP failures without exposing upstream private data',()=>{
+ for(const [status,expected] of [[400,/configuration/],[401,/420ID/],[403,/not authorized/],[404,/unavailable/],[409,/limit/],[429,/rate limit/],[502,/Gateway/],[503,/temporarily unavailable/],[504,/timed out/],[201,/did not match/]]){
+  const message=classicRequestFailure({status,data:{error:'secret database credentials'}},'Room creation');
+  assert.match(message,expected);assert.match(message,new RegExp('HTTP '+status));assert.doesNotMatch(message,/secret/);
+ }
 });

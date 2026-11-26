@@ -16,5 +16,16 @@
   ],
   "rationale": "Inspected Resource specifications require staking but do not establish numeric Resource collateral policy. Compute and validator parameters apply to distinct collateral authorities and are not imported. Governance must publish positive Resource-specific values with evidence commitment; unconfigured policy denies admission.",
   "coverage": "ceil(aggregate native exposure * coverageBps / 10000), floored at minimumSlashable",
-  "withdrawal": "Snapshot policy revision and maturity at exit request; actual withdrawal must additionally require discharged obligations."
+  "withdrawal": "Snapshot policy revision and maturity at exit request; actual withdrawal must additionally require discharged obligations.",
+  "disposition": {
+    "repositoryQualification": "NOT_BLOCKED_BY_UNAPPROVED_PRODUCTION_PARAMETERS",
+    "productionAdmission": "DISABLED_UNTIL_APPROVED_POLICY_AND_AUTHORIZED_ACTIVATION",
+    "governanceWorkItem": "GOV-PRE-RESOURCE-COLLATERAL",
+    "roadmap": "docs/audit/420GOVERNANCE-AUDIT-REMEDIATION-ROADMAP.md#gov-pre-resource-collateral--resource-provider-economic-policy",
+    "approvalEvidence": null,
+    "approvedPolicyRevision": null,
+    "activationTransaction": null,
+    "activationStage": "PRE_TESTNET_GOVERNANCE_APPROVAL_THEN_AUTHORIZED_DEPLOYMENT_INITIALIZATION",
+    "noParameterInheritance": true
+  }
 }

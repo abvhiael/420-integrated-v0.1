@@ -1,6 +1,7 @@
 import {classicRequestFailure} from './classic-rooms.js';
 // BC-1.8: a genuine server-owned 420ID match against Easy/Medium/Hard.
 // No local shuffle, hidden opponent state, scoring, or bot turn authority.
+import {escapeHtml as esc} from './design-system.js';
 import {isSubjectID} from './account-social.js';
 import {normalizeCribbageSnapshot} from './cribbage-session.js';
 const ID=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
@@ -66,7 +67,7 @@ export function renderCribbagePractice(s={}){
  (off?'<p role="status">Classic rooms are not activated for this deployment.</p>':
  guest?'<p><a href="/social-api/auth/start">Sign in with 420ID</a> to play.</p>':
  '<p>420ID sign-in required. The computer never sees your hidden cards.</p>')+
- (s.practiceError?'<p role="alert">Start unconfirmed. Check your rooms before retrying.</p>':'')+
+ (s.practiceError?'<p role="alert">'+esc(s.practiceNotice||'Start unconfirmed. Check your rooms before retrying.')+'</p>':'')+
  '</section>';
 }
 export function bindCribbagePractice(root,controller,{
@@ -82,12 +83,12 @@ export function bindCribbagePractice(root,controller,{
   event.preventDefault();
   if(controller.state?.practiceBusy||!levels.includes(picker.value))return;
   const difficulty=picker.value;
-  controller.emit({practiceBusy:true,practiceError:false,practiceDifficulty:difficulty});
+  controller.emit({practiceBusy:true,practiceError:false,practiceNotice:'',practiceDifficulty:difficulty});
   try{
    const id=await startCribbagePractice(controller.client,difficulty);
    navigate('/games/cribbage/play?session='+encodeURIComponent(id));
-  }catch{
-   controller.emit({practiceBusy:false,practiceError:true});
+  }catch(error){
+   controller.emit({practiceBusy:false,practiceError:true,practiceNotice:error.message.startsWith('Cribbage ')?error.message:'Start unconfirmed. Check your rooms before retrying.'});
   }
  });
 }

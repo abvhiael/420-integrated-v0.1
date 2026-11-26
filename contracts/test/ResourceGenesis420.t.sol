@@ -14,6 +14,14 @@ import "../src/resource/ResourceReceiptRegistry420.sol";
 import "../src/resource/ResourceRouter420.sol";
 
 interface VmResource420 { function prank(address) external; function warp(uint256) external; }
+// Shared legacy fixture retained for collateral custody tests; lifecycle tests use the real registry.
+contract MockResourceCaps420 is ICapabilityRegistry420 {
+    mapping(bytes32=>bool) internal ok;
+    function key(address p,bytes32 c,bytes32 a,bytes32 s) public pure returns(bytes32){return keccak256(abi.encode(p,c,a,s));}
+    function set(address p,bytes32 c,bytes32 a,bytes32 s,bool v) external {ok[key(p,c,a,s)]=v;}
+    function grant(bytes32) external pure returns(CapabilityGrant memory g){return g;}
+    function isAuthorized(address p,bytes32 c,bytes32 a,bytes32 s,uint256) external view returns(bool){return ok[key(p,c,a,s)];}
+}
 contract ResourceGenesis420Test {
     VmResource420 constant vm=VmResource420(address(uint160(uint256(keccak256("hevm cheat code")))));
     address constant ALICE=address(0xA11CE); address constant BOB=address(0xB0B); address constant SETTLER=address(0x420); address constant DELEGATE=address(0xD311);

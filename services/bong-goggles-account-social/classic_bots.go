@@ -101,7 +101,8 @@ func (s *ClassicSessions) RunBotTurn(ctx context.Context,id string)(bool,error){
  var now time.Time
  if e=tx.QueryRowContext(ctx,"SELECT clock_timestamp()").Scan(&now);e!=nil{return false,e}
  chess:=isClassicChess(adapter)
- if rec.Deadline==nil&&!chess||rec.Deadline!=nil&&!now.Before(*rec.Deadline){
+ salad:=rec.GameID=="scrabble"
+ if rec.Deadline==nil&&!chess&&!salad||rec.Deadline!=nil&&!now.Before(*rec.Deadline){
   if e=s.expireLocked(ctx,tx,&rec,now);e!=nil{return false,e}
   return false,tx.Commit()
  }
@@ -135,7 +136,8 @@ func (s *ClassicSessions) RunBotTurn(ctx context.Context,id string)(bool,error){
   if e!=nil{return false,e}
   if nextController!="human"&&nextController!="bot"{return false,ErrUnavailable}
   rec.TurnSeat=&turn;nextSeat=turn
-  if !chess{due:=now.Add(classicTurnSeconds*time.Second);rec.Deadline=&due;deadline=due
+  if salad{frame,err:=adapter.decode(next);if err!=nil{return false,err};rec.Deadline=wordSaladDeadline(frame.Variant,now);deadline=rec.Deadline
+  }else if !chess{due:=now.Add(classicTurnSeconds*time.Second);rec.Deadline=&due;deadline=due
   }else if rec.Deadline!=nil{
    frame,err:=adapter.decode(next);if err!=nil{return false,err}
    data,err:=chessDecode(frame);if err!=nil{return false,err}

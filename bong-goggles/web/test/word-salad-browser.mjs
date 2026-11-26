@@ -43,8 +43,8 @@ async function localServer(){
 }
 function observe(page,origin){
  const problems=[];
- page.on('pageerror',()=>problems.push('uncaught application exception'));
- page.on('console',m=>{if(m.type()==='error'&& !/Failed to load resource/.test(m.text()))problems.push('browser console error');});
+ page.on('pageerror',e=>problems.push(live?'uncaught application exception':'uncaught application exception: '+e.message));
+ page.on('console',m=>{if(m.type()==='error'&& !/Failed to load resource/.test(m.text()))problems.push(live?'browser console error':'browser console error: '+m.text()+' @ '+JSON.stringify(m.location()));});
  page.on('response',r=>{if(r.url().startsWith(origin+'/assets/games/word-salad/')&&r.status()>=400)problems.push('Word Salad artwork HTTP '+r.status());});
  page.on('requestfailed',r=>{if(r.url().startsWith(origin+'/assets/games/word-salad/'))problems.push('Word Salad artwork request failed');});
  return problems;

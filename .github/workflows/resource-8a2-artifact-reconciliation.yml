@@ -1,0 +1,39 @@
+name: Resource 8A2 compiler artifact reconciliation
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/**'
+      - 'contracts/foundry.toml'
+      - 'contracts/config/resource/**'
+      - 'scripts/resource-8a2-artifacts.py'
+      - 'scripts/qualify-resource-solidity.py'
+      - 'docs/audit/420RESOURCE-8A2-artifacts/**'
+      - '.github/workflows/resource-8a2-artifact-reconciliation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.9.0
+      - name: Generate and reconcile compiler artifacts
+        run: |
+          set -euo pipefail
+          archive=docs/audit/420RESOURCE-8A2-artifacts
+          args=()
+          if test -f "$archive/sha256.json"; then args+=(--check "$archive"); fi
+          python scripts/resource-8a2-artifacts.py --out "$RUNNER_TEMP/resource-8a2-artifacts" "${args[@]}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: resource-8a2-compiler-evidence
+          path: ${{ runner.temp }}/resource-8a2-artifacts
+          if-no-files-found: error
+          retention-days: 90

@@ -54,7 +54,7 @@ contract ResourceCollateralInvariant420Test is ResourceProviderCollateralFixture
         vm.prank(owner);
         collateral.deposit{value:amount}(_provider(i),n);
         funded[i] += amount;
-        if (!providers.isActive(_provider(i))) {
+        if (providers.getProvider(_provider(i)).state != ResourceProviderRegistry420.State.ACTIVE) {
             vm.prank(owner);
             providers.updateProvider(_provider(i),0,_id(i));
             vm.prank(owner);

@@ -282,6 +282,10 @@ func (h *AcceptanceHandler) receipt(ctx context.Context,kind string)(string,erro
 }
 func (h *AcceptanceHandler) scopedHash(v string)string{mac:=hmac.New(sha256.New,h.rateKey);_,_=mac.Write([]byte(v));return encodeBytes(mac.Sum(nil))}
 func (h *AcceptanceHandler) limit(ctx context.Context,digest []byte,remote string,mail bool)error{
+ return h.limitScope(ctx,digest,remote,mail,"")
+}
+// Authenticated introspection uses independent bounded ingress budgets.
+func (h *AcceptanceHandler) limitScope(ctx context.Context,digest []byte,remote string,mail bool,client string)error{
  host,_,e:=net.SplitHostPort(remote);if e!=nil||net.ParseIP(host)==nil{return ErrInvalid}
  // Never trust browser-supplied X-Forwarded-For. A load balancer's address may
  // be shared; global limits remain in force even if proxy peers rotate.
@@ -290,6 +294,7 @@ func (h *AcceptanceHandler) limit(ctx context.Context,digest []byte,remote strin
  if e=tx.QueryRowContext(ctx,"SELECT floor(extract(epoch from clock_timestamp())/60)::bigint").Scan(&minute);e!=nil{return e}
  type item struct{scope string;bucket int64;max int}
  limits:=[]item{{"global",minute,120},{"peer:"+h.scopedHash(host),minute,60},{"browser:"+encodeBytes(digest),minute,30}}
+ if client!=""{limits=[]item{{"sso-inspect-global",minute,2400},{"sso-inspect-peer:"+h.scopedHash(host),minute,1200},{"sso-inspect-app:"+client,minute,600}}}
  if mail{limits=append(limits,item{"mail-global-hour",minute/60,30},item{"mail-global-day",minute/1440,90})}
  for _,v:=range limits{
   var count int

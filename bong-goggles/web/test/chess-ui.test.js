@@ -96,3 +96,20 @@ test('Chess distinguishes temporary identity failure from actual guest and recov
  status=200;await c.refresh(null);assert.equal(c.state.status,'ready');assert.deepEqual(c.state.matches,[]);assert.equal(c.state.error,'');
  status=401;await c.refresh(null);assert.equal(c.state.status,'guest');assert.equal(c.state.error,'');assert.equal(c.state.session,null);
 });
+
+test('sustained Chess polling distinguishes identity outage, revocation and changed principal',async()=>{
+ let calls=0,me=0,mode='normal';
+ const c=new ChessController({enabled:true,fetchImpl:async(url)=>{
+  calls++;let status=200,data;
+  if(url.endsWith('/v1/me')){me++;if(mode==='outage'&&me%2===0)status=503;if(mode==='revoked'&&me%2===0)status=401;
+   data={walletRequired:false,profile:{subject:mode==='changed'&&me%2===0?'22222222-2222-4222-8222-222222222222':actor}};}
+  else data={onChain:false,wager:false,rewards:false,sessions:[]};
+  return new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json'}});
+ }});
+ for(let n=0;n<120;n++){await c.refresh(null);assert.equal(c.state.status,'ready');}
+ assert.equal(calls,360);
+ for(const [m,msg] of [['outage','503'],['revoked','no longer verified'],['changed','Account changed']]){
+  me=0;mode=m;await c.refresh(null);assert.equal(c.state.status,'unavailable');assert.ok(c.state.error.includes(msg));assert.deepEqual(c.state.matches,[]);
+ }
+ mode='normal';await c.refresh(null);assert.equal(c.state.status,'ready');
+});

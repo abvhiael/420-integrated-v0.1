@@ -71,13 +71,21 @@ func (h *AcceptanceHandler) ssoBackendRoute(w http.ResponseWriter,r *http.Reques
  // endpoints, including invalid credentials. No unauthenticated brute force
  // is granted a high-frequency backend bypass.
  key:=sha256.Sum256([]byte(r.Header.Get("Authorization")))
- if e=h.limit(ctx,key[:],r.RemoteAddr,false);e!=nil{
-  if errors.Is(e,errLimited){deny(w,429)}else{deny(w,503)};return
- }
  app,secret,ok:=r.BasicAuth()
- if !ok{deny(w,401);return}
- client,e:=h.sso.CheckClient(app,secret)
- if e!=nil{deny(w,401);return}
+ client,clientErr:=h.sso.CheckClient(app,secret)
+ inspect:=ok&&clientErr==nil&&r.URL.Path=="/v1/sso/introspect"
+ if !inspect{
+  if e=h.limit(ctx,key[:],r.RemoteAddr,false);e!=nil{
+   if errors.Is(e,errLimited){deny(w,429)}else{deny(w,503)};return
+  }
+ }
+ if !ok||clientErr!=nil{deny(w,401);return}
+ if inspect{
+  // Charge the authenticated app before parsing even malformed requests.
+  if e=h.limitScope(ctx,key[:],r.RemoteAddr,false,client.app);e!=nil{
+   if errors.Is(e,errLimited){w.Header().Set("Retry-After","60");deny(w,429)}else{deny(w,503)};return
+  }
+ }
  if r.ContentLength>maxRequest{deny(w,413);return}
  raw,e:=io.ReadAll(http.MaxBytesReader(w,r.Body,maxRequest))
  if e!=nil{deny(w,413);return}

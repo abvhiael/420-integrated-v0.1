@@ -1,0 +1,599 @@
+{
+  "schema": "420-resource-8a2-retained-ci-extract-v1",
+  "run": 45746706326,
+  "head": "b9e3e9acc1c66fa1d0cd5d44cffee7a20497977e",
+  "label": "sdk",
+  "scope": "Actual timestamped CI excerpts; not full verbose traces; local/fixture qualification only",
+  "jobs": [
+    {
+      "id": 139664406540,
+      "name": "resource-contract-core",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Checkout exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Verify exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run foundry-rs/foundry-toolchain@v1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Verify deterministic Resource deployment package",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Stage scoped Resource test owners and pinned import closure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Build Resource contract family",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Run Resource collateral custody suite",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Run Resource collateral policy suite",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Run Resource stateful collateral invariants",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Run Resource deployment binding suite",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Run Resource protocol adversarial suite",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Check Resource Solidity formatting",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Post Run foundry-rs/foundry-toolchain@v1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25
+        },
+        {
+          "name": "Post Checkout exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27
+        }
+      ],
+      "originalLogLength": 1706112,
+      "extract": [
+        "2026-11-26T03:05:59.3656628Z   FOUNDRY_PROFILE: ci",
+        "2026-11-26T03:06:18.0787112Z HEAD is now at b9e3e9ac Exercise collateral SDK precision, discovery, canonical RPC and transaction rejection",
+        "2026-11-26T03:06:18.1296007Z   FOUNDRY_PROFILE: ci",
+        "2026-11-26T03:06:18.1477929Z   FOUNDRY_PROFILE: ci",
+        "2026-11-26T03:06:21.7196744Z   FOUNDRY_PROFILE: ci",
+        "2026-11-26T03:06:21.7949075Z   FOUNDRY_PROFILE: ci",
+        "2026-11-26T03:06:21.8704408Z Staged 46 exact source/import files",
+        "2026-11-26T03:06:21.8885187Z   FOUNDRY_PROFILE: ci",
+        "2026-11-26T03:06:40.4773242Z ##[group]Run forge test --root \"$RUNNER_TEMP/resource-contracts\" --match-path test/ResourceProviderCollateral420.t.sol -vvvv",
+        "2026-11-26T03:06:40.4774158Z \u001b[36;1mforge test --root \"$RUNNER_TEMP/resource-contracts\" --match-path test/ResourceProviderCollateral420.t.sol -vvvv\u001b[0m",
+        "2026-11-26T03:06:40.4807181Z   FOUNDRY_PROFILE: ci",
+        "2026-11-26T03:07:15.0566711Z Ran 20 tests for test/ResourceProviderCollateral420.t.sol:ResourceProviderCollateral420Test",
+        "2026-11-26T03:07:15.0567514Z [PASS] testComputeObligationCannotReuseReservedFunds() (gas: 884406)",
+        "2026-11-26T03:07:15.0857671Z [PASS] testExitImmediatelyStopsAdmissionAndFreezesPolicyRevision() (gas: 1252189)",
+        "2026-11-26T03:07:15.1088468Z [PASS] testForeignDepositorAndMissingGrantRollback() (gas: 635714)",
+        "2026-11-26T03:07:15.1182411Z [PASS] testGenericVaultGrantCannotUnlockResourceCollateral() (gas: 1030187)",
+        "2026-11-26T03:07:15.1348426Z [PASS] testGovernanceDisciplineCannotBeOverridden() (gas: 1539920)",
+        "2026-11-26T03:07:15.1576272Z [PASS] testMaliciousVaultBindingMismatchRollsBackDepositAndNonce() (gas: 13371573)",
+        "2026-11-26T03:07:15.2028416Z [PASS] testMaliciousVaultCallbacksCannotMutateCollateralOrExposeEligibility() (gas: 13813350)",
+        "2026-11-26T03:07:15.2338731Z [PASS] testNativeDepositAndTopupReconcile() (gas: 1339074)",
+        "2026-11-26T03:07:15.2478011Z [PASS] testPenaltyAndZeroExposureReservationBlockPartialWithdrawal() (gas: 2775230)",
+        "2026-11-26T03:07:15.2751884Z [PASS] testPenaltyExecutionRollbackOnMissingVaultGrant() (gas: 1147726)",
+        "2026-11-26T03:07:15.2839346Z [PASS] testPositionCannotActivateSecondProviderOrAlias() (gas: 1042031)",
+        "2026-11-26T03:07:15.2918071Z [PASS] testReplayCannotCountDepositTwice() (gas: 763730)",
+        "2026-11-26T03:07:15.2984066Z [PASS] testReservationsPreventOverbookingAndWithdrawal() (gas: 1986602)",
+        "2026-11-26T03:07:15.3158965Z [PASS] testSlashDeductsNativeCustodyAndRetainsExistingExposure() (gas: 3930029)",
+        "2026-11-26T03:07:15.3577978Z [PASS] testUnauthorizedHoldAndDuplicatePenaltyDecision() (gas: 2051633)",
+        "2026-11-26T03:07:15.3763113Z [PASS] testUnauthorizedSponsorshipAndPrematureExit() (gas: 1508947)",
+        "2026-11-26T03:07:15.3900651Z [PASS] testWalletAndDirectVaultBalanceAreNotProviderCollateral() (gas: 151389)",
+        "2026-11-26T03:07:15.3916714Z [PASS] testWithdrawalGrantFailureIsAtomicAndSponsorReceivesFunds() (gas: 1894696)",
+        "2026-11-26T03:07:15.4090150Z [PASS] testWrongAccountingBindingRejected() (gas: 1453105)",
+        "2026-11-26T03:07:15.4094208Z [PASS] testZeroAndBelowMinimumThenExactBoundaryTopup() (gas: 1645639)",
+        "2026-11-26T03:07:15.4244751Z Suite result: ok. 20 passed; 0 failed; 0 skipped; finished in 19.25ms (57.18ms CPU time)",
+        "2026-11-26T03:07:15.4245148Z Ran 1 test suite in 54.84ms (19.25ms CPU time): 20 tests passed, 0 failed, 0 skipped (20 total tests)",
+        "2026-11-26T03:07:15.4277678Z ##[group]Run forge test --root \"$RUNNER_TEMP/resource-contracts\" --match-path test/ResourceCollateralPolicy420.t.sol -vvv",
+        "2026-11-26T03:07:15.4278107Z \u001b[36;1mforge test --root \"$RUNNER_TEMP/resource-contracts\" --match-path test/ResourceCollateralPolicy420.t.sol -vvv\u001b[0m",
+        "2026-11-26T03:07:15.4310659Z   FOUNDRY_PROFILE: ci",
+        "2026-11-26T03:07:26.4798650Z Ran 6 tests for test/ResourceCollateralPolicy420.t.sol:ResourceCollateralPolicy420Test",
+        "2026-11-26T03:07:26.4804302Z [PASS] testCoverageRoundsUpAndEnforcesFloor() (gas: 201076)",
+        "2026-11-26T03:07:26.4805253Z [PASS] testFuzzCoverage(uint128,uint16) (runs: 50000, μ: 142742, ~: 155867)",
+        "2026-11-26T03:07:26.4805764Z [PASS] testInvalidPolicyRejected() (gas: 149060)",
+        "2026-11-26T03:07:26.4806200Z [PASS] testPolicyRevisionsAndCommitmentsRemainHistorical() (gas: 319265)",
+        "2026-11-26T03:07:26.4806694Z [PASS] testUnauthorizedPolicyAndPauseRejected() (gas: 152355)",
+        "2026-11-26T03:07:26.4807117Z [PASS] testUnconfiguredPolicyFailsClosed() (gas: 151675)",
+        "2026-11-26T03:07:26.4807563Z Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 1.10s (1.10s CPU time)",
+        "2026-11-26T03:07:26.4808143Z Ran 1 test suite in 1.10s (1.10s CPU time): 6 tests passed, 0 failed, 0 skipped (6 total tests)",
+        "2026-11-26T03:07:26.4888356Z ##[group]Run forge test --root \"$RUNNER_TEMP/resource-contracts\" --match-path test/ResourceCollateralInvariant420.t.sol -vvv",
+        "2026-11-26T03:07:26.4889262Z \u001b[36;1mforge test --root \"$RUNNER_TEMP/resource-contracts\" --match-path test/ResourceCollateralInvariant420.t.sol -vvv\u001b[0m",
+        "2026-11-26T03:07:26.4922790Z   FOUNDRY_PROFILE: ci",
+        "2026-11-26T03:17:52.5718214Z Ran 1 test for test/ResourceCollateralInvariant420.t.sol:ResourceCollateralInvariant420Test",
+        "2026-11-26T03:17:52.5719181Z [PASS] invariant_accounting() (runs: 2048, calls: 524288, reverts: 0)",
+        "2026-11-26T03:17:52.5739127Z Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 583.38s (583.37s CPU time)",
+        "2026-11-26T03:17:52.5742950Z Ran 1 test suite in 583.38s (583.38s CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)",
+        "2026-11-26T03:17:52.5871618Z ##[group]Run forge test --root \"$RUNNER_TEMP/resource-contracts\" --match-path 'test/ResourceDeploymentBinding420.t.sol' -vvvv",
+        "2026-11-26T03:17:52.5873221Z \u001b[36;1mforge test --root \"$RUNNER_TEMP/resource-contracts\" --match-path 'test/ResourceDeploymentBinding420.t.sol' -vvvv\u001b[0m",
+        "2026-11-26T03:17:52.5922129Z   FOUNDRY_PROFILE: ci",
+        "2026-11-26T03:18:19.5346381Z Ran 3 tests for test/ResourceDeploymentBinding420.t.sol:ResourceDeploymentBinding420Test",
+        "2026-11-26T03:18:19.5347462Z [PASS] testCapabilityAuthorityAndWrongRouterAreVisible() (gas: 30706978)",
+        "2026-11-26T03:18:19.5648955Z     ├─ emit DeploymentAddress(name: \"ResourceAuthorization420\", implementation: ResourceAuthorization420: [0xF62849F9A0B5Bf2913b396098F7c7019b51A820a])",
+        "2026-11-26T03:18:19.5650224Z     ├─ emit DeploymentAddress(name: \"ResourcePolicyRegistry420\", implementation: ResourcePolicyRegistry420: [0x5991A2dF15A8F6A256D3Ec51E99254Cd3fb576A9])",
+        "2026-11-26T03:18:19.5651520Z     ├─ emit DeploymentAddress(name: \"ResourceProviderRegistry420\", implementation: ResourceProviderRegistry420: [0xc7183455a4C133Ae270771860664b6B7ec320bB1])",
+        "2026-11-26T03:18:19.5652743Z     ├─ emit DeploymentAddress(name: \"ResourceProviderCollateral420\", implementation: ResourceProviderCollateral420: [0x96d3F6c20EEd2697647F543fE6C08bC2Fbf39758])",
+        "2026-11-26T03:18:19.5653912Z     ├─ emit DeploymentAddress(name: \"ResourceNodeRegistry420\", implementation: ResourceNodeRegistry420: [0x3Cff5E7eBecb676c3Cb602D0ef2d46710b88854E])",
+        "2026-11-26T03:18:19.5655033Z     ├─ emit DeploymentAddress(name: \"ResourceOfferRegistry420\", implementation: ResourceOfferRegistry420: [0x27cc01A4676C73fe8b6d0933Ac991BfF1D77C4da])",
+        "2026-11-26T03:18:19.5656172Z     ├─ emit DeploymentAddress(name: \"ResourceSessionRegistry420\", implementation: ResourceSessionRegistry420: [0x796f2974e3C1af763252512dd6d521E9E984726C])",
+        "2026-11-26T03:18:19.5657331Z     ├─ emit DeploymentAddress(name: \"ResourceReceiptRegistry420\", implementation: ResourceReceiptRegistry420: [0x92a6649Fdcc044DA968d94202465578a9371C7b1])",
+        "2026-11-26T03:18:19.5658413Z     ├─ emit DeploymentAddress(name: \"ResourceRouter420\", implementation: ResourceRouter420: [0xDA5A5ADC64C8013d334A0DA9e711B364Af7A4C2d])",
+        "2026-11-26T03:18:19.5659771Z     ├─ emit DeploymentAddress(name: \"StorageProofSchemeRegistry420\", implementation: StorageProofSchemeRegistry420: [0x886D6d1eB8D415b00052828CD6d5B321f072073d])",
+        "2026-11-26T03:18:19.5660962Z     ├─ emit DeploymentAddress(name: \"StorageCapacityRegistry420\", implementation: StorageCapacityRegistry420: [0x3C4293F66941ECa00f4950C10d4255d5c271bAeF])",
+        "2026-11-26T03:18:19.5662152Z     ├─ emit DeploymentAddress(name: \"StorageCommitmentRegistry420\", implementation: StorageCommitmentRegistry420: [0x89CA9F4f77B267778EB2eA0Ba1bEAdEe8523af36])",
+        "2026-11-26T03:18:19.5663325Z     ├─ emit DeploymentAddress(name: \"StorageProofRegistry420\", implementation: StorageProofRegistry420: [0xe54a55121A47451c5727ADBAF9b9FC1643477e25])",
+        "2026-11-26T03:18:19.5664464Z     ├─ emit DeploymentAddress(name: \"StorageAgreementRegistry420\", implementation: StorageAgreementRegistry420: [0x94771550282853f6E0124c302F7dE1Cf50aa45CA])",
+        "2026-11-26T03:18:19.5665700Z     ├─ emit DeploymentAddress(name: \"StorageObjectManifestRegistry420\", implementation: StorageObjectManifestRegistry420: [0x8227724C33C1748A42d1C1cD06e21AB8Deb6eB0A])",
+        "2026-11-26T03:18:19.5666930Z     ├─ emit DeploymentAddress(name: \"StorageSettlementRegistry420\", implementation: StorageSettlementRegistry420: [0x883816205341a6ba3C32AE8dAdCEbDD9d59BC2C4])",
+        "2026-11-26T03:18:19.5668005Z     ├─ emit RuntimeCodeHash(name: \"ResourceRouter420\", codeHash: 0xd879e5349b9c5558700f8e32401a3e2f91dd890d5cb3aa67376996362ccacfe5)",
+        "2026-11-26T03:18:19.5669027Z     ├─ emit RuntimeCodeHash(name: \"StorageSettlementRegistry420\", codeHash: 0x4988dc104b08d50d942590b9ebee0912c4b2174c0610eab2b7ee34870a232d38)",
+        "2026-11-26T03:18:19.5670145Z     ├─ emit ReleaseCommitment(name: \"dependencyRoot\", value: 0x06762e00176fbe7f03fb900f5ee57a5f5eea00098c4ea35f9a063c3346022941)",
+        "2026-11-26T03:18:19.5671089Z     ├─ emit ReleaseCommitment(name: \"manifestHash\", value: 0x9928d3b0fdb3810adca85f30ca73ca7449b726fa7aaa33d654ab0cbe8f3d947d)",
+        "2026-11-26T03:18:19.5672048Z     ├─ emit ReleaseCommitment(name: \"interfaceHash\", value: 0x6f9cca3e4ed6105c357a897ada7ba2bdbb8cdcba229515db20036e580ca48d4a)",
+        "2026-11-26T03:18:19.5681934Z [PASS] testDeploymentOrderAndConstructorBindings() (gas: 30517287)",
+        "2026-11-26T03:18:19.5905789Z     ├─ emit DeploymentAddress(name: \"ResourceAuthorization420\", implementation: ResourceAuthorization420: [0xF62849F9A0B5Bf2913b396098F7c7019b51A820a])",
+        "2026-11-26T03:18:19.5906935Z     ├─ emit DeploymentAddress(name: \"ResourcePolicyRegistry420\", implementation: ResourcePolicyRegistry420: [0x5991A2dF15A8F6A256D3Ec51E99254Cd3fb576A9])",
+        "2026-11-26T03:18:19.5908120Z     ├─ emit DeploymentAddress(name: \"ResourceProviderRegistry420\", implementation: ResourceProviderRegistry420: [0xc7183455a4C133Ae270771860664b6B7ec320bB1])",
+        "2026-11-26T03:18:19.5909558Z     ├─ emit DeploymentAddress(name: \"ResourceProviderCollateral420\", implementation: ResourceProviderCollateral420: [0x96d3F6c20EEd2697647F543fE6C08bC2Fbf39758])",
+        "2026-11-26T03:18:19.5910759Z     ├─ emit DeploymentAddress(name: \"ResourceNodeRegistry420\", implementation: ResourceNodeRegistry420: [0x3Cff5E7eBecb676c3Cb602D0ef2d46710b88854E])",
+        "2026-11-26T03:18:19.5911911Z     ├─ emit DeploymentAddress(name: \"ResourceOfferRegistry420\", implementation: ResourceOfferRegistry420: [0x27cc01A4676C73fe8b6d0933Ac991BfF1D77C4da])",
+        "2026-11-26T03:18:19.5913062Z     ├─ emit DeploymentAddress(name: \"ResourceSessionRegistry420\", implementation: ResourceSessionRegistry420: [0x796f2974e3C1af763252512dd6d521E9E984726C])",
+        "2026-11-26T03:18:19.5914228Z     ├─ emit DeploymentAddress(name: \"ResourceReceiptRegistry420\", implementation: ResourceReceiptRegistry420: [0x92a6649Fdcc044DA968d94202465578a9371C7b1])",
+        "2026-11-26T03:18:19.5915320Z     ├─ emit DeploymentAddress(name: \"ResourceRouter420\", implementation: ResourceRouter420: [0xDA5A5ADC64C8013d334A0DA9e711B364Af7A4C2d])",
+        "2026-11-26T03:18:19.5916442Z     ├─ emit DeploymentAddress(name: \"StorageProofSchemeRegistry420\", implementation: StorageProofSchemeRegistry420: [0x886D6d1eB8D415b00052828CD6d5B321f072073d])",
+        "2026-11-26T03:18:19.5917808Z     ├─ emit DeploymentAddress(name: \"StorageCapacityRegistry420\", implementation: StorageCapacityRegistry420: [0x3C4293F66941ECa00f4950C10d4255d5c271bAeF])",
+        "2026-11-26T03:18:19.5918987Z     ├─ emit DeploymentAddress(name: \"StorageCommitmentRegistry420\", implementation: StorageCommitmentRegistry420: [0x89CA9F4f77B267778EB2eA0Ba1bEAdEe8523af36])",
+        "2026-11-26T03:18:19.5920242Z     ├─ emit DeploymentAddress(name: \"StorageProofRegistry420\", implementation: StorageProofRegistry420: [0xe54a55121A47451c5727ADBAF9b9FC1643477e25])",
+        "2026-11-26T03:18:19.5921375Z     ├─ emit DeploymentAddress(name: \"StorageAgreementRegistry420\", implementation: StorageAgreementRegistry420: [0x94771550282853f6E0124c302F7dE1Cf50aa45CA])",
+        "2026-11-26T03:18:19.5922603Z     ├─ emit DeploymentAddress(name: \"StorageObjectManifestRegistry420\", implementation: StorageObjectManifestRegistry420: [0x8227724C33C1748A42d1C1cD06e21AB8Deb6eB0A])",
+        "2026-11-26T03:18:19.5923849Z     ├─ emit DeploymentAddress(name: \"StorageSettlementRegistry420\", implementation: StorageSettlementRegistry420: [0x883816205341a6ba3C32AE8dAdCEbDD9d59BC2C4])",
+        "2026-11-26T03:18:19.5924937Z     ├─ emit RuntimeCodeHash(name: \"ResourceRouter420\", codeHash: 0xd879e5349b9c5558700f8e32401a3e2f91dd890d5cb3aa67376996362ccacfe5)",
+        "2026-11-26T03:18:19.5925964Z     ├─ emit RuntimeCodeHash(name: \"StorageSettlementRegistry420\", codeHash: 0x4988dc104b08d50d942590b9ebee0912c4b2174c0610eab2b7ee34870a232d38)",
+        "2026-11-26T03:18:19.5926963Z     ├─ emit ReleaseCommitment(name: \"dependencyRoot\", value: 0x06762e00176fbe7f03fb900f5ee57a5f5eea00098c4ea35f9a063c3346022941)",
+        "2026-11-26T03:18:19.5927904Z     ├─ emit ReleaseCommitment(name: \"manifestHash\", value: 0x9928d3b0fdb3810adca85f30ca73ca7449b726fa7aaa33d654ab0cbe8f3d947d)",
+        "2026-11-26T03:18:19.5929034Z     ├─ emit ReleaseCommitment(name: \"interfaceHash\", value: 0x6f9cca3e4ed6105c357a897ada7ba2bdbb8cdcba229515db20036e580ca48d4a)",
+        "2026-11-26T03:18:19.5983303Z [PASS] testProtocolRegistryPublishesExactResourceRouterRuntimeIdentity() (gas: 30392093)",
+        "2026-11-26T03:18:19.6261326Z     ├─ emit DeploymentAddress(name: \"ResourceAuthorization420\", implementation: ResourceAuthorization420: [0xF62849F9A0B5Bf2913b396098F7c7019b51A820a])",
+        "2026-11-26T03:18:19.6262470Z     ├─ emit DeploymentAddress(name: \"ResourcePolicyRegistry420\", implementation: ResourcePolicyRegistry420: [0x5991A2dF15A8F6A256D3Ec51E99254Cd3fb576A9])",
+        "2026-11-26T03:18:19.6263763Z     ├─ emit DeploymentAddress(name: \"ResourceProviderRegistry420\", implementation: ResourceProviderRegistry420: [0xc7183455a4C133Ae270771860664b6B7ec320bB1])",
+        "2026-11-26T03:18:19.6264960Z     ├─ emit DeploymentAddress(name: \"ResourceProviderCollateral420\", implementation: ResourceProviderCollateral420: [0x96d3F6c20EEd2697647F543fE6C08bC2Fbf39758])",
+        "2026-11-26T03:18:19.6266116Z     ├─ emit DeploymentAddress(name: \"ResourceNodeRegistry420\", implementation: ResourceNodeRegistry420: [0x3Cff5E7eBecb676c3Cb602D0ef2d46710b88854E])",
+        "2026-11-26T03:18:19.6267229Z     ├─ emit DeploymentAddress(name: \"ResourceOfferRegistry420\", implementation: ResourceOfferRegistry420: [0x27cc01A4676C73fe8b6d0933Ac991BfF1D77C4da])",
+        "2026-11-26T03:18:19.6268365Z     ├─ emit DeploymentAddress(name: \"ResourceSessionRegistry420\", implementation: ResourceSessionRegistry420: [0x796f2974e3C1af763252512dd6d521E9E984726C])",
+        "2026-11-26T03:18:19.6269619Z     ├─ emit DeploymentAddress(name: \"ResourceReceiptRegistry420\", implementation: ResourceReceiptRegistry420: [0x92a6649Fdcc044DA968d94202465578a9371C7b1])",
+        "2026-11-26T03:18:19.6270700Z     ├─ emit DeploymentAddress(name: \"ResourceRouter420\", implementation: ResourceRouter420: [0xDA5A5ADC64C8013d334A0DA9e711B364Af7A4C2d])",
+        "2026-11-26T03:18:19.6271805Z     ├─ emit DeploymentAddress(name: \"StorageProofSchemeRegistry420\", implementation: StorageProofSchemeRegistry420: [0x886D6d1eB8D415b00052828CD6d5B321f072073d])",
+        "2026-11-26T03:18:19.6272978Z     ├─ emit DeploymentAddress(name: \"StorageCapacityRegistry420\", implementation: StorageCapacityRegistry420: [0x3C4293F66941ECa00f4950C10d4255d5c271bAeF])",
+        "2026-11-26T03:18:19.6274167Z     ├─ emit DeploymentAddress(name: \"StorageCommitmentRegistry420\", implementation: StorageCommitmentRegistry420: [0x89CA9F4f77B267778EB2eA0Ba1bEAdEe8523af36])",
+        "2026-11-26T03:18:19.6275426Z     ├─ emit DeploymentAddress(name: \"StorageProofRegistry420\", implementation: StorageProofRegistry420: [0xe54a55121A47451c5727ADBAF9b9FC1643477e25])",
+        "2026-11-26T03:18:19.6276568Z     ├─ emit DeploymentAddress(name: \"StorageAgreementRegistry420\", implementation: StorageAgreementRegistry420: [0x94771550282853f6E0124c302F7dE1Cf50aa45CA])",
+        "2026-11-26T03:18:19.6277789Z     ├─ emit DeploymentAddress(name: \"StorageObjectManifestRegistry420\", implementation: StorageObjectManifestRegistry420: [0x8227724C33C1748A42d1C1cD06e21AB8Deb6eB0A])",
+        "2026-11-26T03:18:19.6279006Z     ├─ emit DeploymentAddress(name: \"StorageSettlementRegistry420\", implementation: StorageSettlementRegistry420: [0x883816205341a6ba3C32AE8dAdCEbDD9d59BC2C4])",
+        "2026-11-26T03:18:19.6280167Z     ├─ emit RuntimeCodeHash(name: \"ResourceRouter420\", codeHash: 0xd879e5349b9c5558700f8e32401a3e2f91dd890d5cb3aa67376996362ccacfe5)",
+        "2026-11-26T03:18:19.6281212Z     ├─ emit RuntimeCodeHash(name: \"StorageSettlementRegistry420\", codeHash: 0x4988dc104b08d50d942590b9ebee0912c4b2174c0610eab2b7ee34870a232d38)",
+        "2026-11-26T03:18:19.6282211Z     ├─ emit ReleaseCommitment(name: \"dependencyRoot\", value: 0x06762e00176fbe7f03fb900f5ee57a5f5eea00098c4ea35f9a063c3346022941)",
+        "2026-11-26T03:18:19.6283146Z     ├─ emit ReleaseCommitment(name: \"manifestHash\", value: 0x9928d3b0fdb3810adca85f30ca73ca7449b726fa7aaa33d654ab0cbe8f3d947d)",
+        "2026-11-26T03:18:19.6284074Z     ├─ emit ReleaseCommitment(name: \"interfaceHash\", value: 0x6f9cca3e4ed6105c357a897ada7ba2bdbb8cdcba229515db20036e580ca48d4a)",
+        "2026-11-26T03:18:19.6293377Z Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 5.63ms (15.21ms CPU time)",
+        "2026-11-26T03:18:19.6293945Z Ran 1 test suite in 17.71ms (5.63ms CPU time): 3 tests passed, 0 failed, 0 skipped (3 total tests)",
+        "2026-11-26T03:18:19.6326012Z ##[group]Run forge test --root \"$RUNNER_TEMP/resource-contracts\" --match-path 'test/ResourceGenesis420.t.sol' -vvvv",
+        "2026-11-26T03:18:19.6326833Z \u001b[36;1mforge test --root \"$RUNNER_TEMP/resource-contracts\" --match-path 'test/ResourceGenesis420.t.sol' -vvvv\u001b[0m",
+        "2026-11-26T03:18:19.6358949Z   FOUNDRY_PROFILE: ci",
+        "2026-11-26T03:19:07.9947574Z Ran 14 tests for test/ResourceGenesis420.t.sol:ResourceGenesis420Test",
+        "2026-11-26T03:19:07.9950421Z [PASS] testActiveAndClosedSessionBlockCollateralWithdrawalUntilDischarge() (gas: 20118888)",
+        "2026-11-26T03:19:08.0671214Z [PASS] testConsumerCanCancelOpenSessionOnly() (gas: 19231509)",
+        "2026-11-26T03:19:08.1113016Z [PASS] testExpiredSessionCannotReceiveUsage() (gas: 19251387)",
+        "2026-11-26T03:19:08.1471045Z [PASS] testForgedNonzeroStakeCannotActivateProvider() (gas: 17173254)",
+        "2026-11-26T03:19:08.1541371Z [PASS] testFourServiceClassesAreDistinct() (gas: 394)",
+        "2026-11-26T03:19:08.1542197Z [PASS] testFuzzArbitraryNonzeroStakeReferenceCannotActivate(bytes32) (runs: 50000, μ: 17156657, ~: 17169795)",
+        "2026-11-26T03:19:08.1612962Z [PASS] testNodeUpdateUsesDeclaredCapabilityAndRequiresInactiveState() (gas: 18563858)",
+        "2026-11-26T03:19:08.1805625Z [PASS] testOfferSessionReceiptReplayAndBounds() (gas: 19818945)",
+        "2026-11-26T03:19:08.2109126Z [PASS] testProviderNeedsStakeAndDefaultDeny() (gas: 17160526)",
+        "2026-11-26T03:19:08.2181542Z [PASS] testReceiptSubmissionSupportsScopedDelegateOnly() (gas: 19544227)",
+        "2026-11-26T03:19:08.2437839Z [PASS] testReceiptsMustAdvanceAndBeNonzero() (gas: 19497231)",
+        "2026-11-26T03:19:08.2688204Z [PASS] testServicePolicyCapsOfferAndSessionDuration() (gas: 19054387)",
+        "2026-11-26T03:19:08.2917786Z [PASS] testSettlementIsCapabilityScoped() (gas: 19339281)",
+        "2026-11-26T03:19:08.3190317Z [PASS] testUnauthorizedProviderActivationCannotUseForgedReference() (gas: 17155861)",
+        "2026-11-26T03:19:08.3333529Z Suite result: ok. 14 passed; 0 failed; 0 skipped; finished in 28.08s (28.14s CPU time)",
+        "2026-11-26T03:19:08.3334129Z Ran 1 test suite in 28.10s (28.08s CPU time): 14 tests passed, 0 failed, 0 skipped (14 total tests)",
+        "2026-11-26T03:19:08.3400846Z   FOUNDRY_PROFILE: ci"
+      ]
+    },
+    {
+      "id": 139664406843,
+      "name": "resource-runtime-sdk",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Checkout exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Verify exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Test Resource Network runtime",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Test storage SDK",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Post Checkout exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        }
+      ],
+      "originalLogLength": 23977,
+      "extract": [
+        "2026-11-26T03:06:18.9914812Z HEAD is now at b9e3e9ac Exercise collateral SDK precision, discovery, canonical RPC and transaction rejection",
+        "2026-11-26T03:06:26.8970463Z ##[group]Run go test ./execution/storage/...",
+        "2026-11-26T03:06:26.8970961Z \u001b[36;1mgo test ./execution/storage/...\u001b[0m",
+        "2026-11-26T03:06:31.3770906Z ok  \tgithub.com/420integrated/420-integrated/execution/storage\t2.562s",
+        "2026-11-26T03:06:31.4191633Z ##[group]Run go test ./sdk/storage420/...",
+        "2026-11-26T03:06:31.4191903Z \u001b[36;1mgo test ./sdk/storage420/...\u001b[0m",
+        "2026-11-26T03:06:32.5641262Z ok  \tgithub.com/420integrated/420-integrated/sdk/storage420\t0.011s"
+      ]
+    },
+    {
+      "id": 139664406947,
+      "name": "resource-storage",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Checkout exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Verify exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run foundry-rs/foundry-toolchain@v1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Stage scoped Resource test owners and pinned import closure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Run storage protocol suites",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Post Run foundry-rs/foundry-toolchain@v1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Post Checkout exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        }
+      ],
+      "originalLogLength": 27895,
+      "extract": [
+        "2026-11-26T03:05:59.5664307Z   FOUNDRY_PROFILE: ci",
+        "2026-11-26T03:06:18.5965880Z HEAD is now at b9e3e9ac Exercise collateral SDK precision, discovery, canonical RPC and transaction rejection",
+        "2026-11-26T03:06:18.6563043Z   FOUNDRY_PROFILE: ci",
+        "2026-11-26T03:06:18.6758751Z   FOUNDRY_PROFILE: ci",
+        "2026-11-26T03:06:22.6314391Z   FOUNDRY_PROFILE: ci",
+        "2026-11-26T03:06:22.7598574Z Staged 46 exact source/import files",
+        "2026-11-26T03:06:22.7762442Z \u001b[36;1m  forge test --root \"$RUNNER_TEMP/resource-contracts\" --match-path \"$suite\" -vvv\u001b[0m",
+        "2026-11-26T03:06:22.7803531Z   FOUNDRY_PROFILE: ci",
+        "2026-11-26T03:06:51.8414270Z Ran 6 tests for test/StorageCapacityRegistry420.t.sol:StorageCapacityRegistry420Test",
+        "2026-11-26T03:06:51.8415504Z [PASS] testCapacityCannotShrinkBelowReservations() (gas: 16723801)",
+        "2026-11-26T03:06:51.8416603Z [PASS] testProviderConfiguresCapacityAndAvailability() (gas: 16031485)",
+        "2026-11-26T03:06:51.8417627Z [PASS] testReservationCannotReleaseBeforeStorageTerm() (gas: 16512977)",
+        "2026-11-26T03:06:51.8418643Z [PASS] testReservationIdIsCanonicalAndReplaySafe() (gas: 16556845)",
+        "2026-11-26T03:06:51.8419466Z [PASS] testReservationsPreventOverselling() (gas: 16939089)",
+        "2026-11-26T03:06:51.8420254Z [PASS] testUnrelatedActorCannotConfigureOrReserve() (gas: 16338434)",
+        "2026-11-26T03:06:51.8421203Z Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 14.81ms (42.23ms CPU time)",
+        "2026-11-26T03:06:51.8422383Z Ran 1 test suite in 15.26ms (14.81ms CPU time): 6 tests passed, 0 failed, 0 skipped (6 total tests)",
+        "2026-11-26T03:07:10.9019710Z Ran 7 tests for test/StorageProofProtocol420.t.sol:StorageProofProtocol420Test",
+        "2026-11-26T03:07:10.9020926Z [PASS] testCommitmentRequiresActiveStoreNodeAndProviderAuthority() (gas: 18005870)",
+        "2026-11-26T03:07:10.9022435Z [PASS] testInvalidOrLateProofFailsClosed() (gas: 18363878)",
+        "2026-11-26T03:07:10.9023855Z [PASS] testNodeSuspensionAndRetirementPreserveUnconsumedChallenges() (gas: 18639528)",
+        "2026-11-26T03:07:10.9024838Z [PASS] testProofSchemeRegistrationIsDefaultDeny() (gas: 1402649)",
+        "2026-11-26T03:07:10.9025443Z [PASS] testProviderDisciplineStopsProofWithoutConsumingChallenge() (gas: 18893703)",
+        "2026-11-26T03:07:10.9026053Z [PASS] testSchemeOrNodeSuspensionStopsProofAcceptance() (gas: 18376266)",
+        "2026-11-26T03:07:10.9026568Z [PASS] testVerifiedProofCreatesReplaySafeReceipt() (gas: 18257517)",
+        "2026-11-26T03:07:10.9027072Z Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 12.30ms (43.86ms CPU time)",
+        "2026-11-26T03:07:10.9027675Z Ran 1 test suite in 13.87ms (12.30ms CPU time): 7 tests passed, 0 failed, 0 skipped (7 total tests)",
+        "2026-11-26T03:07:37.0500144Z Ran 7 tests for test/StorageAgreementRegistry420.t.sol:StorageAgreementRegistry420Test",
+        "2026-11-26T03:07:37.0504219Z [PASS] testActivationBindsExactImmutableCommitmentAndCapacity() (gas: 23660665)",
+        "2026-11-26T03:07:37.0505618Z [PASS] testActivationRejectsMissingCapacityReservation() (gas: 22931551)",
+        "2026-11-26T03:07:37.0508021Z [PASS] testActivationRejectsUnauthorizedActorAndMismatchedCommitment() (gas: 24023412)",
+        "2026-11-26T03:07:37.0508860Z [PASS] testCompletionIsDeterministicAfterEnd() (gas: 23698826)",
+        "2026-11-26T03:07:37.0509352Z [PASS] testConsumerCanCancelOnlyBeforeActivation() (gas: 24069904)",
+        "2026-11-26T03:07:37.0509881Z [PASS] testConsumerCanProposeCanonicalStoreAgreement() (gas: 22254716)",
+        "2026-11-26T03:07:37.0510389Z [PASS] testInvalidErasureOrTimingPolicyFailsClosed() (gas: 21869232)",
+        "2026-11-26T03:07:37.0510910Z Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 19.30ms (62.39ms CPU time)",
+        "2026-11-26T03:07:37.0512165Z Ran 1 test suite in 20.97ms (19.30ms CPU time): 7 tests passed, 0 failed, 0 skipped (7 total tests)",
+        "2026-11-26T03:08:05.9622517Z Ran 5 tests for test/StorageObjectManifestRegistry420.t.sol:StorageObjectManifestRegistry420Test",
+        "2026-11-26T03:08:05.9624226Z [PASS] testControllerRegistersCanonicalManifest() (gas: 23694937)",
+        "2026-11-26T03:08:05.9625218Z [PASS] testDuplicateShardIndexFailsClosed() (gas: 25719449)",
+        "2026-11-26T03:08:05.9626108Z [PASS] testForeignControllerCannotPlaceShard() (gas: 25461067)",
+        "2026-11-26T03:08:05.9627436Z [PASS] testPlacementBindsActiveAgreementAndCommitment() (gas: 25732560)",
+        "2026-11-26T03:08:05.9628510Z [PASS] testSealRequiresAllPlacementsAndMakesManifestRetrievable() (gas: 25935078)",
+        "2026-11-26T03:08:05.9629537Z Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 14.62ms (43.95ms CPU time)",
+        "2026-11-26T03:08:05.9630562Z Ran 1 test suite in 15.89ms (14.62ms CPU time): 5 tests passed, 0 failed, 0 skipped (5 total tests)",
+        "2026-11-26T03:08:38.3776013Z Ran 6 tests for test/StorageSettlementRegistry420.t.sol:StorageSettlementRegistry420Test",
+        "2026-11-26T03:08:38.3777846Z [PASS] testAgreementAndPendingSettlementBlockCollateralWithdrawalUntilDischarge() (gas: 4635373)",
+        "2026-11-26T03:08:38.3779651Z [PASS] testBatchedReservationFullyFundsExactQuotedAmount() (gas: 2787200)",
+        "2026-11-26T03:08:38.3780819Z [PASS] testMissedProofWindowRefundsAfterDeadlineOnly() (gas: 3102817)",
+        "2026-11-26T03:08:38.3782031Z [PASS] testPartialFundingCannotEarnAndCanAbortAfterStart() (gas: 2747371)",
+        "2026-11-26T03:08:38.3782790Z [PASS] testVerifiedCanonicalProofReleasesOnlyItsWindow() (gas: 3348675)",
+        "2026-11-26T03:08:38.3783307Z [PASS] testWrongChallengeCannotReleaseEscrow() (gas: 3245039)",
+        "2026-11-26T03:08:38.3783801Z Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 15.93ms (28.23ms CPU time)",
+        "2026-11-26T03:08:38.3784417Z Ran 1 test suite in 17.84ms (15.93ms CPU time): 6 tests passed, 0 failed, 0 skipped (6 total tests)"
+      ]
+    },
+    {
+      "id": 139664406957,
+      "name": "resource-security",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Checkout exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Verify exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run foundry-rs/foundry-toolchain@v1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Reject dangerous Resource primitives",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Stage scoped Resource test owners and pinned import closure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Re-run Resource core under hardening profile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Re-run collateral custody and policy under hardening profile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Install Slither",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Targeted Resource Slither high-severity gate",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Post Run foundry-rs/foundry-toolchain@v1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19
+        },
+        {
+          "name": "Post Checkout exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21
+        }
+      ],
+      "originalLogLength": 130830,
+      "extract": [
+        "2026-11-26T03:06:19.6275607Z HEAD is now at b9e3e9ac Exercise collateral SDK precision, discovery, canonical RPC and transaction rejection",
+        "2026-11-26T03:06:23.2112268Z Staged 46 exact source/import files",
+        "2026-11-26T03:06:23.2220968Z ##[group]Run forge test --root \"$RUNNER_TEMP/resource-contracts\" --match-path 'test/ResourceGenesis420.t.sol' -vvv",
+        "2026-11-26T03:06:23.2221978Z \u001b[36;1mforge test --root \"$RUNNER_TEMP/resource-contracts\" --match-path 'test/ResourceGenesis420.t.sol' -vvv\u001b[0m",
+        "2026-11-26T03:06:23.2256618Z   FOUNDRY_PROFILE: hardening",
+        "2026-11-26T03:07:30.0505238Z Ran 14 tests for test/ResourceGenesis420.t.sol:ResourceGenesis420Test",
+        "2026-11-26T03:07:30.0505873Z [PASS] testActiveAndClosedSessionBlockCollateralWithdrawalUntilDischarge() (gas: 20118888)",
+        "2026-11-26T03:07:30.0506446Z [PASS] testConsumerCanCancelOpenSessionOnly() (gas: 19231509)",
+        "2026-11-26T03:07:30.0506995Z [PASS] testExpiredSessionCannotReceiveUsage() (gas: 19251387)",
+        "2026-11-26T03:07:30.0507495Z [PASS] testForgedNonzeroStakeCannotActivateProvider() (gas: 17173254)",
+        "2026-11-26T03:07:30.0507953Z [PASS] testFourServiceClassesAreDistinct() (gas: 394)",
+        "2026-11-26T03:07:30.0508996Z [PASS] testFuzzArbitraryNonzeroStakeReferenceCannotActivate(bytes32) (runs: 100000, μ: 17162158, ~: 17169795)",
+        "2026-11-26T03:07:30.0509936Z [PASS] testNodeUpdateUsesDeclaredCapabilityAndRequiresInactiveState() (gas: 18563858)",
+        "2026-11-26T03:07:30.0510895Z [PASS] testOfferSessionReceiptReplayAndBounds() (gas: 19818945)",
+        "2026-11-26T03:07:30.0512034Z [PASS] testProviderNeedsStakeAndDefaultDeny() (gas: 17160526)",
+        "2026-11-26T03:07:30.0512611Z [PASS] testReceiptSubmissionSupportsScopedDelegateOnly() (gas: 19544227)",
+        "2026-11-26T03:07:30.0513435Z [PASS] testReceiptsMustAdvanceAndBeNonzero() (gas: 19497231)",
+        "2026-11-26T03:07:30.0514008Z [PASS] testServicePolicyCapsOfferAndSessionDuration() (gas: 19054387)",
+        "2026-11-26T03:07:30.0514582Z [PASS] testSettlementIsCapabilityScoped() (gas: 19339281)",
+        "2026-11-26T03:07:30.0515133Z [PASS] testUnauthorizedProviderActivationCannotUseForgedReference() (gas: 17155861)",
+        "2026-11-26T03:07:30.0515726Z Suite result: ok. 14 passed; 0 failed; 0 skipped; finished in 41.96s (42.01s CPU time)",
+        "2026-11-26T03:07:30.0516363Z Ran 1 test suite in 41.96s (41.96s CPU time): 14 tests passed, 0 failed, 0 skipped (14 total tests)",
+        "2026-11-26T03:07:30.0594431Z \u001b[36;1m  forge test --root \"$RUNNER_TEMP/resource-contracts\" --match-path \"test/$suite.t.sol\" -vvv\u001b[0m",
+        "2026-11-26T03:07:30.0626049Z   FOUNDRY_PROFILE: hardening",
+        "2026-11-26T03:07:57.1410845Z Ran 20 tests for test/ResourceProviderCollateral420.t.sol:ResourceProviderCollateral420Test",
+        "2026-11-26T03:07:57.1411607Z [PASS] testComputeObligationCannotReuseReservedFunds() (gas: 884406)",
+        "2026-11-26T03:07:57.1412269Z [PASS] testExitImmediatelyStopsAdmissionAndFreezesPolicyRevision() (gas: 1252189)",
+        "2026-11-26T03:07:57.1412908Z [PASS] testForeignDepositorAndMissingGrantRollback() (gas: 635714)",
+        "2026-11-26T03:07:57.1413669Z [PASS] testGenericVaultGrantCannotUnlockResourceCollateral() (gas: 1030187)",
+        "2026-11-26T03:07:57.1414228Z [PASS] testGovernanceDisciplineCannotBeOverridden() (gas: 1539920)",
+        "2026-11-26T03:07:57.1414870Z [PASS] testMaliciousVaultBindingMismatchRollsBackDepositAndNonce() (gas: 13371573)",
+        "2026-11-26T03:07:57.1415672Z [PASS] testMaliciousVaultCallbacksCannotMutateCollateralOrExposeEligibility() (gas: 13813350)",
+        "2026-11-26T03:07:57.1416343Z [PASS] testNativeDepositAndTopupReconcile() (gas: 1339074)",
+        "2026-11-26T03:07:57.1416917Z [PASS] testPenaltyAndZeroExposureReservationBlockPartialWithdrawal() (gas: 2775230)",
+        "2026-11-26T03:07:57.1417570Z [PASS] testPenaltyExecutionRollbackOnMissingVaultGrant() (gas: 1147726)",
+        "2026-11-26T03:07:57.1418151Z [PASS] testPositionCannotActivateSecondProviderOrAlias() (gas: 1042031)",
+        "2026-11-26T03:07:57.1418575Z [PASS] testReplayCannotCountDepositTwice() (gas: 763730)",
+        "2026-11-26T03:07:57.1418965Z [PASS] testReservationsPreventOverbookingAndWithdrawal() (gas: 1986602)",
+        "2026-11-26T03:07:57.1419444Z [PASS] testSlashDeductsNativeCustodyAndRetainsExistingExposure() (gas: 3930029)",
+        "2026-11-26T03:07:57.1419971Z [PASS] testUnauthorizedHoldAndDuplicatePenaltyDecision() (gas: 2051633)",
+        "2026-11-26T03:07:57.1420546Z [PASS] testUnauthorizedSponsorshipAndPrematureExit() (gas: 1508947)",
+        "2026-11-26T03:07:57.1421112Z [PASS] testWalletAndDirectVaultBalanceAreNotProviderCollateral() (gas: 151389)",
+        "2026-11-26T03:07:57.1422154Z [PASS] testWithdrawalGrantFailureIsAtomicAndSponsorReceivesFunds() (gas: 1894696)",
+        "2026-11-26T03:07:57.1422610Z [PASS] testWrongAccountingBindingRejected() (gas: 1453105)",
+        "2026-11-26T03:07:57.1423151Z [PASS] testZeroAndBelowMinimumThenExactBoundaryTopup() (gas: 1645639)",
+        "2026-11-26T03:07:57.1423780Z Suite result: ok. 20 passed; 0 failed; 0 skipped; finished in 12.40ms (34.70ms CPU time)",
+        "2026-11-26T03:07:57.1424465Z Ran 1 test suite in 12.88ms (12.40ms CPU time): 20 tests passed, 0 failed, 0 skipped (20 total tests)",
+        "2026-11-26T03:08:07.1399696Z Ran 6 tests for test/ResourceCollateralPolicy420.t.sol:ResourceCollateralPolicy420Test",
+        "2026-11-26T03:08:07.1400894Z [PASS] testCoverageRoundsUpAndEnforcesFloor() (gas: 201076)",
+        "2026-11-26T03:08:07.1401797Z [PASS] testFuzzCoverage(uint128,uint16) (runs: 100000, μ: 142962, ~: 155867)",
+        "2026-11-26T03:08:07.1402293Z [PASS] testInvalidPolicyRejected() (gas: 149060)",
+        "2026-11-26T03:08:07.1402795Z [PASS] testPolicyRevisionsAndCommitmentsRemainHistorical() (gas: 319265)",
+        "2026-11-26T03:08:07.1403545Z [PASS] testUnauthorizedPolicyAndPauseRejected() (gas: 152355)",
+        "2026-11-26T03:08:07.1404009Z [PASS] testUnconfiguredPolicyFailsClosed() (gas: 151675)",
+        "2026-11-26T03:08:07.1404485Z Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 1.67s (1.67s CPU time)",
+        "2026-11-26T03:08:07.1405113Z Ran 1 test suite in 1.67s (1.67s CPU time): 6 tests passed, 0 failed, 0 skipped (6 total tests)",
+        "2026-11-26T03:27:25.7383426Z Ran 1 test for test/ResourceCollateralInvariant420.t.sol:ResourceCollateralInvariant420Test",
+        "2026-11-26T03:27:25.7384492Z [PASS] invariant_accounting() (runs: 4096, calls: 1572864, reverts: 0)",
+        "2026-11-26T03:27:25.7399554Z Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 1121.91s (1121.91s CPU time)",
+        "2026-11-26T03:27:25.7400133Z Ran 1 test suite in 1121.91s (1121.91s CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)",
+        "2026-11-26T03:27:56.0194611Z   \"highSeverity\": []"
+      ]
+    }
+  ]
+}

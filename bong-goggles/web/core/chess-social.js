@@ -28,16 +28,31 @@ export class ChessSocialController{
  emit(p){const next={...this.state,...p};if(JSON.stringify(next)!==JSON.stringify(this.state)){this.state=next;this.onChange();}}
  invalidate(){this.gen++;this.busy=false;this.emit({status:this.client.enabled?'idle':'disabled',viewer:null,friends:[],history:null,notice:'',submitting:false});}
  async principal(){const r=await this.client.request('/v1/me');if(r.status===401)return null;if(r.status!==200||r.data?.walletRequired!==false||!isSubjectID(r.data.profile?.subject))throw Error('420ID verification unavailable ('+r.status+')');return r.data.profile.subject;}
+ // Identity checks are independent of the expensive statistics refresh.
+ async verifyIdentity(){
+  if(!this.client.enabled||this.busy)return false;
+  const gen=++this.gen;this.busy=true;
+  try{
+   const actor=await this.principal();if(gen!==this.gen)return false;
+   if(!actor){this.emit({status:'guest',viewer:null,friends:[],history:null,notice:'',submitting:false});return false;}
+   if(actor!==this.state.viewer){this.emit({status:'loading',viewer:actor,friends:[],history:null,notice:'',submitting:false});}
+   return true;
+  }catch(e){if(gen===this.gen)this.emit({status:'unavailable',viewer:null,friends:[],history:null,notice:'Chess identity verification temporarily unavailable.',submitting:false});return false;}
+  finally{if(gen===this.gen)this.busy=false;}
+ }
  async refresh(){
   if(!this.client.enabled||this.busy)return;
   const gen=++this.gen;this.busy=true;
   try{
    const actor=await this.principal();if(gen!==this.gen)return;
-   if(!actor){this.emit({status:'guest',viewer:null,friends:[],history:null});return;}
+   if(!actor){this.emit({status:'guest',viewer:null,friends:[],history:null,notice:''});return;}
    if(actor!==this.state.viewer)this.emit({status:'loading',viewer:null,friends:[],history:null});
    const [h,f]=await Promise.all([this.client.request('/v1/classic-sessions/history-chess'),this.client.request('/v1/classic-rooms/friends')]);
    const history=verifyChessHistory(h),friends=verifyCribbageFriends(f);
-   if(!history||!friends||await this.principal()!==actor)throw Error('Chess invitations unavailable');
+   const confirmed=await this.principal();if(gen!==this.gen)return;
+   if(!confirmed){this.emit({status:'guest',viewer:null,friends:[],history:null,notice:''});return;}
+   if(confirmed!==actor){this.emit({status:'loading',viewer:confirmed,friends:[],history:null,notice:''});return;}
+   if(!history||!friends)throw Error('Chess invitations unavailable');
    if(gen===this.gen)this.emit({status:'ready',viewer:actor,history,friends,notice:''});
   }catch(e){if(gen===this.gen)this.emit({status:'unavailable',viewer:null,friends:[],history:null,notice:'Chess account history could not be verified.'});}
   finally{if(gen===this.gen)this.busy=false;}

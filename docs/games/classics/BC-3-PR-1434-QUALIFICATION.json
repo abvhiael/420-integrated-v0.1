@@ -1,0 +1,105 @@
+{
+  "pull_request": 1434,
+  "qualified_source_sha": "c6cf8eaac2a091fc782e339cb0364d0d720647e5",
+  "qualified_base_sha": "5308e7fcfe14db640619ede99a5c3b545c7a5508",
+  "source_tree": "6ce5ffb9db1b78c4c41cca97ff2487404b0b496b",
+  "scope": "CI qualification; live authentication recovery and gameplay remain unverified.",
+  "runs": [
+    {
+      "id": 45881937811,
+      "name": "BC-4.2 Word Salad Backend Qualification",
+      "event": "pull_request",
+      "head_sha": "c6cf8eaac2a091fc782e339cb0364d0d720647e5",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45881937811",
+      "created_at": "2026-11-26T19:12:51Z",
+      "updated_at": "2026-11-26T19:14:22Z"
+    },
+    {
+      "id": 45881937790,
+      "name": "BC-3.5 Chess Player Interface",
+      "event": "pull_request",
+      "head_sha": "c6cf8eaac2a091fc782e339cb0364d0d720647e5",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45881937790",
+      "created_at": "2026-11-26T19:12:51Z",
+      "updated_at": "2026-11-26T19:15:13Z"
+    },
+    {
+      "id": 45881937804,
+      "name": "BC-3.4 Chess Player Interface",
+      "event": "pull_request",
+      "head_sha": "c6cf8eaac2a091fc782e339cb0364d0d720647e5",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45881937804",
+      "created_at": "2026-11-26T19:12:51Z",
+      "updated_at": "2026-11-26T19:15:25Z"
+    },
+    {
+      "id": 45881937901,
+      "name": "BC-3.6 Chess History and Social Integration",
+      "event": "pull_request",
+      "head_sha": "c6cf8eaac2a091fc782e339cb0364d0d720647e5",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45881937901",
+      "created_at": "2026-11-26T19:12:51Z",
+      "updated_at": "2026-11-26T19:16:05Z"
+    },
+    {
+      "id": 45881937915,
+      "name": "BC-3.7 Chess Automated and Adversarial Qualification",
+      "event": "pull_request",
+      "head_sha": "c6cf8eaac2a091fc782e339cb0364d0d720647e5",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45881937915",
+      "created_at": "2026-11-26T19:12:51Z",
+      "updated_at": "2026-11-26T19:16:25Z"
+    },
+    {
+      "id": 45881937906,
+      "name": "Bong Goggles Web Verification",
+      "event": "pull_request",
+      "head_sha": "c6cf8eaac2a091fc782e339cb0364d0d720647e5",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45881937906",
+      "created_at": "2026-11-26T19:12:51Z",
+      "updated_at": "2026-11-26T19:17:10Z"
+    },
+    {
+      "id": 45881937894,
+      "name": "AUTH-8/9/10/11 Wallet-Independent BongGoggles Social",
+      "event": "pull_request",
+      "head_sha": "c6cf8eaac2a091fc782e339cb0364d0d720647e5",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45881937894",
+      "created_at": "2026-11-26T19:12:51Z",
+      "updated_at": "2026-11-26T19:22:40Z"
+    },
+    {
+      "id": 45881931028,
+      "name": "Bong Goggles Web Verification",
+      "event": "push",
+      "head_sha": "c6cf8eaac2a091fc782e339cb0364d0d720647e5",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45881931028",
+      "created_at": "2026-11-26T19:12:47Z",
+      "updated_at": "2026-11-26T19:17:47Z"
+    }
+  ]
+}

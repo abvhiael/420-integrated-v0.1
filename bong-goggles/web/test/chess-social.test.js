@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {renderApplicationShell} from '../core/app-shell.js';
 import assert from 'node:assert/strict';
 import {ChessSocialController,verifyChessHistory,renderChessSocial} from '../core/chess-social.js';
 import {fixture,actor,id,roomId,envelope} from './chess-fixture.mjs';
@@ -47,4 +48,26 @@ test('BC-3.6 verified recent statistics, notifications and conflicting history r
  assert.equal(verifyChessHistory(envelope({history:{...history,matches:[null]}})),null);
  assert.equal(verifyChessHistory(envelope({history:{...history,matches:[{...active,winnerSeat:1}]}})),null);
  assert.doesNotMatch(renderChessSocial({status:'guest',history:parsed}),/3 completed/);
+});
+
+test('Chess account surfaces render nonprivate identity states and guard private projections',()=>{
+ const history=verifyChessHistory(envelope({history:hist}));
+ const ready={status:'ready',viewer:actor,friends:[],history};
+ const unavailable={...ready,status:'unavailable',viewer:null,notice:'Chess identity verification temporarily unavailable.'};
+ const guest={...ready,status:'guest',viewer:null};
+ const identity={status:'ready',profile:{subject:actor,displayName:'Player',bio:''}};
+ const options={accountSocialEnabled:true,accountGamesEnabled:true,accountIdentityEnabled:true,accountSocialState:identity,accountIdentityState:identity};
+ for(const pathname of ['/account/games','/social','/games/chess/history']){
+  const render=(social,overrides={})=>renderApplicationShell({...options,...overrides,pathname,chessState:{status:'ready',matches:[],social}});
+  assert.match(render(ready),/Recent verified results/);
+  assert.match(render(unavailable),/Chess identity verification temporarily unavailable/);
+  assert.doesNotMatch(render(unavailable),/Recent verified results/);
+  assert.match(render(guest),/Sign in with 420ID to view Chess history/);
+  assert.doesNotMatch(render(guest),/Recent verified results/);
+  if(pathname!=='/games/chess/history'){
+   const other={...identity,profile:{...identity.profile,subject:peer}};
+   assert.doesNotMatch(render(ready,{accountSocialState:other,accountIdentityState:other}),/Recent verified results/);
+   assert.match(render(ready,{accountSocialState:other,accountIdentityState:other}),/Private history is hidden/);
+  }
+ }
 });

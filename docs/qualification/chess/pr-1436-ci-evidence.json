@@ -1,0 +1,680 @@
+{
+  "schema": 1,
+  "pr": 1436,
+  "qualifiedHead": "eb0ebb64749644e7c8c054994d38099447ff75d5",
+  "disposition": "11 pull-request workflows successful; live acceptance separate",
+  "limitations": "Run outcomes, dedicated Chess job/step outcomes, artifact metadata and selected qualification log extracts; not full raw logs or artifact ZIP bytes.",
+  "runs": [
+    {
+      "id": 45891028790,
+      "name": "AUTH-8/9/10/11 Wallet-Independent BongGoggles Social",
+      "conclusion": "success",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45891028790"
+    },
+    {
+      "id": 45891027893,
+      "name": "420ID Shared Account and Authentication",
+      "conclusion": "success",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45891027893"
+    },
+    {
+      "id": 45891027537,
+      "name": "BC-3.4 Chess Player Interface",
+      "conclusion": "success",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45891027537"
+    },
+    {
+      "id": 45891027580,
+      "name": "BC-2.4 Labyrinth 325-Point Interface and Source Art Gate",
+      "conclusion": "success",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45891027580"
+    },
+    {
+      "id": 45891027721,
+      "name": "BC-3.7 Chess Automated and Adversarial Qualification",
+      "conclusion": "success",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45891027721",
+      "jobs": [
+        {
+          "id": 140153446142,
+          "name": "chess-web",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify exact source",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install web build dependencies (manifest-pinned)",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete web regression and build qualification",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install pinned browser qualification dependencies",
+              "conclusion": "success"
+            },
+            {
+              "name": "Chess real-browser history, profiles, multiplayer, accessibility and network recovery qualification",
+              "conclusion": "success"
+            },
+            {
+              "name": "Preserve public release lock",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ],
+          "qualificationLogExtract": [
+            "2026-11-26T20:27:28.2125029Z ok 411 - owner-traced lanes retain distinct homes and share the actual central finish; leapfrog uses confirmed previous scores",
+            "2026-11-26T20:27:28.2129136Z ok 412 - BC-2.4 Labyrinth session hash is the SHA-256 of the exact compiled v2 Go identity",
+            "2026-11-26T20:27:28.2132974Z ok 413 - BC-2.4 only authenticated server v2 seat snapshots enter the table",
+            "2026-11-26T20:27:28.2136960Z ok 414 - BC-2.4 maintain private table and reject replay after stale or rejected moves",
+            "2026-11-26T20:27:28.2140768Z ok 415 - BC-2.4 My Games only lists verified 325-point matching sessions, no hidden fields",
+            "2026-11-26T20:27:28.2144474Z ok 416 - BC-2.4 ready-room host start confirms signed v2 session before opening table",
+            "2026-11-26T20:27:28.2148503Z ok 417 - BC-2.4 does not navigate after unverified or unavailable host start",
+            "2026-11-26T20:27:28.2800721Z ok 418 - BC-2.6 accepts only 325-point, zero-wager history and immutable team variants",
+            "2026-11-26T20:27:28.2804650Z ok 419 - BC-2.6 individual results never claim a partnership victory and invitations are in-app notifications",
+            "2026-11-26T20:27:28.2808465Z ok 420 - BC-2.6 verified friend challenge binds authenticated actor and rejects optimistic rooms",
+            "2026-11-26T20:27:28.2816118Z ok 421 - BC-2.6 revoked 420ID invalidates private history and suppresses notices",
+            "2026-11-26T20:27:28.3016461Z ok 422 - complete recorded packet remains operator hold, never launch or traffic permission",
+            "2026-11-26T20:27:28.3030061Z ok 423 - missing independent BG-19 signoff, rollback or owner blocks",
+            "2026-11-26T20:27:28.3033975Z ok 424 - rejects cross-release, cross-environment and altered artifact, config or policy",
+            "2026-11-26T20:27:28.3037365Z ok 425 - stale records, missing checks and unreviewed browsers block",
+            "2026-11-26T20:27:28.3068201Z ok 426 - 24-hour freshness boundary applies to operations and each individual check",
+            "2026-11-26T20:27:28.3072080Z ok 427 - private ingress, independent check reviewer and correct environment are mandatory",
+            "2026-11-26T20:27:28.3075030Z ok 428 - BG-19.7 conversation identity and participant fail closed",
+            "2026-11-26T20:27:28.3077949Z ok 429 - BG-19.7 inbox is deterministic and derived from canonical requests",
+            "2026-11-26T20:27:28.3081028Z ok 430 - BG-19.7 public inbox metadata rejects private data recursively",
+            "2026-11-26T20:27:28.3083825Z ok 431 - BG-19.7 thread requires current eligibility/device/epoch",
+            "2026-11-26T20:27:28.3086581Z ok 432 - BG-19.7 receipt ordering and replay are rejected",
+            "2026-11-26T20:27:28.3089643Z ok 433 - BG-19.7 requested/closed conversation actions respect canonical state",
+            "2026-11-26T20:27:28.3092892Z ok 434 - BG-19.7 send intent is Wallet-bound and cannot bypass epoch/sequence checks",
+            "2026-11-26T20:27:28.3095854Z ok 435 - BG-19.7 missing service and stale epoch fail closed",
+            "2026-11-26T20:27:28.3098755Z ok 436 - BG-19.7 UI renders only envelope metadata and disables plaintext composer",
+            "2026-11-26T20:27:28.3102277Z ok 437 - BG-19.7 UI keeps disconnected and unprovided inbox private",
+            "2026-11-26T20:27:28.3105422Z ok 438 - BG-20.2 healthy aggregate has only static summary and does not page",
+            "2026-11-26T20:27:28.3108629Z ok 439 - BG-20.2 rejects identifiers, arbitrary labels and untrusted raw telemetry fields",
+            "2026-11-26T20:27:28.3120365Z ok 440 - BG-20.2 rejects impossible, stale and malformed measurements",
+            "2026-11-26T20:27:28.3123420Z ok 441 - BG-20.2 fault injections classify safety failures as critical",
+            "2026-11-26T20:27:28.3127102Z ok 442 - BG-20.2 fault injections classify index, finality, latency and error SLO breaches",
+            "2026-11-26T20:27:28.3130933Z ok 443 - BG-20.2 low traffic blocks release interpretation but retains critical incident alert",
+            "2026-11-26T20:27:28.3511754Z ok 444 - no evidence means blocked, never ready",
+            "2026-11-26T20:27:28.3514963Z ok 445 - complete supplied records only hold for independent operator review",
+            "2026-11-26T20:27:28.3584510Z ok 446 - rejects mismatched immutable release and unsafe ingress or flags",
+            "2026-11-26T20:27:28.3606872Z ok 447 - rejects unverified backups, missing scenarios and duplicate scenarios",
+            "2026-11-26T20:27:28.3611577Z ok 448 - each scenario must match release, preserve access controls and have distinct operator and reviewer",
+            "2026-11-26T20:27:28.3615632Z ok 449 - measured RTO and RPO must meet objectives, cannot be missing or fabricated negatives",
+            "2026-11-26T20:27:28.3693356Z ok 450 - BG-20 does not automatically promote a clean, approved measured canary",
+            "2026-11-26T20:27:28.3696763Z ok 451 - BG-20 blocks missing or mismatched BG-19 evidence and untested rollback",
+            "2026-11-26T20:27:28.3700281Z ok 452 - BG-20 blocks absent, mixed-release, insufficient and malformed observations",
+            "2026-11-26T20:27:28.3704004Z ok 453 - BG-20 requests rollback on latency, error, lag, privacy, moderation, authorization or reorg breach",
+            "2026-11-26T20:27:28.3707581Z ok 454 - BG-20 never treats a clean CI result or a production label as launch approval",
+            "2026-11-26T20:27:28.4100111Z ok 455 - BG-19.10 recipient-scoped notifications and canonical lifecycle",
+            "2026-11-26T20:27:28.4104549Z ok 456 - BG-19.10 notification deep links do not accept unqualified URLs or private payloads",
+            "2026-11-26T20:27:28.4108086Z ok 457 - BG-19.10 rewards separate submitted claimable and paid states",
+            "2026-11-26T20:27:28.4112189Z ok 458 - BG-19.10 moderation projection is private to affected account and appeals are conditional",
+            "2026-11-26T20:27:28.4116318Z ok 459 - BG-19.10 intents require current Wallet and qualified service binding",
+            "2026-11-26T20:27:28.4121719Z ok 460 - BG-19.10 web views fail closed on missing canonical projections",
+            "2026-11-26T20:27:28.4134301Z ok 461 - BG-19.10 notifications retracted links and claim/appeal controls cannot be executed locally",
+            "2026-11-26T20:27:28.4259476Z ok 462 - BG-19.4 normalizes canonical profile projection without inventing fields",
+            "2026-11-26T20:27:28.4262822Z ok 463 - BG-19.4 friend actions reflect canonical pending and accepted states",
+            "2026-11-26T20:27:28.4265737Z ok 464 - BG-19.4 follows support open/pending/accepted presentation",
+            "2026-11-26T20:27:28.4274496Z ok 465 - BG-19.4 blocking suppresses ordinary relationship actions",
+            "2026-11-26T20:27:28.4279970Z ok 466 - BG-19.4 relationship lists are deterministic canonical projections",
+            "2026-11-26T20:27:28.4291816Z ok 467 - BG-19.4 canonical refresh replaces instead of preserving optimistic relationship state",
+            "2026-11-26T20:27:28.4294422Z ok 468 - BG-19.4 profile UI renders profile state and wallet-gated actions",
+            "2026-11-26T20:27:28.4297102Z ok 469 - BG-19.4 disconnected profile UI leaves write actions disabled",
+            "2026-11-26T20:27:28.4299640Z ok 470 - BG-19.4 relationship-list UI renders canonical account links",
+            "2026-11-26T20:27:28.4302448Z ok 471 - BG-19.18 disabled unless explicitly enabled and given independent safe social API origin",
+            "2026-11-26T20:27:28.4305621Z ok 472 - BG-19.18 explicitly enabled browser GET omits credentials and reads only public DISCOVER projection",
+            "2026-11-26T20:27:28.4308626Z ok 473 - BG-19.18 rejects nonpublic, unexpected or expanded server DTOs without showing content",
+            "2026-11-26T20:27:28.4311561Z ok 474 - BG-19.18 errors, non-JSON and policy withdrawal never reuse a previously visible page",
+            "2026-11-26T20:27:28.4314360Z ok 475 - BG-19.18 invalidated and superseded requests cannot resurrect stale public content",
+            "2026-11-26T20:27:28.4653631Z ok 476 - BG-19 follow-up refuses unqualified or inferred read transports",
+            "2026-11-26T20:27:28.4658015Z ok 477 - BG-19 follow-up supplies only explicit GET path and abort signal",
+            "2026-11-26T20:27:28.4667061Z ok 478 - BG-19 follow-up keeps private projection locked without a supported Wallet session",
+            "2026-11-26T20:27:28.4683930Z ok 479 - BG-19 follow-up discards previous account projection after account change",
+            "2026-11-26T20:27:28.4687914Z ok 480 - BG-19 follow-up invalidation discards in-flight results and failure stays unavailable",
+            "2026-11-26T20:27:28.4790630Z ok 481 - BG-19.13 bounded deterministic backoff",
+            "2026-11-26T20:27:28.4793874Z ok 482 - BG-19.13 transient read succeeds within retry limit",
+            "2026-11-26T20:27:28.4797058Z ok 483 - BG-19.13 refuses to retry nonretryable failure or leak exception content",
+            "2026-11-26T20:27:28.4800992Z ok 484 - BG-19.13 never publishes response after route, account or session changed",
+            "2026-11-26T20:27:28.4804099Z ok 485 - BG-19.13 exhausted read retries degrade with fixed reason",
+            "2026-11-26T20:27:28.4807036Z ok 486 - BG-19.13 aborted read never displays stale result",
+            "2026-11-26T20:27:28.4833493Z ok 487 - BG-19.1 validates safe runtime configuration",
+            "2026-11-26T20:27:28.4847734Z ok 488 - BG-19.1 production origin is fixed to Bong Goggles host",
+            "2026-11-26T20:27:28.4850907Z ok 489 - BG-19.1 rejects insecure production service origins",
+            "2026-11-26T20:27:28.4853850Z ok 490 - BG-19.1 bootstrap states are deterministic",
+            "2026-11-26T20:27:28.4857154Z ok 491 - BG-19.1 creates typed service boundaries without authority",
+            "2026-11-26T20:27:28.4866512Z ok 492 - BG-19.1 telemetry recursively redacts sensitive fields",
+            "2026-11-26T20:27:28.5211836Z ok 493 - BG-19.12 rejects active-content, relative, credential and malformed handoff URLs",
+            "2026-11-26T20:27:28.5214889Z ok 494 - BG-19.12 escapes URL attribute content and ignores untrusted attributes",
+            "2026-11-26T20:27:28.5240974Z ok 495 - BG-19.12 never emits free-form error strings, URLs, account or nested secrets",
+            "2026-11-26T20:27:28.5248921Z ok 496 - BG-19.12 bounds telemetry depth, arrays and unexpected inputs",
+            "2026-11-26T20:27:28.5490150Z ok 497 - BG-19.11 display prefs are strictly local and validated",
+            "2026-11-26T20:27:28.5493868Z ok 498 - BG-19.11 public metadata and indexing fail closed without verified public state",
+            "2026-11-26T20:27:28.5497547Z ok 499 - BG-19.11 settings handoffs accept only safe HTTPS URLs",
+            "2026-11-26T20:27:28.5547339Z ok 500 - BG-19.11 settings route is account guarded and never promises canonical policy writes",
+            "2026-11-26T20:27:28.6452225Z ok 501 - BC-0.3 eight screen routes resolve for all 25 games and legacy entries without a wallet",
+            "2026-11-26T20:27:28.6482393Z ok 502 - BC-0.3 rejects nested/unknown screen segments and unknown games",
+            "2026-11-26T20:27:28.6486491Z ok 503 - BC-0.3 overview and rules are honest and variants do not masquerade as rulebooks",
+            "2026-11-26T20:27:28.6490870Z ok 504 - BC-0.3 opponent setup exposes seat types and all bot difficulties but cannot submit",
+            "2026-11-26T20:27:28.6494828Z ok 505 - BC-0.3 Chaos separates 420ID online rooms from an explicit local CPU game",
+            "2026-11-26T20:27:28.6499002Z ok 506 - BC-0.3 table, results, history and rematch stay fail-closed without an authenticated projection",
+            "2026-11-26T20:27:28.6503060Z ok 507 - BC-0.3 table uses only bounded public cells, safe scores and seat labels",
+            "2026-11-26T20:27:28.6507184Z ok 508 - BC-0.3 result, history and rematch use verified data but never activate unconnected actions",
+            "2026-11-26T20:27:28.6511936Z ok 509 - BC-0.3 hostile text cannot inject HTML, URL attributes, extra private data or oversized state",
+            "2026-11-26T20:27:28.6515568Z ok 510 - BC-0.3 shared styles and navigation accessibility ship with the web app",
+            "2026-11-26T20:27:28.6632882Z ok 511 - BC-0.9 canonical 52-card manifest is deterministic, unique and immutable, not a shuffled dealt hand",
+            "2026-11-26T20:27:28.6642485Z ok 512 - BC-0.9 verified tabletop composes decks, discards, own hand and tiles, board pieces, dice and scorecards",
+            "2026-11-26T20:27:28.6646293Z ok 513 - BC-0.9 server-verified seat permissions are required for all private cards and tiles",
+            "2026-11-26T20:27:28.6650331Z ok 514 - BC-0.9 rejects invalid boards, duplicate locations, invalid card/dice values and untrusted schema",
+            "2026-11-26T20:27:28.6654581Z ok 515 - BC-0.9 all reusable public renderers escape malicious labels and never inject URLs or active action hooks",
+            "2026-11-26T20:27:28.6658396Z ok 516 - BC-0.9 full generic multi-column scorecards support 1, 2, 3 and 6 complete scoring rows",
+            "2026-11-26T20:27:28.6662302Z ok 517 - BC-0.9 chess/checkers and 9, 13, 19 Go boards render bounded, accessible squares",
+            "2026-11-26T20:27:28.6666009Z ok 518 - BC-0.9 responsive and forced-color accessibility skin is packaged with Classics",
+            "2026-11-26T20:27:28.6670599Z ok 519 - BC-0.9 rule-localization, feedback and server deadline are validated and never invent client time",
+            "2026-11-26T20:27:28.6674906Z ok 520 - BC-0.9 local symbol asset manifest and feedback helpers never fetch unqualified artwork or run controls",
+            "2026-11-26T20:27:28.6821268Z ok 521 - authenticated same-origin Worker transport preserves cookies, path, and redirects",
+            "2026-11-26T20:27:28.6834131Z ok 522 - Worker retains authenticated POST data, exact Origin, and private response",
+            "2026-11-26T20:27:28.6839109Z ok 523 - Worker denies noncanonical hosts, non-HTTPS, missing secret and unrelated paths",
+            "2026-11-26T20:27:28.6843098Z ok 524 - Worker returns generic noncacheable 502 without exposing secret on upstream failure",
+            "2026-11-26T20:27:28.6950145Z ok 525 - safe GET login start converts Render cold-start 502/503/504 to automatic bounded recovery",
+            "2026-11-26T20:27:28.7041434Z ok 526 - cold-start browser refresh expires after eight tries, never spins indefinitely",
+            "2026-11-26T20:27:28.7045418Z ok 527 - a successful 420ID redirect preserves the authoritative flow cookie and clears wake attempts",
+            "2026-11-26T20:27:28.7049746Z ok 528 - callback, POST, and non-login GET never receive wake-retry pages or replay a request",
+            "2026-11-26T20:27:28.7053572Z ok 529 - network exceptions on GET login start show recovery without exposing upstream details",
+            "2026-11-26T20:27:28.7056849Z ok 530 - BG-19.2 discovers only the qualified 420 Wallet provider",
+            "2026-11-26T20:27:28.7060735Z ok 531 - BG-19.2 normalizes network and rejects invalid chain IDs",
+            "2026-11-26T20:27:28.7063888Z ok 532 - BG-19.2 exposes read-only mode until Wallet is connected",
+            "2026-11-26T20:27:28.7067024Z ok 533 - BG-19.2 marks wrong network unsupported and blocks writes",
+            "2026-11-26T20:27:28.7081657Z ok 534 - BG-19.2 reacts to accounts and chain lifecycle from Wallet",
+            "2026-11-26T20:27:28.7085052Z ok 535 - BG-19.2 clears only Bong Goggles session-local material on signout",
+            "2026-11-26T20:27:28.7088351Z ok 536 - BG-19.2 builds secure Wallet passkey/session handoffs",
+            "2026-11-26T20:27:28.7091899Z ok 537 - BG-19.2 prepares reviewable non-authoritative transaction intents",
+            "2026-11-26T20:27:28.7095261Z ok 538 - BG-19.2 rejected Wallet transactions never become local success",
+            "2026-11-26T20:27:28.7099105Z ok 539 - BG-19.2 receipt classification distinguishes canonical confirm/revert/pending",
+            "2026-11-26T20:27:28.7102631Z ok 540 - BG-19.2 storage clearing tolerates unavailable browser storage",
+            "2026-11-26T20:27:28.7653014Z ok 541 - valid private snapshot and malformed or concealed fields fail closed",
+            "2026-11-26T20:27:28.7656179Z ok 542 - rejected placement preserves draft at same revision; conflict clears it",
+            "2026-11-26T20:27:28.7668297Z ok 543 - duplicate submission prevented, accepted revision confirmed by GET",
+            "2026-11-26T20:27:28.7672210Z ok 544 - stale and conflicting revisions conceal rack",
+            "2026-11-26T20:27:28.7674799Z ok 545 - expired authentication and changed account clear draft and private projection",
+            "2026-11-26T20:27:28.7677475Z ok 546 - transport failure hides rack; fresh controller recovers completed shared victory",
+            "2026-11-26T20:27:28.7679797Z ok 547 - runtime invalidates on offline, hidden page, logout and destruction",
+            "2026-11-26T20:27:28.7783449Z ok 548 - six bag profiles preserve total size and every tile type",
+            "2026-11-26T20:27:28.7785859Z ok 549 - hybrids remain joined and premiums score physical tiles",
+            "2026-11-26T20:27:28.7788911Z ok 550 - all fifteen hybrid symbols retain their printed order and face values",
+            "2026-11-26T20:27:28.7791786Z ok 551 - all board dimensions, rack capacities and canonical premium cells render",
+            "2026-11-26T20:27:28.7794296Z ok 552 - every physical tile art and approved control is allowlisted",
+            "2026-11-26T20:27:28.7796915Z ok 553 - draft and turn controls use authoritative state; rejected errors escaped",
+            "2026-11-26T20:27:28.7798833Z ok 554 - terminal shared victory locks moves",
+            "2026-11-26T20:27:28.7801237Z # pass 554",
+            "2026-11-26T20:27:28.7801470Z # fail 0",
+            "2026-11-26T20:29:11.7137081Z BC-3.4 Chromium: two independent seats, legal moves, polling, reload, orientation, keyboard, mobile, axe and revocation passed",
+            "2026-11-26T20:29:21.1240225Z BC-3.5 Chromium: two seats, moves, recovery, accessibility, challenge, invitation, resignation and rematch passed",
+            "2026-11-26T20:30:06.7957943Z BC-3.6 Chromium: profile, account games, verified history, independent result statistics, invitations and revocation passed",
+            "2026-11-26T20:30:25.3759506Z BC-3.7 Chromium: temporary network loss, same-document reconnect, opponent progress, lost committed response, no duplicate POST and resumed gameplay passed"
+          ]
+        },
+        {
+          "id": 140153446557,
+          "name": "chess-postgresql",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify exact source",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete Chess backend, adversarial concurrency, AI and authoritative API regression",
+              "conclusion": "success"
+            },
+            {
+              "name": "Static analysis and service build",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ],
+          "qualificationLogExtract": [
+            "2026-11-26T20:28:44.4736297Z --- PASS: TestBC322DeadAndMatePrecedence (0.00s)",
+            "2026-11-26T20:28:44.4737126Z --- PASS: TestBC322MaterialPolicy (0.00s)",
+            "2026-11-26T20:28:44.4737986Z --- PASS: TestBC322RepetitionClaims (0.25s)",
+            "2026-11-26T20:28:44.4738716Z --- PASS: TestBC322FlagAuthority (0.01s)",
+            "2026-11-26T20:28:44.4739671Z --- PASS: TestBC322BareKingFlagDrawAndResignationWin (0.03s)",
+            "2026-11-26T20:28:44.4740539Z --- PASS: TestBC37ConcurrentCompleteChess (1.51s)",
+            "2026-11-26T20:28:44.4742825Z --- PASS: TestBC37ChessPolicyAdversarialPlayout (6.84s)",
+            "2026-11-26T20:28:44.4746408Z --- PASS: TestBC37ChessCompleteAI (0.13s)",
+            "2026-11-26T20:28:44.4749418Z --- PASS: TestBC33PostgresHumanBotRecovery (2.42s)",
+            "2026-11-26T20:28:44.4751936Z --- PASS: TestBC33ChessPolicies (0.27s)",
+            "2026-11-26T20:28:44.4752608Z --- PASS: TestBC33ChessMate (0.08s)",
+            "2026-11-26T20:28:44.4753281Z --- PASS: TestBC33ChessReplay (0.76s)",
+            "2026-11-26T20:28:44.4755338Z --- PASS: TestBC33ComparativeStrength (1.27s)",
+            "2026-11-26T20:28:44.4756261Z --- PASS: TestBC33DeadlineAndDeterministicBudget (0.25s)",
+            "2026-11-26T20:28:44.4757724Z --- PASS: TestBC33LegalExistenceMatchesFullGenerator (0.01s)",
+            "2026-11-26T20:28:44.4758515Z --- PASS: TestBC32ChessCapacity (0.00s)",
+            "2026-11-26T20:28:44.4759264Z --- PASS: TestBC32ChessNonTurnWhitelist (0.00s)",
+            "2026-11-26T20:28:44.4760011Z --- PASS: TestBC32ChessRepetitionAndScores (0.02s)",
+            "2026-11-26T20:28:44.4760775Z --- PASS: TestBC32ChessClockBoundary (0.00s)",
+            "2026-11-26T20:28:44.4761564Z --- PASS: TestBC32TimedBoundaryAndReplay (0.05s)",
+            "2026-11-26T20:28:44.4762398Z --- PASS: TestBC32QueensGambitResignation (0.16s)",
+            "2026-11-26T20:28:44.4763304Z --- PASS: TestBC36ChessHistoryProfileStatistics (0.73s)",
+            "2026-11-26T20:28:44.4764121Z --- PASS: TestBC35ChessConsentLifecycle (0.75s)",
+            "2026-11-26T20:28:44.4764774Z --- PASS: TestBC32FEN (0.00s)",
+            "2026-11-26T20:28:44.4765563Z --- PASS: TestBC32PGN (0.14s)",
+            "2026-11-26T20:28:44.4766234Z --- PASS: TestBC32ReferencePerft (0.32s)",
+            "2026-11-26T20:28:44.4767022Z --- PASS: TestBC32OpeningPrefixResignation (0.04s)",
+            "2026-11-26T20:28:44.4767816Z --- PASS: TestBC32SicilianResignation (0.04s)",
+            "2026-11-26T20:28:44.4768535Z --- PASS: TestBC321ChessAdapter (0.03s)",
+            "2026-11-26T20:28:44.4769322Z --- PASS: TestBC321ChessReplayAndTerminal (0.13s)",
+            "2026-11-26T20:28:44.4770128Z --- PASS: TestBC321ChessNonTurnLifecycle (0.05s)",
+            "2026-11-26T20:28:44.4770854Z --- PASS: TestBC321ChessPerft (0.43s)",
+            "2026-11-26T20:28:44.4771580Z --- PASS: TestBC32UntimedChessSession (0.37s)",
+            "2026-11-26T20:28:44.4772366Z --- PASS: TestBC32TimedChessSession (0.75s)",
+            "2026-11-26T20:28:44.4773240Z --- PASS: TestBC34ChessHumanActionsAndRecovery (0.81s)",
+            "2026-11-26T20:28:44.4774103Z --- PASS: TestBC33FixtureRateLimitIsolation (0.11s)",
+            "2026-11-26T20:28:44.4774461Z PASS",
+            "2026-11-26T20:28:44.4775061Z ok  \tgithub.com/420integrated/420-integrated/services/bong-goggles-account-social\t19.788s",
+            "2026-11-26T20:28:44.4776554Z --- PASS: TestBC33OperatorActivationPreservesCribbageAndFailsClosed (0.00s)",
+            "2026-11-26T20:28:44.4777073Z PASS",
+            "2026-11-26T20:28:44.4777459Z ok  \tgithub.com/420integrated/420-integrated/cmd/bong-goggles-social\t1.013s"
+          ]
+        }
+      ],
+      "artifacts": []
+    },
+    {
+      "id": 45891027589,
+      "name": "BC-3.6 Chess History and Social Integration",
+      "conclusion": "success",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45891027589",
+      "jobs": [
+        {
+          "id": 140153445168,
+          "name": "chess-web",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify exact source",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install web build dependencies (manifest-pinned)",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete web regression and build qualification",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install pinned browser qualification dependencies",
+              "conclusion": "success"
+            },
+            {
+              "name": "Chess real-browser history, profiles, multiplayer and accessibility qualification",
+              "conclusion": "success"
+            },
+            {
+              "name": "Preserve public release lock",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ],
+          "qualificationLogExtract": [
+            "2026-11-26T20:27:58.7752234Z ok 410 - BC-2.4 every printed decade is tied to both real route segments",
+            "2026-11-26T20:27:58.7756565Z ok 411 - owner-traced lanes retain distinct homes and share the actual central finish; leapfrog uses confirmed previous scores",
+            "2026-11-26T20:27:58.7760380Z ok 412 - BC-2.4 Labyrinth session hash is the SHA-256 of the exact compiled v2 Go identity",
+            "2026-11-26T20:27:58.7764168Z ok 413 - BC-2.4 only authenticated server v2 seat snapshots enter the table",
+            "2026-11-26T20:27:58.7768280Z ok 414 - BC-2.4 maintain private table and reject replay after stale or rejected moves",
+            "2026-11-26T20:27:58.7772388Z ok 415 - BC-2.4 My Games only lists verified 325-point matching sessions, no hidden fields",
+            "2026-11-26T20:27:58.7776237Z ok 416 - BC-2.4 ready-room host start confirms signed v2 session before opening table",
+            "2026-11-26T20:27:58.7780030Z ok 417 - BC-2.4 does not navigate after unverified or unavailable host start",
+            "2026-11-26T20:27:58.8528828Z ok 418 - BC-2.6 accepts only 325-point, zero-wager history and immutable team variants",
+            "2026-11-26T20:27:58.8532936Z ok 419 - BC-2.6 individual results never claim a partnership victory and invitations are in-app notifications",
+            "2026-11-26T20:27:58.8535964Z ok 420 - BC-2.6 verified friend challenge binds authenticated actor and rejects optimistic rooms",
+            "2026-11-26T20:27:58.8543057Z ok 421 - BC-2.6 revoked 420ID invalidates private history and suppresses notices",
+            "2026-11-26T20:27:58.8753064Z ok 422 - complete recorded packet remains operator hold, never launch or traffic permission",
+            "2026-11-26T20:27:58.8797741Z ok 423 - missing independent BG-19 signoff, rollback or owner blocks",
+            "2026-11-26T20:27:58.8802067Z ok 424 - rejects cross-release, cross-environment and altered artifact, config or policy",
+            "2026-11-26T20:27:58.8805350Z ok 425 - stale records, missing checks and unreviewed browsers block",
+            "2026-11-26T20:27:58.8808985Z ok 426 - 24-hour freshness boundary applies to operations and each individual check",
+            "2026-11-26T20:27:58.8813826Z ok 427 - private ingress, independent check reviewer and correct environment are mandatory",
+            "2026-11-26T20:27:58.8817127Z ok 428 - BG-19.7 conversation identity and participant fail closed",
+            "2026-11-26T20:27:58.8820400Z ok 429 - BG-19.7 inbox is deterministic and derived from canonical requests",
+            "2026-11-26T20:27:58.8832746Z ok 430 - BG-19.7 public inbox metadata rejects private data recursively",
+            "2026-11-26T20:27:58.8835851Z ok 431 - BG-19.7 thread requires current eligibility/device/epoch",
+            "2026-11-26T20:27:58.8838834Z ok 432 - BG-19.7 receipt ordering and replay are rejected",
+            "2026-11-26T20:27:58.8842231Z ok 433 - BG-19.7 requested/closed conversation actions respect canonical state",
+            "2026-11-26T20:27:58.8845759Z ok 434 - BG-19.7 send intent is Wallet-bound and cannot bypass epoch/sequence checks",
+            "2026-11-26T20:27:58.8849158Z ok 435 - BG-19.7 missing service and stale epoch fail closed",
+            "2026-11-26T20:27:58.8852482Z ok 436 - BG-19.7 UI renders only envelope metadata and disables plaintext composer",
+            "2026-11-26T20:27:58.8855663Z ok 437 - BG-19.7 UI keeps disconnected and unprovided inbox private",
+            "2026-11-26T20:27:58.8859123Z ok 438 - BG-20.2 healthy aggregate has only static summary and does not page",
+            "2026-11-26T20:27:58.8863488Z ok 439 - BG-20.2 rejects identifiers, arbitrary labels and untrusted raw telemetry fields",
+            "2026-11-26T20:27:58.8866724Z ok 440 - BG-20.2 rejects impossible, stale and malformed measurements",
+            "2026-11-26T20:27:58.8869759Z ok 441 - BG-20.2 fault injections classify safety failures as critical",
+            "2026-11-26T20:27:58.8885124Z ok 442 - BG-20.2 fault injections classify index, finality, latency and error SLO breaches",
+            "2026-11-26T20:27:58.8888762Z ok 443 - BG-20.2 low traffic blocks release interpretation but retains critical incident alert",
+            "2026-11-26T20:27:58.8891773Z ok 444 - no evidence means blocked, never ready",
+            "2026-11-26T20:27:58.8908924Z ok 445 - complete supplied records only hold for independent operator review",
+            "2026-11-26T20:27:58.8912959Z ok 446 - rejects mismatched immutable release and unsafe ingress or flags",
+            "2026-11-26T20:27:58.8923048Z ok 447 - rejects unverified backups, missing scenarios and duplicate scenarios",
+            "2026-11-26T20:27:58.8927352Z ok 448 - each scenario must match release, preserve access controls and have distinct operator and reviewer",
+            "2026-11-26T20:27:58.8934611Z ok 449 - measured RTO and RPO must meet objectives, cannot be missing or fabricated negatives",
+            "2026-11-26T20:27:58.9166983Z ok 450 - BG-20 does not automatically promote a clean, approved measured canary",
+            "2026-11-26T20:27:58.9192778Z ok 451 - BG-20 blocks missing or mismatched BG-19 evidence and untested rollback",
+            "2026-11-26T20:27:58.9196531Z ok 452 - BG-20 blocks absent, mixed-release, insufficient and malformed observations",
+            "2026-11-26T20:27:58.9200746Z ok 453 - BG-20 requests rollback on latency, error, lag, privacy, moderation, authorization or reorg breach",
+            "2026-11-26T20:27:58.9204740Z ok 454 - BG-20 never treats a clean CI result or a production label as launch approval",
+            "2026-11-26T20:27:58.9657154Z ok 455 - BG-19.10 recipient-scoped notifications and canonical lifecycle",
+            "2026-11-26T20:27:58.9661567Z ok 456 - BG-19.10 notification deep links do not accept unqualified URLs or private payloads",
+            "2026-11-26T20:27:58.9665490Z ok 457 - BG-19.10 rewards separate submitted claimable and paid states",
+            "2026-11-26T20:27:58.9669298Z ok 458 - BG-19.10 moderation projection is private to affected account and appeals are conditional",
+            "2026-11-26T20:27:58.9673514Z ok 459 - BG-19.10 intents require current Wallet and qualified service binding",
+            "2026-11-26T20:27:58.9708203Z ok 460 - BG-19.10 web views fail closed on missing canonical projections",
+            "2026-11-26T20:27:58.9712317Z ok 461 - BG-19.10 notifications retracted links and claim/appeal controls cannot be executed locally",
+            "2026-11-26T20:27:58.9782359Z ok 462 - BG-19.4 normalizes canonical profile projection without inventing fields",
+            "2026-11-26T20:27:58.9785557Z ok 463 - BG-19.4 friend actions reflect canonical pending and accepted states",
+            "2026-11-26T20:27:58.9788630Z ok 464 - BG-19.4 follows support open/pending/accepted presentation",
+            "2026-11-26T20:27:58.9791620Z ok 465 - BG-19.4 blocking suppresses ordinary relationship actions",
+            "2026-11-26T20:27:58.9794852Z ok 466 - BG-19.4 relationship lists are deterministic canonical projections",
+            "2026-11-26T20:27:58.9798586Z ok 467 - BG-19.4 canonical refresh replaces instead of preserving optimistic relationship state",
+            "2026-11-26T20:27:58.9801722Z ok 468 - BG-19.4 profile UI renders profile state and wallet-gated actions",
+            "2026-11-26T20:27:58.9805134Z ok 469 - BG-19.4 disconnected profile UI leaves write actions disabled",
+            "2026-11-26T20:27:58.9815473Z ok 470 - BG-19.4 relationship-list UI renders canonical account links",
+            "2026-11-26T20:27:58.9822835Z ok 471 - BG-19.18 disabled unless explicitly enabled and given independent safe social API origin",
+            "2026-11-26T20:27:58.9826669Z ok 472 - BG-19.18 explicitly enabled browser GET omits credentials and reads only public DISCOVER projection",
+            "2026-11-26T20:27:58.9831211Z ok 473 - BG-19.18 rejects nonpublic, unexpected or expanded server DTOs without showing content",
+            "2026-11-26T20:27:58.9835015Z ok 474 - BG-19.18 errors, non-JSON and policy withdrawal never reuse a previously visible page",
+            "2026-11-26T20:27:58.9843035Z ok 475 - BG-19.18 invalidated and superseded requests cannot resurrect stale public content",
+            "2026-11-26T20:27:59.0074361Z ok 476 - BG-19 follow-up refuses unqualified or inferred read transports",
+            "2026-11-26T20:27:59.0078103Z ok 477 - BG-19 follow-up supplies only explicit GET path and abort signal",
+            "2026-11-26T20:27:59.0102966Z ok 478 - BG-19 follow-up keeps private projection locked without a supported Wallet session",
+            "2026-11-26T20:27:59.0176684Z ok 479 - BG-19 follow-up discards previous account projection after account change",
+            "2026-11-26T20:27:59.0247883Z ok 480 - BG-19 follow-up invalidation discards in-flight results and failure stays unavailable",
+            "2026-11-26T20:27:59.0250825Z ok 481 - BG-19.13 bounded deterministic backoff",
+            "2026-11-26T20:27:59.0253841Z ok 482 - BG-19.13 transient read succeeds within retry limit",
+            "2026-11-26T20:27:59.0256981Z ok 483 - BG-19.13 refuses to retry nonretryable failure or leak exception content",
+            "2026-11-26T20:27:59.0265123Z ok 484 - BG-19.13 never publishes response after route, account or session changed",
+            "2026-11-26T20:27:59.0268288Z ok 485 - BG-19.13 exhausted read retries degrade with fixed reason",
+            "2026-11-26T20:27:59.0271176Z ok 486 - BG-19.13 aborted read never displays stale result",
+            "2026-11-26T20:27:59.0442766Z ok 487 - BG-19.1 validates safe runtime configuration",
+            "2026-11-26T20:27:59.0454101Z ok 488 - BG-19.1 production origin is fixed to Bong Goggles host",
+            "2026-11-26T20:27:59.0458000Z ok 489 - BG-19.1 rejects insecure production service origins",
+            "2026-11-26T20:27:59.0461454Z ok 490 - BG-19.1 bootstrap states are deterministic",
+            "2026-11-26T20:27:59.0465694Z ok 491 - BG-19.1 creates typed service boundaries without authority",
+            "2026-11-26T20:27:59.0505220Z ok 492 - BG-19.1 telemetry recursively redacts sensitive fields",
+            "2026-11-26T20:27:59.0609905Z ok 493 - BG-19.12 rejects active-content, relative, credential and malformed handoff URLs",
+            "2026-11-26T20:27:59.0616039Z ok 494 - BG-19.12 escapes URL attribute content and ignores untrusted attributes",
+            "2026-11-26T20:27:59.0623447Z ok 495 - BG-19.12 never emits free-form error strings, URLs, account or nested secrets",
+            "2026-11-26T20:27:59.0637436Z ok 496 - BG-19.12 bounds telemetry depth, arrays and unexpected inputs",
+            "2026-11-26T20:27:59.1209450Z ok 497 - BG-19.11 display prefs are strictly local and validated",
+            "2026-11-26T20:27:59.1221243Z ok 498 - BG-19.11 public metadata and indexing fail closed without verified public state",
+            "2026-11-26T20:27:59.1230750Z ok 499 - BG-19.11 settings handoffs accept only safe HTTPS URLs",
+            "2026-11-26T20:27:59.1257234Z ok 500 - BG-19.11 settings route is account guarded and never promises canonical policy writes",
+            "2026-11-26T20:27:59.1979574Z ok 501 - BC-0.3 eight screen routes resolve for all 25 games and legacy entries without a wallet",
+            "2026-11-26T20:27:59.1990756Z ok 502 - BC-0.3 rejects nested/unknown screen segments and unknown games",
+            "2026-11-26T20:27:59.1994490Z ok 503 - BC-0.3 overview and rules are honest and variants do not masquerade as rulebooks",
+            "2026-11-26T20:27:59.2004272Z ok 504 - BC-0.3 opponent setup exposes seat types and all bot difficulties but cannot submit",
+            "2026-11-26T20:27:59.2010805Z ok 505 - BC-0.3 Chaos separates 420ID online rooms from an explicit local CPU game",
+            "2026-11-26T20:27:59.2014535Z ok 506 - BC-0.3 table, results, history and rematch stay fail-closed without an authenticated projection",
+            "2026-11-26T20:27:59.2017193Z ok 507 - BC-0.3 table uses only bounded public cells, safe scores and seat labels",
+            "2026-11-26T20:27:59.2019971Z ok 508 - BC-0.3 result, history and rematch use verified data but never activate unconnected actions",
+            "2026-11-26T20:27:59.2023305Z ok 509 - BC-0.3 hostile text cannot inject HTML, URL attributes, extra private data or oversized state",
+            "2026-11-26T20:27:59.2042876Z ok 510 - BC-0.3 shared styles and navigation accessibility ship with the web app",
+            "2026-11-26T20:27:59.2213343Z ok 511 - BC-0.9 canonical 52-card manifest is deterministic, unique and immutable, not a shuffled dealt hand",
+            "2026-11-26T20:27:59.2382920Z ok 512 - BC-0.9 verified tabletop composes decks, discards, own hand and tiles, board pieces, dice and scorecards",
+            "2026-11-26T20:27:59.2505148Z ok 513 - BC-0.9 server-verified seat permissions are required for all private cards and tiles",
+            "2026-11-26T20:27:59.2508544Z ok 514 - BC-0.9 rejects invalid boards, duplicate locations, invalid card/dice values and untrusted schema",
+            "2026-11-26T20:27:59.2511780Z ok 515 - BC-0.9 all reusable public renderers escape malicious labels and never inject URLs or active action hooks",
+            "2026-11-26T20:27:59.2514888Z ok 516 - BC-0.9 full generic multi-column scorecards support 1, 2, 3 and 6 complete scoring rows",
+            "2026-11-26T20:27:59.2517610Z ok 517 - BC-0.9 chess/checkers and 9, 13, 19 Go boards render bounded, accessible squares",
+            "2026-11-26T20:27:59.2520250Z ok 518 - BC-0.9 responsive and forced-color accessibility skin is packaged with Classics",
+            "2026-11-26T20:27:59.2538158Z ok 519 - BC-0.9 rule-localization, feedback and server deadline are validated and never invent client time",
+            "2026-11-26T20:27:59.2542169Z ok 520 - BC-0.9 local symbol asset manifest and feedback helpers never fetch unqualified artwork or run controls",
+            "2026-11-26T20:27:59.2545443Z ok 521 - authenticated same-origin Worker transport preserves cookies, path, and redirects",
+            "2026-11-26T20:27:59.2548091Z ok 522 - Worker retains authenticated POST data, exact Origin, and private response",
+            "2026-11-26T20:27:59.2550666Z ok 523 - Worker denies noncanonical hosts, non-HTTPS, missing secret and unrelated paths",
+            "2026-11-26T20:27:59.2553418Z ok 524 - Worker returns generic noncacheable 502 without exposing secret on upstream failure",
+            "2026-11-26T20:27:59.2556104Z ok 525 - safe GET login start converts Render cold-start 502/503/504 to automatic bounded recovery",
+            "2026-11-26T20:27:59.2558662Z ok 526 - cold-start browser refresh expires after eight tries, never spins indefinitely",
+            "2026-11-26T20:27:59.2561702Z ok 527 - a successful 420ID redirect preserves the authoritative flow cookie and clears wake attempts",
+            "2026-11-26T20:27:59.2565284Z ok 528 - callback, POST, and non-login GET never receive wake-retry pages or replay a request",
+            "2026-11-26T20:27:59.2567914Z ok 529 - network exceptions on GET login start show recovery without exposing upstream details",
+            "2026-11-26T20:27:59.2570111Z ok 530 - BG-19.2 discovers only the qualified 420 Wallet provider",
+            "2026-11-26T20:27:59.2572456Z ok 531 - BG-19.2 normalizes network and rejects invalid chain IDs",
+            "2026-11-26T20:27:59.2574504Z ok 532 - BG-19.2 exposes read-only mode until Wallet is connected",
+            "2026-11-26T20:27:59.2576600Z ok 533 - BG-19.2 marks wrong network unsupported and blocks writes",
+            "2026-11-26T20:27:59.2578736Z ok 534 - BG-19.2 reacts to accounts and chain lifecycle from Wallet",
+            "2026-11-26T20:27:59.2580938Z ok 535 - BG-19.2 clears only Bong Goggles session-local material on signout",
+            "2026-11-26T20:27:59.2583336Z ok 536 - BG-19.2 builds secure Wallet passkey/session handoffs",
+            "2026-11-26T20:27:59.2585594Z ok 537 - BG-19.2 prepares reviewable non-authoritative transaction intents",
+            "2026-11-26T20:27:59.2587861Z ok 538 - BG-19.2 rejected Wallet transactions never become local success",
+            "2026-11-26T20:27:59.2590551Z ok 539 - BG-19.2 receipt classification distinguishes canonical confirm/revert/pending",
+            "2026-11-26T20:27:59.2593013Z ok 540 - BG-19.2 storage clearing tolerates unavailable browser storage",
+            "2026-11-26T20:27:59.3206942Z ok 541 - valid private snapshot and malformed or concealed fields fail closed",
+            "2026-11-26T20:27:59.3215216Z ok 542 - rejected placement preserves draft at same revision; conflict clears it",
+            "2026-11-26T20:27:59.3217871Z ok 543 - duplicate submission prevented, accepted revision confirmed by GET",
+            "2026-11-26T20:27:59.3235584Z ok 544 - stale and conflicting revisions conceal rack",
+            "2026-11-26T20:27:59.3249148Z ok 545 - expired authentication and changed account clear draft and private projection",
+            "2026-11-26T20:27:59.3252122Z ok 546 - transport failure hides rack; fresh controller recovers completed shared victory",
+            "2026-11-26T20:27:59.3254746Z ok 547 - runtime invalidates on offline, hidden page, logout and destruction",
+            "2026-11-26T20:27:59.3352949Z ok 548 - six bag profiles preserve total size and every tile type",
+            "2026-11-26T20:27:59.3355352Z ok 549 - hybrids remain joined and premiums score physical tiles",
+            "2026-11-26T20:27:59.3358422Z ok 550 - all fifteen hybrid symbols retain their printed order and face values",
+            "2026-11-26T20:27:59.3361028Z ok 551 - all board dimensions, rack capacities and canonical premium cells render",
+            "2026-11-26T20:27:59.3364711Z ok 552 - every physical tile art and approved control is allowlisted",
+            "2026-11-26T20:27:59.3367445Z ok 553 - draft and turn controls use authoritative state; rejected errors escaped",
+            "2026-11-26T20:27:59.3369504Z ok 554 - terminal shared victory locks moves",
+            "2026-11-26T20:27:59.3371522Z # pass 554",
+            "2026-11-26T20:27:59.3371752Z # fail 0",
+            "2026-11-26T20:29:41.9041284Z BC-3.4 Chromium: two independent seats, legal moves, polling, reload, orientation, keyboard, mobile, axe and revocation passed",
+            "2026-11-26T20:29:51.4938695Z BC-3.5 Chromium: two seats, moves, recovery, accessibility, challenge, invitation, resignation and rematch passed",
+            "2026-11-26T20:30:37.1296384Z BC-3.6 Chromium: profile, account games, verified history, independent result statistics, invitations and revocation passed"
+          ]
+        },
+        {
+          "id": 140153445568,
+          "name": "chess-postgresql",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify exact source",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete Chess backend and authoritative API regression",
+              "conclusion": "success"
+            },
+            {
+              "name": "Static analysis and service build",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ],
+          "qualificationLogExtract": [
+            "2026-11-26T20:29:05.6805702Z --- PASS: TestBC322DeadAndMatePrecedence (0.00s)",
+            "2026-11-26T20:29:05.6806290Z --- PASS: TestBC322MaterialPolicy (0.00s)",
+            "2026-11-26T20:29:05.6806836Z --- PASS: TestBC322RepetitionClaims (0.19s)",
+            "2026-11-26T20:29:05.6807653Z --- PASS: TestBC322FlagAuthority (0.01s)",
+            "2026-11-26T20:29:05.6808341Z --- PASS: TestBC322BareKingFlagDrawAndResignationWin (0.02s)",
+            "2026-11-26T20:29:05.6809931Z --- PASS: TestBC33PostgresHumanBotRecovery (1.36s)",
+            "2026-11-26T20:29:05.6811735Z --- PASS: TestBC33ChessPolicies (0.19s)",
+            "2026-11-26T20:29:05.6812224Z --- PASS: TestBC33ChessMate (0.06s)",
+            "2026-11-26T20:29:05.6812722Z --- PASS: TestBC33ChessReplay (0.54s)",
+            "2026-11-26T20:29:05.6814194Z --- PASS: TestBC33ComparativeStrength (0.88s)",
+            "2026-11-26T20:29:05.6814869Z --- PASS: TestBC33DeadlineAndDeterministicBudget (0.17s)",
+            "2026-11-26T20:29:05.6815600Z --- PASS: TestBC33LegalExistenceMatchesFullGenerator (0.01s)",
+            "2026-11-26T20:29:05.6816209Z --- PASS: TestBC32ChessCapacity (0.00s)",
+            "2026-11-26T20:29:05.6816773Z --- PASS: TestBC32ChessNonTurnWhitelist (0.00s)",
+            "2026-11-26T20:29:05.6817547Z --- PASS: TestBC32ChessRepetitionAndScores (0.02s)",
+            "2026-11-26T20:29:05.6818126Z --- PASS: TestBC32ChessClockBoundary (0.00s)",
+            "2026-11-26T20:29:05.6818714Z --- PASS: TestBC32TimedBoundaryAndReplay (0.04s)",
+            "2026-11-26T20:29:05.6819307Z --- PASS: TestBC32QueensGambitResignation (0.12s)",
+            "2026-11-26T20:29:05.6819961Z --- PASS: TestBC36ChessHistoryProfileStatistics (0.62s)",
+            "2026-11-26T20:29:05.6820919Z --- PASS: TestBC35ChessConsentLifecycle (0.53s)",
+            "2026-11-26T20:29:05.6821413Z --- PASS: TestBC32FEN (0.00s)",
+            "2026-11-26T20:29:05.6821989Z --- PASS: TestBC32PGN (0.10s)",
+            "2026-11-26T20:29:05.6822477Z --- PASS: TestBC32ReferencePerft (0.22s)",
+            "2026-11-26T20:29:05.6823060Z --- PASS: TestBC32OpeningPrefixResignation (0.03s)",
+            "2026-11-26T20:29:05.6823649Z --- PASS: TestBC32SicilianResignation (0.03s)",
+            "2026-11-26T20:29:05.6824174Z --- PASS: TestBC321ChessAdapter (0.02s)",
+            "2026-11-26T20:29:05.6824749Z --- PASS: TestBC321ChessReplayAndTerminal (0.09s)",
+            "2026-11-26T20:29:05.6825344Z --- PASS: TestBC321ChessNonTurnLifecycle (0.04s)",
+            "2026-11-26T20:29:05.6825881Z --- PASS: TestBC321ChessPerft (0.30s)",
+            "2026-11-26T20:29:05.6826490Z --- PASS: TestBC32UntimedChessSession (0.27s)",
+            "2026-11-26T20:29:05.6827287Z --- PASS: TestBC32TimedChessSession (0.28s)",
+            "2026-11-26T20:29:05.6827906Z --- PASS: TestBC34ChessHumanActionsAndRecovery (0.62s)",
+            "2026-11-26T20:29:05.6828543Z --- PASS: TestBC33FixtureRateLimitIsolation (0.06s)",
+            "2026-11-26T20:29:05.6828812Z PASS",
+            "2026-11-26T20:29:05.6829179Z ok  \tgithub.com/420integrated/420-integrated/services/bong-goggles-account-social\t7.839s",
+            "2026-11-26T20:29:05.6830190Z --- PASS: TestBC33OperatorActivationPreservesCribbageAndFailsClosed (0.00s)",
+            "2026-11-26T20:29:05.6830560Z PASS",
+            "2026-11-26T20:29:05.6830841Z ok  \tgithub.com/420integrated/420-integrated/cmd/bong-goggles-social\t1.011s"
+          ]
+        }
+      ],
+      "artifacts": []
+    },
+    {
+      "id": 45891027547,
+      "name": "BC-3.5 Chess Player Interface",
+      "conclusion": "success",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45891027547"
+    },
+    {
+      "id": 45891027655,
+      "name": "BC-1.4 Cribbage Player Frontend",
+      "conclusion": "success",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45891027655"
+    },
+    {
+      "id": 45891027681,
+      "name": "BC-4.2 Word Salad Backend Qualification",
+      "conclusion": "success",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45891027681"
+    },
+    {
+      "id": 45891027743,
+      "name": "Bong Goggles Web Verification",
+      "conclusion": "success",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45891027743"
+    },
+    {
+      "id": 45891027873,
+      "name": "GOV-PRE-08 Step 3 unsigned V4 materialization and local recovery",
+      "conclusion": "success",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45891027873"
+    }
+  ]
+}

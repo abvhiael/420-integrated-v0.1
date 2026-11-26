@@ -38,6 +38,7 @@ export class ChessController{
  emit(p){this.state={...this.state,...p};this.onChange();return this.state;}
  invalidate(){this.gen++;this.busy=false;this.reading=false;this.actor=null;this.emit({session:null,actions:[],matches:[],selected:null,promotion:[],offer:false,error:'',status:this.client.enabled?'idle':'disabled'});}
  async principal(){const r=await this.client.request('/v1/me');if(r.status===401)return null;if(r.status!==200||r.data?.walletRequired!==false||!isSubjectID(r.data.profile?.subject))throw Error('420ID verification unavailable ('+r.status+')');return r.data.profile.subject;}
+ async confirmPrincipal(actor){const next=await this.principal();if(!next)throw Error('420ID session no longer verified');if(next!==actor)throw Error('Account changed');return next;}
  async refresh(id){
   if(!this.client.enabled||this.busy)return;
   const gen=++this.gen;this.busy=this.reading=true;
@@ -49,7 +50,7 @@ export class ChessController{
     const r=await this.client.request('/v1/classic-sessions');if(gen!==this.gen)return;
     if(!clean(r)||!Array.isArray(r.data.sessions))throw Error('Match list unavailable ('+r.status+')');
     const matches=r.data.sessions.filter(s=>s.gameId==='chess'&&s.rulesVersion==='v1.1'&&chessID(s.id)&&['active','finished'].includes(s.status)).map(s=>({id:s.id,status:s.status}));
-    if(await this.principal()!==actor)throw Error('Account changed');
+    await this.confirmPrincipal(actor);
     if(gen===this.gen)this.emit({status:'ready',matches,error:''});return;
    }
    if(!chessID(id))throw Error('Invalid match link');
@@ -60,7 +61,7 @@ export class ChessController{
    const legal=await this.client.request('/v1/classic-sessions/'+id+'/chess-actions');
    if(gen!==this.gen)return;
    const actions=normalizeChessActions(legal,s);if(!actions)throw Error('Position changed; refreshing legal actions');
-   if(await this.principal()!==actor)throw Error('Account changed');
+   await this.confirmPrincipal(actor);
    if(gen!==this.gen)return;
    if(previous?.id===id&&previous.sequence===s.sequence&&previous.seat===s.seat&&this.state.status==='ready')return;
    this.emit({status:'ready',session:s,actions,selected:null,promotion:[],offer:false,error:''});
@@ -73,7 +74,7 @@ export class ChessController{
   // An authorized click supersedes an in-flight read, never another mutation.
   const gen=++this.gen;this.reading=false;this.busy=true;this.emit({status:'submitting',error:''});
   try{
-   if(await this.principal()!==actor||gen!==this.gen)throw Error('Account changed');
+   await this.confirmPrincipal(actor);if(gen!==this.gen)return;
    const requestId=globalThis.crypto?.randomUUID?.();if(!chessID(requestId))throw Error('Secure request ID unavailable');
    const r=await this.client.request('/v1/classic-sessions/'+s.id+'/action',{method:'POST',body:{requestId,action:'move',expectedSequence:s.sequence+1,move:action}});
    if(gen!==this.gen)return;

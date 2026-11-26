@@ -20,6 +20,14 @@ import {renderAccountMonetization} from './account-monetization.js';
 import {renderClassicRooms} from './classic-rooms.js';
 import {renderAccountHeader} from './account-identity.js';
 function navMarkup(items,activeId,placement){return `<nav class="app-nav app-nav--${placement}" aria-label="${placement==='mobile'?'Primary mobile':'Primary'}">${items.map(item=>`<a href="${item.path}" data-route="${item.id}" aria-current="${item.id===activeId?'page':'false'}" class="app-nav__item ${item.access.allowed?'':'is-locked'}"><span aria-hidden="true">${escapeHtml(item.icon)}</span><span>${escapeHtml(NAV_LABELS[item.id]??item.label)}</span></a>`).join('')}</nav>`;}
+// Public status is safe to render even when the account projection is unavailable.
+ // Private history and invitations still require a matching verified subject.
+function renderAccountChessStatus(state,account){
+ if(!state||state.status==='disabled')return '';
+ if(state.status!=='ready')return renderChessSocial(state);
+ if(account?.status==='ready'&&account.profile?.subject&&account.profile.subject===state.viewer)return renderChessSocial(state);
+ return renderChessSocial({status:'unavailable',notice:'Chess account verification unavailable. Private history is hidden.'});
+}
 function routePlaceholder(route,access,{profileProjection=null,relationshipProjection=null,relationshipCollection=null,viewer=null,walletView=null,feedProjection=null,storyProjection=null,publication=null,upload=null,communityProjection=null,messagingProjection=null,discoveryProjection=null,gamesProjection=null,notificationsProjection=null,rewardsProjection=null,safetyProjection=null,viewPreferences=null,walletSettingsUrl=null,notificationsSettingsUrl=null,accountSocialState=null,accountSocialEnabled=false,accountIdentityState=null,accountIdentityEnabled=false,classicRoomsState=null,classicRoomsEnabled=false,classicCommunicationsState=null,accountMessagesState=null,accountGamesState=null,accountMessagingEnabled=false,accountGamesEnabled=false,accountXPState=null,accountXPEnabled=false,accountMonetizationState=null,accountMonetizationEnabled=false,chaosGame=null,chaosRevealed=false,chaosError=null,chaosRepairCue=null,chaosEffects=null,chaosSaveInfo=null,online=null,cribbageState=null,labyrinthState=null,chessState=null,saladState=null}={}){
  if(route.id==='home'&&!accountSocialEnabled)return `<div class="home-surface">${welcomeHero()}${renderStories({items:storyProjection??[]})}${renderComposer({walletView,publication,upload})}${renderFeed({page:feedProjection})}</div>`;
  if(route.id==='home')return `<div class="home-surface">${welcomeHero()}
@@ -35,9 +43,9 @@ function routePlaceholder(route,access,{profileProjection=null,relationshipProje
   </details>
  </div>`;
  if(route.id==='discover')return renderDiscoveryRoute({projection:discoveryProjection,walletView});
- if(route.id==='social')return renderAccountSocial(accountSocialState,{enabled:accountSocialEnabled})+(accountSocialEnabled&&accountSocialState?.status==='ready'&&accountSocialState.profile?.subject===chessState?.social?.viewer?renderChessSocial(chessState.social):'');
+ if(route.id==='social')return renderAccountSocial(accountSocialState,{enabled:accountSocialEnabled})+(accountSocialEnabled?renderAccountChessStatus(chessState?.social,accountSocialState):'');
  if(route.id==='account-messages')return renderAccountExtra('messages',accountMessagesState,{enabled:accountMessagingEnabled});
- if(route.id==='account-games')return renderAccountExtra('games',accountGamesState,{enabled:accountGamesEnabled})+(accountGamesEnabled&&accountIdentityState?.profile?.subject===chessState?.social?.viewer&&chessState?.social?.status==='ready'?renderChessSocial(chessState.social):'');
+ if(route.id==='account-games')return renderAccountExtra('games',accountGamesState,{enabled:accountGamesEnabled})+(accountGamesEnabled?renderAccountChessStatus(chessState?.social,accountIdentityState):'');
  if(route.id==='account-xp')return renderAccountXP(accountXPState,{enabled:accountXPEnabled});
  if(route.id==='account-monetization')return renderAccountMonetization(accountMonetizationState,{enabled:accountMonetizationEnabled});
  if(route.id==='settings')return renderSettingsRoute({walletView,preferences:viewPreferences,walletUrl:walletSettingsUrl,notificationsUrl:notificationsSettingsUrl,accountSocialState,accountSocialEnabled});

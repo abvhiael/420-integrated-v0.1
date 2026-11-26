@@ -109,6 +109,8 @@ func TestSSOHTTPConsentBackendIsolationAndLogout(t *testing.T){
  var active SSOIntrospection
  readResult(t,serverPost("/v1/sso/introspect","doobtube",clients[0].Secret,map[string]string{"token":minted.AccessToken},"",nil),&active)
  if !active.Active||active.Subject==nil||active.Subject.App!="doobtube"{t.Fatal("valid app session missing",active)}
+ // Exercise real HTTP, durable rate accounting and token validation beyond the old 30/min ceiling.
+ for i:=0;i<120;i++{var seen SSOIntrospection;readResult(t,serverPost("/v1/sso/introspect","doobtube",clients[0].Secret,map[string]string{"token":minted.AccessToken},"",nil),&seen);if !seen.Active||seen.Subject==nil||seen.Subject.App!="doobtube"{t.Fatal("sustained introspection failed",i)}}
  var forbidden SSOIntrospection
  readResult(t,serverPost("/v1/sso/introspect","420town",clients[1].Secret,map[string]string{"token":minted.AccessToken},"",nil),&forbidden)
  if forbidden.Active||forbidden.Subject!=nil{t.Fatal("other app received identity",forbidden)}

@@ -28,16 +28,31 @@ export class ChessSocialController{
  emit(p){const next={...this.state,...p};if(JSON.stringify(next)!==JSON.stringify(this.state)){this.state=next;this.onChange();}}
  invalidate(){this.gen++;this.busy=false;this.emit({status:this.client.enabled?'idle':'disabled',viewer:null,friends:[],history:null,notice:'',submitting:false});}
  async principal(){const r=await this.client.request('/v1/me');if(r.status===401)return null;if(r.status!==200||r.data?.walletRequired!==false||!isSubjectID(r.data.profile?.subject))throw Error('420ID verification unavailable ('+r.status+')');return r.data.profile.subject;}
+ // Identity checks are independent of the expensive statistics refresh.
+ async verifyIdentity(){
+  if(!this.client.enabled||this.busy)return false;
+  const gen=++this.gen;this.busy=true;
+  try{
+   const actor=await this.principal();if(gen!==this.gen)return false;
+   if(!actor){this.emit({status:'guest',viewer:null,friends:[],history:null,notice:'',submitting:false});return false;}
+   if(actor!==this.state.viewer){this.emit({status:'loading',viewer:actor,friends:[],history:null,notice:'',submitting:false});}
+   return true;
+  }catch(e){if(gen===this.gen)this.emit({status:'unavailable',viewer:null,friends:[],history:null,notice:'Chess identity verification temporarily unavailable.',submitting:false});return false;}
+  finally{if(gen===this.gen)this.busy=false;}
+ }
  async refresh(){
   if(!this.client.enabled||this.busy)return;
   const gen=++this.gen;this.busy=true;
   try{
    const actor=await this.principal();if(gen!==this.gen)return;
-   if(!actor){this.emit({status:'guest',viewer:null,friends:[],history:null});return;}
-   if(actor!==this.state.viewer)this.emit({status:'loading',viewer:null,friends:[],history:null});
+   if(!actor){this.emit({status:'guest',viewer:null,friends:[],history:null,notice:''});return;}
+   if(actor!==this.state.viewer)this.emit({status:'loading',viewer:null,friends:[],history:null,notice:''});
    const [h,f]=await Promise.all([this.client.request('/v1/classic-sessions/history-chess'),this.client.request('/v1/classic-rooms/friends')]);
    const history=verifyChessHistory(h),friends=verifyCribbageFriends(f);
-   if(!history||!friends||await this.principal()!==actor)throw Error('Chess invitations unavailable');
+   const confirmed=await this.principal();if(gen!==this.gen)return;
+   if(!confirmed){this.emit({status:'guest',viewer:null,friends:[],history:null,notice:''});return;}
+   if(confirmed!==actor){this.emit({status:'loading',viewer:confirmed,friends:[],history:null,notice:''});return;}
+   if(!history||!friends)throw Error('Chess invitations unavailable');
    if(gen===this.gen)this.emit({status:'ready',viewer:actor,history,friends,notice:''});
   }catch(e){if(gen===this.gen)this.emit({status:'unavailable',viewer:null,friends:[],history:null,notice:'Chess account history could not be verified.'});}
   finally{if(gen===this.gen)this.busy=false;}
@@ -61,7 +76,7 @@ export class ChessSocialController{
 }
 export function renderChessSocial(state,session=null){
  if(!state||state.status==='disabled')return '';
- if(state.status!=='ready')return '<p role="status">'+esc(state.notice||'Checking Chess invitations…')+'</p>';
+ if(state.status!=='ready'||!state.history||!isSubjectID(state.viewer))return '<p role="status" data-chess-social-status="'+esc(state.status)+'">'+esc(state.status==='guest'?'Sign in with 420ID to view Chess history.':state.status==='unavailable'?state.notice||'Chess account history temporarily unavailable.':'Checking Chess invitations…')+'</p>';
  const disabled=state.submitting?' disabled':'';
  const invite=state.history.invitations.map(i=>'<li><a data-route="classic-room" href="/games/rooms/'+esc(i.roomId)+'">Chess invitation from '+esc(state.friends.find(f=>f.subject===i.inviter)?.displayName??'420ID member')+'</a></li>').join('');
  const form=state.friends.length?'<form data-chess-challenge><label>Challenge a mutual friend<select name="target">'+state.friends.map(f=>'<option value="'+esc(f.subject)+'">'+esc(f.displayName)+'</option>').join('')+'</select></label><button type="submit"'+disabled+'>Send Chess challenge</button></form>':'<p>Mutual 420ID friends can receive challenges.</p>';

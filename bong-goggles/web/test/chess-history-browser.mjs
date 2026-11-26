@@ -22,7 +22,7 @@ const server=createServer(async(req,res)=>{
   const bytes=await readFile(path);res.writeHead(200,{'Content-Type':types[extname(path)]??'application/octet-stream'});res.end(bytes);
  }catch{res.writeHead(404);res.end();}
 });
-let finished=false,invited=false,rematch=false;let browser,seq=1,board=fixture().privateView.board,last='',san='',outage=false,posts=0;const errors=[];
+let finished=false,invited=false,rematch=false;let browser,seq=1,board=fixture().privateView.board,last='',san='',outage=false,posts=0,blackIdentity='normal',blackHistory=0,blackMe=0;const errors=[];
 const session=seat=>{const s=fixture(seat);s.sequence=seq;s.turnSeat=(seq-1)%2;Object.assign(s.privateView,{board,turn:s.turnSeat,lastMove:last,lastSAN:san});if(finished){Object.assign(s,{status:'finished',turnSeat:null,winnerSeat:1});Object.assign(s.privateView,{turn:-1,phase:'finished',terminal:true,winner:1,reason:'resigned'});}return s;};
 try{
  await new Promise(r=>server.listen(0,'127.0.0.1',r));
@@ -36,9 +36,13 @@ try{
   await context.route('**/social-api/**',async r=>{
    const p=new URL(r.request().url()).pathname.replace('/social-api','');
    const cookie=r.request().headers().cookie??'';
+   if(seat&&p==='/v1/me')blackMe++;
+   if(seat&&p==='/v1/classic-sessions/history-chess')blackHistory++;
+   if(seat&&blackIdentity==='changed'&&p==='/v1/classic-sessions/history-chess'){await r.fulfill({status:503,json:{error:'History unavailable'}});return;}
+   if(seat&&blackIdentity==='temporary'&&p==='/v1/me'){await r.fulfill({status:503,json:{error:'Temporary failure'}});return;}
    if(outage&&seat||!cookie.includes('bc34_actor='+subject)){await r.fulfill({status:401,json:{error:'Unauthorized'}});return;}
    let status=200,data;
-   if(p==='/v1/me')data={walletRequired:false,profile:{subject,displayName:seat?'Black friend':'White friend',bio:''}};
+   if(p==='/v1/me')data={walletRequired:false,profile:{subject:seat&&blackIdentity==='changed'?actor:subject,displayName:seat?'Black friend':'White friend',bio:''}};
    else if(p==='/v1/feed')data={source:'bonggoggles-account-social',posts:[],nextCursor:null,onChain:false};
    else if(p==='/v1/classic-sessions/history-chess'){const m={...session(seat),updatedAt:new Date().toISOString()};if(finished)m.chessReason='resigned';delete m.privateView;data=envelope({history:{stats:{sampleSize:finished?1:0,completed:finished?1:0,wins:finished&&seat?1:0,losses:finished&&!seat?1:0,draws:0},matches:[m],invitations:invited&&seat?[{roomId,inviter:actor,seat:1,expiresAt:'2099-01-01T00:00:00Z'}]:[]}}).data;}
    else if(p==='/v1/classic-rooms/friends')data={onChain:false,friends:[{subject:seat?actor:peer,displayName:seat?'White friend':'Black friend'}]};
@@ -96,7 +100,24 @@ try{
  await b.goto(origin+'/games/chess/history');await b.getByText(/1 completed · 1 wins · 0 losses · 0 draws/).waitFor({timeout:15000});
  await w.goto(origin+'/social');await w.getByText(/1 completed · 0 wins · 1 losses · 0 draws/).waitFor({timeout:15000});
  await b.goto(origin+'/account/games');await b.getByText(/1 completed · 1 wins · 0 losses · 0 draws/).waitFor({timeout:15000});
- outage=true;await b.getByText(/1 completed · 1 wins/).waitFor({state:'detached',timeout:25000});
+ // Observe an actual identity check within the reduced statistics interval.
+ const initialHistory=blackHistory,initialMe=blackMe;
+ await new Promise((resolve,reject)=>{const deadline=Date.now()+15000;const timer=setInterval(()=>{if(blackMe>initialMe){clearInterval(timer);resolve();}else if(Date.now()>deadline){clearInterval(timer);reject(Error('Identity cadence exceeded'));}},50);});
+ assert.equal(blackHistory,initialHistory,'Identity probe must not fetch statistics');
+ blackIdentity='temporary';
+ await b.getByText('Chess identity verification temporarily unavailable.').waitFor({timeout:15000});
+ await b.getByText(/1 completed · 1 wins/).waitFor({state:'detached',timeout:1000});
+ blackIdentity='normal';await b.evaluate(()=>window.dispatchEvent(new Event('online')));
+ await b.getByText(/1 completed · 1 wins/).waitFor({timeout:15000});
+ blackIdentity='changed';
+ await b.getByText(/1 completed · 1 wins/).waitFor({state:'detached',timeout:15000});
+ blackIdentity='normal';await b.evaluate(()=>window.dispatchEvent(new Event('online')));
+ await b.getByText(/1 completed · 1 wins/).waitFor({timeout:15000});
+ outage=true;
+ await b.getByText(/1 completed · 1 wins/).waitFor({state:'detached',timeout:15000});
+
+ outage=false;await b.evaluate(()=>window.dispatchEvent(new Event('online')));
+ await b.getByText(/1 completed · 1 wins/).waitFor({timeout:15000});
  assert.deepEqual(errors,[]);
  console.log('BC-3.6 Chromium: profile, account games, verified history, independent result statistics, invitations and revocation passed');
 }finally{await browser?.close();await new Promise(r=>server.close(r));}

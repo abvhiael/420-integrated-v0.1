@@ -7,15 +7,28 @@ export function createChessRuntime({enabled=false,onChange=()=>{},win=window,doc
  const id=()=>new URLSearchParams(win.location.search).get('session');
  const c=new ChessController({enabled,fetchImpl,onChange:()=>{if(active())onChange();}});
  const social=new ChessSocialController({enabled,fetchImpl,onChange:()=>{if(socialSurface())onChange();}});
- let socialAt=0,listAt=0,refreshing=false,epoch=0;
- const refresh=async()=>{
+ // Keep identity checks responsive without repeatedly fetching private statistics.
+ let socialAt=0,listAt=0,authAt=0,refreshing=false,epoch=0,pending=false,destroyed=false;
+ const refresh=async(force=false)=>{
+  if(destroyed||!enabled||!socialSurface())return;
+  if(force===true){authAt=0;socialAt=0;listAt=0;pending=true;}
   if(refreshing||c.busy||social.busy)return;
+  pending=false;
   const run=epoch;refreshing=true;
   try{
    const now=Date.now(),session=id();
    if(active()&&(session||c.state.status!=='ready'||now-listAt>=15000)){listAt=now;await c.refresh(session);}
+   if(run!==epoch||c.busy||!socialSurface())return;
+   if(now-authAt>=7000){
+    authAt=now;
+    const previous=social.state.viewer;
+    const verified=await social.verifyIdentity();
+    if(run!==epoch)return;
+    if(!verified){socialAt=0;return;}
+    if(previous!==social.state.viewer||social.state.status!=='ready')socialAt=0;
+   }
    if(run===epoch&&!c.busy&&socialSurface()&&now-socialAt>=30000){socialAt=now;await social.refresh();}
-  }finally{refreshing=false;}
+  }finally{refreshing=false;if(pending&&!destroyed&&socialSurface()&&!c.busy&&!social.busy)void refresh();}
  };
  const roomGo=room=>{win.history.pushState({},'','/games/rooms/'+room);win.dispatchEvent(new Event('popstate'));};
  const go=s=>{win.history.pushState({},'','/games/chess/play?session='+s.id);c.invalidate();win.dispatchEvent(new Event('popstate'));};
@@ -49,8 +62,8 @@ export function createChessRuntime({enabled=false,onChange=()=>{},win=window,doc
  }};
  const timer=win.setInterval(()=>{if(socialSurface()&&!doc.hidden)refresh();},3500);
  const ticker=win.setInterval(clocks,250);
- const online=()=>refresh();win.addEventListener('online',online);
- return {get state(){return {...c.state,social:social.state};},refresh,invalidate:()=>{epoch++;c.invalidate();social.invalidate();socialAt=0;listAt=0;},bind(root){if(!c.client.enabled)return;
+ const online=()=>refresh(true);const visible=()=>{if(!doc.hidden)void refresh(true);};win.addEventListener('online',online);doc.addEventListener('visibilitychange',visible);
+ return {get state(){return {...c.state,social:social.state};},refresh,invalidate:()=>{epoch++;pending=true;c.invalidate();social.invalidate();socialAt=0;listAt=0;authAt=0;},bind(root){if(!c.client.enabled)return;
  const lobby=root.querySelector('[data-chess-room-start]');if(lobby)lobby.addEventListener('submit',async e=>{e.preventDefault();if(c.busy)return;c.busy=true;const gen=++c.gen;const roomId=win.location.pathname.split('/').at(-1);const clockProfile=new FormData(lobby).get('clockProfile');const submit=lobby.querySelector('button');submit.disabled=true;try{const actor=await c.principal();if(!actor||!chessID(roomId)||gen!==c.gen)throw Error('Room access unavailable');const r=await c.client.request('/v1/classic-sessions',{method:'POST',body:{roomId,clockProfile}});const s=normalizeChessSession({...r,status:200},r.data?.session?.id);if(r.status!==201||!s||s.roomId!==roomId||s.seat!==0||gen!==c.gen||await c.principal()!==actor)throw Error('Chess start not confirmed');go(s);}catch(err){if(gen===c.gen){const p=doc.createElement('p');p.setAttribute('role','alert');p.textContent=err.message;lobby.append(p);}}finally{if(gen===c.gen)c.busy=false;submit.disabled=false;}});
- if(socialSurface())bindChessSocial(root,social,roomGo,active()?c.state.session:null);if(!active())return;bindChessScreen(root,c,win);root.querySelector('[data-chess-start]')?.addEventListener('submit',e=>{e.preventDefault();void start(e.currentTarget);});clocks();},destroy(){win.clearInterval(timer);win.clearInterval(ticker);win.removeEventListener('online',online);c.invalidate();social.invalidate();}};
+ if(socialSurface())bindChessSocial(root,social,roomGo,active()?c.state.session:null);if(!active())return;bindChessScreen(root,c,win);root.querySelector('[data-chess-start]')?.addEventListener('submit',e=>{e.preventDefault();void start(e.currentTarget);});clocks();},destroy(){destroyed=true;pending=false;epoch++;doc.removeEventListener('visibilitychange',visible);win.clearInterval(timer);win.clearInterval(ticker);win.removeEventListener('online',online);c.invalidate();social.invalidate();}};
 }

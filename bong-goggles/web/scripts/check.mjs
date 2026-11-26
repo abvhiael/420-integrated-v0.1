@@ -10,9 +10,14 @@ const required=[
 for(const file of required) await readFile(resolve(root,file),'utf8');
 
 const html=await readFile(resolve(root,'index.html'),'utf8');
-for(const token of ['Content-Security-Policy','frame-ancestors \'none\'','type="module"']){
+for(const token of ['Content-Security-Policy','type="module"']){
   if(!html.includes(token)) throw new Error(`missing required HTML hardening: ${token}`);
 }
+
+const headers=await readFile(resolve(root,'_headers'),'utf8');
+const globalHeaders=headers.split(/\n\s*\n/)[0];
+if(!/^\/\*\s*$/m.test(globalHeaders)||!/^\s*Content-Security-Policy:.*frame-ancestors 'none'(?:;|$)/m.test(globalHeaders)||!/^\s*X-Frame-Options: DENY\s*$/m.test(globalHeaders)) throw new Error('missing response-header anti-framing protection');
+if(/frame-ancestors/i.test(html)) throw new Error('frame-ancestors must not be delivered in HTML meta CSP');
 
 const config=JSON.parse(await readFile(resolve(root,'runtime-config.example.json'),'utf8'));
 const requiredConfig=['environment','appOrigin','chainId','rpcUrl','indexerUrl','mediaUrl','messengerUrl','notificationsUrl','walletUrl','explorerUrl'];

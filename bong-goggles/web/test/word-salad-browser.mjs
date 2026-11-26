@@ -26,6 +26,10 @@ function snapshot(n){
 }
 async function localServer(){
  const root=resolve('dist'),mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.webp':'image/webp','.svg':'image/svg+xml'};
+ const headerText=await readFile(resolve(root,'_headers'),'utf8');
+ const globalHeaders=Object.fromEntries(headerText.split(/\n\s*\n/)[0].split('\n').slice(1).filter(line=>line.includes(':')).map(line=>{const i=line.indexOf(':');return [line.slice(0,i).trim(),line.slice(i+1).trim()];}));
+ assert.match(globalHeaders['Content-Security-Policy'],/frame-ancestors 'none'/);
+ assert.equal(globalHeaders['X-Frame-Options'],'DENY');
  server=createServer(async(req,res)=>{
   try{
    const url=new URL(req.url,'http://localhost'),path=resolve(root,'.'+decodeURIComponent(url.pathname));
@@ -35,7 +39,7 @@ async function localServer(){
    if(url.pathname==='/runtime-config.json'){
     const config=JSON.parse(data);config.environment='staging';config.features={...config.features,accountSocial:true,accountGames:true,classicRooms:true,classicCommunications:true,wordSaladRestricted:true,chessRestricted:false,publicDiscoverFeed:false};data=JSON.stringify(config);
    }
-   res.writeHead(200,{'Content-Type':mime[extname(target)]||'application/octet-stream'}).end(data);
+   res.writeHead(200,{...globalHeaders,'Content-Type':mime[extname(target)]||'application/octet-stream'}).end(data);
   }catch{res.writeHead(404).end();}
  });
  await new Promise((ok,fail)=>{server.once('error',fail);server.listen(0,'127.0.0.1',ok);});
@@ -120,7 +124,9 @@ async function fixtureRun(origin){
     return reply({},404);
    });
    const page=await context.newPage(),problems=observe(page,origin);
-   await page.goto(origin+'/games/scrabble/play?session='+id);
+   const navigation=await page.goto(origin+'/games/scrabble/play?session='+id);
+   assert.match((await navigation.headerValue('content-security-policy'))||'',/frame-ancestors 'none'/);
+   assert.equal(await navigation.headerValue('x-frame-options'),'DENY');
    const measured=await inspect(page,n,view);
    // Decode every approved published asset, including art not shown in this state.
    if(n===11&&view.width===1920)assert.equal(await page.evaluate(async paths=>{let count=0;for(const path of paths){const img=new Image();img.src='/assets/games/word-salad/'+path;await img.decode();count++;}return count;},SALAD_ART),SALAD_ART.length);

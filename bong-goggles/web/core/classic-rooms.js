@@ -60,6 +60,13 @@ if(variantId!=null){
 return Object.freeze({...normalizedRoom(r),variantId,seats:Object.freeze(seats),invites:Object.freeze(invites)});
 }
 export const normalizeClassicRoom=normalizedRoom;
+ // Never surface arbitrary upstream error bodies, SQL, tokens or identities.
+export function classicRequestFailure(response,stage='Room action'){
+ const status=response?.status;
+ const message=({400:'Invalid game or room configuration.',401:'420ID session is no longer verified.',403:'Request is not authorized.',404:'Required game service or room is unavailable.',409:'Room conflict or active-room limit reached. Check Multiplayer Rooms before retrying.',429:'Too many requests. Try again after the rate limit resets.',502:'Gateway could not confirm the request.',503:'Game service temporarily unavailable.',504:'Gateway timed out; check existing rooms before retrying.'})[status];
+ return stage+' — '+(message||(Number.isInteger(status)&&status>=200&&status<300?'Server response did not match the expected room or session.':'Network or service response could not be verified.'))+(Number.isInteger(status)&&status>0?' (HTTP '+status+')':'');
+}
+
 const verifiedEnvelope=(response,name)=>{
 if(!response||response.status!==200&&response.status!==201||
 response.data?.onChain!==false||response.data?.wager!==false||
@@ -127,7 +134,7 @@ if(!this.client.enabled||this.state.status!=='ready'||!isSubjectID(this.state.vi
 throw Error('420ID room session required');
 const gen=++this.generation;
 const current=this.state;
-let submitted=false;
+let submitted=false,failure='';
 try{
 let path,body;
 if(action==='create'){
@@ -158,10 +165,12 @@ submitted=true;
 const response=await this.client.request(path,{method:'POST',body});
 if(gen!==this.generation)return this.state;
 if(response.status===401)return this.emit({status:'guest'});
+if(action==='create'&&response.status!==201){failure=classicRequestFailure(response,'Room creation');throw Error(failure);}
 if(response.status===409){
 this.emit({...current,notice:'Room changed on another account. Reloading its verified state.'});
 return this.refresh(current.selected?.id??null);
 }
+failure=classicRequestFailure(response,action==='create'?'Room creation':'Room action');
 const returned=verifiedEnvelope(response,'room');
 if(action==='decline'||action==='leave'){
 if(!returned||!id(returned.id)||returned.id!==current.selected.id)throw Error('Unverified departure');
@@ -171,7 +180,7 @@ const view=normalizedRoom(returned,true);
 if(!view)throw Error('Unverified room update');
 return this.refresh(view.id);
 }catch(error){
-if(gen===this.generation)this.emit(submitted?{status:'error',notice:'Room action not confirmed; recheck 420ID and room policy before retrying.'}:
+if(gen===this.generation)this.emit(submitted?{status:'error',notice:failure||'Room action not confirmed; check Multiplayer Rooms before retrying.'}:
 {...current,notice:'Invalid room request. No action was submitted.'});
 throw error;
 }

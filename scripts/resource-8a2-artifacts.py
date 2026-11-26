@@ -137,12 +137,16 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--out", required=True, type=Path)
     p.add_argument("--check", type=Path, help="compare generated evidence with permanent archive")
+    p.add_argument("--historical-only", action="store_true", help="Reproduce frozen archive; current changes must be qualified by the successor comparison")
     args = p.parse_args()
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
     # Verify that the current production source/import graph still equals the qualified revision.
-    for path in ("contracts/src/resource", "contracts/src/vault", "contracts/foundry.toml"):
-        subprocess.run(["git", "diff", "--exit-code", QUALIFIED, "HEAD", "--", path], cwd=ROOT, check=True)
+    if not args.historical_only:
+        for path in ("contracts/src/resource", "contracts/src/vault", "contracts/foundry.toml"):
+            subprocess.run(["git", "diff", "--exit-code", QUALIFIED, "HEAD", "--", path], cwd=ROOT, check=True)
+    else:
+        assert args.check, "Historical qualification requires permanent archive comparison"
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
         results = {}

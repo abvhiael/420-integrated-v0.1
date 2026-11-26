@@ -1,0 +1,152 @@
+{
+  "schema": "420-resource-indexer-qualification-evidence-v1",
+  "qualifiedHead": "405ea76eb57e6b4fdf11eb04730ca5657cb457be",
+  "pr": 1428,
+  "workflowRun": 45754458197,
+  "job": 139689695955,
+  "artifact": {
+    "id": 15087062907,
+    "sha256": "8f792e3bbae1bb2b990bd0f707d656534815d4447907e85a1973dd5d486ea757"
+  },
+  "scope": "Repository qualification using PostgreSQL 16 and controlled chain fixture; no live deployment claim",
+  "workflows": [
+    {
+      "name": "420Compute App Qualification",
+      "id": 45754458222,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "420Governance audit qualification",
+      "id": 45754458065,
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "420Treasury audit qualification",
+      "id": 45754458101,
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "420Docs Qualification",
+      "id": 45754458048,
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Treasury REC-7 qualification",
+      "id": 45754458038,
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Commerce service fast qualification",
+      "id": 45754458024,
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "420Governance GOV-REC-5 Wallet and Ecosystem Requalification",
+      "id": 45754458051,
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "420Names audit qualification",
+      "id": 45754458175,
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Resource 8A2 Indexer durable qualification",
+      "id": 45754458197,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "420Identity ID-AUDIT-6",
+      "id": 45754458040,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "420Explorer EXP-NEXT.1 Registry Descriptor Provenance",
+      "id": 45754458187,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "420Rights audit qualification",
+      "id": 45754458045,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "DEVCOMP Indexer receipt qualification",
+      "id": 45754458016,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "LAUNCHPAD-REC-5 ecosystem integration qualification",
+      "id": 45754458262,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "420Arbitration ARB-PRE-06 Indexer and API Qualification",
+      "id": 45754458287,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "420Registry REG-AUDIT-7",
+      "id": 45754458157,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "420Grants Audit Qualification",
+      "id": 45754458237,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "420Indexer",
+      "id": 45754458155,
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "ciLogExtract": [
+    "2026-11-26T04:20:08.3839929Z TAP version 13",
+    "2026-11-26T04:20:08.7194566Z # Subtest: Resource retained event descriptors exactly match compiler evidence and reject spoofed/malformed logs",
+    "2026-11-26T04:20:08.7196461Z ok 1 - Resource retained event descriptors exactly match compiler evidence and reject spoofed/malformed logs",
+    "2026-11-26T04:20:08.7197336Z   ---",
+    "2026-11-26T04:20:08.7197891Z   duration_ms: 203.23229",
+    "2026-11-26T04:20:08.7198350Z   type: 'test'",
+    "2026-11-26T04:20:08.7198768Z   ...",
+    "2026-11-26T04:20:08.9405745Z # Subtest: Resource deployment verifies complete registry graph and rejects incorrect authority",
+    "2026-11-26T04:20:08.9407081Z ok 2 - Resource deployment verifies complete registry graph and rejects incorrect authority",
+    "2026-11-26T04:20:08.9407661Z   ---",
+    "2026-11-26T04:20:08.9407929Z   duration_ms: 40.254192",
+    "2026-11-26T04:20:08.9408210Z   type: 'test'",
+    "2026-11-26T04:20:08.9408424Z   ...",
+    "2026-11-26T04:20:09.6626779Z # Subtest: Resource durable PostgreSQL ingestion, receipt reconciliation, restart, rollback and canonical rebuild",
+    "2026-11-26T04:20:09.6628313Z ok 3 - Resource durable PostgreSQL ingestion, receipt reconciliation, restart, rollback and canonical rebuild",
+    "2026-11-26T04:20:09.6628954Z   ---",
+    "2026-11-26T04:20:09.6629246Z   duration_ms: 733.007131",
+    "2026-11-26T04:20:09.6629529Z   type: 'test'",
+    "2026-11-26T04:20:09.6629771Z   ...",
+    "2026-11-26T04:20:09.6747893Z 1..3",
+    "2026-11-26T04:20:09.6748157Z # tests 3",
+    "2026-11-26T04:20:09.6748403Z # suites 0",
+    "2026-11-26T04:20:09.6763635Z # pass 3",
+    "2026-11-26T04:20:09.6763893Z # fail 0",
+    "2026-11-26T04:20:09.6764157Z # cancelled 0",
+    "2026-11-26T04:20:09.6764483Z # skipped 0",
+    "2026-11-26T04:20:09.6764737Z # todo 0",
+    "2026-11-26T04:20:09.6765038Z # duration_ms 1301.179591"
+  ]
+}

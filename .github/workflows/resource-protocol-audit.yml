@@ -156,7 +156,7 @@ jobs:
 
   resource-security:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - name: Checkout exact qualification head
         uses: actions/checkout@v4

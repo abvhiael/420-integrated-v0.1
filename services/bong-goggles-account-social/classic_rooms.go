@@ -93,7 +93,12 @@ func scanClassicRoom(row interface{Scan(...any)error})(ClassicRoom,error){
 func (s *Store) ReadyClassicRooms(ctx context.Context)error{
  var ok bool
  e:=s.DB.QueryRowContext(ctx,`SELECT
- (COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.classic_rooms'),'SELECT'),false)
+ EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='bg_account_social' AND table_name='classic_rooms' AND column_name='format' AND data_type='text' AND is_nullable='NO')
+ AND EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid=to_regclass('bg_account_social.classic_rooms') AND conname='classic_rooms_word_salad_format_check' AND convalidated)
+ AND EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid=to_regclass('bg_account_social.classic_sessions') AND conname='classic_sessions_active_state_check' AND convalidated)
+ AND NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid=to_regclass('bg_account_social.classic_sessions') AND conname='classic_sessions_check')
+ AND COALESCE(has_any_column_privilege(current_user,'bg_account_social.members','UPDATE'),false)
+ AND (COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.classic_rooms'),'SELECT'),false)
  AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.classic_rooms'),'INSERT'),false))
  AND COALESCE(has_column_privilege(current_user,'bg_account_social.classic_rooms','status','UPDATE'),false)
  AND COALESCE(has_column_privilege(current_user,'bg_account_social.classic_rooms','revision','UPDATE'),false)

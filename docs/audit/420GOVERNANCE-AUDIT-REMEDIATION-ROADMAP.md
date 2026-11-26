@@ -423,6 +423,20 @@ Documentation and evidence describe the implementation that actually exists at t
 
 ---
 
+## GOV-PRE-RESOURCE-COLLATERAL — Resource provider economic policy
+
+**Status: OPEN — external governance approval required before production-equivalent provider admission.** Origin: RESOURCE-AUDIT-8A.2 C6. Repository engineering qualification is not blocked by the absence of approved economic parameters.
+
+Canonical policy record: [resource-8a2-collateral-policy.json](../../contracts/config/resource/resource-8a2-collateral-policy.json). All four production values remain null, acceptingNew remains false. No approval evidence, approved revision, or activation transaction exists.
+
+Before testnet launch preparation is signed off, the authorized governance body must approve a Resource-specific minimum provider collateral, minimum slashable backing, exposure coverage ratio (basis points), and withdrawal delay (seconds), with documented risk analysis and evidence commitment. Do not import Compute or validator collateral parameters. Approval does not itself activate providers.
+
+Prepare and independently review the exact GovernanceTimelock action targeting the verified ResourceProviderRegistry420. Use the canonical publishCollateralPolicy interface, with positive minimums, minimum slashable no greater than minimum collateral, positive delay and coverage, and nonzero approval evidence hash. Keep acceptingNew false until deployment graph, Vault custody, capability grants, and release authorization are verified. On the actual deployed chain, execute authorized policy publication/activation through GovernanceTimelock, retain revision, policy commitment, receipt and chain identity; verify admission suspension state and genuine collateral eligibility before permitting admission. If any approval, deployment or authorization is missing, keep admission disabled; no direct operator or SDK bypass is authorized.
+
+The pre-testnet gate owns approval and exact action preparation; on-chain receipt verification necessarily follows deployment. Local fixture values do not constitute approved production policy. C6 is dispositioned, not economically activated; RESOURCE-AUDIT-9 owns live readback and admission smoke tests.
+
+---
+
 ## GOV-AUDIT-9 — production-equivalent testnet deployment qualification
 
 ### Purpose

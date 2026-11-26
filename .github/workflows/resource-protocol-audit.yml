@@ -23,6 +23,7 @@ on:
       - "docs/developers/storage-and-resource-integration.md"
       - "docs/audit/420RESOURCE-*"
       - "scripts/verify-resource-audit-8-deployment.py"
+      - "scripts/verify-resource-8a2-policy-disposition.py"
       - "scripts/qualify-resource-solidity.py"
       - "contracts/test/fixtures/cadc/upstream/**"
       - "contracts/test/fixtures/cadc/upstream-manifest.json"
@@ -56,6 +57,9 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: v1.9.0
+
+      - name: Verify C6 production policy disposition
+        run: python scripts/verify-resource-8a2-policy-disposition.py
 
       - name: Verify deterministic Resource deployment package
         run: python scripts/verify-resource-audit-8-deployment.py

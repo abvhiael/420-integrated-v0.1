@@ -76,6 +76,15 @@ async function inspect(page,n,view){
    const offenders=[...document.querySelectorAll('body *')].filter(node=>!scroll.contains(node)&&getComputedStyle(node).position!=='fixed').map(node=>({node,r:box(node)})).filter(({r})=>r.right>innerWidth+2||r.left< -2).slice(0,15).map(({node,r})=>({tag:node.tagName,classes:typeof node.className==='string'?node.className:'',left:Math.round(r.left),right:Math.round(r.right)}));
    bad.push('document horizontal overflow: '+JSON.stringify({viewport:innerWidth,document:document.documentElement.scrollWidth,offenders}));
   }
+  const shell=el.closest('.app-shell'),layout=el.closest('.app-layout'),main=el.closest('.app-content');
+  const lr=box(layout),mr=box(main);
+  if(mr.width<lr.width-30)bad.push('game does not occupy full layout lane');
+  if(innerWidth>=1101&&br.width<Math.min(750,innerWidth*.55))bad.push('desktop board too narrow');
+  for(const rail of shell.querySelectorAll('.app-sidebar,.app-rail,.ecosystem-rail')){
+   if(getComputedStyle(rail).display!=='none'&&box(rail).top<mr.bottom-1)bad.push('sidebar competes with game lane');
+  }
+  const mobileNav=shell.querySelector('.app-nav--mobile');
+  if(innerWidth<=760&&mobileNav&&getComputedStyle(mobileNav).display!=='none'&&['fixed','sticky'].includes(getComputedStyle(mobileNav).position))bad.push('mobile navigation overlays gameplay');
   if(Math.abs(br.width-br.height)>2)bad.push('board not square');
   if(sr.right>tr.right+1)bad.push('board scroll container escapes table');
   for(const node of el.querySelectorAll('.ws-rack,.ws-side,.ws-panel,.ws-action,.ws-blank-picker')){

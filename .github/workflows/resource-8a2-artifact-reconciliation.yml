@@ -6,6 +6,7 @@ on:
       - 'contracts/foundry.toml'
       - 'contracts/config/resource/**'
       - 'scripts/resource-8a2-artifacts.py'
+      - 'scripts/resource-8a3-artifacts.py'
       - 'scripts/qualify-resource-solidity.py'
       - 'docs/audit/420RESOURCE-8A2-artifacts/**'
       - '.github/workflows/resource-8a2-artifact-reconciliation.yml'
@@ -30,11 +31,24 @@ jobs:
           archive=docs/audit/420RESOURCE-8A2-artifacts
           args=()
           if test -f "$archive/sha256.json"; then args+=(--check "$archive"); fi
-          python scripts/resource-8a2-artifacts.py --out "$RUNNER_TEMP/resource-8a2-artifacts" "${args[@]}"
+          if test -f scripts/resource-8a3-artifacts.py; then
+            python scripts/resource-8a2-artifacts.py --historical-only --out "$RUNNER_TEMP/resource-8a2-artifacts" "${args[@]}"
+            python scripts/resource-8a3-artifacts.py --out "$RUNNER_TEMP/resource-8a3-artifacts"
+          else
+            python scripts/resource-8a2-artifacts.py --out "$RUNNER_TEMP/resource-8a2-artifacts" "${args[@]}"
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: resource-8a2-compiler-evidence
           path: ${{ runner.temp }}/resource-8a2-artifacts
+          if-no-files-found: error
+          retention-days: 90
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ hashFiles('scripts/resource-8a3-artifacts.py') != '' }}
+        with:
+          name: resource-8a3-compiler-evidence
+          path: ${{ runner.temp }}/resource-8a3-artifacts
           if-no-files-found: error
           retention-days: 90
 

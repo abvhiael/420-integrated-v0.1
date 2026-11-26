@@ -1,3 +1,4 @@
+import {classicRequestFailure} from './classic-rooms.js';
 // BC-1.8: a genuine server-owned 420ID match against Easy/Medium/Hard.
 // No local shuffle, hidden opponent state, scoring, or bot turn authority.
 import {isSubjectID} from './account-social.js';
@@ -7,7 +8,7 @@ const levels=['easy','medium','hard'];
 const validID=v=>typeof v==='string'&&ID.test(v);
 function verify(r,status,name){
  if(r?.status!==status||r.data?.onChain!==false||r.data.wager!==false||
-    r.data.rewards!==false)throw Error('Unverified '+name);
+    r.data.rewards!==false)throw Error(classicRequestFailure(r,'Cribbage '+name));
  return r.data;
 }
 async function principal(client){

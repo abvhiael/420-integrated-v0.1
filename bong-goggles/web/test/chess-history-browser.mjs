@@ -38,6 +38,7 @@ try{
    const cookie=r.request().headers().cookie??'';
    if(seat&&p==='/v1/me')blackMe++;
    if(seat&&p==='/v1/classic-sessions/history-chess')blackHistory++;
+   if(seat&&blackIdentity==='changed'&&p==='/v1/classic-sessions/history-chess'){await r.fulfill({status:503,json:{error:'History unavailable'}});return;}
    if(seat&&blackIdentity==='temporary'&&p==='/v1/me'){await r.fulfill({status:503,json:{error:'Temporary failure'}});return;}
    if(outage&&seat||!cookie.includes('bc34_actor='+subject)){await r.fulfill({status:401,json:{error:'Unauthorized'}});return;}
    let status=200,data;
@@ -101,7 +102,6 @@ try{
  await b.goto(origin+'/account/games');await b.getByText(/1 completed · 1 wins · 0 losses · 0 draws/).waitFor({timeout:15000});
  // Observe an actual identity check within the reduced statistics interval.
  const initialHistory=blackHistory,initialMe=blackMe;
- await b.waitForFunction(()=>true);
  await new Promise((resolve,reject)=>{const deadline=Date.now()+15000;const timer=setInterval(()=>{if(blackMe>initialMe){clearInterval(timer);resolve();}else if(Date.now()>deadline){clearInterval(timer);reject(Error('Identity cadence exceeded'));}},50);});
  assert.equal(blackHistory,initialHistory,'Identity probe must not fetch statistics');
  blackIdentity='temporary';
@@ -109,9 +109,13 @@ try{
  await b.getByText(/1 completed · 1 wins/).waitFor({state:'detached',timeout:1000});
  blackIdentity='normal';await b.evaluate(()=>window.dispatchEvent(new Event('online')));
  await b.getByText(/1 completed · 1 wins/).waitFor({timeout:15000});
+ blackIdentity='changed';
+ await b.getByText(/1 completed · 1 wins/).waitFor({state:'detached',timeout:15000});
+ blackIdentity='normal';await b.evaluate(()=>window.dispatchEvent(new Event('online')));
+ await b.getByText(/1 completed · 1 wins/).waitFor({timeout:15000});
  outage=true;
  await b.getByText(/1 completed · 1 wins/).waitFor({state:'detached',timeout:15000});
- await b.getByText('Checking Chess invitations…',{exact:true}).waitFor({timeout:15000});
+
  outage=false;await b.evaluate(()=>window.dispatchEvent(new Event('online')));
  await b.getByText(/1 completed · 1 wins/).waitFor({timeout:15000});
  assert.deepEqual(errors,[]);

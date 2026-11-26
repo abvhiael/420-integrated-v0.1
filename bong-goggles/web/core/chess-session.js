@@ -32,15 +32,16 @@ export function normalizeChessActions(r,s){
 }
 export class ChessController{
  constructor({enabled=false,fetchImpl=fetch,onChange=()=>{}}={}){
-  this.client=createAccountSocialClient({enabled,fetchImpl});this.onChange=onChange;this.gen=0;this.busy=false;this.reading=false;this.actor=null;
+  this.client=createAccountSocialClient({enabled,fetchImpl});this.onChange=onChange;this.gen=0;this.busy=false;this.reading=false;this.actor=null;this.target=null;
   this.state={status:enabled?'idle':'disabled',session:null,actions:[],matches:[],selected:null,promotion:[],flipped:null,offer:false,error:''};
  }
  emit(p){this.state={...this.state,...p};this.onChange();return this.state;}
- invalidate(){this.gen++;this.busy=false;this.reading=false;this.actor=null;this.emit({session:null,actions:[],matches:[],selected:null,promotion:[],offer:false,error:'',status:this.client.enabled?'idle':'disabled'});}
+ invalidate(){this.gen++;this.busy=false;this.reading=false;this.actor=null;this.target=null;this.emit({session:null,actions:[],matches:[],selected:null,promotion:[],offer:false,error:'',status:this.client.enabled?'idle':'disabled'});}
  async principal(){const r=await this.client.request('/v1/me');if(r.status===401)return null;if(r.status!==200||r.data?.walletRequired!==false||!isSubjectID(r.data.profile?.subject))throw Error('420ID verification unavailable ('+r.status+')');return r.data.profile.subject;}
  async confirmPrincipal(actor){const next=await this.principal();if(!next)throw Error('420ID session no longer verified');if(next!==actor)throw Error('Account changed');return next;}
  async refresh(id){
   if(!this.client.enabled||this.busy)return;
+  this.target=id||null;
   const gen=++this.gen;this.busy=this.reading=true;
   try{
    const actor=await this.principal();if(gen!==this.gen)return;
@@ -58,13 +59,21 @@ export class ChessController{
    const s=normalizeChessSession(r,id);if(!s)throw Error('Match not authorized or unavailable');
    const previous=this.state.session;
    if(previous?.id===id&&s.sequence<previous.sequence)throw Error('Stale match');
-   const legal=await this.client.request('/v1/classic-sessions/'+id+'/chess-actions');
-   if(gen!==this.gen)return;
-   const actions=normalizeChessActions(legal,s);if(!actions)throw Error('Position changed; refreshing legal actions');
+   let snapshot=s,actions=null;
+   for(let attempt=0;attempt<3;attempt++){
+    const legal=await this.client.request('/v1/classic-sessions/'+id+'/chess-actions');
+    if(gen!==this.gen)return;
+    actions=normalizeChessActions(legal,snapshot);if(actions)break;
+    if(legal.status!==200||!Number.isSafeInteger(legal.data?.sequence)||legal.data.sequence<=snapshot.sequence)break;
+    const next=normalizeChessSession(await this.client.request('/v1/classic-sessions/'+id),id);
+    if(gen!==this.gen)return;
+    if(!next||next.sequence<snapshot.sequence)break;snapshot=next;
+   }
+   if(!actions)throw Error('Position changed; refreshing legal actions');
    await this.confirmPrincipal(actor);
    if(gen!==this.gen)return;
-   if(previous?.id===id&&previous.sequence===s.sequence&&previous.seat===s.seat&&this.state.status==='ready')return;
-   this.emit({status:'ready',session:s,actions,selected:null,promotion:[],offer:false,error:''});
+   if(previous?.id===id&&previous.sequence===snapshot.sequence&&previous.seat===snapshot.seat&&this.state.status==='ready')return;
+   this.emit({status:'ready',session:snapshot,actions,selected:null,promotion:[],offer:false,error:''});
   }catch(e){if(gen===this.gen)this.emit({status:'unavailable',session:null,actions:[],matches:[],selected:null,promotion:[],error:e.message});}
   finally{if(gen===this.gen)this.busy=this.reading=false;}
  }
@@ -78,8 +87,10 @@ export class ChessController{
    const requestId=globalThis.crypto?.randomUUID?.();if(!chessID(requestId))throw Error('Secure request ID unavailable');
    const r=await this.client.request('/v1/classic-sessions/'+s.id+'/action',{method:'POST',body:{requestId,action:'move',expectedSequence:s.sequence+1,move:action}});
    if(gen!==this.gen)return;
-   if(r.status!==409&&!normalizeChessSession(r,s.id))throw Error('Move not confirmed; refresh before retrying');
-   this.emit({status:'idle',actions:[],selected:null,promotion:[],offer:false});
+   const accepted=normalizeChessSession(r,s.id);
+   if(r.status!==409&&(!accepted||accepted.sequence<=s.sequence))throw Error('Move not confirmed; refresh before retrying');
+   await this.confirmPrincipal(actor);if(gen!==this.gen)return;
+   this.emit({status:'submitting',session:accepted||s,actions:[],selected:null,promotion:[],offer:false});
   }catch(e){if(gen===this.gen)this.emit({status:'unavailable',session:null,actions:[],error:e.message});}
   finally{if(gen===this.gen){this.busy=false;await this.refresh(s.id);}}
  }

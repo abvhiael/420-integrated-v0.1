@@ -79,7 +79,9 @@
     "artifactComparison": "docs/audit/420RESOURCE-8A2-artifacts/comparison.json",
     "indexerArchive": "docs/audit/420RESOURCE-8A2-indexer-qualification.json",
     "policyConfig": "contracts/config/resource/resource-8a2-collateral-policy.json",
-    "genesisDisposition": "contracts/config/resource/resource-8a2-genesis-authority-reconciliation.json"
+    "genesisDisposition": "contracts/config/resource/resource-8a2-genesis-authority-reconciliation.json",
+    "finalC7": "docs/audit/420RESOURCE-8A2-qualification/final-ci.json",
+    "finalC8": "docs/audit/420RESOURCE-8A2-qualification/c8-final-ci.json"
   },
   "merged": [
     {
@@ -97,6 +99,10 @@
     {
       "pr": 1430,
       "sha": "0c9760f30bdee9a3c04a36691d2b6c56d476b18e"
+    },
+    {
+      "pr": 1431,
+      "sha": "0ba12e392e2930536fc37cbcf2821ef9583e75ba"
     }
   ],
   "deferrals": [
@@ -117,5 +123,7 @@
       "scope": "Inherited Token V3 authority manifest mismatch; no bypass or Resource implementation defect"
     }
   ],
-  "finalCloseout": "C8 outstanding; no full Resource readiness asserted"
+  "finalCloseout": "CLOSED_REPOSITORY_QUALIFIED_LIVE_DEFERRED",
+  "finalIntegrationHead": "812b9e64efc171d4ff43db6e3f355b2b586f3e8d",
+  "closeoutPR": 1433
 }

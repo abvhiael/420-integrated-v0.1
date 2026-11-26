@@ -1,0 +1,16 @@
+# RESOURCE-AUDIT-8A.2 — C8 final integration qualification
+
+Status: **REPOSITORY QUALIFIED — closeout disposition recorded for merge**.
+
+Baseline main: 0ba12e392e2930536fc37cbcf2821ef9583e75ba. Original PR #1423 already merged at 41e99bb1028bc40c890921762d253edecad8a987. Follow-ups #1427, #1428, #1430 and #1431 merged. See [consolidated evidence](420RESOURCE-8A2-qualification/manifest.json) and [C7 final CI](420RESOURCE-8A2-qualification/final-ci.json).
+
+GitHub comparisons from qualified contract source 6837f137229ff0d9496d2d74d1cb0bea50680de5, SDK source b9e3e9acc1c66fa1d0cd5d44cffee7a20497977e and Indexer source 405ea76eb57e6b4fdf11eb04730ca5657cb457be to baseline main show all are ancestors, and no subsequent Resource Solidity, contract test or Foundry configuration changes. SDK and Indexer source and tests are retained. The Indexer dependency-root ABI order was checked against ResourceDeploymentBinding420.t.sol: 21 addresses followed by 19 runtime hashes excluding external CapabilityRegistry and GovernanceTimelock, whose identities are separately verified.
+
+Final gate: same exact PR head must pass Resource core, Storage, runtime/SDK, security (ci 50000 fuzz/2048 sequences/depth 256; hardening 100000 fuzz/4096 sequences/depth 384; zero unexpected reverts and zero high-severity Slither findings), compiler reconciliation, Indexer regression and mandatory PostgreSQL Resource tests (no skips). Security timeout 60 minutes. No threshold reduction, policy activation, production authorization or accounting changes are authorized. Archive successful exact-head results before closeout merge.
+
+Explicitly retained dispositions: production policy approval GOV-PRE-RESOURCE-COLLATERAL (all four parameters null, acceptingNew false); deployed SDK integration and live deployment/Indexer proof RESOURCE-AUDIT-9; session discharge RESOURCE-AUDIT-8A5; inherited Token V3 authority manifest discrepancy external Genesis V4 dependency, not Resource defect. No testnet, Genesis or production readiness claim.
+
+
+## RESOURCE-AUDIT-8A.2 — C8 final disposition
+
+**Closed — repository qualification only, subject to integration of PR #1433.** Exact qualified candidate `812b9e64efc171d4ff43db6e3f355b2b586f3e8d`; [final evidence](420RESOURCE-8A2-qualification/c8-final-ci.json). Resource and mandatory PostgreSQL workflows 45869890865 and 45869890945 passed on that revision. Compiler reconciliation and general Indexer regression passed on C7 revision 9eedc855391494412d6294ada449b6671bd701dd (45864804913 and 45864804789); complete comparison establishes unchanged inputs, not a new run. Standard and hardening 150,000 total policy fuzz runs, 6,144 sequences, 2,097,152 calls, zero unexpected reverts, zero high-severity Slither findings; PostgreSQL 3/3 with no skips. Original PR #1423 merged at 41e99bb1028bc40c890921762d253edecad8a987. No production authorization or accounting behavior changed. All deferrals remain: GOV-PRE-RESOURCE-COLLATERAL approval with admission disabled, RESOURCE-AUDIT-9 deployed SDK/Indexer and live deployment qualification, RESOURCE-AUDIT-8A5 discharge binding, inherited Token V3 manifest mismatch external Genesis V4 dependency. The broader deployment package remains repository_ready=false and live_qualified=false; no full Resource or live readiness assertion.

@@ -34,14 +34,24 @@ test = TEST.read_text()
 
 need(d.get("schema") == "420-resource-audit-8-deployment-package-v1", "schema drift")
 need(d.get("step") == "RESOURCE-AUDIT-8", "step drift")
-need(d.get("status") == "COLLATERAL_GRAPH_REPOSITORY_QUALIFIED_C8_PENDING", "status drift")
+need(d.get("status") == "COLLATERAL_GRAPH_REPOSITORY_QUALIFIED_C8_CLOSED", "status drift")
 evidence_path = ROOT / "docs/audit/420RESOURCE-8A2-qualification/manifest.json"
 need(d.get("repository_evidence", {}).get("qualification_manifest") == str(evidence_path.relative_to(ROOT)), "qualification evidence link drift")
 need(evidence_path.is_file(), "missing C7 qualification manifest")
 if evidence_path.is_file():
     retained = json.loads(evidence_path.read_text())
     need(retained.get("qualifiedContractSource") == d.get("repository_evidence", {}).get("qualified_contract_source"), "qualified source drift")
-    need(retained.get("finalCloseout") == "C8 outstanding; no full Resource readiness asserted", "closeout overclaim")
+    need(retained.get("finalCloseout") == "CLOSED_REPOSITORY_QUALIFIED_LIVE_DEFERRED", "closeout disposition drift")
+    final_path = ROOT / "docs/audit/420RESOURCE-8A2-qualification/c8-final-ci.json"
+    ev = d.get("repository_evidence", {})
+    need(ev.get("final_collateral_qualification") == str(final_path.relative_to(ROOT)), "final evidence link drift")
+    need(ev.get("collateral_audit_disposition") == retained.get("finalCloseout"), "collateral disposition drift")
+    need(final_path.is_file(), "missing final qualification evidence")
+    if final_path.is_file():
+        final = json.loads(final_path.read_text())
+        need(final.get("qualifiedHead") == retained.get("finalIntegrationHead") == ev.get("final_integration_head"), "final qualification source drift")
+        need(final.get("results") == {"standardSequences":2048,"hardeningSequences":4096,"standardCalls":524288,"hardeningCalls":1572864,"policyFuzz":150000,"unexpectedReverts":0,"highSeverity":0,"postgresTests":3,"postgresSkipped":0}, "final qualification thresholds drift")
+        need({w.get("id"):w.get("conclusion") for w in final.get("workflows", [])} == {45869890865:"success",45869890945:"success",45864804913:"success",45864804789:"success"}, "final CI evidence drift")
 need(d.get("repository_ready") is False, "unqualified package must not be marked ready")
 need(d.get("live_qualified") is False, "fabricated live qualification")
 

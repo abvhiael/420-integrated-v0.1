@@ -1,7 +1,7 @@
 {
   "schema": "420-resource-audit-8-deployment-package-v1",
   "step": "RESOURCE-AUDIT-8",
-  "status": "COLLATERAL_GRAPH_REPOSITORY_QUALIFIED_C8_PENDING",
+  "status": "COLLATERAL_GRAPH_REPOSITORY_QUALIFIED_C8_CLOSED",
   "repository_ready": false,
   "live_qualified": false,
   "address_policy": {
@@ -292,7 +292,10 @@
     "runtime_code_hashes": "RETAINED_LOCAL_EVM_CI_EXTRACTS_NOT_LIVE",
     "artifact_hashes": "docs/audit/420RESOURCE-8A2-artifacts/sha256.json",
     "qualification_manifest": "docs/audit/420RESOURCE-8A2-qualification/manifest.json",
-    "qualified_contract_source": "6837f137229ff0d9496d2d74d1cb0bea50680de5"
+    "qualified_contract_source": "6837f137229ff0d9496d2d74d1cb0bea50680de5",
+    "final_collateral_qualification": "docs/audit/420RESOURCE-8A2-qualification/c8-final-ci.json",
+    "final_integration_head": "812b9e64efc171d4ff43db6e3f355b2b586f3e8d",
+    "collateral_audit_disposition": "CLOSED_REPOSITORY_QUALIFIED_LIVE_DEFERRED"
   },
   "live_testnet_evidence": {
     "required_in_step": "RESOURCE-AUDIT-9",

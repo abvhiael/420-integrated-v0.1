@@ -9,11 +9,12 @@ export function saladFormat(format,count){
 }
 export function normalizeSalad(r,id){
  const s=r?.data?.session,v=s?.privateView;
- if(!clean(r)||![200,201].includes(r.status)||!s||!v||!saladID(id)||s.id!==id||!saladID(s.roomId)||s.gameId!=='scrabble'||s.rulesVersion!=='v1'||!/^[a-f0-9]{64}$/.test(s.rulesHash)||!Number.isSafeInteger(s.sequence)||s.sequence<1||![2,3,4].includes(s.seatCount)||!Number.isInteger(s.viewerSeat)||s.viewerSeat<0||s.viewerSeat>=s.seatCount||!['active','finished'].includes(s.status))return null;
+ if(!clean(r)||![200,201].includes(r.status)||!s||!v||Object.keys(s).some(k=>!['id','roomId','gameId','seatCount','status','rulesVersion','rulesHash','sequence','turnSeat','deadline','winnerSeat','finishedReason','updatedAt','viewerSeat','privateView'].includes(k))||!saladID(id)||s.id!==id||!saladID(s.roomId)||s.gameId!=='scrabble'||s.rulesVersion!=='v1'||!/^[a-f0-9]{64}$/.test(s.rulesHash)||!Number.isSafeInteger(s.sequence)||s.sequence<1||![2,3,4].includes(s.seatCount)||!Number.isInteger(s.viewerSeat)||s.viewerSeat<0||s.viewerSeat>=s.seatCount||!['active','finished'].includes(s.status))return null;
  const fmt=saladFormat(v.variant,s.seatCount);if(!fmt)return null;
  const {p,timing}=fmt,n=s.seatCount,fields='variant board blankCells rack rackCounts bagCount scores turn terminal winners forfeit ending'.split(' ');
  if(Object.keys(v).length!==fields.length||!fields.every(k=>Object.hasOwn(v,k))||!v.board||Array.isArray(v.board)||typeof v.board!=='object'||!Array.isArray(v.blankCells)||new Set(v.blankCells).size!==v.blankCells.length||!Array.isArray(v.rack)||v.rack.length>p.rackSize||!Array.isArray(v.rackCounts)||v.rackCounts.length!==n||v.rackCounts.some(x=>!Number.isInteger(x)||x<0||x>p.rackSize)||v.rackCounts[s.viewerSeat]!==v.rack.length||!Array.isArray(v.scores)||v.scores.length!==n||v.scores.some(x=>!Number.isSafeInteger(x)||Math.abs(x)>1e9)||!Array.isArray(v.forfeit)||v.forfeit.length!==n||v.forfeit.some(x=>typeof x!=='boolean')||!Number.isInteger(v.bagCount)||v.bagCount<0||v.bagCount>p.tileCount||v.terminal!==(s.status==='finished'))return null;
  for(const [k,sym] of Object.entries(v.board)){const q=Number(k);if(!Number.isInteger(q)||String(q)!==k||q<0||q>=p.size*p.size||!Object.hasOwn(TILE_VALUES,sym)||sym==='?')return null;}
+ if(Object.keys(v.board).length+v.bagCount+v.rackCounts.reduce((a,b)=>a+b,0)>p.tileCount||v.forfeit.some((x,i)=>x&&v.rackCounts[i]!==0))return null;
  if(v.blankCells.some(q=>!Number.isInteger(q)||!Object.hasOwn(v.board,q)||!/^[A-Z]$/.test(v.board[q])))return null;
  const ids=new Set();for(const t of v.rack){if(!t||Object.keys(t).length!==3||!Number.isInteger(t.id)||t.id<0||t.id>=p.tileCount||ids.has(t.id)||!Object.hasOwn(TILE_VALUES,t.symbol)||t.value!==TILE_VALUES[t.symbol])return null;ids.add(t.id);}
  if(v.terminal){if(v.turn!==-1||s.turnSeat!==null||s.deadline!==null||!Array.isArray(v.winners)||!v.winners.length||new Set(v.winners).size!==v.winners.length||v.winners.some(x=>!Number.isInteger(x)||x<0||x>=n||v.forfeit[x])||s.winnerSeat!==(v.winners.length===1?v.winners[0]:null)||!['out','scoreless','forfeit'].includes(v.ending))return null;}
@@ -21,22 +22,22 @@ export function normalizeSalad(r,id){
  return {...s,privateView:v,format:fmt};
 }
 export class SaladController{
- constructor({enabled=false,fetchImpl=fetch,onChange=()=>{}}={}){this.client=createAccountSocialClient({enabled,fetchImpl});this.onChange=onChange;this.gen=0;this.busy=false;this.actor=null;this.state={status:enabled?'idle':'disabled',session:null,matches:[],seats:[],draft:{},selected:null,exchange:[],order:[],error:'',notice:'',large:false};}
+ constructor({enabled=false,fetchImpl=fetch,onChange=()=>{}}={}){this.client=createAccountSocialClient({enabled,fetchImpl});this.onChange=onChange;this.gen=0;this.busy=false;this.actor=null;this.target=null;this.state={status:enabled?'idle':'disabled',session:null,matches:[],seats:[],draft:{},selected:null,exchange:[],order:[],error:'',notice:'',large:false};}
  emit(p){this.state={...this.state,...p};this.onChange();return this.state;}
  clear(){return {draft:{},selected:null,exchange:[],order:[],confirm:'',blank:'A'};}
- invalidate(){this.gen++;this.busy=false;this.actor=null;this.emit({status:this.client.enabled?'idle':'disabled',session:null,matches:[],seats:[],error:'',notice:'',...this.clear()});}
- async principal(){const r=await this.client.request('/v1/me');return r.status===200&&r.data?.walletRequired===false&&isSubjectID(r.data.profile?.subject)?r.data.profile.subject:null;}
- async refresh(id){if(!this.client.enabled||this.busy)return;const gen=++this.gen;this.busy=true;
+ invalidate(){this.gen++;this.busy=false;this.actor=null;this.target=null;this.emit({status:this.client.enabled?'idle':'disabled',session:null,matches:[],seats:[],error:'',notice:'',...this.clear()});}
+ async principal(){const r=await this.client.request('/v1/me');if(r.status===401)return null;if(r.status!==200||r.data?.walletRequired!==false||!isSubjectID(r.data.profile?.subject))throw Error('420ID verification unavailable');return r.data.profile.subject;}
+ async refresh(id){if(!this.client.enabled)return;if(this.target!==id){this.invalidate();this.target=id;}if(this.busy)return;const gen=++this.gen;this.busy=true;
  try{const actor=await this.principal();if(gen!==this.gen)return;if(!actor){this.actor=null;this.emit({status:'guest',session:null,matches:[],seats:[],...this.clear()});return;}
  if(actor!==this.actor){this.actor=actor;this.emit({session:null,matches:[],seats:[],...this.clear()});}
- if(!id){const r=await this.client.request('/v1/classic-sessions');if(gen!==this.gen)return;if(r.status!==200||!clean(r)||!Array.isArray(r.data.sessions)||await this.principal()!==actor)throw Error('Match list unavailable');if(gen===this.gen)this.emit({status:'ready',session:null,matches:r.data.sessions.filter(s=>s.gameId==='scrabble'&&saladID(s.id)&&saladID(s.roomId)&&['active','finished'].includes(s.status)),error:''});return;}
+ if(!id){const r=await this.client.request('/v1/classic-sessions');if(gen!==this.gen)return;if(r.status!==200||!clean(r)||!Array.isArray(r.data.sessions)||await this.principal()!==actor)throw Error('Match list unavailable');if(gen===this.gen)this.emit({status:'ready',session:null,matches:r.data.sessions.filter(s=>s.gameId==='scrabble'&&saladID(s.id)&&saladID(s.roomId)&&s.rulesVersion==='v1'&&/^[a-f0-9]{64}$/.test(s.rulesHash)&&['active','finished'].includes(s.status)).map(({id,roomId,status,sequence})=>({id,roomId,status,sequence})),error:''});return;}
  if(!saladID(id))throw Error('Invalid match link');
  const r=await this.client.request('/v1/classic-sessions/'+id),s=normalizeSalad(r,id);if(!s)throw Error('Match unavailable or access denied');
  const room=await this.client.request('/v1/classic-rooms/'+s.roomId);const seats=room.data?.room?.seats;
  if(room.status!==200||!clean(room)||room.data.room.id!==s.roomId||room.data.room.gameId!=='scrabble'||!Array.isArray(seats)||seats.length!==s.seatCount||seats[s.viewerSeat]?.subject!==actor||seats.some((x,i)=>x.index!==i||!['human','bot'].includes(x.controller)||x.controller==='bot'&&!['easy','medium','hard'].includes(x.difficulty)))throw Error('Room seats unavailable');
- if(await this.principal()!==actor||gen!==this.gen)return;
- const old=this.state.session;if(old?.id===id&&s.sequence<old.sequence)throw Error('Stale server revision');
- if(old?.id===id&&old.sequence===s.sequence&&this.state.status==='ready')return;
+ if(await this.principal()!==actor)throw Error('Account changed');if(gen!==this.gen)return;
+ const old=this.state.session;if(old?.id===id&&(s.sequence<old.sequence||s.roomId!==old.roomId||s.viewerSeat!==old.viewerSeat||s.rulesHash!==old.rulesHash||s.privateView.variant!==old.privateView.variant||s.seatCount!==old.seatCount))throw Error('Session identity or revision changed');
+ if(old?.id===id&&old.sequence===s.sequence){if(JSON.stringify(old.privateView)!==JSON.stringify(s.privateView)||old.status!==s.status||old.deadline!==s.deadline)throw Error('Conflicting server revision');if(this.state.status==='ready')return;this.emit({status:'ready',session:s,seats,error:''});return;}
  const notice=old?.id===id?s.privateView.scores.map((x,i)=>x-old.privateView.scores[i]).map((x,i)=>x?'Player '+(i+1)+': '+(x>0?'+':'')+x:'').filter(Boolean).join(' · '):'';
  this.emit({status:'ready',session:s,seats,error:'',notice,...this.clear()});
  }catch(e){if(gen===this.gen)this.emit({status:'unavailable',session:null,seats:[],matches:[],error:e.message,...this.clear()});}finally{if(gen===this.gen)this.busy=false;}}
@@ -45,14 +46,14 @@ export class SaladController{
  place(q,blank=this.state.blank){if(!this.canPlay())return;const s=this.state.session,v=s.privateView,id=this.state.selected,t=v.rack.find(x=>x.id===id),size=s.format.p.size;if(!t||!Number.isInteger(q)||q<0||q>=size*size||Object.hasOwn(v.board,q)||t.symbol==='?'&&!/^[A-Z]$/.test(blank))return;
  const draft={...this.state.draft};for(const k of Object.keys(draft))if(draft[k].id===id)delete draft[k];draft[q]={row:Math.floor(q/size),col:q%size,id,...(t.symbol==='?'?{blank}:{})};this.emit({draft,selected:null,exchange:[]});}
  recall(q){const d={...this.state.draft};if(q===undefined)this.emit({draft:{},selected:null,exchange:[]});else{delete d[q];this.emit({draft:d});}}
- async act(move,action='move'){const s=this.state.session,actor=this.actor;if(this.busy||!s||s.status!=='active'||(action==='move'&&!this.canPlay())||s.privateView.forfeit[s.viewerSeat])return;
+ async act(move,action='move'){const s=this.state.session,actor=this.actor;if(!['move','resign'].includes(action)||action==='move'&&!['place','exchange','pass'].includes(move?.type)||action==='resign'&&move!==undefined&&move!==null||this.busy||!s||s.status!=='active'||(action==='move'&&!this.canPlay())||s.privateView.forfeit[s.viewerSeat])return;
  const gen=++this.gen;this.busy=true;this.emit({status:'submitting',error:''});let error='';
  try{if(await this.principal()!==actor||gen!==this.gen)throw Error('Account changed');const requestId=globalThis.crypto?.randomUUID?.();if(!saladID(requestId))throw Error('Secure request ID unavailable');
  const r=await this.client.request('/v1/classic-sessions/'+s.id+'/action',{method:'POST',body:{requestId,action,expectedSequence:s.sequence+1,...(move?{move}:{})}});if(gen!==this.gen)return;
  if(r.status===400)error='That move was rejected by the rules or dictionary. Check your words and try again.';
  else if(r.status===409)error='The turn changed. Reloaded authoritative state.';
- else if(!normalizeSalad(r,s.id))throw Error('Move not confirmed. Recheck the match before retrying.');
- this.emit({status:'idle',...this.clear()});
+ else {const next=normalizeSalad(r,s.id);if(!next||next.sequence<s.sequence+1||next.roomId!==s.roomId||next.viewerSeat!==s.viewerSeat||next.rulesHash!==s.rulesHash||next.privateView.variant!==s.privateView.variant)throw Error('Move not confirmed. Recheck the match before retrying.');}
+ this.emit({status:'idle',...(r.status===400?{}:this.clear())});
  }catch(e){error=e.message;if(gen===this.gen)this.emit({status:'unavailable',session:null,...this.clear()});}
- finally{if(gen===this.gen){this.busy=false;await this.refresh(s.id);if(error)this.emit({error});}}}
+ finally{if(gen===this.gen){this.busy=false;await this.refresh(s.id);if(error&&this.target===s.id&&this.actor===actor)this.emit({error});}}}
 }

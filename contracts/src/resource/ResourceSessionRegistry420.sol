@@ -77,7 +77,12 @@ contract ResourceSessionRegistry420 is I420System {
     }
 
     // Preserve the legacy selector but reject caller-chosen, unverifiable session IDs.
-    function openSession(bytes32, bytes32, uint128, uint64) external pure {
+    function openSession(
+        bytes32,
+        bytes32,
+        uint128,
+        uint64
+    ) external pure {
         revert InvalidSession();
     }
 

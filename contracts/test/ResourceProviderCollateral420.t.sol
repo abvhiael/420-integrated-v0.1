@@ -80,7 +80,7 @@ contract CallbackResourceVault420 {
     }
 }
 
-contract ResourceProviderCollateral420Test {
+abstract contract ResourceProviderCollateralFixture420 {
     VmResourceCollateral420 constant vm = VmResourceCollateral420(address(uint160(uint256(keccak256("hevm cheat code")))));
     address constant OWNER = address(0xA11CE);
     address constant OTHER = address(0xB0B);
@@ -94,7 +94,7 @@ contract ResourceProviderCollateral420Test {
     AssetVault420 vault;
     ResourceProviderRegistry420 providers;
     ResourceProviderCollateral420 collateral;
-    function setUp() public { _setup(false); }
+    function setUp() public virtual { _setup(false); }
     function _setup(bool hostile) internal {
         caps = new MockResourceCaps420();
         auth = new VaultAuthorization420(address(caps));
@@ -134,6 +134,15 @@ contract ResourceProviderCollateral420Test {
         vm.prank(OWNER);
         return collateral.deposit{value:amount}(ID,n);
     }
+    function _activate(bytes32 id) internal {
+        vm.prank(OWNER);
+        providers.updateProvider(ID,0,id);
+        vm.prank(OWNER);
+        providers.setState(ID,ResourceProviderRegistry420.State.ACTIVE);
+    }
+}
+
+contract ResourceProviderCollateral420Test is ResourceProviderCollateralFixture420 {
     function testNativeDepositAndTopupReconcile() public {
         bytes32 id = _deposit(2 ether);
         require(id == collateral.positionId(ID),"identity");
@@ -177,12 +186,6 @@ contract ResourceProviderCollateral420Test {
         try new ResourceProviderCollateral420(address(providers),address(vault),address(registry),address(other)) {
             revert("incorrect binding accepted");
         } catch {}
-    }
-    function _activate(bytes32 id) internal {
-        vm.prank(OWNER);
-        providers.updateProvider(ID,0,id);
-        vm.prank(OWNER);
-        providers.setState(ID,ResourceProviderRegistry420.State.ACTIVE);
     }
     function testReplayCannotCountDepositTwice() public {
         bytes32 id = _deposit(2 ether);

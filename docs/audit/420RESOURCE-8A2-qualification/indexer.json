@@ -1,0 +1,103 @@
+{
+  "run": 45754458197,
+  "head": "405ea76eb57e6b4fdf11eb04730ca5657cb457be",
+  "label": "indexer",
+  "jobs": [
+    {
+      "id": 139689695955,
+      "name": "resource-postgres",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Initialize containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run npm install --no-package-lock",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Run npm run build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Resource ABI and mandatory PostgreSQL qualification",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Stop containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17
+        }
+      ],
+      "extract": [
+        "2026-11-26T04:20:01.3204396Z HEAD is now at 405ea76e Require real PostgreSQL Resource recovery qualification in dedicated CI",
+        "2026-11-26T04:20:08.3401150Z \u001b[36;1mgrep -Eq '^# skipped 0$' \"$RUNNER_TEMP/resource-indexer.tap\"\u001b[0m",
+        "2026-11-26T04:20:08.7194566Z # Subtest: Resource retained event descriptors exactly match compiler evidence and reject spoofed/malformed logs",
+        "2026-11-26T04:20:08.7196461Z ok 1 - Resource retained event descriptors exactly match compiler evidence and reject spoofed/malformed logs",
+        "2026-11-26T04:20:08.9405745Z # Subtest: Resource deployment verifies complete registry graph and rejects incorrect authority",
+        "2026-11-26T04:20:08.9407081Z ok 2 - Resource deployment verifies complete registry graph and rejects incorrect authority",
+        "2026-11-26T04:20:09.6626779Z # Subtest: Resource durable PostgreSQL ingestion, receipt reconciliation, restart, rollback and canonical rebuild",
+        "2026-11-26T04:20:09.6628313Z ok 3 - Resource durable PostgreSQL ingestion, receipt reconciliation, restart, rollback and canonical rebuild",
+        "2026-11-26T04:20:09.6748157Z # tests 3",
+        "2026-11-26T04:20:09.6763635Z # pass 3",
+        "2026-11-26T04:20:09.6763893Z # fail 0",
+        "2026-11-26T04:20:09.6764483Z # skipped 0",
+        "2026-11-26T04:20:10.7609043Z SHA256 digest of uploaded artifact zip is 8f792e3bbae1bb2b990bd0f707d656534815d4447907e85a1973dd5d486ea757",
+        "2026-11-26T04:20:11.1671058Z Artifact resource-8a2-indexer-qualification.zip successfully finalized. Artifact ID 15087062907",
+        "2026-11-26T04:20:11.1672414Z Artifact resource-8a2-indexer-qualification has been successfully uploaded! Final size is 508 bytes. Artifact ID is 15087062907"
+      ]
+    }
+  ]
+}

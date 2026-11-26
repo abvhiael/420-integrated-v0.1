@@ -1,0 +1,121 @@
+{
+  "schema": "420-resource-8a2-consolidated-evidence-v1",
+  "startingMain": "0c9760f30bdee9a3c04a36691d2b6c56d476b18e",
+  "qualifiedContractSource": "6837f137229ff0d9496d2d74d1cb0bea50680de5",
+  "scope": "Repository qualification and explicit deferrals; no live acceptance",
+  "results": {
+    "custody": 20,
+    "policy": 6,
+    "adversarial": 14,
+    "deployment": 3,
+    "storage": 31,
+    "policyFuzz": 150000,
+    "standardSequences": 2048,
+    "hardeningSequences": 4096,
+    "invariantCalls": 2097152,
+    "unexpectedReverts": 0,
+    "highSeverity": 0
+  },
+  "profiles": {
+    "foundry": "1.9.0",
+    "solc": "0.8.24",
+    "evm": "cancun",
+    "optimizerRuns": 200,
+    "viaIR": true,
+    "ci": {
+      "fuzz": 50000,
+      "seed": "0x420",
+      "runs": 2048,
+      "depth": 256,
+      "failOnRevert": true
+    },
+    "hardening": {
+      "fuzz": 100000,
+      "seed": "0x420420",
+      "runs": 4096,
+      "depth": 384,
+      "failOnRevert": true
+    }
+  },
+  "sources": [
+    {
+      "path": "contracts/foundry.toml",
+      "ref": "6837f137229ff0d9496d2d74d1cb0bea50680de5",
+      "gitBlobSha": "9fa5356e6595a751033cbacd83eef541d3c7d4ff"
+    },
+    {
+      "path": ".github/workflows/resource-protocol-audit.yml",
+      "ref": "6837f137229ff0d9496d2d74d1cb0bea50680de5",
+      "gitBlobSha": "45cb16a216f4e3fa3a940ac0283e3162e45f7bd7"
+    },
+    {
+      "path": "scripts/qualify-resource-solidity.py",
+      "ref": "6837f137229ff0d9496d2d74d1cb0bea50680de5",
+      "gitBlobSha": "bcb884a7954537cf5b08effff725f0f37fe930a9"
+    },
+    {
+      "path": "contracts/test/ResourceDeploymentBinding420.t.sol",
+      "ref": "6837f137229ff0d9496d2d74d1cb0bea50680de5",
+      "gitBlobSha": "22010c5c150158f6205e35eb0e463120727d43b1"
+    },
+    {
+      "path": "sdk/storage420/collateral.go",
+      "ref": "b9e3e9acc1c66fa1d0cd5d44cffee7a20497977e",
+      "gitBlobSha": "3e5d7b4843618027749eea1a1868b68742240e22"
+    },
+    {
+      "path": "420-indexer/src/resource-indexer.ts",
+      "ref": "405ea76eb57e6b4fdf11eb04730ca5657cb457be",
+      "gitBlobSha": "e5ec4b944dd8d86b191be9a0ba02b1eac807d5d9"
+    }
+  ],
+  "evidence": {
+    "contract": "docs/audit/420RESOURCE-8A2-qualification/original-contract.json",
+    "sdk": "docs/audit/420RESOURCE-8A2-qualification/sdk.json",
+    "compiler": "docs/audit/420RESOURCE-8A2-qualification/compiler.json",
+    "indexer": "docs/audit/420RESOURCE-8A2-qualification/indexer.json",
+    "policy": "docs/audit/420RESOURCE-8A2-qualification/policy-disposition.json",
+    "artifactManifest": "docs/audit/420RESOURCE-8A2-artifacts/sha256.json",
+    "artifactComparison": "docs/audit/420RESOURCE-8A2-artifacts/comparison.json",
+    "indexerArchive": "docs/audit/420RESOURCE-8A2-indexer-qualification.json",
+    "policyConfig": "contracts/config/resource/resource-8a2-collateral-policy.json",
+    "genesisDisposition": "contracts/config/resource/resource-8a2-genesis-authority-reconciliation.json"
+  },
+  "merged": [
+    {
+      "pr": 1423,
+      "sha": "41e99bb1028bc40c890921762d253edecad8a987"
+    },
+    {
+      "pr": 1427,
+      "sha": "9ebf7d4baacbe3bb4a6699ad86358bd67c0fd393"
+    },
+    {
+      "pr": 1428,
+      "sha": "e671efa88036ca2b1d3db29d7cae69069d146336"
+    },
+    {
+      "pr": 1430,
+      "sha": "0c9760f30bdee9a3c04a36691d2b6c56d476b18e"
+    }
+  ],
+  "deferrals": [
+    {
+      "owner": "GOV-PRE-RESOURCE-COLLATERAL",
+      "scope": "Approve economic parameters and prepare governance actions; admission disabled"
+    },
+    {
+      "owner": "RESOURCE-AUDIT-9",
+      "scope": "Actual testnet deployment, canonical code/Registry/Vault evidence, SDK deployed-contract integration, live Indexer ingestion and operational proof"
+    },
+    {
+      "owner": "RESOURCE-AUDIT-8A5",
+      "scope": "Session economic settlement/discharge controller not bound"
+    },
+    {
+      "owner": "Genesis V4",
+      "scope": "Inherited Token V3 authority manifest mismatch; no bypass or Resource implementation defect"
+    }
+  ],
+  "finalCloseout": "C8 outstanding; no full Resource readiness asserted"
+}

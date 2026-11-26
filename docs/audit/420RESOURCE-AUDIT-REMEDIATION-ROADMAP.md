@@ -165,6 +165,14 @@ The canonical [policy record](../../contracts/config/resource/resource-8a2-colla
 
 The outstanding external approval and activation preparation is owned by [GOV-PRE-RESOURCE-COLLATERAL](420GOVERNANCE-AUDIT-REMEDIATION-ROADMAP.md#gov-pre-resource-collateral--resource-provider-economic-policy). Governance must approve Resource-specific values before production-equivalent admission; verified deployment and authorized on-chain publication/readback are retained under RESOURCE-AUDIT-9. No validator or Compute policy inheritance is authorized. This disposition does not assert live readiness.
 
+## RESOURCE-AUDIT-8A.2 — C7 retained collateral qualification
+
+Original qualified source: `6837f137229ff0d9496d2d74d1cb0bea50680de5`, run 45731694723. Custody 20/20, policy 6/6, Resource adversarial 14/14, deployment binding 3/3, Storage 31/31; 150,000 policy fuzz runs; 2,048 x 256 and 4,096 x 384 invariant profiles (2,097,152 calls, zero unexpected reverts); zero high-severity Slither findings. The counts are for the original standard/hardening qualification, not a sum of subsequent reruns.
+
+The [consolidated evidence manifest](420RESOURCE-8A2-qualification/manifest.json) binds retained actual timestamped CI extracts, job/step outcomes, local-EVM deployment emissions, test configuration and source commitments to their respective exact revisions. The [compiler archive](420RESOURCE-8A2-artifacts/sha256.json) retains before/after ABI, storage layout and bytecode commitments for ten contracts. C5.2 SDK repository tests passed; deployed-contract integration was explicitly deferred. C5.3 verified 44 events and real PostgreSQL recovery using a controlled chain source, with three tests passed and none skipped. C6 retains unapproved economic parameters and disabled admission; approval is assigned to GOV-PRE-RESOURCE-COLLATERAL. The inherited Genesis V4 authority dependency is not a Resource implementation defect and remains fail-closed. Session economic discharge binding remains owned by RESOURCE-AUDIT-8A5.
+
+C7 records historical, repository-scoped evidence, not live deployment authorization. C8 final integrated closeout remains separate. All live deployment evidence remains empty; RESOURCE-AUDIT-9 owns testnet verification.
+
 ## RESOURCE-AUDIT-9 — production-equivalent testnet deployment
 
 Status: **BLOCKED — TESTNET/INFRASTRUCTURE**

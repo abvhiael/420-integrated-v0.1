@@ -1,3 +1,4 @@
+import {SALAD_ART} from '../core/word-salad-ui.js';
 import {cp,mkdir,rm,readFile,writeFile,stat} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {resolve,dirname} from 'node:path';
@@ -36,10 +37,18 @@ const flags=resolveClassicBuildFlags({account:accountFlag,rooms:process.env[CLAS
 const runtimeConfig=withAccountSocialBuildFlags(example,accountFlag,flags.rooms,flags.communications);
 validateRuntimeConfig(runtimeConfig);
 
-for(const item of ['index.html','app.js','styles.css','game-kit.css','classic-communications.css','settings.css','branding.css','feed-branding.css','dashboard.css','classics.css','ccc-tabletop.css','ccc-practice.css','cribbage.css','labyrinth.css','chess.css','welcome-landscape.svg','core','_headers']){
+for(const item of ['index.html','app.js','styles.css','game-kit.css','classic-communications.css','settings.css','branding.css','feed-branding.css','dashboard.css','classics.css','ccc-tabletop.css','ccc-practice.css','cribbage.css','labyrinth.css','chess.css','word-salad.css','welcome-landscape.svg','core','_headers']){
   await cp(resolve(root,item),resolve(out,item),{recursive:true});
 }
-// Only approved dashboard assets and explicitly mapped optimized game cards are published.
+// Word Salad: publish only explicit, validated approved PNG artwork.
+for(const asset of SALAD_ART){
+ const relative='assets/games/word-salad/'+asset;
+ const source=resolve(root,relative),target=resolve(out,relative);
+ const meta=await sharp(source).metadata();
+ if(meta.format!=='png'||!meta.width||!meta.height||meta.width>4096||meta.height>4096||(await stat(source)).size>8*1024*1024)throw Error('Invalid Word Salad artwork: '+relative);
+ await mkdir(dirname(target),{recursive:true});await cp(source,target);
+}
+ // Only approved dashboard assets and explicitly mapped optimized game cards are published.
 // Uploaded source PNGs, manifests, and placeholder files are never shipped.
 for(const asset of DASHBOARD_ASSETS){
   const source=resolve(root,asset),target=resolve(out,asset);

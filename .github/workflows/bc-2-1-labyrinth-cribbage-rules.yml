@@ -53,5 +53,4 @@ jobs:
         with:
           go-version-file: 'go.mod'
       - name: Verify account-room identity compatibility
-        run: go test ./services/bong-goggles-account-social -run '^TestBC05RoomSeatLimitsAndTeams
- -count=1
+        run: go test ./services/bong-goggles-account-social -run '^TestBC05RoomSeatLimitsAndTeams$' -count=1

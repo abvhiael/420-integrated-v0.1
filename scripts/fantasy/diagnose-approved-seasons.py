@@ -15,7 +15,7 @@ def main():
         for _ in range(100):
             try:urllib.request.urlopen(urllib.request.Request(rpc,data=b'{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}',headers={'Content-Type':'application/json'}),timeout=1);break
             except Exception:time.sleep(.1)
-        f=FundedSeasons(rpc,Path(a.build).resolve(),ROOT.parent/'approved-qualification-private'/uuid4().hex,'wrapped-native').setup_seasons();print('Canonical season setup',flush=True)
+        f=FundedSeasons(rpc,Path(a.build).resolve(),ROOT.parent/'approved-qualification-private'/uuid4().hex,'wrapped-native', compensation_consumers=bool(os.getenv('DEVCOMP_EXPLORER_BIN'))).setup_seasons();print('Canonical season setup',flush=True)
         cases=[f.make_season('mode-'+str(mode),mode) for mode in (range(4) if a.all_modes else [0])]
         free=void=pending=withheld=underfilled=official=early=late_queue=inventory=None
         if a.all_modes:
@@ -57,7 +57,7 @@ def main():
             if c is void:
                 f.tx(f.season.functions.initializeFinal(c['id']));f.collect_refunds(c,'all published scoring weeks conclusively void')
             else:f.finish_season(c)
-        f.assert_conservation();f.export_execution(out);(out/'diagnostic.json').write_text(json.dumps({'diagnosticOnly':True,'outcomes':f.outcomes,'expectedRejections':f.rejections},indent=2)+'\n',encoding='utf-8');print('Funded season diagnostics complete; no certificate',flush=True)
+        f.assert_conservation();f.qualify_compensation_consumers(out);f.export_execution(out);(out/'diagnostic.json').write_text(json.dumps({'diagnosticOnly':True,'outcomes':f.outcomes,'expectedRejections':f.rejections},indent=2)+'\n',encoding='utf-8');print('Funded season diagnostics complete; no certificate',flush=True)
     finally:node.terminate();node.wait(timeout=15);log.close()
 
 

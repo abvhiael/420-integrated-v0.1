@@ -76,3 +76,19 @@ Optional validation environment:
 - `EXPLORER_LIVE_TIMEOUT` — per-request timeout, default `10s`.
 
 The command emits a JSON evidence report containing every check plus sampled block, transaction, address, and service identifiers. `passed` must be `true` before EXP-7.2 is considered complete. A testnet with no representative transaction/address/registry data fails closed rather than receiving a false live-validation pass.
+
+### Development compensation transaction activity
+
+Set `EXPLORER_COMPENSATION_INDEXER_URL` to the trusted 420Indexer HTTP origin
+serving the authenticated compensation projection for the same chain. The
+regular `EXPLORER_INDEXER_URL` continues to supply transaction, receipt, log,
+block and finality records. Both origins must track the same canonical chain.
+
+The transaction page reads
+`GET /v1/transactions/{hash}/compensation`. Explorer requests only the matching
+transaction from the Indexer's `420DevelopmentCompensation` projection and
+checks the result against indexed receipt and block provenance. The response
+is uncached. It returns an empty event list when the projection has no
+matching records and reports unavailable when the upstream is unconfigured,
+unreachable or inconsistent with the canonical block. The displayed
+confirmation count is relative to the indexed head.

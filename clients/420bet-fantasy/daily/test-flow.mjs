@@ -119,7 +119,7 @@ try{
   await control('advance',{timestamp:Number(config.slates[slates[1]].lockAt)+3601});
   for(let i=0;i<100;i++){if((await view(pools[3],1)).pool.state===5)break;await new Promise(r=>setTimeout(r,100));}
   for(const page of [alice,bob]){await choose(page,pools[3]);await click(page,'#collect','credited');await click(page,'#withdraw');}
-  const totals=await control('totals');assert.equal(totals.balances[1],'100440000000000000000');assert.equal(totals.balances[2],'109000000000000000000');assert.equal(totals.balances[8],'60000000000000000');assert.equal(totals.balances[9],'500000000000000000');assert.equal(totals.engineBalance,'0');assert.equal(totals.engineLiability,'0');assert.equal(totals.bondBalance,'0');assert.equal(totals.bondLiability,'0');
+  const totals=await control('totals');assert.equal(totals.balances[1],'100440000000000000000');assert.equal(totals.balances[2],'109000000000000000000');assert.equal(totals.developmentBalance,'60000000000000000');assert.equal(totals.balances[9],'500000000000000000');assert.equal(totals.engineBalance,'0');assert.equal(totals.engineLiability,'0');assert.equal(totals.bondBalance,'0');assert.equal(totals.bondLiability,'0');
   await writeFile(join(out,'conservation.json'),JSON.stringify(totals,null,2));
  });
  await choose(alice,pools[0]);await alice.screenshot({path:join(out,'daily-pool.png'),fullPage:true});await alice.setViewportSize({width:390,height:844});await alice.screenshot({path:join(out,'daily-pool-mobile.png'),fullPage:true});

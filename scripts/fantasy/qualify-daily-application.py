@@ -17,7 +17,7 @@ ROOT=Path(__file__).resolve().parents[2]
 APP=ROOT/"clients/420bet-fantasy/daily"
 sys.path.insert(0,str(APP));sys.path.insert(0,str(APP.parent))
 from local_fixture import LocalFixture
-from chain import b32
+from chain import b32, hx
 
 def port():
     with socket.socket() as s:s.bind(('127.0.0.1',0));return s.getsockname()[1]
@@ -44,7 +44,7 @@ def main():
             try:
                 urllib.request.urlopen(urllib.request.Request(rpc,data=b'{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}',headers={'Content-Type':'application/json'}),timeout=1);break
             except Exception:time.sleep(.1)
-        private=out/'private'/str(uuid4());fixture=LocalFixture(rpc,out/'build',private,a.asset_kind);config=fixture.setup();(out/'deployment.json').write_text(json.dumps(config,indent=2)+'\n')
+        private=out/'private'/str(uuid4());fixture=LocalFixture(rpc,out/'build',private,a.asset_kind, compensation_consumers=bool(os.getenv("DEVCOMP_EXPLORER_BIN")));config=fixture.setup();(out/'deployment.json').write_text(json.dumps(config,indent=2)+'\n')
         app_log=(out/'service.log').open('w')
         def start_service():return subprocess.Popen([sys.executable,str(APP/'server.py'),'--config',str(private/'application.json'),'--private-directory',str(private),'--port',str(web_port)],cwd=ROOT,env=os.environ,stdout=app_log,stderr=app_log,**kwargs)
         service=start_service();token=os.urandom(24).hex()
@@ -60,7 +60,7 @@ def main():
                     elif action=='prepareCorrection':value=fixture.score(body['pool'],2,True,prepare_only=True)
                     elif action=='scopeResolver':
                         scope=fixture.disputes.functions.claimScope(b32(body['claim'])).call();claim=fixture.disputes.functions.claimOf(b32(body['claim'])).call();deadline=fixture.disputes.functions.poolOf(claim[0]).call()[3];fixture.grant(fixture.accounts[4],fixture.disputes.functions.RESOLVE().call(),scope,valid_until=deadline);value={'granted':True}
-                    elif action=='totals':value={'balances':[str(fixture.token.functions.balanceOf(w).call()) for w in fixture.accounts], 'engineBalance':str(fixture.token.functions.balanceOf(fixture.engine.address).call()),'engineLiability':str(fixture.engine.functions.totalLiability().call()),'bondBalance':str(fixture.token.functions.balanceOf(fixture.disputes.address).call()),'bondLiability':str(fixture.disputes.functions.totalLiability().call())}
+                    elif action=='totals':value={'balances':[str(fixture.token.functions.balanceOf(w).call()) for w in fixture.accounts], 'developmentBalance':str(fixture.token.functions.balanceOf(fixture.development_recipient).call()),'engineBalance':str(fixture.token.functions.balanceOf(fixture.engine.address).call()),'engineLiability':str(fixture.engine.functions.totalLiability().call()),'bondBalance':str(fixture.token.functions.balanceOf(fixture.disputes.address).call()),'bondLiability':str(fixture.disputes.functions.totalLiability().call())}
                     elif action=='restart':service.terminate();service.wait(timeout=10);service=start_service();value={'restarted':True}
                     else:raise ValueError('unknown qualification action')
                     data=json.dumps(value).encode();self.send_response(200);self.send_header('Content-Type','application/json');self.send_header('Content-Length',str(len(data)));self.end_headers();self.wfile.write(data)
@@ -75,6 +75,25 @@ def main():
         (out/'browser.stdout.log').write_bytes(result.stdout);(out/'browser.stderr.log').write_bytes(result.stderr)
         if result.returncode:raise RuntimeError('actual browser integration failed; inspect captured logs')
         print(result.stdout.decode())
+        if fixture.compensation_consumers:
+            pool = fixture.pools[0]
+            accepted = fixture.engine.events.EntryAccepted().get_logs(from_block=0, argument_filters={'pool': b32(pool)})
+            origin = [
+                event for event in accepted
+                if fixture.engine.decode_function_input(
+                    fixture.w3.eth.get_transaction(event.transactionHash).input
+                )[0].fn_name == 'enterPool'
+            ]
+            state = fixture.engine.functions.poolOf(b32(pool)).call()
+            forwards = fixture.vault.events.DevelopmentCompensationForwarded().get_logs(from_block=0)
+            if len(forwards) != 1 or len(origin) != 2:
+                raise AssertionError('expected one paid pool forwarding and two originating entries')
+            fixture.compensation_forwards.append({
+                'case': 'daily-paid-pool', 'source': fixture.engine.address, 'pool': pool,
+                'tx': hx(forwards[0].transactionHash), 'origins': [hx(event.transactionHash) for event in origin],
+                'gross': str(state[8]), 'fee': str(state[10])
+            })
+            fixture.qualify_compensation_consumers(out)
         ledger=[]
         for number in range(1,fixture.w3.eth.block_number+1):
             for tx in fixture.w3.eth.get_block(number).transactions:
@@ -98,6 +117,8 @@ def main():
             result=json.loads((out/'browser-result.json').read_text())
             if result['passed']!=len(result['steps']) or result['passed']!=12:raise RuntimeError('mandatory browser scenarios missing')
             files=['bundle-checksums.json','transactions.json','versions.json','source-checksums.json','deployment.json','browser-result.json','conservation.json','browser.stdout.log','browser.stderr.log','compile.stdout.log','compile.stderr.log','daily-pool.png','daily-pool-mobile.png']
+            if fixture.compensation_consumers:
+                files.append('compensation-consumers.json')
             evidence={name:hashlib.sha256((out/name).read_bytes()).hexdigest() for name in files}
             certificate={'schema':'420bet.daily-application.local-level2.v1','qualifiedSHA':sha,'level':2,'assetKind':a.asset_kind,'scope':'daily application local integration','status':'passed','syntheticSportsData':True,'testnetLiveSettlementQualified':False,'externalWalletExtensionQualified':False,'evidenceSHA256':evidence}
             (out/'qualification.json').write_text(json.dumps(certificate,indent=2)+'\n',encoding='utf-8')

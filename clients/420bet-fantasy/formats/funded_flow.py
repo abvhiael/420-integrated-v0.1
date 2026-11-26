@@ -138,14 +138,15 @@ class FundedFormats(LocalFixture):
         self.tx(host.functions.create(pid,b32(self.profiles[0]['subject']),(fid,candidate_feed,stake,prize,4,stake*6*users if kind==4 else 0),bands,bankroll))
         hashes={c.address:Web3.keccak(self.w3.eth.get_code(c.address)).hex() for c in self.contracts.values()}
         client=FormatClient(self.w3,self.build,host.address,hashes);custodian=FormatCustodian(client,self.private)
-        case={'label':label,'kind':kind,'snapshot':s,'format':fid,'feed':feed,'host':host,'pool':pid,'candidateFeed':candidate_feed,'selection':selection,'client':client,'custodian':custodian,'users':users,'stake':stake,'prize':prize,'entries':[],'selections':[],'void_aids':set(void_aids)}
+        case={'label':label,'kind':kind,'snapshot':s,'format':fid,'feed':feed,'host':host,'pool':pid,'candidateFeed':candidate_feed,'selection':selection,'client':client,'custodian':custodian,'users':users,'stake':stake,'prize':prize,'entries':[],'origins':[],'selections':[],'void_aids':set(void_aids)}
         for i in range(1,users+1):
             p=self.profiles[i];actor=p['account'];subject=b32(p['subject']);credential=b32(p['credential']);self.grant(actor,k256(b'BET_FANTASY_ENTER'),self.auth.functions.scopeForContest(pid).call())
             chosen=encode(['uint32[]','bool[]'],[user_indices[i-1],[True]*card_size]) if user_indices else selection
             case['selections'].append(chosen)
             salt=k256(('test-salt-'+label+str(i)).encode());request=client.prepare(pid,subject,credential,actor,chosen,salt,self.encryption.public_key().export_key(format='raw'))
             signature=self.w3.eth.sign(actor,text=request['message']);receipt=custodian.attest(request,signature)
-            self.tx(host.functions.enter(pid,subject,credential,receipt),actor);case['entries'].append((actor,subject,credential,receipt))
+            entry = self.tx(host.functions.enter(pid,subject,credential,receipt),actor)
+            case['origins'].append(hx(entry.transactionHash));case['entries'].append((actor,subject,credential,receipt))
             if i==1:self.reject(label+' duplicate canonical user',host.functions.enter(pid,subject,credential,receipt),actor)
         self.cases.append(case);return case
 
@@ -295,7 +296,8 @@ class FundedFormats(LocalFixture):
         self.advance(self.start+2000+2*86400+2000)
         for c in self.cases:
             host=c['host']
-            before={a:host.functions.credit(a).call() for a in self.accounts}
+            beneficiaries = dict.fromkeys([*self.accounts, self.development_recipient])
+            before={a:host.functions.credit(a).call() for a in beneficiaries}
             if c['kind']==4:
                 for i in range(1,c['users']+1):
                     if not c.get('houseCanceled'):
@@ -304,7 +306,7 @@ class FundedFormats(LocalFixture):
                 self.tx(host.functions.releaseHouseBankroll(c['pool']))
                 expected_credit={row[0]:c['stake']*(1 if c.get('houseCanceled') else c['expected'][i][2]) for i,row in enumerate(c['entries'])}
                 development=0 if c.get('houseCanceled') else 3*(c['stake']*sum(q for _,q,_ in c['expected']))//100
-                expected_credit[self.accounts[8]]=development
+                expected_credit[self.development_recipient]=development
                 expected_credit[self.admin]=c['stake']*6*c['users']+c['stake']*c['users']-sum(expected_credit.values())
             else:
                 if not c.get('canceled'):
@@ -316,16 +318,14 @@ class FundedFormats(LocalFixture):
                     valid={str(i+1):score for i,(score,q,_) in enumerate(c['expected']) if q}
                     expected=allocate(valid,c['prize']+c['stake']*len(valid),300 if c['stake'] else 0,[10000],True)
                     expected_credit={row[0]:expected['payouts'][str(i+1)] if q else c['stake'] for i,(row,(_,q,_)) in enumerate(zip(c['entries'],c['expected']))}
-                    expected_credit[self.accounts[8]]=expected['fee']
-            for account in self.accounts:
+                    expected_credit[self.development_recipient]=expected['fee']
+            for account in beneficiaries:
                 if host.functions.credit(account).call()-before[account]!=expected_credit.get(account,0)-c.get('precredited',{}).get(account,0):raise AssertionError('independent beneficiary/fee/refund allocation mismatch '+c['label'])
-            developer = self.accounts[8]
+            developer = self.development_recipient
             fee = expected_credit.get(developer, 0)
             if fee:
-                balance_before = self.token.functions.balanceOf(developer).call()
-                self.tx(host.functions.forwardDevelopment())
-                if self.token.functions.balanceOf(developer).call() - balance_before != fee:
-                    raise AssertionError('independent per-pool developer delivery mismatch '+c['label'])
+                gross = c['stake'] * sum(q for _, q, _ in c['expected'])
+                self.forward_fantasy_development(host, fee, gross, c['label'], c['pool'], c['origins'])
             self.outcomes.append({'case':c['label'],'kind':c['kind'],'entries':c['users'],'pool':'0x'+c['pool'].hex(),'host':host.address,'candidateAuthenticated':True})
             c['custodian'].close()
         for host in (self.peer,self.house):

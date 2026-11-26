@@ -1,3 +1,4 @@
+import { compensationReport420 } from './compensation-report.js';
 import type { QueryDirection420, QueryPage420 } from './query-layer.js';
 import {
   blockDto420,
@@ -81,6 +82,7 @@ export interface AssetTransferPageRequest420 extends PageRequest420 {
 export interface ProtocolEventPageRequest420 extends PageRequest420 {
   protocol?: string;
   objectKey?: string;
+  transactionHash?: string;
 }
 
 export interface SearchResult420 {
@@ -111,6 +113,7 @@ export interface IndexerPublicApi420 {
   logs(chainId: bigint, request?: LogPageRequest420): Promise<QueryPage420<LogDto420>>;
   address(chainId: bigint, address: string): Promise<AddressDto420 | null>;
   assetTransfers(chainId: bigint, request?: AssetTransferPageRequest420): Promise<QueryPage420<AssetTransferDto420>>;
+  compensationReport?(chainId: bigint, from: bigint, to: bigint): ReturnType<typeof compensationReport420>;
   protocolEvents(chainId: bigint, request?: ProtocolEventPageRequest420): Promise<QueryPage420<ProtocolEventDto420>>;
   protocolObject(chainId: bigint, protocol: string, objectKey: string): Promise<ProtocolObjectStateDto420 | null>;
   arbitrationAvailable?():boolean;
@@ -241,6 +244,12 @@ export class IndexerPublicApiAdapter420 implements IndexerPublicApi420 {
 
   assetTransfers(chainId: bigint, request: AssetTransferPageRequest420 = {}): Promise<QueryPage420<AssetTransferDto420>> {
     return this.service.publicAssetTransfers(chainId, request);
+  }
+
+  async compensationReport(chainId: bigint, from: bigint, to: bigint): ReturnType<typeof compensationReport420> {
+    const raw = process.env.INDEXER_COMPENSATION_REPORT_BINDING;
+    if (!raw) throw new Error('compensation report binding unavailable');
+    return compensationReport420(this.service.db, chainId, JSON.parse(raw), from, to);
   }
 
   async protocolEvents(chainId: bigint, request: ProtocolEventPageRequest420 = {}): Promise<QueryPage420<ProtocolEventDto420>> {

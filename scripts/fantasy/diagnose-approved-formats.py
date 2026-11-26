@@ -17,7 +17,7 @@ def main():
         for _ in range(100):
             try:urllib.request.urlopen(urllib.request.Request(rpc,data=b'{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}',headers={'Content-Type':'application/json'}),timeout=1);break
             except Exception:time.sleep(.1)
-        f=FundedFormats(rpc,Path(a.build).resolve(),ROOT.parent/'approved-qualification-private'/uuid4().hex,'wrapped-native').setup_formats()
+        f=FundedFormats(rpc,Path(a.build).resolve(),ROOT.parent/'approved-qualification-private'/uuid4().hex,'wrapped-native', compensation_consumers=bool(os.getenv('DEVCOMP_EXPLORER_BIN'))).setup_formats()
         print('Canonical setup complete',flush=True)
         cases=[('salary',1,'multi',2,2,None),('captain',2,'single',2,2,None),('peer-two',3,'multi',2,2,None),('peer-three',3,'multi',3,3,None),('house-two',4,'multi',1,2,[0,2]),('house-three',4,'multi',1,3,[0,4,2]),('same-game-peer',3,'single',2,3,[0,2,4]),('same-game-house',4,'single',1,3,[0,2,4])]
         for label,kind,slate,users,size,indices in cases:
@@ -34,7 +34,7 @@ def main():
         f.resolve();print('Revealed and resolved',flush=True)
         for c in f.cases:f.score_case(c);print('Scored '+c['label'],flush=True)
         f.exercise_disputes();print('Real upheld/denied/delegated/timeout dispute paths complete',flush=True)
-        f.finish();f.export_execution(out);(out/'diagnostic.json').write_text(json.dumps({'diagnosticOnly':True,'outcomes':f.outcomes,'expectedRejections':f.rejections},indent=2)+'\n',encoding='utf-8');print('Actual funded diagnostic flows complete; no certificate',flush=True)
+        f.finish();f.qualify_compensation_consumers(out);f.export_execution(out);(out/'diagnostic.json').write_text(json.dumps({'diagnosticOnly':True,'outcomes':f.outcomes,'expectedRejections':f.rejections},indent=2)+'\n',encoding='utf-8');print('Actual funded diagnostic flows complete; no certificate',flush=True)
     finally:node.terminate();node.wait(timeout=15);log.close()
 
 

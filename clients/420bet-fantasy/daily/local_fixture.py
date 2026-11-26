@@ -15,8 +15,10 @@ from chain import hx,b32,Chain
 
 
 class LocalFixture:
-    def __init__(self,rpc,build,private,asset_kind="erc20"):
+    def __init__(self,rpc,build,private,asset_kind="erc20", compensation_consumers=False):
         self.asset_kind=asset_kind
+        self.compensation_consumers = compensation_consumers
+        self.compensation_forwards = []
         if asset_kind not in ("erc20","wrapped-native"):raise ValueError("unsupported qualification asset")
         self.w3=Web3(Web3.HTTPProvider(rpc));self.build=Path(build);self.private=Path(private);self.private.mkdir(parents=True,exist_ok=True)
         if self.w3.eth.chain_id!=31337 or not rpc.startswith('http://127.0.0.1:'):raise ValueError("fixture refuses non-local chain")
@@ -28,6 +30,50 @@ class LocalFixture:
     def deploy(self,name,*args):
         artifact=json.loads((self.build/(name+'.sol')/(name+'.json')).read_text());factory=self.w3.eth.contract(abi=artifact['abi'],bytecode=artifact['bytecode']['object'])
         receipt=self.tx(factory.constructor(*args));c=self.w3.eth.contract(address=receipt.contractAddress,abi=artifact['abi']);self.contracts[name]=c;return c
+    def qualify_compensation_consumers(self, out):
+        if not self.compensation_consumers:
+            return
+        token = self.token.functions
+        credited = token.balanceOf(self.splitter.address).call()
+        assert credited > 0
+        claims = []
+        for founder in self.founders:
+            entitlement = self.splitter.functions.claimableToken(self.token.address, founder).call()
+            before = token.balanceOf(founder).call()
+            receipt = self.tx(self.splitter.functions.claimToken(self.token.address), founder)
+            assert token.balanceOf(founder).call() - before == entitlement
+            claims.append({'founder': founder, 'tx': hx(receipt.transactionHash), 'amount': str(entitlement)})
+        assert sum(int(claim['amount']) for claim in claims) == credited
+        assert token.balanceOf(self.splitter.address).call() == token.balanceOf(self.vault.address).call() == 0
+        payload = {
+            'rpc': self.w3.provider.endpoint_uri, 'chainId': self.w3.eth.chain_id,
+            'genesisHash': hx(self.w3.eth.get_block(0).hash),
+            'deploymentBlock': self.compensation_anchor.blockNumber,
+            'deploymentBlockHash': hx(self.compensation_anchor.blockHash),
+            'founders': self.founders, 'asset': self.token.address.lower(),
+            'claims': claims, 'credited': str(credited), 'forwards': self.compensation_forwards
+        }
+        for key, c in [('registry', self.compensation_registry), ('vault', self.vault), ('splitter', self.splitter)]:
+            payload[key] = {'address': c.address, 'runtimeHash': hx(k256(self.w3.eth.get_code(c.address)))}
+        root = Path(__file__).resolve().parents[3]
+        result = subprocess.run(
+            ['node', str(root / '420-indexer/scripts/qualify-fantasy-compensation-consumers.mjs')],
+            input=json.dumps(payload), text=True, env={**os.environ, 'DEVCOMP_FOUNDRY_OUT': str(self.build)},
+            stdout=subprocess.PIPE, check=True
+        )
+        (Path(out) / 'compensation-consumers.json').write_text(result.stdout, encoding='utf-8')
+
+    def forward_fantasy_development(self, host, fee, gross, label, pool, origins):
+        before = self.token.functions.balanceOf(self.development_recipient).call()
+        receipt = self.tx(host.functions.forwardDevelopment())
+        if self.token.functions.balanceOf(self.development_recipient).call() - before != fee:
+            raise AssertionError('independent developer delivery mismatch ' + label)
+        if self.compensation_consumers:
+            self.compensation_forwards.append({
+                'case': label, 'source': host.address, 'tx': hx(receipt.transactionHash),
+                'gross': str(gross), 'fee': str(fee), 'pool': hx(pool), 'origins': origins
+            })
+
     def grant(self,principal,action,scope,valid_until=None):
         now=self.w3.eth.get_block('latest').timestamp
         end=now+7*86400 if valid_until is None else int(valid_until)
@@ -63,7 +109,22 @@ class LocalFixture:
         else:self.token=self.deploy('ERC20Template420','Local qualification $420','$420',self.admin,1000000*10**18,0,False,False,False,False,k256(b'local $420'))
         for address in self.accounts[1:5]:self.tx(self.token.functions.transfer(address,100*10**18))
         self.disputes=self.deploy('FantasyDisputeController420',self.auth.address,self.identity.address,self.router.address,self.resolver_type,self.token.address,self.accounts[9])
-        self.book=self.deploy('FantasySlateBook420',self.auth.address,self.router.address);self.scorer=self.deploy('FantasyNHLScoring420');self.vault=self.deploy('DevelopmentCompensationVault420',self.cap.address,self.accounts[8])
+        self.book=self.deploy('FantasySlateBook420',self.auth.address,self.router.address);self.scorer=self.deploy('FantasyNHLScoring420')
+        self.development_recipient = self.accounts[8]
+        if self.compensation_consumers:
+            self.founders = self.accounts[7:10]
+            self.splitter = self.deploy('FoundingDeveloperCompensationSplitter420', *self.founders)
+            self.development_recipient = self.splitter.address
+        self.vault = self.deploy('DevelopmentCompensationVault420', self.cap.address, self.development_recipient)
+        if self.compensation_consumers:
+            self.tx(self.splitter.functions.bindCompensationVault(self.vault.address))
+            self.compensation_registry = self.deploy('ProtocolRegistry', self.admin)
+            runtime = self.w3.eth.get_code(self.vault.address)
+            self.compensation_anchor = self.tx(self.compensation_registry.functions.publishService(
+                k256(b'420/service/development-compensation/v1'), self.vault.address, k256(runtime),
+                k256(b'local funded Fantasy compensation qualification'), 1, True
+            ))
+
         self.engine=self.deploy('FantasyContestEngine420',self.disputes.address,self.book.address,self.scorer.address,self.vault.address,self.issuer,self.user_type)
         self.tx(self.cap.functions.registerProtocolComponent(k256(b'420/REVENUE/DEVELOPMENT_COMPENSATION/COMPONENT/V1'),self.admin))
         self.grant_fantasy_source(self.engine)

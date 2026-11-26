@@ -303,10 +303,26 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
         beforeBlock: optionalBigint420(url, 'beforeBlock')
       }));
     }
+    if (path === '/v1/protocols/development-compensation/report') {
+      const from = optionalBigint420(url, 'from');
+      const to = optionalBigint420(url, 'to');
+      if (from === undefined || to === undefined || from >= to) invalidRequest420('expected from < to in Unix seconds');
+      if (!api.compensationReport) return error420(503, 'unavailable', 'compensation report unavailable');
+      try {
+        return ok420(await api.compensationReport(chainId, from, to));
+      } catch {
+        return error420(503, 'unavailable', 'compensation report unavailable');
+      }
+    }
     if (path === '/v1/protocols/events') {
+      const transactionHash = url.searchParams.get('transactionHash') ?? undefined;
+      if (transactionHash !== undefined && !/^0x[0-9a-f]{64}$/i.test(transactionHash)) {
+        invalidRequest420('transactionHash must be a 32-byte hash');
+      }
       return ok420(await api.protocolEvents(chainId, {
         ...pageRequest420(url),
         protocol: url.searchParams.get('protocol') ?? undefined,
+        transactionHash,
         objectKey: url.searchParams.get('objectKey') ?? undefined
       }));
     }

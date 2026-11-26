@@ -45,7 +45,7 @@ jobs:
           cp explorer/web/static/app.js /tmp/explorer-app.mjs
           node --check /tmp/explorer-app.mjs
       - name: Run browser presentation tests
-        run: node --test explorer/web/presentation.test.mjs explorer/web/workflow-presentation.test.mjs
+        run: node --test explorer/web/compensation-presentation.test.mjs explorer/web/presentation.test.mjs explorer/web/workflow-presentation.test.mjs
       - name: Run Explorer web regression
         run: go test ./explorer/web
       - name: Run full Explorer regression

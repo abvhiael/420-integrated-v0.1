@@ -1,3 +1,4 @@
+import { renderCompensation420 } from './compensation.mjs';
 import { tokenPresentation420 } from './token-presentation.mjs';
 import { inspectableRaw420, renderFeeSummary420, renderRawLogs420, transactionDetailPresentation420 } from './presentation.mjs';
 import { addressHistoryPresentation420, assetTransfersPresentation420, contractPresentation420, diagnosticPresentation420, producerPresentation420, registryServicePresentation420, registryVersionPresentation420, routeLink420 } from './workflow-presentation.mjs';
@@ -131,7 +132,12 @@ function logTable(logs, prefix='logs') {
 }
 
 async function transactionDetail(hash) {
-  const view = await api(`/v1/transactions/${encodeURIComponent(hash)}`);
+  const path = `/v1/transactions/${encodeURIComponent(hash)}`;
+  const [view, compensation] = await Promise.all([
+    api(path),
+    api(`${path}/compensation`).catch(() => null)
+  ]);
+  if (location.hash.toLowerCase() !== `#/transactions/${hash}`.toLowerCase()) return;
   const tx = view.transaction || {};
   const receipt = view.receipt || {};
   const logs = view.logs || [];
@@ -151,7 +157,10 @@ async function transactionDetail(hash) {
     ['Value (wei)', mono(qualified.raw.valueWei), true],
     ['Created contract', created ? link(`#/contracts/${created}`, created) : '—', true],
     ['Raw input', inspectableRaw420(qualified.raw.input, 'transaction input', 'transaction-input'), true]
-  ])}</div>` + `<div class="panel"><h3>Raw logs</h3>${logTable(logs)}</div>`;
+  ])}</div>` + renderCompensation420(compensation?.events?.every(event =>
+    event.blockHash.toLowerCase() === qualified.blockHash.toLowerCase() &&
+    event.transactionHash.toLowerCase() === qualified.txHash.toLowerCase()
+  ) ? compensation : null) + `<div class="panel"><h3>Raw logs</h3>${logTable(logs)}</div>`;
 }
 
 async function addressDetail(address) {

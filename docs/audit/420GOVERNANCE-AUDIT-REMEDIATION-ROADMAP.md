@@ -427,7 +427,7 @@ Documentation and evidence describe the implementation that actually exists at t
 
 **Status: OPEN — external governance approval required before production-equivalent provider admission.** Origin: RESOURCE-AUDIT-8A.2 C6. Repository engineering qualification is not blocked by the absence of approved economic parameters.
 
-Canonical policy record: [resource-8a2-collateral-policy.json](../../contracts/config/resource/resource-8a2-collateral-policy.json). All four production values remain null, acceptingNew remains false. No approval evidence, approved revision, or activation transaction exists.
+Canonical policy record: [resource-8a2-collateral-policy.json](https://github.com/abvhiael/420-integrated-v0.1/blob/main/contracts/config/resource/resource-8a2-collateral-policy.json). All four production values remain null, acceptingNew remains false. No approval evidence, approved revision, or activation transaction exists.
 
 Before testnet launch preparation is signed off, the authorized governance body must approve a Resource-specific minimum provider collateral, minimum slashable backing, exposure coverage ratio (basis points), and withdrawal delay (seconds), with documented risk analysis and evidence commitment. Do not import Compute or validator collateral parameters. Approval does not itself activate providers.
 

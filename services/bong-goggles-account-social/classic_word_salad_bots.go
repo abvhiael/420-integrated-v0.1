@@ -38,8 +38,11 @@ type saladBotView struct{
 // Score using public symbols, own tile values and the canonical premium and
 // dictionary tables. No reconstruction of unseen physical tile identities.
 func (l *saladBotLexicon) score(v saladBotView,p saladProfile,mode string,tiles []saladPlacement)(int64,bool){
+ return l.scorePrepared(v,p,mode,tiles,saladPack(p),saladPremium(p))
+}
+func (l *saladBotLexicon) scorePrepared(v saladBotView,p saladProfile,mode string,tiles []saladPlacement,pack,premium []int)(int64,bool){
  board:=make(map[int]string,len(v.Board)+len(tiles));for q,s:=range v.Board{board[q]=s}
- fresh:=map[int]int64{};pack:=saladPack(p);premium:=saladPremium(p)
+ fresh:=map[int]int64{}
  for _,t:=range tiles{q:=*t.Row*p.size+*t.Col;s:=saladSymbols[pack[*t.ID]];if s=="?"{s=t.Blank};board[q]=s;fresh[q]=saladValues[pack[*t.ID]]}
  blankCells:=map[int]bool{};for _,q:=range v.BlankCells{blankCells[q]=true}
  seen:=map[[2]int]bool{};var points int64;bonus:=false;count:=0
@@ -64,7 +67,7 @@ func (policy saladBotPolicy) ChooseMove(raw json.RawMessage,level string,legal [
  if policy.lex==nil||level!=policy.level||b.Charge(1)!=nil{return nil,ErrInvalid}
  var v saladBotView;if !strictRuleJSON(raw,&v)||v.Terminal||v.Turn<0||v.Turn>=len(v.Scores)||len(v.RackCounts)!=len(v.Scores)||len(v.Forfeit)!=len(v.Scores)||v.Forfeit[v.Turn]||v.Board==nil{return nil,ErrInvalid}
  p,mode,e:=saladVariant(v.Variant,len(v.Scores));if e!=nil||len(v.Rack)>p.rack||len(v.Rack)!=v.RackCounts[v.Turn]||v.BagCount<0||v.BagCount>p.bag{return nil,ErrInvalid}
- pack:=saladPack(p);seen:=map[int]bool{}
+ pack:=saladPack(p);premium:=saladPremium(p);seen:=map[int]bool{}
  for _,t:=range v.Rack{if t.ID<0||t.ID>=len(pack)||seen[t.ID]||t.Symbol!=saladSymbols[pack[t.ID]]||t.Value!=saladValues[pack[t.ID]]{return nil,ErrInvalid};seen[t.ID]=true}
  for q,s:=range v.Board{if q<0||q>=p.size*p.size{return nil,ErrInvalid};ok:=false;for _,sym:=range saladSymbols[:41]{if sym==s{ok=true;break}};if !ok{return nil,ErrInvalid}}
  blankSeen:=map[int]bool{};for _,q:=range v.BlankCells{sym:=v.Board[q];if len(sym)!=1||blankSeen[q]{return nil,ErrInvalid};blankSeen[q]=true}
@@ -89,7 +92,7 @@ func (policy saladBotPolicy) ChooseMove(raw json.RawMessage,level string,legal [
    walk=func(q int,node *saladTrie,used uint16,tiles []saladPlacement,hit bool,cells int){
     if done||node==nil{return};if nodes<=0||b.Charge(1)!=nil{done=true;return};nodes--
     if node.word&&hit&&cells>=2&&len(tiles)>0&&(q<0||v.Board[q]==""){
-     if score,ok:=policy.lex.score(v,p,mode,tiles);ok{
+     if score,ok:=policy.lex.scorePrepared(v,p,mode,tiles,pack,premium);ok{
       value:=score*100
       if level=="hard"{vowels,consonants:=0,0;for i,t:=range v.Rack{if used&(1<<i)!=0{continue};if t.Symbol=="?"{value+=350}else if strings.ContainsAny(t.Symbol,"AEIOU"){vowels++}else{consonants++};value-=t.Value*8};diff:=vowels-consonants;if diff<0{diff=-diff};value-=int64(diff*35)}
       if best==nil||value>bestValue{bestValue=value;best=append([]saladPlacement(nil),tiles...)}

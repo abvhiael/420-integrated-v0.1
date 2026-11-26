@@ -126,6 +126,10 @@ try{
   const view=await context.newPage();
   await view.goto(origin+'/games/chess',{waitUntil:'domcontentloaded'});
   await view.locator('main .games-game-page').waitFor({timeout:10_000});
+  assert.match(await view.locator('main').innerText(),/not enabled in this deployment/);
+  assert.equal(await view.locator('[data-chess-start]').count(),0);
+  await view.locator('a[href="/games/chess/setup"]').first().click();
+  await view.locator('main [data-game-screen="setup"] fieldset[disabled]').waitFor({timeout:5000});
   return {context,view,principal};
  };
  const left=await mkContext(a),right=await mkContext(b);

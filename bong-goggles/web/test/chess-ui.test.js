@@ -56,5 +56,7 @@ test('BC-3 release requires explicit activation and all account dependencies in 
   assert.equal(validateRuntimeConfig({...config,features:{...config.features,[key]:false}}).features.chessRestricted,false,key);
  }
  const disabled=renderApplicationShell({pathname:'/games/chess',chessState:{status:'disabled'}});
- assert.match(disabled,/not enabled in this deployment/);assert.doesNotMatch(disabled,/data-chess-start/);
+ assert.match(disabled,/not enabled in this deployment/);assert.match(disabled,/data-game-screen="intro"/);assert.doesNotMatch(disabled,/data-chess-start/);
+ const setup=renderApplicationShell({pathname:'/games/chess/setup',chessState:{status:'disabled'}});
+ assert.match(setup,/<fieldset disabled>/);assert.match(setup,/Seat 2/);assert.doesNotMatch(setup,/data-chess-start/);
 });

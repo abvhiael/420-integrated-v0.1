@@ -77,4 +77,37 @@ contract ResourceGenesis420Test {
         require(!accepted, "unauthorized activation");
         require(!e.providers.isActive(id), "unexpected active provider");
     }
+
+    function testActiveAndClosedSessionBlockCollateralWithdrawalUntilDischarge() public {
+        Env memory e=setup();
+        (bytes32 providerId,,bytes32 offerId)=activateRelay(e);
+        ResourceProviderCollateral420 c=ResourceProviderCollateral420(address(e.providers.collateral()));
+        bytes32 id=c.positionId(providerId);
+        bytes32 session=e.sessions.canonicalSessionId(BOB,offerId,99);
+        vm.prank(BOB);
+        e.sessions.openSession(session,offerId,10,uint64(block.timestamp+100));
+        e.sessions.bindEconomicSettlementController(address(this));
+        vm.prank(ALICE);
+        c.requestExit(id);
+        vm.warp(c.withdrawableAt(id));
+        vm.prank(ALICE);
+        (bool ok,)=address(c).call(abi.encodeCall(c.withdraw,(id)));
+        require(!ok && c.outstandingReservations(id)==1,"active session withdrawal");
+        vm.prank(BOB);
+        e.sessions.closeSession(session);
+        (ok,)=address(e.sessions).call(abi.encodeCall(e.sessions.releaseDischargedSession,(session)));
+        require(!ok,"closed session premature discharge");
+        e.caps.set(SETTLER,ResourceIds420.COMPONENT_RESOURCE,ResourceIds420.ACTION_SETTLE,e.auth.scopeSession(session),true);
+        vm.prank(SETTLER);
+        e.sessions.markSettled(session,20);
+        vm.prank(ALICE);
+        (ok,)=address(c).call(abi.encodeCall(c.withdraw,(id)));
+        require(!ok,"legacy settled marker released collateral");
+        e.sessions.releaseDischargedSession(session);
+        (ok,)=address(e.sessions).call(abi.encodeCall(e.sessions.releaseDischargedSession,(session)));
+        require(!ok && c.outstandingReservations(id)==0,"session discharge replay");
+        vm.prank(ALICE);
+        c.withdraw(id);
+        require(c.getPosition(id).slashable==0 && c.custodyInvariant(),"discharged session exit");
+    }
 }

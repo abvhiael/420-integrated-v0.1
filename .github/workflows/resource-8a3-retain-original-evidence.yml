@@ -1,0 +1,46 @@
+name: Resource 8A3 retain original evidence
+on:
+  push:
+    branches: [audit/resource-8a3-authorization]
+    paths: ['.github/workflows/resource-8a3-retain-original-evidence.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  retain:
+    if: github.ref == 'refs/heads/audit/resource-8a3-authorization'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Download and retain exact original archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          archive=docs/audit/420RESOURCE-8A3-original-artifacts
+          mkdir -p "$archive"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/15152850886/zip" > "$archive/resource-8a3-compiler-evidence.zip"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/15152796152/zip" > "$archive/resource-8a2-compiler-evidence.zip"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/15152083210/zip" > "$archive/resource-8a2-indexer-qualification.zip"
+          cd "$archive"
+          cat > SHA256SUMS <<'EOF'
+          a504e8152c101b14b0085926e350a115565b41be39fbb721a643c04f77e63d2f  resource-8a3-compiler-evidence.zip
+          07abce8061cd0372e637fe325690e1e16499681594569dccbad94f46dad75052  resource-8a2-compiler-evidence.zip
+          74890b44b7e87f500ad54392525d8f5f20a914a08a29d637f95a93d9f2fbb7f3  resource-8a2-indexer-qualification.zip
+          EOF
+          sha256sum -c SHA256SUMS
+          for f in *.zip; do unzip -t "$f"; done
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f -- "$archive"
+          if git diff --cached --quiet; then exit 0; fi
+          test "$(git ls-remote origin refs/heads/audit/resource-8a3-authorization | cut -f1)" = "$EXPECTED_HEAD"
+          git commit -m "Retain original verified Resource 8A3 qualification ZIP archives"
+          git push origin HEAD:refs/heads/audit/resource-8a3-authorization

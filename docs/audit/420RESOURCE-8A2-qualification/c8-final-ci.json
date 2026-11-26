@@ -1,0 +1,1758 @@
+{
+  "schema": "420-resource-8a2-c8-final-ci-v1",
+  "qualifiedHead": "812b9e64efc171d4ff43db6e3f355b2b586f3e8d",
+  "pr": 1433,
+  "scope": "Repository-only collateral qualification",
+  "workflows": [
+    {
+      "id": 45869890945,
+      "name": "Resource 8A2 Indexer durable qualification",
+      "source": "812b9e64efc171d4ff43db6e3f355b2b586f3e8d",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 140082262124,
+          "name": "resource-postgres",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Verify exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run npm install --no-package-lock",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Run npm run build",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Resource ABI and mandatory PostgreSQL qualification",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 16
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 17
+            },
+            {
+              "name": "Stop containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 18
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 19
+            }
+          ],
+          "extract": [
+            "2026-11-26T17:42:23.8336606Z HEAD is now at 812b9e64 Record C8 final integration baseline and unchanged qualification gates",
+            "2026-11-26T17:42:31.2373537Z ok 1 - Resource retained event descriptors exactly match compiler evidence and reject spoofed/malformed logs",
+            "2026-11-26T17:42:31.4776802Z ok 2 - Resource deployment verifies complete registry graph and rejects incorrect authority",
+            "2026-11-26T17:42:32.0872481Z ok 3 - Resource durable PostgreSQL ingestion, receipt reconciliation, restart, rollback and canonical rebuild",
+            "2026-11-26T17:42:32.0983572Z # tests 3",
+            "2026-11-26T17:42:32.0984339Z # pass 3",
+            "2026-11-26T17:42:32.0992969Z # fail 0",
+            "2026-11-26T17:42:32.0994106Z # skipped 0"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 45869890865,
+      "name": "420ResourceProtocol Audit Qualification",
+      "source": "812b9e64efc171d4ff43db6e3f355b2b586f3e8d",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 140082261600,
+          "name": "resource-runtime-sdk",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Verify exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Test Resource Network runtime",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Test storage SDK",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Post Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            }
+          ],
+          "extract": [
+            "2026-11-26T17:42:12.0266971Z HEAD is now at 812b9e64 Record C8 final integration baseline and unchanged qualification gates",
+            "2026-11-26T17:42:26.4773834Z ok  \tgithub.com/420integrated/420-integrated/execution/storage\t3.436s",
+            "2026-11-26T17:42:27.6870376Z ok  \tgithub.com/420integrated/420-integrated/sdk/storage420\t0.009s"
+          ]
+        },
+        {
+          "id": 140082262035,
+          "name": "resource-security",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Verify exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Reject dangerous Resource primitives",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Stage scoped Resource test owners and pinned import closure",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Re-run Resource core under hardening profile",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Re-run collateral custody and policy under hardening profile",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Install Slither",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Targeted Resource Slither high-severity gate",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Post Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 19
+            },
+            {
+              "name": "Post Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 20
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 21
+            }
+          ],
+          "extract": [
+            "2026-11-26T17:42:08.3325143Z HEAD is now at 812b9e64 Record C8 final integration baseline and unchanged qualification gates",
+            "2026-11-26T17:43:39.4095132Z Ran 14 tests for test/ResourceGenesis420.t.sol:ResourceGenesis420Test",
+            "2026-11-26T17:43:39.4096164Z [PASS] testActiveAndClosedSessionBlockCollateralWithdrawalUntilDischarge() (gas: 20118888)",
+            "2026-11-26T17:43:39.4096929Z [PASS] testConsumerCanCancelOpenSessionOnly() (gas: 19231509)",
+            "2026-11-26T17:43:39.4097673Z [PASS] testExpiredSessionCannotReceiveUsage() (gas: 19251387)",
+            "2026-11-26T17:43:39.4098810Z [PASS] testForgedNonzeroStakeCannotActivateProvider() (gas: 17173254)",
+            "2026-11-26T17:43:39.4099880Z [PASS] testFourServiceClassesAreDistinct() (gas: 394)",
+            "2026-11-26T17:43:39.4101746Z [PASS] testFuzzArbitraryNonzeroStakeReferenceCannotActivate(bytes32) (runs: 100000, μ: 17162158, ~: 17169795)",
+            "2026-11-26T17:43:39.4103383Z [PASS] testNodeUpdateUsesDeclaredCapabilityAndRequiresInactiveState() (gas: 18563858)",
+            "2026-11-26T17:43:39.4105178Z [PASS] testOfferSessionReceiptReplayAndBounds() (gas: 19818945)",
+            "2026-11-26T17:43:39.4106078Z [PASS] testProviderNeedsStakeAndDefaultDeny() (gas: 17160526)",
+            "2026-11-26T17:43:39.4106668Z [PASS] testReceiptSubmissionSupportsScopedDelegateOnly() (gas: 19544227)",
+            "2026-11-26T17:43:39.4107146Z [PASS] testReceiptsMustAdvanceAndBeNonzero() (gas: 19497231)",
+            "2026-11-26T17:43:39.4107601Z [PASS] testServicePolicyCapsOfferAndSessionDuration() (gas: 19054387)",
+            "2026-11-26T17:43:39.4108051Z [PASS] testSettlementIsCapabilityScoped() (gas: 19339281)",
+            "2026-11-26T17:43:39.4108548Z [PASS] testUnauthorizedProviderActivationCannotUseForgedReference() (gas: 17155861)",
+            "2026-11-26T17:43:39.4109129Z Suite result: ok. 14 passed; 0 failed; 0 skipped; finished in 57.08s (57.15s CPU time)",
+            "2026-11-26T17:43:39.4109691Z Ran 1 test suite in 57.09s (57.08s CPU time): 14 tests passed, 0 failed, 0 skipped (14 total tests)",
+            "2026-11-26T17:44:12.6848693Z Ran 20 tests for test/ResourceProviderCollateral420.t.sol:ResourceProviderCollateral420Test",
+            "2026-11-26T17:44:12.6850003Z [PASS] testComputeObligationCannotReuseReservedFunds() (gas: 884406)",
+            "2026-11-26T17:44:12.6851592Z [PASS] testExitImmediatelyStopsAdmissionAndFreezesPolicyRevision() (gas: 1252189)",
+            "2026-11-26T17:44:12.6852652Z [PASS] testForeignDepositorAndMissingGrantRollback() (gas: 635714)",
+            "2026-11-26T17:44:12.6853684Z [PASS] testGenericVaultGrantCannotUnlockResourceCollateral() (gas: 1030187)",
+            "2026-11-26T17:44:12.6854628Z [PASS] testGovernanceDisciplineCannotBeOverridden() (gas: 1539920)",
+            "2026-11-26T17:44:12.6855643Z [PASS] testMaliciousVaultBindingMismatchRollsBackDepositAndNonce() (gas: 13371573)",
+            "2026-11-26T17:44:12.6856874Z [PASS] testMaliciousVaultCallbacksCannotMutateCollateralOrExposeEligibility() (gas: 13813350)",
+            "2026-11-26T17:44:12.6857622Z [PASS] testNativeDepositAndTopupReconcile() (gas: 1339074)",
+            "2026-11-26T17:44:12.6858152Z [PASS] testPenaltyAndZeroExposureReservationBlockPartialWithdrawal() (gas: 2775230)",
+            "2026-11-26T17:44:12.6858761Z [PASS] testPenaltyExecutionRollbackOnMissingVaultGrant() (gas: 1147726)",
+            "2026-11-26T17:44:12.6859277Z [PASS] testPositionCannotActivateSecondProviderOrAlias() (gas: 1042031)",
+            "2026-11-26T17:44:12.6859726Z [PASS] testReplayCannotCountDepositTwice() (gas: 763730)",
+            "2026-11-26T17:44:12.6860238Z [PASS] testReservationsPreventOverbookingAndWithdrawal() (gas: 1986602)",
+            "2026-11-26T17:44:12.6861703Z [PASS] testSlashDeductsNativeCustodyAndRetainsExistingExposure() (gas: 3930029)",
+            "2026-11-26T17:44:12.6863244Z [PASS] testUnauthorizedHoldAndDuplicatePenaltyDecision() (gas: 2051633)",
+            "2026-11-26T17:44:12.6864414Z [PASS] testUnauthorizedSponsorshipAndPrematureExit() (gas: 1508947)",
+            "2026-11-26T17:44:12.6865640Z [PASS] testWalletAndDirectVaultBalanceAreNotProviderCollateral() (gas: 151389)",
+            "2026-11-26T17:44:12.6867097Z [PASS] testWithdrawalGrantFailureIsAtomicAndSponsorReceivesFunds() (gas: 1894696)",
+            "2026-11-26T17:44:12.6867623Z [PASS] testWrongAccountingBindingRejected() (gas: 1453105)",
+            "2026-11-26T17:44:12.6868073Z [PASS] testZeroAndBelowMinimumThenExactBoundaryTopup() (gas: 1645639)",
+            "2026-11-26T17:44:12.6868594Z Suite result: ok. 20 passed; 0 failed; 0 skipped; finished in 17.22ms (51.96ms CPU time)",
+            "2026-11-26T17:44:12.6869180Z Ran 1 test suite in 17.62ms (17.22ms CPU time): 20 tests passed, 0 failed, 0 skipped (20 total tests)",
+            "2026-11-26T17:44:25.1564108Z Ran 6 tests for test/ResourceCollateralPolicy420.t.sol:ResourceCollateralPolicy420Test",
+            "2026-11-26T17:44:25.1566441Z [PASS] testCoverageRoundsUpAndEnforcesFloor() (gas: 201076)",
+            "2026-11-26T17:44:25.1567754Z [PASS] testFuzzCoverage(uint128,uint16) (runs: 100000, μ: 142962, ~: 155867)",
+            "2026-11-26T17:44:25.1568490Z [PASS] testInvalidPolicyRejected() (gas: 149060)",
+            "2026-11-26T17:44:25.1569246Z [PASS] testPolicyRevisionsAndCommitmentsRemainHistorical() (gas: 319265)",
+            "2026-11-26T17:44:25.1570111Z [PASS] testUnauthorizedPolicyAndPauseRejected() (gas: 152355)",
+            "2026-11-26T17:44:25.1570833Z [PASS] testUnconfiguredPolicyFailsClosed() (gas: 151675)",
+            "2026-11-26T17:44:25.1571878Z Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 2.22s (2.22s CPU time)",
+            "2026-11-26T17:44:25.1573226Z Ran 1 test suite in 2.23s (2.22s CPU time): 6 tests passed, 0 failed, 0 skipped (6 total tests)",
+            "2026-11-26T18:13:50.5333292Z Ran 1 test for test/ResourceCollateralInvariant420.t.sol:ResourceCollateralInvariant420Test",
+            "2026-11-26T18:13:50.5334775Z [PASS] invariant_accounting() (runs: 4096, calls: 1572864, reverts: 0)",
+            "2026-11-26T18:13:50.5364221Z Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 1722.47s (1722.46s CPU time)",
+            "2026-11-26T18:13:50.5365035Z Ran 1 test suite in 1722.47s (1722.47s CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)",
+            "2026-11-26T18:14:22.2502186Z   \"highSeverity\": []"
+          ]
+        },
+        {
+          "id": 140082262059,
+          "name": "resource-storage",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Verify exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Stage scoped Resource test owners and pinned import closure",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run storage protocol suites",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Post Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Post Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            }
+          ],
+          "extract": [
+            "2026-11-26T17:42:09.3382918Z HEAD is now at 812b9e64 Record C8 final integration baseline and unchanged qualification gates",
+            "2026-11-26T17:42:41.2913592Z Ran 6 tests for test/StorageCapacityRegistry420.t.sol:StorageCapacityRegistry420Test",
+            "2026-11-26T17:42:41.2916885Z [PASS] testCapacityCannotShrinkBelowReservations() (gas: 16723801)",
+            "2026-11-26T17:42:41.2917972Z [PASS] testProviderConfiguresCapacityAndAvailability() (gas: 16031485)",
+            "2026-11-26T17:42:41.2919100Z [PASS] testReservationCannotReleaseBeforeStorageTerm() (gas: 16512977)",
+            "2026-11-26T17:42:41.2920258Z [PASS] testReservationIdIsCanonicalAndReplaySafe() (gas: 16556845)",
+            "2026-11-26T17:42:41.2921082Z [PASS] testReservationsPreventOverselling() (gas: 16939089)",
+            "2026-11-26T17:42:41.2921866Z [PASS] testUnrelatedActorCannotConfigureOrReserve() (gas: 16338434)",
+            "2026-11-26T17:42:41.2922622Z Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 12.39ms (34.37ms CPU time)",
+            "2026-11-26T17:42:41.2923226Z Ran 1 test suite in 15.88ms (12.39ms CPU time): 6 tests passed, 0 failed, 0 skipped (6 total tests)",
+            "2026-11-26T17:42:58.9791368Z Ran 7 tests for test/StorageProofProtocol420.t.sol:StorageProofProtocol420Test",
+            "2026-11-26T17:42:58.9792047Z [PASS] testCommitmentRequiresActiveStoreNodeAndProviderAuthority() (gas: 18005870)",
+            "2026-11-26T17:42:58.9792592Z [PASS] testInvalidOrLateProofFailsClosed() (gas: 18363878)",
+            "2026-11-26T17:42:58.9793252Z [PASS] testNodeSuspensionAndRetirementPreserveUnconsumedChallenges() (gas: 18639528)",
+            "2026-11-26T17:42:58.9794468Z [PASS] testProofSchemeRegistrationIsDefaultDeny() (gas: 1402649)",
+            "2026-11-26T17:42:58.9795739Z [PASS] testProviderDisciplineStopsProofWithoutConsumingChallenge() (gas: 18893703)",
+            "2026-11-26T17:42:58.9797064Z [PASS] testSchemeOrNodeSuspensionStopsProofAcceptance() (gas: 18376266)",
+            "2026-11-26T17:42:58.9798402Z [PASS] testVerifiedProofCreatesReplaySafeReceipt() (gas: 18257517)",
+            "2026-11-26T17:42:58.9799503Z Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 12.08ms (39.26ms CPU time)",
+            "2026-11-26T17:42:58.9800547Z Ran 1 test suite in 14.15ms (12.08ms CPU time): 7 tests passed, 0 failed, 0 skipped (7 total tests)",
+            "2026-11-26T17:43:23.3820207Z Ran 7 tests for test/StorageAgreementRegistry420.t.sol:StorageAgreementRegistry420Test",
+            "2026-11-26T17:43:23.3821676Z [PASS] testActivationBindsExactImmutableCommitmentAndCapacity() (gas: 23660665)",
+            "2026-11-26T17:43:23.3822833Z [PASS] testActivationRejectsMissingCapacityReservation() (gas: 22931551)",
+            "2026-11-26T17:43:23.3824773Z [PASS] testActivationRejectsUnauthorizedActorAndMismatchedCommitment() (gas: 24023412)",
+            "2026-11-26T17:43:23.3825894Z [PASS] testCompletionIsDeterministicAfterEnd() (gas: 23698826)",
+            "2026-11-26T17:43:23.3826704Z [PASS] testConsumerCanCancelOnlyBeforeActivation() (gas: 24069904)",
+            "2026-11-26T17:43:23.3827603Z [PASS] testConsumerCanProposeCanonicalStoreAgreement() (gas: 22254716)",
+            "2026-11-26T17:43:23.3828500Z [PASS] testInvalidErasureOrTimingPolicyFailsClosed() (gas: 21869232)",
+            "2026-11-26T17:43:23.3829384Z Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 17.46ms (60.67ms CPU time)",
+            "2026-11-26T17:43:23.3830571Z Ran 1 test suite in 17.85ms (17.46ms CPU time): 7 tests passed, 0 failed, 0 skipped (7 total tests)",
+            "2026-11-26T17:43:49.8432995Z Ran 5 tests for test/StorageObjectManifestRegistry420.t.sol:StorageObjectManifestRegistry420Test",
+            "2026-11-26T17:43:49.8434397Z [PASS] testControllerRegistersCanonicalManifest() (gas: 23694937)",
+            "2026-11-26T17:43:49.8435548Z [PASS] testDuplicateShardIndexFailsClosed() (gas: 25719449)",
+            "2026-11-26T17:43:49.8436508Z [PASS] testForeignControllerCannotPlaceShard() (gas: 25461067)",
+            "2026-11-26T17:43:49.8437403Z [PASS] testPlacementBindsActiveAgreementAndCommitment() (gas: 25732560)",
+            "2026-11-26T17:43:49.8438404Z [PASS] testSealRequiresAllPlacementsAndMakesManifestRetrievable() (gas: 25935078)",
+            "2026-11-26T17:43:49.8439456Z Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 15.93ms (43.65ms CPU time)",
+            "2026-11-26T17:43:49.8440663Z Ran 1 test suite in 17.20ms (15.93ms CPU time): 5 tests passed, 0 failed, 0 skipped (5 total tests)",
+            "2026-11-26T17:44:20.4910253Z Ran 6 tests for test/StorageSettlementRegistry420.t.sol:StorageSettlementRegistry420Test",
+            "2026-11-26T17:44:20.4912125Z [PASS] testAgreementAndPendingSettlementBlockCollateralWithdrawalUntilDischarge() (gas: 4635373)",
+            "2026-11-26T17:44:20.4913899Z [PASS] testBatchedReservationFullyFundsExactQuotedAmount() (gas: 2787200)",
+            "2026-11-26T17:44:20.4915381Z [PASS] testMissedProofWindowRefundsAfterDeadlineOnly() (gas: 3102817)",
+            "2026-11-26T17:44:20.4916324Z [PASS] testPartialFundingCannotEarnAndCanAbortAfterStart() (gas: 2747371)",
+            "2026-11-26T17:44:20.4917276Z [PASS] testVerifiedCanonicalProofReleasesOnlyItsWindow() (gas: 3348675)",
+            "2026-11-26T17:44:20.4918141Z [PASS] testWrongChallengeCannotReleaseEscrow() (gas: 3245039)",
+            "2026-11-26T17:44:20.4918965Z Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 16.54ms (29.93ms CPU time)",
+            "2026-11-26T17:44:20.4920122Z Ran 1 test suite in 18.36ms (16.54ms CPU time): 6 tests passed, 0 failed, 0 skipped (6 total tests)"
+          ]
+        },
+        {
+          "id": 140082262157,
+          "name": "resource-contract-core",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Verify exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Verify C6 production policy disposition",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Verify deterministic Resource deployment package",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Stage scoped Resource test owners and pinned import closure",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Build Resource contract family",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Run Resource collateral custody suite",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Run Resource collateral policy suite",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Run Resource stateful collateral invariants",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Run Resource deployment binding suite",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Run Resource protocol adversarial suite",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            },
+            {
+              "name": "Check Resource Solidity formatting",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14
+            },
+            {
+              "name": "Post Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 27
+            },
+            {
+              "name": "Post Checkout exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 28
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 29
+            }
+          ],
+          "extract": [
+            "2026-11-26T17:42:13.8539541Z HEAD is now at 812b9e64 Record C8 final integration baseline and unchanged qualification gates",
+            "2026-11-26T17:42:18.6357851Z C6 PASS: unapproved values retained, admission disabled, governance handoff linked",
+            "2026-11-26T17:43:16.4419457Z Ran 20 tests for test/ResourceProviderCollateral420.t.sol:ResourceProviderCollateral420Test",
+            "2026-11-26T17:43:16.4420057Z [PASS] testComputeObligationCannotReuseReservedFunds() (gas: 884406)",
+            "2026-11-26T17:43:16.4592602Z [PASS] testExitImmediatelyStopsAdmissionAndFreezesPolicyRevision() (gas: 1252189)",
+            "2026-11-26T17:43:16.4792375Z [PASS] testForeignDepositorAndMissingGrantRollback() (gas: 635714)",
+            "2026-11-26T17:43:16.4886206Z [PASS] testGenericVaultGrantCannotUnlockResourceCollateral() (gas: 1030187)",
+            "2026-11-26T17:43:16.5048878Z [PASS] testGovernanceDisciplineCannotBeOverridden() (gas: 1539920)",
+            "2026-11-26T17:43:16.5256833Z [PASS] testMaliciousVaultBindingMismatchRollsBackDepositAndNonce() (gas: 13371573)",
+            "2026-11-26T17:43:16.5713985Z [PASS] testMaliciousVaultCallbacksCannotMutateCollateralOrExposeEligibility() (gas: 13813350)",
+            "2026-11-26T17:43:16.6104895Z [PASS] testNativeDepositAndTopupReconcile() (gas: 1339074)",
+            "2026-11-26T17:43:16.6239083Z [PASS] testPenaltyAndZeroExposureReservationBlockPartialWithdrawal() (gas: 2775230)",
+            "2026-11-26T17:43:16.6555174Z [PASS] testPenaltyExecutionRollbackOnMissingVaultGrant() (gas: 1147726)",
+            "2026-11-26T17:43:16.6640476Z [PASS] testPositionCannotActivateSecondProviderOrAlias() (gas: 1042031)",
+            "2026-11-26T17:43:16.6715395Z [PASS] testReplayCannotCountDepositTwice() (gas: 763730)",
+            "2026-11-26T17:43:16.6775359Z [PASS] testReservationsPreventOverbookingAndWithdrawal() (gas: 1986602)",
+            "2026-11-26T17:43:16.6937843Z [PASS] testSlashDeductsNativeCustodyAndRetainsExistingExposure() (gas: 3930029)",
+            "2026-11-26T17:43:16.7343711Z [PASS] testUnauthorizedHoldAndDuplicatePenaltyDecision() (gas: 2051633)",
+            "2026-11-26T17:43:16.7711140Z [PASS] testUnauthorizedSponsorshipAndPrematureExit() (gas: 1508947)",
+            "2026-11-26T17:43:16.7836970Z [PASS] testWalletAndDirectVaultBalanceAreNotProviderCollateral() (gas: 151389)",
+            "2026-11-26T17:43:16.7851355Z [PASS] testWithdrawalGrantFailureIsAtomicAndSponsorReceivesFunds() (gas: 1894696)",
+            "2026-11-26T17:43:16.8005900Z [PASS] testWrongAccountingBindingRejected() (gas: 1453105)",
+            "2026-11-26T17:43:16.8009889Z [PASS] testZeroAndBelowMinimumThenExactBoundaryTopup() (gas: 1645639)",
+            "2026-11-26T17:43:16.8140762Z Suite result: ok. 20 passed; 0 failed; 0 skipped; finished in 16.45ms (45.77ms CPU time)",
+            "2026-11-26T17:43:16.8141035Z Ran 1 test suite in 40.50ms (16.45ms CPU time): 20 tests passed, 0 failed, 0 skipped (20 total tests)",
+            "2026-11-26T17:43:28.5268340Z Ran 6 tests for test/ResourceCollateralPolicy420.t.sol:ResourceCollateralPolicy420Test",
+            "2026-11-26T17:43:28.5269466Z [PASS] testCoverageRoundsUpAndEnforcesFloor() (gas: 201076)",
+            "2026-11-26T17:43:28.5270918Z [PASS] testFuzzCoverage(uint128,uint16) (runs: 50000, μ: 142742, ~: 155867)",
+            "2026-11-26T17:43:28.5271693Z [PASS] testInvalidPolicyRejected() (gas: 149060)",
+            "2026-11-26T17:43:28.5272513Z [PASS] testPolicyRevisionsAndCommitmentsRemainHistorical() (gas: 319265)",
+            "2026-11-26T17:43:28.5273500Z [PASS] testUnauthorizedPolicyAndPauseRejected() (gas: 152355)",
+            "2026-11-26T17:43:28.5274156Z [PASS] testUnconfiguredPolicyFailsClosed() (gas: 151675)",
+            "2026-11-26T17:43:28.5274726Z Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 1.12s (1.12s CPU time)",
+            "2026-11-26T17:43:28.5275265Z Ran 1 test suite in 1.12s (1.12s CPU time): 6 tests passed, 0 failed, 0 skipped (6 total tests)",
+            "2026-11-26T17:52:41.4347489Z Ran 1 test for test/ResourceCollateralInvariant420.t.sol:ResourceCollateralInvariant420Test",
+            "2026-11-26T17:52:41.4348450Z [PASS] invariant_accounting() (runs: 2048, calls: 524288, reverts: 0)",
+            "2026-11-26T17:52:41.4372220Z Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 506.05s (506.05s CPU time)",
+            "2026-11-26T17:52:41.4373114Z Ran 1 test suite in 506.05s (506.05s CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)",
+            "2026-11-26T17:53:09.8657212Z Ran 3 tests for test/ResourceDeploymentBinding420.t.sol:ResourceDeploymentBinding420Test",
+            "2026-11-26T17:53:09.8657818Z [PASS] testCapabilityAuthorityAndWrongRouterAreVisible() (gas: 30706978)",
+            "2026-11-26T17:53:09.8945115Z [PASS] testDeploymentOrderAndConstructorBindings() (gas: 30517287)",
+            "2026-11-26T17:53:09.9211241Z [PASS] testProtocolRegistryPublishesExactResourceRouterRuntimeIdentity() (gas: 30392093)",
+            "2026-11-26T17:53:09.9437018Z Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 6.51ms (15.62ms CPU time)",
+            "2026-11-26T17:53:09.9437549Z Ran 1 test suite in 16.17ms (6.51ms CPU time): 3 tests passed, 0 failed, 0 skipped (3 total tests)",
+            "2026-11-26T17:53:57.7884921Z Ran 14 tests for test/ResourceGenesis420.t.sol:ResourceGenesis420Test",
+            "2026-11-26T17:53:57.7887509Z [PASS] testActiveAndClosedSessionBlockCollateralWithdrawalUntilDischarge() (gas: 20118888)",
+            "2026-11-26T17:53:57.8553601Z [PASS] testConsumerCanCancelOpenSessionOnly() (gas: 19231509)",
+            "2026-11-26T17:53:57.8941011Z [PASS] testExpiredSessionCannotReceiveUsage() (gas: 19251387)",
+            "2026-11-26T17:53:57.9345313Z [PASS] testForgedNonzeroStakeCannotActivateProvider() (gas: 17173254)",
+            "2026-11-26T17:53:57.9506027Z [PASS] testFourServiceClassesAreDistinct() (gas: 394)",
+            "2026-11-26T17:53:57.9507493Z [PASS] testFuzzArbitraryNonzeroStakeReferenceCannotActivate(bytes32) (runs: 50000, μ: 17156657, ~: 17169795)",
+            "2026-11-26T17:53:57.9626021Z [PASS] testNodeUpdateUsesDeclaredCapabilityAndRequiresInactiveState() (gas: 18563858)",
+            "2026-11-26T17:53:57.9792745Z [PASS] testOfferSessionReceiptReplayAndBounds() (gas: 19818945)",
+            "2026-11-26T17:53:58.0042727Z [PASS] testProviderNeedsStakeAndDefaultDeny() (gas: 17160526)",
+            "2026-11-26T17:53:58.0109712Z [PASS] testReceiptSubmissionSupportsScopedDelegateOnly() (gas: 19544227)",
+            "2026-11-26T17:53:58.0339600Z [PASS] testReceiptsMustAdvanceAndBeNonzero() (gas: 19497231)",
+            "2026-11-26T17:53:58.0561984Z [PASS] testServicePolicyCapsOfferAndSessionDuration() (gas: 19054387)",
+            "2026-11-26T17:53:58.0759404Z [PASS] testSettlementIsCapabilityScoped() (gas: 19339281)",
+            "2026-11-26T17:53:58.0970258Z [PASS] testUnauthorizedProviderActivationCannotUseForgedReference() (gas: 17155861)",
+            "2026-11-26T17:53:58.1034855Z Suite result: ok. 14 passed; 0 failed; 0 skipped; finished in 26.56s (26.61s CPU time)",
+            "2026-11-26T17:53:58.1035126Z Ran 1 test suite in 26.59s (26.56s CPU time): 14 tests passed, 0 failed, 0 skipped (14 total tests)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 45864804789,
+      "name": "420Indexer",
+      "source": "9eedc855391494412d6294ada449b6671bd701dd",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 140064763385,
+          "name": "scope",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run python3 - <<'PY_SCOPE'",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            }
+          ],
+          "extract": [
+            "2026-11-26T17:07:01.6364725Z HEAD is now at 9eedc8553 Allow 60 minutes for full Resource security qualification without reducing hardening gates"
+          ]
+        },
+        {
+          "id": 140065147731,
+          "name": "qualify",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Verify exact qualification head",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Test indexer",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Vet indexer",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Test TypeScript 420Indexer",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Verify retained Stake ingestion and authority assertions",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Test Explorer indexer consumer",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Vet Explorer indexer consumer",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Validate readiness JSON",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            },
+            {
+              "name": "Verify GEN-11.1 readiness contract",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14
+            },
+            {
+              "name": "Verify 420Explorer shared-indexer consumer contract",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            },
+            {
+              "name": "EXP-0.1.2 shared Indexer route/dependency reconciliation",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 16
+            },
+            {
+              "name": "EXP-0.1.3 contract ABI and frozen-address dependency reconciliation",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 17
+            },
+            {
+              "name": "EXP-0.2.1 required Genesis capability matrix",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 18
+            },
+            {
+              "name": "EXP-0.2.2 Genesis user-workflow acceptance matrix",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 19
+            },
+            {
+              "name": "EXP-0.2.3 canonical data and authority requirements",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 20
+            },
+            {
+              "name": "EXP-0.2.4 dependency readiness matrix",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 21
+            },
+            {
+              "name": "EXP-0.2.5 Genesis blocker and qualification-gap register",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 22
+            },
+            {
+              "name": "EXP-0.2.6 Genesis acceptance criteria ownership map",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 23
+            },
+            {
+              "name": "EXP-0.3.1 authoritative Genesis requirement inventory",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 24
+            },
+            {
+              "name": "EXP-0.3.2 mandatory capability implementation paths",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 25
+            },
+            {
+              "name": "EXP-0.3.3 mandatory capability acceptance-test mapping",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 26
+            },
+            {
+              "name": "EXP-0.3.4 qualification-status freeze",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 27
+            },
+            {
+              "name": "EXP-0.3.5 optional and post-Genesis exclusions",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 28
+            },
+            {
+              "name": "EXP-0.3.6 scope-conflict resolution register",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 29
+            },
+            {
+              "name": "EXP-0.3.7 bidirectional Genesis traceability",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 30
+            },
+            {
+              "name": "EXP-0.3.8 governance scope resolution",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 31
+            },
+            {
+              "name": "EXP-0.4.1 CI and qualification-workflow inventory",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 32
+            },
+            {
+              "name": "EXP-0.4.2 historical qualification and closeout inventory",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 33
+            },
+            {
+              "name": "EXP-0.4.3 exact-head qualification evidence provenance ledger",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 34
+            },
+            {
+              "name": "EXP-0.4.4 mandatory requirement-to-CI coverage reconciliation",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 35
+            },
+            {
+              "name": "EXP-0.4.5 acceptance-criterion evidence reconciliation",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 36
+            },
+            {
+              "name": "EXP-0.4.6 historical contradiction and stale-evidence reconciliation",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 37
+            },
+            {
+              "name": "EXP-0.4.7 canonical qualification ledger",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 38
+            },
+            {
+              "name": "EXP-0.4.8 evidence retention and reproducibility",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 39
+            },
+            {
+              "name": "EXP-0.4.9 current-main reconciliation and requalification",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 40
+            },
+            {
+              "name": "EXP-0.4.10 final EXP-0 closeout",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 41
+            },
+            {
+              "name": "EXP-1.1 runtime authority and target-network baseline",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 42
+            },
+            {
+              "name": "EXP-1.2 canonical RPC/node binding",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 43
+            },
+            {
+              "name": "EXP-1.3 canonical indexing invariants",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 44
+            },
+            {
+              "name": "EXP-1.4 deployable Indexer runtime",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 45
+            },
+            {
+              "name": "Build EXP-1.4 Indexer runtime binary",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 46
+            },
+            {
+              "name": "EXP-1.5 consensus provider integration",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 47
+            },
+            {
+              "name": "Build EXP-1.5 Indexer container",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 48
+            },
+            {
+              "name": "Validate EXP-1.5 deployment manifest",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 49
+            },
+            {
+              "name": "EXP-1.6 historical block producer attribution",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 50
+            },
+            {
+              "name": "EXP-1.7 cross-layer traceability",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 51
+            },
+            {
+              "name": "EXP-1.8 runtime negative and divergence qualification",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 52
+            },
+            {
+              "name": "EXP-1.9 CI and qualification automation",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 53
+            },
+            {
+              "name": "EXP-1.10 final EXP-1 phase closeout",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 54
+            },
+            {
+              "name": "EXP-2.1 authoritative transaction fee model and API",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 55
+            },
+            {
+              "name": "EXP-0.1.1 pinned-tree exhaustive inventory",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 56
+            },
+            {
+              "name": "Upload EXP-0.1.1 full-tree and candidate evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 57
+            },
+            {
+              "name": "Upload EXP-0.1.3 contract ABI address evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 58
+            },
+            {
+              "name": "Upload EXP-0.2.1 capability matrix evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 59
+            },
+            {
+              "name": "Upload EXP-0.2.2 user-workflow evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 60
+            },
+            {
+              "name": "Upload EXP-0.2.3 canonical authority evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 61
+            },
+            {
+              "name": "Upload EXP-0.2.4 dependency readiness evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 62
+            },
+            {
+              "name": "Upload EXP-0.2.5 Genesis gap evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 63
+            },
+            {
+              "name": "Upload EXP-0.2.6 Genesis acceptance evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 64
+            },
+            {
+              "name": "Upload EXP-0.3.1 authoritative requirement evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 65
+            },
+            {
+              "name": "Upload EXP-0.3.2 capability path evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 66
+            },
+            {
+              "name": "Upload EXP-0.3.3 acceptance-test evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 67
+            },
+            {
+              "name": "Upload EXP-0.3.4 qualification-status evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 68
+            },
+            {
+              "name": "Upload EXP-0.3.5 exclusion evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 69
+            },
+            {
+              "name": "Upload EXP-0.3.6 scope-conflict evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 70
+            },
+            {
+              "name": "Upload EXP-0.3.7 traceability evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 71
+            },
+            {
+              "name": "Upload EXP-0.3.8 scope-resolution evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 72
+            },
+            {
+              "name": "Upload EXP-0.4.1 CI inventory evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 73
+            },
+            {
+              "name": "Upload EXP-0.4.2 historical closeout evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 74
+            },
+            {
+              "name": "Upload EXP-0.4.3 qualification provenance evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 75
+            },
+            {
+              "name": "Upload EXP-0.4.4 requirement CI coverage evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 76
+            },
+            {
+              "name": "Upload EXP-0.4.5 acceptance-criterion evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 77
+            },
+            {
+              "name": "Upload EXP-0.4.6 historical contradiction evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 78
+            },
+            {
+              "name": "Upload EXP-0.4.7 canonical qualification ledger evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 79
+            },
+            {
+              "name": "Upload EXP-0.4.8 evidence retention and reproducibility",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 80
+            },
+            {
+              "name": "Upload EXP-0.4.9 current-main requalification evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 81
+            },
+            {
+              "name": "Upload EXP-0.4.10 final EXP-0 closeout evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 82
+            },
+            {
+              "name": "Upload EXP-1.1 runtime authority evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 83
+            },
+            {
+              "name": "Upload EXP-1.2 RPC binding evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 84
+            },
+            {
+              "name": "Upload EXP-1.3 canonical indexing evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 85
+            },
+            {
+              "name": "Upload EXP-1.4 runtime evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 86
+            },
+            {
+              "name": "Upload EXP-1.5 consensus provider evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 87
+            },
+            {
+              "name": "Upload EXP-1.6 historical producer evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 88
+            },
+            {
+              "name": "Upload EXP-1.7 cross-layer traceability evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 89
+            },
+            {
+              "name": "Upload EXP-1.8 runtime negative/divergence evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 90
+            },
+            {
+              "name": "Upload EXP-1.9 CI qualification automation evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 91
+            },
+            {
+              "name": "Upload EXP-1.10 phase closeout evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 92
+            },
+            {
+              "name": "Upload EXP-2.1 transaction fee API evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 93
+            },
+            {
+              "name": "Retain Stake recovery qualification evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 94
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 185
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 186
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 187
+            },
+            {
+              "name": "Stop containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 188
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 189
+            }
+          ],
+          "extract": [
+            "2026-11-26T17:08:03.1524316Z HEAD is now at 9eedc8553 Allow 60 minutes for full Resource security qualification without reducing hardening gates",
+            "2026-11-26T17:08:17.2126897Z ok  \tgithub.com/420integrated/420-integrated/indexer/api\t1.481s",
+            "2026-11-26T17:08:17.2128997Z ok  \tgithub.com/420integrated/420-integrated/indexer/assets\t1.012s",
+            "2026-11-26T17:08:18.1994126Z ok  \tgithub.com/420integrated/420-integrated/indexer/cmd/indexer420\t1.076s",
+            "2026-11-26T17:08:18.2326197Z ok  \tgithub.com/420integrated/420-integrated/indexer/consensusview\t1.116s",
+            "2026-11-26T17:08:18.2334782Z ok  \tgithub.com/420integrated/420-integrated/indexer/core\t1.011s",
+            "2026-11-26T17:08:18.5166326Z ok  \tgithub.com/420integrated/420-integrated/indexer/decoder\t1.012s",
+            "2026-11-26T17:08:20.6173494Z ok  \tgithub.com/420integrated/420-integrated/indexer/ingest\t1.931s",
+            "2026-11-26T17:08:20.6188595Z ok  \tgithub.com/420integrated/420-integrated/indexer/reorg\t1.015s",
+            "2026-11-26T17:08:20.6229215Z ok  \tgithub.com/420integrated/420-integrated/indexer/rpc\t1.225s",
+            "2026-11-26T17:08:20.6245381Z ok  \tgithub.com/420integrated/420-integrated/indexer/store\t1.050s",
+            "2026-11-26T17:08:21.0813867Z ok  \tgithub.com/420integrated/420-integrated/indexer/tokenread\t1.031s",
+            "2026-11-26T17:08:21.6701068Z ok  \tgithub.com/420integrated/420-integrated/indexer/treasuryread\t1.031s",
+            "2026-11-26T17:08:21.6702688Z ok  \tgithub.com/420integrated/420-integrated/indexer/version\t1.010s",
+            "2026-11-26T17:08:37.6595729Z ok 1 - builds deterministic descriptors from genesis ABI events",
+            "2026-11-26T17:08:37.6601746Z ok 2 - fails closed when a required genesis artifact is missing",
+            "2026-11-26T17:08:37.6607849Z ok 3 - fails closed on ABI event types outside the frozen decoder surface",
+            "2026-11-26T17:08:37.6620345Z ok 4 - retained Identity420 artifact produces canonical Identity event descriptors",
+            "2026-11-26T17:08:37.6623965Z ok 5 - maps every canonical Civic governance contract into the 420Governance protocol",
+            "2026-11-26T17:08:37.8883774Z ok 6 - 420AI descriptor covers provider/model/deployment/job/escrow/policy read families without private fields",
+            "2026-11-26T17:08:37.8889717Z ok 7 - 420AI descriptor deployment binding requires complete valid address identities",
+            "2026-11-26T17:08:37.8895114Z ok 8 - 420AI descriptor fails on canonical ABI drift",
+            "2026-11-26T17:08:37.9515698Z ok 9 - AI job read model rebuilds AI/CMP/escrow lifecycle from canonical event history",
+            "2026-11-26T17:08:37.9537086Z ok 10 - AI provider state is rebuildable and preserves current CMP provider reference",
+            "2026-11-26T17:08:37.9539342Z ok 11 - AI read model fails closed on wrong network and private-field contamination",
+            "2026-11-26T17:08:37.9541990Z ok 12 - AI collection reads use bounded opaque keyset pagination and chain scope",
+            "2026-11-26T17:08:37.9545178Z ok 13 - AI event history is queried in canonical replay order so reorg rollback/rebuild can reconstruct state",
+            "2026-11-26T17:08:37.9548296Z ok 14 - AI protocol projection rollback removes orphaned events and permits canonical replay",
+            "2026-11-26T17:08:37.9551578Z ok 15 - AI policy projection is versioned and does not invent non-emitted privacy or pricing ids",
+            "2026-11-26T17:08:37.9563755Z ok 16 - AI reputation projection follows Trust-applied evidence counters without inventing a score",
+            "2026-11-26T17:08:37.9948642Z ok 17 - IDX-7 consumer route contract is unique, GET-only and chain scoped where required",
+            "2026-11-26T17:08:37.9962245Z ok 18 - IDX-7 contract names the first-party consumers that bind to the stable public surface",
+            "2026-11-26T17:08:37.9966897Z ok 19 - AI read routes are versioned, chain scoped and collections are paged",
+            "2026-11-26T17:08:38.1333980Z ok 20 - public API exposes a stable v1 adapter over typed query services",
+            "2026-11-26T17:08:38.1340890Z ok 21 - public API maps search rows into transport-safe result objects",
+            "2026-11-26T17:08:38.1343836Z ok 22 - AI read adapter enforces configured network identity before querying projections",
+            "2026-11-26T17:08:38.3082021Z ok 23 - Foundry-compiled real Arbitration contract ABI matches required descriptor without manual guesses # SKIP",
+            "2026-11-26T17:08:38.3127317Z ok 24 - exact Arbitration descriptor contains seven ABI-verified canonical events only",
+            "2026-11-26T17:08:38.3130604Z ok 25 - strict canonical decoder recovers exact indexed and non-indexed ABI and rejects wrong emitter",
+            "2026-11-26T17:08:38.3133510Z ok 26 - deterministic full canonical history reconstruction and repeated duplicate delivery",
+            "2026-11-26T17:08:38.3136488Z ok 27 - reject missing, corrupted, contradictory or cross-case canonical event timelines",
+            "2026-11-26T17:08:38.4934375Z ok 28 - Arbitration Registry/deployment identity verified before event ingestion",
+            "2026-11-26T17:08:38.7260106Z ok 29 - shared PostgreSQL fresh ingestion, duplicate suppression, atomic interrupted batch, restart and API history",
+            "2026-11-26T17:08:39.1972798Z ok 30 - reorganization rollback, safe visibility, fully deterministic replay, RPC disagreement and missing events",
+            "2026-11-26T17:08:39.2443927Z ok 31 - decodes ERC20 and ERC721 Transfer shapes deterministically",
+            "2026-11-26T17:08:39.2448361Z ok 32 - decodes ERC1155 TransferSingle mint semantics",
+            "2026-11-26T17:08:39.2454042Z ok 33 - decodes ERC1155 TransferBatch arrays",
+            "2026-11-26T17:08:39.2458385Z ok 34 - projects native $420 transfers with the deterministic transaction-level sentinel",
+            "2026-11-26T17:08:39.4106833Z ok 35 - Bridge manifest covers all canonical contracts and 37 current events",
+            "2026-11-26T17:08:39.4116157Z ok 36 - Bridge deployment binding requires exact nonzero addresses",
+            "2026-11-26T17:08:39.4119907Z ok 37 - decoder supports identical Bridge event signatures on distinct bound contracts without cross-address confusion",
+            "2026-11-26T17:08:39.4127361Z ok 38 - canonical Bridge transfer events reconstruct exact lifecycle and preserve terminal completion",
+            "2026-11-26T17:08:39.4170659Z ok 39 - obsolete synthetic Bridge lifecycle names do not manufacture state",
+            "2026-11-26T17:08:39.4172957Z ok 40 - duplicate ABI registration is idempotent, conflicting layouts and wildcard ambiguity reject",
+            "2026-11-26T17:08:39.5843176Z ok 41 - all five actual transfer events decode with canonical transfer object keys",
+            "2026-11-26T17:08:39.5847132Z ok 42 - wrong emitter, malformed ABI and removed events cannot become bridge state",
+            "2026-11-26T17:08:39.5852026Z ok 43 - different transfers on the same route retain independent state",
+            "2026-11-26T17:08:39.5921418Z ok 44 - workflow failures can recover; only completed and refunded outcomes are terminal",
+            "2026-11-26T17:08:39.5970593Z ok 45 - rebuilding canonical history after a reorg removes orphaned completion",
+            "2026-11-26T17:08:39.7603203Z ok 46 - bridge notifications require finalized receipt logs from the Registry-qualified historical emitter",
+            "2026-11-26T17:08:39.7607747Z ok 47 - orphaned and reverted receipts, substituted runtime and unqualified projection claims cannot notify",
+            "2026-11-26T17:08:39.7612035Z ok 48 - notification adapter preserves checkpoint on missing or rejected bridge evidence, then resumes with qualified events",
+            "2026-11-26T17:08:39.7617457Z ok 49 - unsubscribed bridge events and non-lifecycle config logs do not block unrelated notification consumers",
+            "2026-11-26T17:08:39.9212035Z ok 50 - Market keys bind order before listing or payment; no secondary identity collision",
+            "2026-11-26T17:08:39.9220013Z ok 51 - Market frozen lifecycle and partial Pay refund separation; sorted replay converges",
+            "2026-11-26T17:08:39.9223706Z ok 52 - cancelled listing can revise/reopen; terminal order cannot reopen",
+            "2026-11-26T17:08:39.9235031Z ok 53 - actual ABI-generated order descriptor decodes provenance and rejects wrong emitter",
+            "2026-11-26T17:08:40.0931347Z ok 54 - projects an authenticated receipt once using exact amount strings",
+            "2026-11-26T17:08:40.0944705Z ok 55 - ignores lookalikes and rejects malformed, unreceipted and wrong-chain events",
+            "2026-11-26T17:08:40.0947019Z ok 56 - compensation API pagination reads the authenticated protocol event projection",
+            "2026-11-26T17:08:40.1491964Z ok 57 - CMP-7.7 aggregates canonical job terminal state and useful rewards without inventing authority",
+            "2026-11-26T17:08:40.1495857Z ok 58 - CMP-7.7 rejects duplicate reward identities rather than double counting",
+            "2026-11-26T17:08:40.1499565Z ok 59 - CMP-7.7 bounds ranges and rejects malformed numeric event state",
+            "2026-11-26T17:08:40.1927594Z ok 60 - CMP-8 dashboard job list is bounded and owner scoped",
+            "2026-11-26T17:08:40.1940596Z ok 61 - CMP-8 reward list scopes beneficiary without inventing payout authority",
+            "2026-11-26T17:08:40.1943698Z ok 62 - CMP-8 reputation projection preserves signed total and non-authority",
+            "2026-11-26T17:08:40.1946871Z ok 63 - CMP-8 stake projection exposes exact reference metadata without claiming stake amount",
+            "2026-11-26T17:08:40.1949545Z ok 64 - CMP-8 collection filters fail closed on malformed account input",
+            "2026-11-26T17:08:40.1952104Z ok 65 - CMP-8 contributions expose canonical project and metric linkage",
+            "2026-11-26T17:08:40.2372011Z ok 66 - CMP-7.6 reconstructs request revisions in canonical replay order",
+            "2026-11-26T17:08:40.2376059Z ok 67 - CMP-7.6 worker projection fails if revision precedes canonical registration",
+            "2026-11-26T17:08:40.2393915Z ok 68 - CMP-7.6 research projection preserves retirement and acceptance state",
+            "2026-11-26T17:08:40.2397388Z ok 69 - CMP-7.6 reward projection is accounting evidence only",
+            "2026-11-26T17:08:40.2401171Z ok 70 - CMP-7.6 blocks private-field contamination and malformed object ids",
+            "2026-11-26T17:08:40.2404949Z ok 71 - CMP-7.6 rebuilds canonical job lifecycle without treating the indexer as authority",
+            "2026-11-26T17:08:40.2407597Z ok 72 - CMP-7.6 job projection rejects transition before creation",
+            "2026-11-26T17:08:40.3814535Z ok 73 - CMP-7.6 descriptor is artifact-derived and covers canonical Compute projection families",
+            "2026-11-26T17:08:40.3818910Z ok 74 - CMP-7.6 deployment binding is explicit and fails closed on invalid addresses",
+            "2026-11-26T17:08:40.4339260Z ok 75 - core projection consumer persists a canonical block in one transaction",
+            "2026-11-26T17:08:40.4355572Z ok 76 - rollback removes only block-scoped projections and recovery metadata above the ancestor",
+            "2026-11-26T17:08:40.5708375Z ok 77 - direct public resources map query rows into stable DTOs",
+            "2026-11-26T17:08:40.5722249Z ok 78 - direct block lookup supports hashes and missing resources remain null",
+            "2026-11-26T17:08:40.6296734Z ok 79 - durable reorg recovery delegates rollback and metadata reset atomically",
+            "2026-11-26T17:08:40.6302438Z ok 80 - SQL recovery stores reload checkpoint and ancestry from durable rows",
+            "2026-11-26T17:08:40.6700379Z ok 81 - finalized event history is immutable",
+            "2026-11-26T17:08:40.6708313Z ok 82 - non-finalized event can be retracted idempotently",
+            "2026-11-26T17:08:40.6712092Z ok 83 - supersession links the replaced event to a distinct fork-sensitive replacement",
+            "2026-11-26T17:08:40.6725089Z ok 84 - supersession fails closed for cross-chain or conflicting replacements",
+            "2026-11-26T17:08:40.6736333Z ok 85 - canonicality operations fail closed for unknown events and identity collisions",
+            "2026-11-26T17:08:40.7145526Z ok 86 - delivery queue deduplicates equivalent handoffs",
+            "2026-11-26T17:08:40.7148932Z ok 87 - delivery queue produces provider-neutral handoff and acknowledges success",
+            "2026-11-26T17:08:40.7152480Z ok 88 - delivery failures back off deterministically then dead-letter at bounded attempts",
+            "2026-11-26T17:08:40.7157222Z ok 89 - retry delay is exponential and capped",
+            "2026-11-26T17:08:40.7159851Z ok 90 - rate limiter produces deterministic allow/deny decisions",
+            "2026-11-26T17:08:40.7162224Z ok 91 - delivery identity mismatch fails closed",
+            "2026-11-26T17:08:40.7596425Z ok 92 - event stream identity is deterministic and fork-sensitive",
+            "2026-11-26T17:08:40.7599245Z ok 93 - event envelope preserves provenance without claiming protocol authority",
+            "2026-11-26T17:08:40.7602139Z ok 94 - event stream replays through the stable public API and preserves opaque cursors",
+            "2026-11-26T17:08:40.7604687Z ok 95 - event identity fails closed on malformed source identity",
+            "2026-11-26T17:08:40.7607903Z ok 96 - Governance event subscriptions stay explicitly non-authoritative with canonical Civic topics",
+            "2026-11-26T17:08:40.8007409Z ok 97 - subscription matching requires explicit selectors and an enabled subscription",
+            "2026-11-26T17:08:40.8024920Z ok 98 - subscription matching combines selectors deterministically",
+            "2026-11-26T17:08:40.8028087Z ok 99 - contract-address matching is case-insensitive while protocol and object keys stay exact",
+            "2026-11-26T17:08:40.8031455Z ok 100 - matcher returns deterministic subscription/event identities and rejects duplicate subscription ids",
+            "2026-11-26T17:08:40.8034349Z ok 101 - event filtering preserves event order and does not mutate stream envelopes",
+            "2026-11-26T17:08:40.8037006Z ok 102 - malformed selectors fail closed",
+            "2026-11-26T17:08:40.8510605Z ok 103 - RPC outage fails the run without advancing checkpoint state",
+            "2026-11-26T17:08:40.8521435Z ok 104 - database interruption cannot advance external checkpoint beyond the failed block",
+            "2026-11-26T17:08:40.8524216Z ok 105 - restart resumes exactly after the last durable checkpoint",
+            "2026-11-26T17:08:40.8527262Z ok 106 - stale ingest makes an otherwise serving runtime unready until progress resumes",
+            "2026-11-26T17:08:40.8530034Z ok 107 - durable reorg path delegates rollback atomically and resumes from the returned ancestor",
+            "2026-11-26T17:08:40.8532971Z ok 108 - deep reorg beyond the configured bound fails closed without rollback",
+            "2026-11-26T17:08:40.9923490Z ok 109 - builds canonical address-unbound Governance descriptors from exact artifact event shapes",
+            "2026-11-26T17:08:40.9928368Z ok 110 - artifact descriptor generation fails closed on ABI/indexing drift",
+            "2026-11-26T17:08:40.9963166Z ok 111 - deployment binding requires valid addresses and does not manufacture them in the artifact descriptor",
+            "2026-11-26T17:08:41.1550057Z ok 112 - Grants descriptor covers every event-emitting Grants registry and remains deployment-address unbound",
+            "2026-11-26T17:08:41.1553350Z ok 113 - Grants descriptor binding fails closed until all registry-resolved deployment identities are supplied",
+            "2026-11-26T17:08:41.1560729Z ok 114 - Grants descriptor generation rejects ABI/indexing drift",
+            "2026-11-26T17:08:41.1562589Z ok 115 - Grants program read model reconstructs active and awarded state without claiming authority",
+            "2026-11-26T17:08:41.1568681Z ok 116 - Grants application read model rejects replay and preserves immutable submission view",
+            "2026-11-26T17:08:41.1583119Z ok 117 - Grants award read model reconstructs terminal state and rejects terminal replay",
+            "2026-11-26T17:08:41.1596939Z ok 118 - Grants milestone read model reconstructs claim, Treasury binding and PAID terminal state",
+            "2026-11-26T17:08:41.1600419Z ok 119 - generic lifecycle reduction recognizes Grants object identities and terminal states",
+            "2026-11-26T17:08:41.1603161Z ok 120 - Grants HTTP read routes expose non-authoritative client views",
+            "2026-11-26T17:08:41.3050794Z ok 121 - HTTP transport distinguishes invalid requests from backend failures",
+            "2026-11-26T17:08:41.3057209Z ok 122 - HTTP transport rejects oversized direct-resource path parameters",
+            "2026-11-26T17:08:41.4551852Z ok 123 - HTTP transport exposes health readiness and indexer status metadata",
+            "2026-11-26T17:08:41.4558998Z ok 124 - HTTP transport routes paged block requests through the stable public API",
+            "2026-11-26T17:08:41.4561557Z ok 125 - HTTP transport routes direct block, transaction, receipts, logs and address resources",
+            "2026-11-26T17:08:41.4563417Z ok 126 - HTTP transport routes direct protocol object state with encoded keys",
+            "2026-11-26T17:08:41.4566899Z ok 127 - HTTP transport exposes non-authoritative Treasury budget and disbursement state",
+            "2026-11-26T17:08:41.4569691Z ok 128 - HTTP transport returns stable 404 envelopes for missing direct resources",
+            "2026-11-26T17:08:41.4572470Z ok 129 - HTTP transport parses transaction, asset, protocol and search filters",
+            "2026-11-26T17:08:41.4575132Z ok 130 - HTTP transport exposes version metadata without requiring a chain id",
+            "2026-11-26T17:08:41.4578172Z ok 131 - HTTP transport fails closed on invalid query parameters and unknown routes",
+            "2026-11-26T17:08:41.4581238Z ok 132 - HTTP transport exposes AI read collections and direct resources with stable pagination inputs",
+            "2026-11-26T17:08:41.4584536Z ok 133 - HTTP transport exposes AI policy and reputation read surfaces without authority claims",
+            "2026-11-26T17:08:41.4587382Z ok 134 - HTTP transport exposes optional non-authoritative Compute projections",
+            "2026-11-26T17:08:41.4589373Z ok 135 - HTTP transport fails closed when optional Compute projection support is unavailable",
+            "2026-11-26T17:08:41.4591185Z ok 136 - HTTP transport exposes bounded Compute collections for 420Compute application",
+            "2026-11-26T17:08:41.4592803Z ok 137 - HTTP transport exposes Compute reputation and stake references",
+            "2026-11-26T17:08:41.4599488Z ok 138 - HTTP transport exposes contributor-scoped Compute contribution records",
+            "2026-11-26T17:08:41.4602814Z ok 139 - Treasury asset-policy route exposes a derived result and rejects malformed addresses",
+            "2026-11-26T17:08:41.5981709Z ok 140 - accepts fully bound official Identity testnet manifest",
+            "2026-11-26T17:08:41.5986305Z ok 141 - rejects local, insecure, credentialed, missing-service and wrong-address manifests",
+            "2026-11-26T17:08:41.5990367Z ok 142 - accepts exact live Identity runtime, chain identity, storage witness and governance binding",
+            "2026-11-26T17:08:41.5994803Z ok 143 - rejects wrong chain, runtime, contract identity/version, governance and malformed storage witness",
+            "2026-11-26T17:08:41.5998832Z ok 144 - accepts representative profile issuer credential negative expiry revoke and recovery lifecycle",
+            "2026-11-26T17:08:41.6009689Z ok 145 - rejects missing authorization expiry revocation and issuer-recovery evidence",
+            "2026-11-26T17:08:41.6020592Z ok 146 - accepts Wallet Indexer Search and Explorer agreement with same deployment",
+            "2026-11-26T17:08:41.6022747Z ok 147 - rejects stale contradictory or authoritative derived-service evidence",
+            "2026-11-26T17:08:41.6025732Z ok 148 - accepts restart reorg and dependency-failure evidence and rejects missing fail-closed properties",
+            "2026-11-26T17:08:41.6028495Z ok 149 - binds PASS evidence to exact repository SHA and rejects local provenance",
+            "2026-11-26T17:08:41.6030964Z ok 150 - runtime hash helper rejects empty code and hashes actual runtime bytes",
+            "2026-11-26T17:08:41.7568259Z ok 151 - final Identity artifact exposes exact nine-event derived-service surface",
+            "2026-11-26T17:08:41.7573103Z ok 152 - Identity profile, issuer and credential events use canonical object keys",
+            "2026-11-26T17:08:41.7577388Z ok 153 - Identity decoded fields preserve commitment hashes without dereference or reinterpretation",
+            "2026-11-26T17:08:41.7580377Z ok 154 - Identity event canonicality is replay-idempotent and reorg-sensitive",
+            "2026-11-26T17:08:41.7584182Z ok 155 - Identity SQL projection declares credential/issuer keys and explicit lifecycle events",
+            "2026-11-26T17:08:41.9201797Z ok 156 - confirmation finality computes a safe head",
+            "2026-11-26T17:08:41.9204035Z ok 157 - invalid finality policy fails closed",
+            "2026-11-26T17:08:41.9207805Z ok 158 - checkpoint continuation accepts canonical child and rejects gaps",
+            "2026-11-26T17:08:41.9211697Z ok 159 - checkpoint continuation detects a reorg",
+            "2026-11-26T17:08:41.9214668Z ok 160 - logs are canonicalized, removed logs dropped, and duplicates suppressed",
+            "2026-11-26T17:08:41.9216662Z ok 161 - conflicting duplicate event evidence fails closed",
+            "2026-11-26T17:08:41.9762603Z ok 162 - bounded ingestion resumes from the persisted checkpoint",
+            "2026-11-26T17:08:41.9773970Z ok 163 - consumer failure does not advance the checkpoint past the failed block",
+            "2026-11-26T17:08:41.9778494Z ok 164 - checkpoint continuation fails closed on a reorg",
+            "2026-11-26T17:08:41.9949301Z ok 165 - file checkpoint store round-trips bigint fields atomically",
+            "2026-11-26T17:08:41.9952097Z ok 166 - finalized mode fails closed when the source lacks finalized block semantics",
+            "2026-11-26T17:08:41.9956548Z ok 167 - EVM JSON-RPC source converts canonical quantities and filters",
+            "2026-11-26T17:08:42.1570987Z ok 168 - real Registry ABI resolution pins the Launchpad graph, code hashes and all emitted event contracts",
+            "2026-11-26T17:08:42.1574908Z ok 169 - Launchpad ABI decoder and shared 420Indexer protocol projection produce canonical Notifications and Reputation evidence",
+            "2026-11-26T17:08:42.1578669Z ok 170 - cross-chain, substituted Registry graph and mismatched router bytecode fail before Launchpad indexing",
+            "2026-11-26T17:08:42.2211837Z ok 171 - extracts canonical object keys from common genesis identifiers",
+            "2026-11-26T17:08:42.2215433Z ok 172 - 420Pay lifecycle uses canonical PaymentSet status and PaymentAuthorized events",
+            "2026-11-26T17:08:42.2218723Z ok 173 - 420Pay partial refund remains nonterminal while full refund is terminal",
+            "2026-11-26T17:08:42.2221823Z ok 174 - obsolete synthetic Pay events do not fabricate payment lifecycle state",
+            "2026-11-26T17:08:42.2225348Z ok 175 - terminal lifecycle states cannot be resurrected by later events",
+            "2026-11-26T17:08:42.2228436Z ok 176 - unknown protocol events do not fabricate lifecycle state",
+            "2026-11-26T17:08:42.2234682Z ok 177 - reconstructs canonical Civic proposal lifecycle from Proposal Registry events",
+            "2026-11-26T17:08:42.2257151Z ok 178 - Governance lifecycle replay is idempotent and replacement-fork rebuild is deterministic",
+            "2026-11-26T17:08:42.2264936Z ok 179 - does not synthesize Civic v1 cancellation from non-canonical or unsupported cancellation state",
+            "2026-11-26T17:08:42.2268196Z ok 180 - 420Stake lifecycle uses canonical ValidatorRegistry events and status fields",
+            "2026-11-26T17:08:42.2271309Z ok 181 - 420Stake slash status remains reconstructable without inventing terminality",
+            "2026-11-26T17:08:42.2273733Z ok 182 - obsolete synthetic Stake events do not fabricate validator lifecycle state",
+            "2026-11-26T17:08:42.2275581Z ok 183 - 420Rights lifecycle uses canonical emitted contract events",
+            "2026-11-26T17:08:42.2277485Z ok 184 - obsolete synthetic 420Rights lifecycle events do not fabricate state",
+            "2026-11-26T17:08:42.3639805Z ok 185 - accepts a fully bound official testnet manifest",
+            "2026-11-26T17:08:42.3642870Z ok 186 - rejects local, insecure, credentialed, missing-service and wrong-address manifests",
+            "2026-11-26T17:08:42.3645881Z ok 187 - accepts exact live Names runtime, storage roots, governance and Registry discovery evidence",
+            "2026-11-26T17:08:42.3651763Z ok 188 - rejects wrong chain, runtime, identity, governance, storage and Registry discovery",
+            "2026-11-26T17:08:42.3654959Z ok 189 - accepts complete commit/register/renew/resolution/reverse/transfer journey",
+            "2026-11-26T17:08:42.3658420Z ok 190 - rejects incomplete or semantically stale lifecycle evidence",
+            "2026-11-26T17:08:42.3665837Z ok 191 - accepts Indexer Search and Wallet agreement with canonical post-transfer state",
+            "2026-11-26T17:08:42.3678298Z ok 192 - rejects stale or contradictory derived-service evidence",
+            "2026-11-26T17:08:42.3686797Z ok 193 - binds live evidence to the exact repository SHA and rejects local-example provenance",
+            "2026-11-26T17:08:42.3689291Z ok 194 - runtime hash helper fails closed on empty code and hashes real runtime bytes",
+            "2026-11-26T17:08:42.5262679Z # Subtest: pinned Names420 descriptor is exact, reproducible and artifact-bound",
+            "2026-11-26T17:08:42.5263936Z ok 195 - pinned Names420 descriptor is exact, reproducible and artifact-bound",
+            "2026-11-26T17:08:42.5270531Z ok 196 - canonical Names420 descriptors decode registration, resolution, renewal and transfer lifecycle",
+            "2026-11-26T17:08:42.5278709Z ok 197 - Names420 fork replacement retracts orphan state and recovers on canonical replacement",
+            "2026-11-26T17:08:42.5281900Z ok 198 - descriptor/address/artifact drift fails closed",
+            "2026-11-26T17:08:42.5284567Z ok 199 - matching Names420 topic from the wrong contract address is rejected",
+            "2026-11-26T17:08:42.5843187Z ok 200 - native settlement archive binds log positions to the canonical execution commitment",
+            "2026-11-26T17:08:42.5851265Z ok 201 - native settlement rejects orphan archives, ordinary transaction claims and duplicate positions",
+            "2026-11-26T17:08:42.6281139Z ok 202 - 420Notifications adapter replays from consumer-owned checkpoints",
+            "2026-11-26T17:08:42.6293961Z ok 203 - restored checkpoints resume replay without re-binding to index database state",
+            "2026-11-26T17:08:42.6296992Z ok 204 - delivery enqueue failure is isolated and does not block other matching subscriptions",
+            "2026-11-26T17:08:42.6299699Z ok 205 - replaying the same event after restart remains delivery-idempotent",
+            "2026-11-26T17:08:42.6302567Z ok 206 - canonicality signals map to non-authoritative notification updates",
+            "2026-11-26T17:08:42.6304383Z ok 207 - batch chain mismatch fails closed before checkpoint advancement",
+            "2026-11-26T17:08:42.6760296Z ok 208 - operational status exposes indexed head and finality metadata without claiming protocol authority",
+            "2026-11-26T17:08:42.6763723Z ok 209 - readiness requires both database access and an indexed head",
+            "2026-11-26T17:08:42.7226986Z ok 210 - telemetry records ingest, lag and reorg progress as non-authoritative aggregates",
+            "2026-11-26T17:08:42.7230769Z ok 211 - delivery telemetry tracks pressure and retry/dead-letter transitions without payload leakage",
+            "2026-11-26T17:08:42.7234630Z ok 212 - work telemetry exposes only aggregate pressure and rejected admission",
+            "2026-11-26T17:08:42.7237617Z ok 213 - telemetry fails closed on invalid numeric gauges",
+            "2026-11-26T17:08:42.7646241Z ok 214 - 420Pay accounting export preserves every frozen field exactly once",
+            "2026-11-26T17:08:42.7657598Z ok 215 - 420Pay accounting export rejects refund totals above canonical settlement plus tip",
+            "2026-11-26T17:08:42.7661907Z ok 216 - 420Pay accounting export rejects malformed canonical commitments",
+            "2026-11-26T17:08:42.7664405Z ok 217 - 420Pay accounting exporter is replaceable and receives the canonical DTO",
+            "2026-11-26T17:08:43.3677787Z ok 218 - query service executes keyset pages and routed lookups against PostgreSQL",
+            "2026-11-26T17:08:43.4089730Z ok 219 - protocol event DTO maps protocol projection rows into transport-safe typed output",
+            "2026-11-26T17:08:43.4094181Z ok 220 - protocol object state DTO requires stable object identity and preserves null lifecycle state",
+            "2026-11-26T17:08:43.4098509Z ok 221 - protocol DTO mapping fails closed on non-JSON field values",
+            "2026-11-26T17:08:43.4528730Z ok 222 - protocol object state lookup queries the canonical latest-state projection and maps a stable DTO",
+            "2026-11-26T17:08:43.4532856Z ok 223 - protocol object state lookup returns null when the object is absent and fails closed on empty identifiers",
+            "2026-11-26T17:08:43.4536488Z ok 224 - non-Governance protocol objects continue to use the generic latest-state view",
+            "2026-11-26T17:08:43.4955128Z ok 225 - manifest descriptor decodes indexed and data fields deterministically",
+            "2026-11-26T17:08:43.4961741Z ok 226 - projection stores decoded genesis events and ignores unknown topics",
+            "2026-11-26T17:08:43.4965008Z ok 227 - protocol projection rollback is block bounded",
+            "2026-11-26T17:08:43.4969828Z ok 228 - Governance event projection is idempotent and reorg replay replaces fork provenance after rollback",
+            "2026-11-26T17:08:43.4972475Z ok 229 - protocol decoder preserves signed int256 reputation totals",
+            "2026-11-26T17:08:43.6328222Z # Subtest: pinned ProtocolRegistry descriptor is reproducible and hash-bound",
+            "2026-11-26T17:08:43.6329189Z ok 230 - pinned ProtocolRegistry descriptor is reproducible and hash-bound",
+            "2026-11-26T17:08:43.6333283Z ok 231 - known ServiceVersionPublished vector decodes with canonical descriptor and address",
+            "2026-11-26T17:08:43.6342000Z ok 232 - known registration profile vector decodes deterministically",
+            "2026-11-26T17:08:43.6344975Z ok 233 - descriptor hash drift and identity drift fail closed",
+            "2026-11-26T17:08:43.6347427Z ok 234 - matching topic from the wrong contract address is rejected",
+            "2026-11-26T17:08:43.6945806Z ok 235 - classifies search routes deterministically",
+            "2026-11-26T17:08:43.6951216Z ok 236 - asset transfer paging emits a stable composite cursor including native sentinel positions",
+            "2026-11-26T17:08:43.6955390Z ok 237 - asset transfer query accepts its own sentinel cursor for the next keyset page",
+            "2026-11-26T17:08:43.6958497Z ok 238 - public DTO mappers use JSON-safe strings and preserve the native sentinel",
+            "2026-11-26T17:08:43.6967522Z ok 239 - search routing avoids broad union scans for exact identifiers",
+            "2026-11-26T17:08:43.7380693Z ok 240 - cursor codecs round-trip canonical positions",
+            "2026-11-26T17:08:43.7383774Z ok 241 - limits are bounded and fail closed",
+            "2026-11-26T17:08:43.7387097Z ok 242 - blocks use keyset pagination and fetch one extra row",
+            "2026-11-26T17:08:43.7389791Z ok 243 - address transaction query preserves tuple ordering",
+            "2026-11-26T17:08:43.7392836Z ok 244 - log and protocol queries use canonical block tx log position",
+            "2026-11-26T17:08:43.7404544Z ok 245 - asset transfer query is chain scoped and deterministic",
+            "2026-11-26T17:08:43.7406589Z ok 246 - Names history query supports canonical ascending replay order",
+            "2026-11-26T17:08:43.7857210Z ok 247 - emits a stable next cursor from one-extra-row block pages",
+            "2026-11-26T17:08:43.7871780Z ok 248 - transaction and log pages encode canonical positions",
+            "2026-11-26T17:08:43.7874494Z ok 249 - normalizes direct hash and address lookups",
+            "2026-11-26T17:08:43.7877066Z ok 250 - search is routed, bounded, and invalid-token safe",
+            "2026-11-26T17:08:43.7879411Z ok 251 - fails closed on malformed database rows used for cursors",
+            "2026-11-26T17:08:43.7881714Z ok 252 - Governance proposal search uses the canonical proposalId object key",
+            "2026-11-26T17:08:43.9298525Z ok 253 - pinned generalized Randomness descriptor binds fixed registry and Registry-resolved router",
+            "2026-11-26T17:08:43.9301912Z ok 254 - generalized router request and resolve events reduce to pending then completed",
+            "2026-11-26T17:08:43.9305744Z ok 255 - voided generalized request becomes terminal expired",
+            "2026-11-26T17:08:43.9309826Z ok 256 - registry request and fulfillment events retain the same request object identity",
+            "2026-11-26T17:08:43.9312026Z ok 257 - wrong router address and registry/router address collision fail closed",
+            "2026-11-26T17:08:44.0809294Z ok 258 - receipt DTO maps transport-safe receipt fields",
+            "2026-11-26T17:08:44.0814681Z ok 259 - log DTO maps topics and indexed log position",
+            "2026-11-26T17:08:44.0821393Z ok 260 - public API retrieves receipts and paged logs without leaking query rows",
+            "2026-11-26T17:08:44.0823880Z ok 261 - receipt/log DTOs fail closed on malformed projection rows",
+            "2026-11-26T17:08:44.1407490Z ok 262 - recovers to the nearest canonical ancestor and trims local history",
+            "2026-11-26T17:08:44.1413022Z ok 263 - fails closed when a reorg exceeds configured depth",
+            "2026-11-26T17:08:44.1418211Z ok 264 - EVM JSON-RPC source resolves the finalized block tag",
+            "2026-11-26T17:08:44.1429656Z ok 265 - ingestor honors source finalized head semantics",
+            "2026-11-26T17:08:44.3077966Z ok 266 - Resource retained event descriptors exactly match compiler evidence and reject spoofed/malformed logs",
+            "2026-11-26T17:08:44.5226575Z ok 267 - Resource deployment verifies complete registry graph and rejects incorrect authority",
+            "2026-11-26T17:08:44.9661342Z ok 268 - Resource durable PostgreSQL ingestion, receipt reconciliation, restart, rollback and canonical rebuild",
+            "2026-11-26T17:08:45.1215036Z ok 269 - 420Rights descriptor manifest reconstructs every canonical emitted event",
+            "2026-11-26T17:08:45.1218125Z ok 270 - 420Rights descriptor generation fails closed on ABI indexing drift",
+            "2026-11-26T17:08:45.1220719Z ok 271 - 420Rights descriptor binding accepts exact registry-resolved address set",
+            "2026-11-26T17:08:45.1223198Z ok 272 - 420Rights descriptor binding rejects malformed deployment address",
+            "2026-11-26T17:08:45.1226347Z ok 273 - 420Rights code-identity binding accepts exact registry addresses and nonzero runtime hashes",
+            "2026-11-26T17:08:45.1229057Z ok 274 - 420Rights code-identity binding rejects zero runtime code hash",
+            "2026-11-26T17:08:45.2695903Z ok 275 - runtime state fails closed until serving with a successful ingest",
+            "2026-11-26T17:08:45.2697859Z ok 276 - runtime readiness detects stale ingestion and draining state",
+            "2026-11-26T17:08:45.2700696Z ok 277 - runtime state rejects backwards ingest time and invalid recovery from terminal states",
+            "2026-11-26T17:08:45.2703194Z ok 278 - public adapter makes readiness stale-aware and exposes source lag",
+            "2026-11-26T17:08:46.1441615Z ok 279 - Stake durable SQL restart, interruption, finalized rollback and canonical reconstruction",
+            "2026-11-26T17:08:46.3004024Z ok 280 - pinned 420Stake descriptor is exact and retains canonical lifecycle/reward event set",
+            "2026-11-26T17:08:46.3013343Z ok 281 - canonical Stake descriptors decode validator lifecycle, slashing and rewards",
+            "2026-11-26T17:08:46.3016658Z ok 282 - Stake event canonicality retracts orphan lifecycle/reward observations on reorg",
+            "2026-11-26T17:08:46.3019192Z ok 283 - Stake descriptor and retained artifact provenance drift fails closed",
+            "2026-11-26T17:08:46.3021588Z ok 284 - matching canonical Stake topic from the wrong contract is rejected",
+            "2026-11-26T17:08:46.3024031Z ok 285 - Go Stake activity classifier is pinned to the same descriptor topics",
+            "2026-11-26T17:08:46.3554587Z ok 286 - IDX-10.5 emits GO only when all live and artifact-backed evidence is present",
+            "2026-11-26T17:08:46.3561322Z ok 287 - IDX-10.5 fails closed when deployment-time evidence is absent",
+            "2026-11-26T17:08:46.3564791Z ok 288 - IDX-10.5 rejects internally inconsistent phase evidence",
+            "2026-11-26T17:08:46.3569408Z ok 289 - IDX-10.5 requires descriptor and compiled-artifact digests when qualification is claimed",
+            "2026-11-26T17:08:46.3974092Z ok 290 - IDX-10.4 qualifies the stable public API and replayable event-stream boundary",
+            "2026-11-26T17:08:46.3980610Z ok 291 - IDX-10.4 fails closed when readiness does not admit traffic",
+            "2026-11-26T17:08:46.3986563Z ok 292 - IDX-10.4 refuses stale witness data beyond the indexed head",
+            "2026-11-26T17:08:46.3995456Z ok 293 - IDX-10.4 requires direct resources and consumer feeds to contain the configured witnesses",
+            "2026-11-26T17:08:46.3997473Z ok 294 - IDX-10.4 requires non-authoritative replay metadata from the notification event stream",
+            "2026-11-26T17:08:46.4468640Z ok 295 - parses an explicit testnet qualification environment",
+            "2026-11-26T17:08:46.4471625Z ok 296 - fails closed when chain identity is missing or malformed",
+            "2026-11-26T17:08:46.4476413Z ok 297 - rejects unsafe RPC URL forms and embedded credentials",
+            "2026-11-26T17:08:46.4478682Z ok 298 - enforces finality-specific confirmation settings",
+            "2026-11-26T17:08:46.4481336Z ok 299 - requires bounded replay to remain inside the reorg qualification window",
+            "2026-11-26T17:08:46.4486496Z ok 300 - IDX-10.2 validates chain/genesis identity and indexes the sustained safe-head window",
+            "2026-11-26T17:08:46.4491420Z ok 301 - IDX-10.2 fails closed on wrong chain or genesis identity before indexing",
+            "2026-11-26T17:08:46.4502593Z ok 302 - IDX-10.2 refuses to claim qualification before the sustained safe-block window exists",
+            "2026-11-26T17:08:46.4504815Z ok 303 - IDX-10.2 honors finalized finality and requires source support for it",
+            "2026-11-26T17:08:46.4959804Z ok 304 - IDX-10.3 resumes from durable state inside the replay window and a repeated restart is idempotent",
+            "2026-11-26T17:08:46.4963823Z ok 305 - IDX-10.3 fails closed when restart catch-up exceeds the configured replay window",
+            "2026-11-26T17:08:46.4968529Z ok 306 - IDX-10.3 rolls back a bounded canonical reorg and deterministically replays the new branch",
+            "2026-11-26T17:08:46.4972952Z ok 307 - IDX-10.3 deep reorg fails closed without destructive rollback or checkpoint movement",
+            "2026-11-26T17:08:46.5359257Z ok 308 - Token binding rejects incomplete, aliased and reserved addresses",
+            "2026-11-26T17:08:47.0489846Z ok 309 - Treasury durable PostgreSQL checkpoint, restart, reorganization and clean rebuild",
+            "2026-11-26T17:08:47.2073771Z ok 310 - Treasury descriptor covers the complete modern event-emitting contract family and remains address-unbound",
+            "2026-11-26T17:08:47.2077930Z ok 311 - Treasury deployment binding fails closed until valid registry-resolved identities are supplied",
+            "2026-11-26T17:08:47.2080601Z ok 312 - Treasury descriptor generation rejects ABI/indexing drift",
+            "2026-11-26T17:08:47.2083277Z ok 313 - Treasury budget read model rebuilds complete state from creation and accounting events",
+            "2026-11-26T17:08:47.2106236Z ok 314 - Treasury disbursement read model preserves schedule fields and terminal release evidence",
+            "2026-11-26T17:08:47.2136059Z ok 315 - Treasury read model rejects terminal replay and accounting corruption",
+            "2026-11-26T17:08:47.2138332Z ok 316 - Treasury event projection is replay-safe and reorg rollback permits canonical replay",
+            "2026-11-26T17:08:47.2141059Z ok 317 - Treasury rejects unbound, aliased, zero and wrong-address descriptors and malformed words",
+            "2026-11-26T17:08:47.2144890Z ok 318 - Treasury policy replay reconstructs native policy revisions and rejects missing revisions, mutable epoch and invalid provenance",
+            "2026-11-26T17:08:47.2148829Z ok 319 - Treasury budget rejects an intermediate ceiling violation even if repaired by later events, and creation must precede changes",
+            "2026-11-26T17:08:47.2665138Z ok 320 - drain stops new work and waits for already accepted work",
+            "2026-11-26T17:08:47.2670614Z ok 321 - shutdown timeout fails runtime closed and reports remaining in-flight work",
+            "2026-11-26T17:08:47.2676865Z ok 322 - shutdown with no work enters draining without failure",
+            "2026-11-26T17:08:47.2679732Z ok 323 - invalid shutdown bounds fail closed",
+            "2026-11-26T17:08:47.2742218Z # tests 323",
+            "2026-11-26T17:08:47.2742709Z # pass 322",
+            "2026-11-26T17:08:47.2742946Z # fail 0",
+            "2026-11-26T17:08:47.2743448Z # skipped 1",
+            "2026-11-26T17:08:50.8510906Z ok  \tgithub.com/420integrated/420-integrated/explorer/api\t0.173s",
+            "2026-11-26T17:08:50.8954667Z ok  \tgithub.com/420integrated/420-integrated/explorer/cmd/explorer420\t0.006s",
+            "2026-11-26T17:08:50.9011135Z ok  \tgithub.com/420integrated/420-integrated/explorer/cmd/explorerlivevalidate\t0.012s",
+            "2026-11-26T17:08:50.9011864Z ok  \tgithub.com/420integrated/420-integrated/explorer/cmd/explorersmoke\t0.007s",
+            "2026-11-26T17:08:50.9322021Z ok  \tgithub.com/420integrated/420-integrated/explorer/indexerclient\t0.009s",
+            "2026-11-26T17:08:50.9408310Z ok  \tgithub.com/420integrated/420-integrated/explorer/service\t0.004s",
+            "2026-11-26T17:08:50.9430033Z ok  \tgithub.com/420integrated/420-integrated/explorer/web\t0.006s"
+          ]
+        },
+        {
+          "id": 140065150480,
+          "name": "stake-recovery",
+          "conclusion": "skipped",
+          "steps": null,
+          "extract": []
+        },
+        {
+          "id": 140065150987,
+          "name": "stake-accounting",
+          "conclusion": "skipped",
+          "steps": null,
+          "extract": []
+        }
+      ]
+    },
+    {
+      "id": 45864804913,
+      "name": "Resource 8A2 compiler artifact reconciliation",
+      "source": "9eedc855391494412d6294ada449b6671bd701dd",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 140064762114,
+          "name": "reconcile",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Generate and reconcile compiler artifacts",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Post Run foundry-rs/foundry-toolchain@v1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            }
+          ],
+          "extract": [
+            "2026-11-26T17:06:59.1110051Z HEAD is now at 9eedc8553 Allow 60 minutes for full Resource security qualification without reducing hardening gates"
+          ]
+        },
+        {
+          "id": 140065477712,
+          "name": "retain-original-evidence",
+          "conclusion": "skipped",
+          "steps": null,
+          "extract": []
+        }
+      ]
+    }
+  ],
+  "reconciliation": {
+    "priorQualifiedHead": "9eedc855391494412d6294ada449b6671bd701dd",
+    "comparison": {
+      "repository_full_name": "abvhiael/420-integrated-v0.1",
+      "base": "9eedc855391494412d6294ada449b6671bd701dd",
+      "head": "812b9e64efc171d4ff43db6e3f355b2b586f3e8d",
+      "status": "ahead",
+      "ahead_by": 4,
+      "behind_by": 0,
+      "total_commits": 4,
+      "too_large": null,
+      "base_commit": {
+        "sha": "9eedc855391494412d6294ada449b6671bd701dd",
+        "url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/commits/9eedc855391494412d6294ada449b6671bd701dd",
+        "html_url": "https://github.com/abvhiael/420-integrated-v0.1/commit/9eedc855391494412d6294ada449b6671bd701dd"
+      },
+      "merge_base_commit": {
+        "sha": "9eedc855391494412d6294ada449b6671bd701dd",
+        "url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/commits/9eedc855391494412d6294ada449b6671bd701dd",
+        "html_url": "https://github.com/abvhiael/420-integrated-v0.1/commit/9eedc855391494412d6294ada449b6671bd701dd"
+      },
+      "files": [
+        {
+          "filename": ".github/workflows/resource-8a2-indexer.yml",
+          "status": "modified",
+          "additions": 9,
+          "deletions": 0,
+          "changes": 9,
+          "previous_filename": null
+        },
+        {
+          "filename": "docs/audit/420RESOURCE-8A2-closeout.md",
+          "status": "added",
+          "additions": 11,
+          "deletions": 0,
+          "changes": 11,
+          "previous_filename": null
+        },
+        {
+          "filename": "docs/audit/420RESOURCE-8A2-qualification/final-ci.json",
+          "status": "added",
+          "additions": 632,
+          "deletions": 0,
+          "changes": 632,
+          "previous_filename": null
+        }
+      ]
+    },
+    "disposition": "Compiler and general Indexer CI passed on C7; no compiler, contract, artifact, Indexer implementation, dependency or regression workflow inputs changed. C8 dedicated PostgreSQL workflow trigger and exact-head verification only. These two suites were not rerun on C8; reuse by unchanged inputs."
+  },
+  "results": {
+    "standardSequences": 2048,
+    "hardeningSequences": 4096,
+    "standardCalls": 524288,
+    "hardeningCalls": 1572864,
+    "policyFuzz": 150000,
+    "unexpectedReverts": 0,
+    "highSeverity": 0,
+    "postgresTests": 3,
+    "postgresSkipped": 0
+  }
+}

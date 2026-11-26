@@ -1,3 +1,5 @@
+import {WORD_SALAD_ART} from './word-salad-art-manifest.mjs';
+import {SALAD_ART} from '../core/word-salad-ui.js';
 // BG-19.13 deterministic build qualification: not a browser or network performance benchmark.
 import {readFile,readdir,stat} from 'node:fs/promises';
 import {resolve,relative} from 'node:path';
@@ -40,7 +42,15 @@ const cardFiles=files.filter(f=>normalize(f.path).startsWith(artPrefix));
 const mapFiles=files.filter(f=>normalize(f.path).startsWith(mapPrefix));
 const vehicleFiles=files.filter(f=>normalize(f.path).startsWith(vehiclePrefix));
 const labyrinthArtFiles=files.filter(f=>normalize(f.path).startsWith(labyrinthArtPrefix));
-const regularFiles=files.filter(f=>!normalize(f.path).startsWith(artPrefix)&&!normalize(f.path).startsWith(mapPrefix)&&!normalize(f.path).startsWith(vehiclePrefix)&&!normalize(f.path).startsWith(labyrinthArtPrefix)&&normalize(f.path)!=='assets/games/cribbage/board-cannabis-leaf.png');
+const saladPrefix='assets/games/word-salad/';
+const saladArtFiles=files.filter(f=>normalize(f.path).startsWith(saladPrefix));
+const saladAllowlist=new Set(SALAD_ART.map(p=>saladPrefix+p));
+if(saladArtFiles.length!==saladAllowlist.size||saladAllowlist.size!==Object.keys(WORD_SALAD_ART).length)throw Error('Word Salad artwork count mismatch');
+let saladArtBytes=0;
+for(const f of saladArtFiles){const name=normalize(f.path),pin=WORD_SALAD_ART[name.slice(saladPrefix.length)];if(!saladAllowlist.has(name)||!pin||pin.bytes!==f.size)throw Error('Unexpected Word Salad art '+name);const raw=await readFile(f.path);if(createHash('sha1').update('blob '+raw.length+'\0').update(raw).digest('hex')!==pin.git)throw Error('Changed Word Salad artwork '+name);const meta=await sharp(raw).metadata();if(meta.format!=='png'||!meta.width||!meta.height||meta.width>4096||meta.height>4096)throw Error('Invalid Word Salad art '+name);saladArtBytes+=f.size;}
+if(saladArtBytes>14512134)throw Error('Word Salad exact artwork budget exceeded');
+console.log('BC-4.4.2 verified artwork:',saladArtFiles.length,saladArtBytes);
+const regularFiles=files.filter(f=>!normalize(f.path).startsWith(saladPrefix)&&!normalize(f.path).startsWith(artPrefix)&&!normalize(f.path).startsWith(mapPrefix)&&!normalize(f.path).startsWith(vehiclePrefix)&&!normalize(f.path).startsWith(labyrinthArtPrefix)&&normalize(f.path)!=='assets/games/cribbage/board-cannabis-leaf.png');
 const baseTotal=regularFiles.reduce((sum,f)=>sum+f.size,0);
 const practiceJs=regularFiles.find(f=>normalize(f.path)==='core/chaos-practice-table.js')?.size;
 const practiceCss=regularFiles.find(f=>normalize(f.path)==='ccc-practice.css')?.size;
@@ -71,6 +81,9 @@ const regularSizes=new Map(regularFiles.map(f=>[normalize(f.path),f.size]));
 // BC-3.4 independently bounded additions over merged BC-3.3. Historical
 // allowances see the exact pre-Chess sizes, never a widened older ceiling.
 const chessBaselines={"app.js":34748,"core/app-shell.js":13025,"core/games-ui.js":10740,"core/classic-rooms.js":17765,"core/runtime-config.js":3856,"index.html":1569};
+// Independently bound new Word Salad code, preserve every historical allowance.
+let saladCodeBytes=0;
+for(const [name,cap] of Object.entries({'core/word-salad-ui.js':16384,'word-salad.css':8192})){const size=regularSizes.get(name);if(!Number.isSafeInteger(size)||size<256||size>cap)throw Error('Word Salad UI size invalid '+name);saladCodeBytes+=size;}
 let chessBytes=0;
 for(const [name,baseline] of Object.entries(chessBaselines)){
  const size=regularSizes.get(name);
@@ -366,7 +379,7 @@ for(const [path,{baseline,maxAdded}] of Object.entries(bc02Files)){
  bc02Growth+=growth;
 }
 if(bc02Growth>8*1024)throw new Error('BC-0.2 menu exceeded 8 KiB scoped budget');
-if(baseTotal-chessBytes-bc24Growth-bc25Growth-bc26Growth-bc27Growth-pinnedInheritedBytes-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024+CCC_PRACTICE_ALLOWANCE)
+if(baseTotal-saladCodeBytes-chessBytes-bc24Growth-bc25Growth-bc26Growth-bc27Growth-pinnedInheritedBytes-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024+CCC_PRACTICE_ALLOWANCE)
  throw new Error('BC-0.5 combined static asset budget exceeded: '+baseTotal);
 // CCC's account-only form wiring belongs to the separately approved roadboard/chat
 // allowance, not to the frozen BC-0.2 through BC-0.5 per-file limits.
@@ -383,7 +396,7 @@ if(!Number.isSafeInteger(gameKitLogicSize)||gameKitLogicSize<12*1024||gameKitLog
 // of the frozen BC-0.2 through BC-0.5 and original asset allowances.
 if(gameKitLogicSize+gameKitSize>24*1024)
  throw new Error('BC-0.9 combined tabletop allowance exceeded 24 KiB');
-const legacyBaseTotal=baseTotal-chessBytes-bc24Growth-bc25Growth-bc26Growth-bc27Growth-pinnedInheritedBytes-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-cribbageViewBytes-cribbageResumeBytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
+const legacyBaseTotal=baseTotal-saladCodeBytes-chessBytes-bc24Growth-bc25Growth-bc26Growth-bc27Growth-pinnedInheritedBytes-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-cribbageViewBytes-cribbageResumeBytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
 if(legacyBaseTotal>limits.baseTotal+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
  throw new Error('Previously qualified base asset budget exceeded: '+legacyBaseTotal+' > '+limits.baseTotal);
 console.log('Inherited independent source-bound modules:',JSON.stringify({bytes:pinnedInheritedBytes,cap:44*1024,source:'main e4020bb + BC-2.1 v2'}));
@@ -435,7 +448,7 @@ for(const f of vehicleFiles){
  const gitSha=createHash('sha1').update(Buffer.from('blob '+raw.length+'\0')).update(raw).digest('hex');
  if(gitSha!==CHAOS_VEHICLE_SOURCE_SHA[id])throw new Error('Published vehicle token differs from approved source: '+name);
 }
-const total=baseTotal+cardTotal+mapTotal+vehicleTotal;
+const total=baseTotal+cardTotal+mapTotal+vehicleTotal+saladArtBytes;
 for(const file of files){const name=relative(root,file.path);if(name.endsWith('.js')&&file.size>limits.singleJs)throw new Error(`JavaScript asset budget exceeded: ${name}`);if(name.endsWith('.css')&&file.size>limits.singleCss)throw new Error(`CSS asset budget exceeded: ${name}`);}
 const html=await readFile(resolve(root,'index.html'),'utf8');const app=await readFile(resolve(root,'app.js'),'utf8');const css=await readFile(resolve(root,'styles.css'),'utf8');const branding=await readFile(resolve(root,'branding.css'),'utf8');
 const tabletopCss=await readFile(resolve(root,'ccc-tabletop.css'),'utf8');
@@ -539,7 +552,7 @@ if(!computerJs.includes('chaosActionOptions(s)')||
 for(const [name,ok] of Object.entries({'document language':/<html\s+lang="[a-z-]+"/i.test(html),'viewport':/name="viewport"/.test(html),'main landmark':/<main\b/.test(app),'focus treatment':/:focus-visible\b/.test(css),'reduced motion':/prefers-reduced-motion/.test(css),'forced colors':/forced-colors/.test(css),'noindex private default':/name="robots"[^>]*noindex/i.test(html)}))if(!ok)throw new Error(`static accessibility/privacy gate missing: ${name}`);
 const names=new Map(files.map(file=>[relative(root,file.path).replaceAll('\\','/'),file.size]));
 for(const asset of DASHBOARD_ASSETS){const size=names.get(asset);if(!size||size>128*1024)throw new Error('missing or oversized dashboard artwork: '+asset);}
-for(const name of names.keys())if(name.startsWith('assets/')&&name!==CHAOS_IMAGE_MANIFEST_PATH&&!DASHBOARD_ASSETS.includes(name)&&!cardAllowlist.has(name)&&!mapAllowlist.has(name)&&!vehicleAllowlist.has(name)&&!bc14Allowed.has(name)&&name!==originalCribbageArt&&name!=='assets/games/labyrinth-cribbage/labyrinth.png')
+for(const name of names.keys())if(name.startsWith('assets/')&&name!==CHAOS_IMAGE_MANIFEST_PATH&&!DASHBOARD_ASSETS.includes(name)&&!cardAllowlist.has(name)&&!mapAllowlist.has(name)&&!vehicleAllowlist.has(name)&&!saladAllowlist.has(name)&&!bc14Allowed.has(name)&&name!==originalCribbageArt&&name!=='assets/games/labyrinth-cribbage/labyrinth.png')
  throw new Error('unexpected published asset: '+name);
 for(const asset of CHAOS_CARD_ART_OUTPUTS)if(!names.has(asset))throw new Error('missing approved card art: '+asset);
 if(names.has('bong-goggles-logo.png'))throw new Error('oversized original brand master must remain source-only');

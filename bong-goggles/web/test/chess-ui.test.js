@@ -84,3 +84,15 @@ test('BC-3.7 a legal click during polling submits once and stale read cannot ove
  assert.equal(c.state.session.sequence,2);assert.equal(c.state.session.view.lastSAN,'e4');
  assert.match(renderChessScreen('play',c.state),/Last move: e4/);
 });
+
+test('Chess distinguishes temporary identity failure from actual guest and recovers mixed legacy match list',async()=>{
+ let status=503;
+ const c=new ChessController({enabled:true,fetchImpl:async(url)=>{
+  const me=url.endsWith('/v1/me');
+  return new Response(JSON.stringify(me?{walletRequired:false,profile:{subject:actor}}:{onChain:false,wager:false,rewards:false,sessions:[{gameId:'cribbage',status:'timed_out',rulesVersion:'v1.0',id}]}),{status:me?status:200,headers:{'content-type':'application/json'}});
+ }});
+ await c.refresh(null);assert.equal(c.state.status,'unavailable');assert.match(c.state.error,/503/);
+ assert.doesNotMatch(renderChessScreen('play',c.state),/Sign in with 420ID to play/);
+ status=200;await c.refresh(null);assert.equal(c.state.status,'ready');assert.deepEqual(c.state.matches,[]);assert.equal(c.state.error,'');
+ status=401;await c.refresh(null);assert.equal(c.state.status,'guest');assert.equal(c.state.error,'');assert.equal(c.state.session,null);
+});

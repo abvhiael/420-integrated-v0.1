@@ -37,17 +37,17 @@ export class ChessController{
  }
  emit(p){this.state={...this.state,...p};this.onChange();return this.state;}
  invalidate(){this.gen++;this.busy=false;this.reading=false;this.actor=null;this.emit({session:null,actions:[],matches:[],selected:null,promotion:[],offer:false,error:'',status:this.client.enabled?'idle':'disabled'});}
- async principal(){const r=await this.client.request('/v1/me');return r.status===200&&r.data?.walletRequired===false&&isSubjectID(r.data.profile?.subject)?r.data.profile.subject:null;}
+ async principal(){const r=await this.client.request('/v1/me');if(r.status===401)return null;if(r.status!==200||r.data?.walletRequired!==false||!isSubjectID(r.data.profile?.subject))throw Error('420ID verification unavailable ('+r.status+')');return r.data.profile.subject;}
  async refresh(id){
   if(!this.client.enabled||this.busy)return;
   const gen=++this.gen;this.busy=this.reading=true;
   try{
    const actor=await this.principal();if(gen!==this.gen)return;
-   if(!actor){this.actor=null;this.emit({status:'guest',session:null,actions:[],matches:[]});return;}
+   if(!actor){this.actor=null;this.emit({status:'guest',session:null,actions:[],matches:[],error:''});return;}
    if(this.actor!==actor){this.actor=actor;this.emit({session:null,actions:[],matches:[],selected:null,promotion:[],offer:false});}
    if(!id){
     const r=await this.client.request('/v1/classic-sessions');if(gen!==this.gen)return;
-    if(!clean(r)||!Array.isArray(r.data.sessions))throw Error('Match list unavailable');
+    if(!clean(r)||!Array.isArray(r.data.sessions))throw Error('Match list unavailable ('+r.status+')');
     const matches=r.data.sessions.filter(s=>s.gameId==='chess'&&s.rulesVersion==='v1.1'&&chessID(s.id)&&['active','finished'].includes(s.status)).map(s=>({id:s.id,status:s.status}));
     if(await this.principal()!==actor)throw Error('Account changed');
     if(gen===this.gen)this.emit({status:'ready',matches,error:''});return;
@@ -64,7 +64,7 @@ export class ChessController{
    if(gen!==this.gen)return;
    if(previous?.id===id&&previous.sequence===s.sequence&&previous.seat===s.seat&&this.state.status==='ready')return;
    this.emit({status:'ready',session:s,actions,selected:null,promotion:[],offer:false,error:''});
-  }catch(e){if(gen===this.gen)this.emit({status:'unavailable',session:null,actions:[],selected:null,promotion:[],error:e.message});}
+  }catch(e){if(gen===this.gen)this.emit({status:'unavailable',session:null,actions:[],matches:[],selected:null,promotion:[],error:e.message});}
   finally{if(gen===this.gen)this.busy=this.reading=false;}
  }
  async act(action){

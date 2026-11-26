@@ -12,12 +12,12 @@ export function createChessRuntime({enabled=false,onChange=()=>{},win=window,doc
  const roomGo=room=>{win.history.pushState({},'','/games/rooms/'+room);win.dispatchEvent(new Event('popstate'));};
  const go=s=>{win.history.pushState({},'','/games/chess/play?session='+s.id);c.invalidate();win.dispatchEvent(new Event('popstate'));};
  async function start(form){
-  if(c.busy||!c.client.enabled)return;
+  if((c.busy&&!c.reading)||!c.client.enabled||c.state.status!=='ready')return;
   const data=new FormData(form),difficulty=data.get('difficulty'),clockProfile=data.get('clockProfile');
   if(!['easy','medium','hard'].includes(difficulty))return;
-  c.busy=true;const gen=++c.gen;let room=null;
+  c.reading=false;c.busy=true;const gen=++c.gen;let room=null;
   try{
-   const actor=await c.principal();if(!actor||gen!==c.gen)throw Error('Sign in again');
+   const actor=await c.principal();if(!actor||gen!==c.gen)throw Error('420ID session not confirmed');
    const created=await c.client.request('/v1/classic-rooms',{method:'POST',body:{gameId:'chess',visibility:'private',seatCount:2}});
    room=created.data?.room;
    if(created.status!==201||!chessID(room?.id)||room.host!==actor||room.gameId!=='chess'||room.status!=='open')throw Error('Chess room not confirmed');

@@ -23,6 +23,7 @@ const server=createServer(async(req,res)=>{
   const bytes=await readFile(path);res.writeHead(200,{'Content-Type':types[extname(path)]??'application/octet-stream'});res.end(bytes);
  }catch{res.writeHead(404);res.end();}
 });
+const trace=[];const record=(event)=>{trace.push(event);if(trace.length>80)trace.shift();};
 let browser,seq=1,board=fixture().privateView.board,last='',san='',outage=false,posts=0,dropReply=false,failedReads=0,authenticatedReads=0;const errors=[];
 const moves=['e2e4','e7e5','g1f3','b8c6'];const notation=['e4','e5','Nf3','Nc6'];
 // After the four submitted plies the game is still active. Advertise a
@@ -42,6 +43,7 @@ try{
   await context.route('**/social-api/**',async r=>{
    const p=new URL(r.request().url()).pathname.replace('/social-api','');
    const cookie=r.request().headers().cookie??'';
+   record({seat,method:r.request().method(),path:p,sequence:seq});
    if(outage&&seat===0){failedReads++;await r.abort('internetdisconnected');return;}
    assert.ok(cookie.includes('bc34_actor='+subject),'original authenticated cookie must survive');
    if(p==='/v1/me'&&seat===0)authenticatedReads++;
@@ -58,7 +60,7 @@ try{
     const b=r.request().postDataJSON();assert.equal(b.expectedSequence,seq+1);assert.equal(seat,(seq-1)%2);
     assert.ok(seq>=1&&seq<=moves.length,'unexpected submission outside scripted match sequence');
     assert.deepEqual(b.move,{type:'move',uci:moves[seq-1]});posts++;
-    const a=board.split(''),from=index(b.move.uci.slice(0,2)),to=index(b.move.uci.slice(2,4));a[to]=a[from];a[from]='.';board=a.join('');last=b.move.uci;san=notation[seq-1];seq++;
+    const a=board.split(''),from=index(b.move.uci.slice(0,2)),to=index(b.move.uci.slice(2,4));a[to]=a[from];a[from]='.';board=a.join('');last=b.move.uci;san=notation[seq-1];seq++;record({seat,committed:seq,san});
     if(dropReply&&seat===0){dropReply=false;outage=true;await r.abort('connectionreset');return;}
     data=envelope({session:session(seat)}).data;
    }else if(p==='/v1/classic-sessions/'+id)data=envelope({session:session(seat)}).data;
@@ -77,7 +79,7 @@ try{
   await page.locator('[data-chess-square="'+uci.slice(0,2)+'"]').click();
   await page.locator('[data-chess-square="'+uci.slice(2,4)+'"].target').waitFor({timeout:15000});
   await page.locator('[data-chess-square="'+uci.slice(2,4)+'"]').click();
-  if(san)await page.getByText('Last move: '+san,{exact:true}).waitFor({timeout:15000});
+  if(san)try{await page.getByText('Last move: '+san,{exact:true}).waitFor({timeout:15000});}catch(e){console.error('Chess move transport/render diagnostic',JSON.stringify({uci,san,seq,posts,trace,visible:await page.locator('main').innerText()}));throw e;}
  };
  const url=w.url();
  await w.evaluate(()=>{window.bc37DocumentMarker='same-document';});

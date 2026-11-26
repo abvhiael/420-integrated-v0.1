@@ -32,15 +32,15 @@ export function normalizeChessActions(r,s){
 }
 export class ChessController{
  constructor({enabled=false,fetchImpl=fetch,onChange=()=>{}}={}){
-  this.client=createAccountSocialClient({enabled,fetchImpl});this.onChange=onChange;this.gen=0;this.busy=false;this.actor=null;
+  this.client=createAccountSocialClient({enabled,fetchImpl});this.onChange=onChange;this.gen=0;this.busy=false;this.reading=false;this.actor=null;
   this.state={status:enabled?'idle':'disabled',session:null,actions:[],matches:[],selected:null,promotion:[],flipped:null,offer:false,error:''};
  }
  emit(p){this.state={...this.state,...p};this.onChange();return this.state;}
- invalidate(){this.gen++;this.busy=false;this.actor=null;this.emit({session:null,actions:[],matches:[],selected:null,promotion:[],offer:false,error:'',status:this.client.enabled?'idle':'disabled'});}
+ invalidate(){this.gen++;this.busy=false;this.reading=false;this.actor=null;this.emit({session:null,actions:[],matches:[],selected:null,promotion:[],offer:false,error:'',status:this.client.enabled?'idle':'disabled'});}
  async principal(){const r=await this.client.request('/v1/me');return r.status===200&&r.data?.walletRequired===false&&isSubjectID(r.data.profile?.subject)?r.data.profile.subject:null;}
  async refresh(id){
   if(!this.client.enabled||this.busy)return;
-  const gen=++this.gen;this.busy=true;
+  const gen=++this.gen;this.busy=this.reading=true;
   try{
    const actor=await this.principal();if(gen!==this.gen)return;
    if(!actor){this.actor=null;this.emit({status:'guest',session:null,actions:[],matches:[]});return;}
@@ -65,12 +65,13 @@ export class ChessController{
    if(previous?.id===id&&previous.sequence===s.sequence&&previous.seat===s.seat&&this.state.status==='ready')return;
    this.emit({status:'ready',session:s,actions,selected:null,promotion:[],offer:false,error:''});
   }catch(e){if(gen===this.gen)this.emit({status:'unavailable',session:null,actions:[],selected:null,promotion:[],error:e.message});}
-  finally{if(gen===this.gen)this.busy=false;}
+  finally{if(gen===this.gen)this.busy=this.reading=false;}
  }
  async act(action){
   const s=this.state.session,actor=this.actor;
-  if(this.busy||!s||!this.state.actions.some(a=>a.type===action.type&&a.uci===action.uci))return;
-  const gen=++this.gen;this.busy=true;this.emit({status:'submitting',error:''});
+  if((this.busy&&!this.reading)||this.state.status!=='ready'||!s||!this.state.actions.some(a=>a.type===action.type&&a.uci===action.uci))return;
+  // An authorized click supersedes an in-flight read, never another mutation.
+  const gen=++this.gen;this.reading=false;this.busy=true;this.emit({status:'submitting',error:''});
   try{
    if(await this.principal()!==actor||gen!==this.gen)throw Error('Account changed');
    const requestId=globalThis.crypto?.randomUUID?.();if(!chessID(requestId))throw Error('Secure request ID unavailable');

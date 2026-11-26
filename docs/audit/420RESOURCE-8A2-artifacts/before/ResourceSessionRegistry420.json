@@ -1,0 +1,531 @@
+{
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "sessionId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "settledAmount420",
+          "type": "uint256"
+        }
+      ],
+      "name": "SessionSettled",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "sessionId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "offerId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "consumer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint128",
+          "name": "maxUnits",
+          "type": "uint128"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "maxSpend420",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "expiresAt",
+          "type": "uint64"
+        }
+      ],
+      "name": "SessionOpened",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "sessionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "SessionCancelled",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "sessionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "SessionClosed",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidSession",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidState",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "SessionExists",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Unauthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "authorization",
+      "outputs": [
+        {
+          "internalType": "contract ResourceAuthorization420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "offers",
+      "outputs": [
+        {
+          "internalType": "contract ResourceOfferRegistry420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "protocolVersion",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "systemName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "consumer",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "offerId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "nonce",
+          "type": "uint256"
+        }
+      ],
+      "name": "canonicalSessionId",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "offers_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "authorization_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getSession",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "offerId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "consumer",
+              "type": "address"
+            },
+            {
+              "internalType": "uint128",
+              "name": "maxUnits",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint256",
+              "name": "maxSpend420",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint64",
+              "name": "openedAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "expiresAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "enum ResourceSessionRegistry420.State",
+              "name": "state",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct ResourceSessionRegistry420.Session",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isOpen",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "sessionId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "offerId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint128",
+          "name": "maxUnits",
+          "type": "uint128"
+        },
+        {
+          "internalType": "uint64",
+          "name": "expiresAt",
+          "type": "uint64"
+        }
+      ],
+      "name": "openSession",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "sessionId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "settledAmount420",
+          "type": "uint256"
+        }
+      ],
+      "name": "markSettled",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "sessionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "cancelSession",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "sessionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "closeSession",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "creationBytecode": {
+    "bytes": 3931,
+    "immutableReferences": {},
+    "linkReferences": {},
+    "sha256": "5c94535dbd57febb95e18e9f1cd9e2a7c66c132b5346f447f3d7fba9a36b95a8"
+  },
+  "runtimeBytecodeTemplate": {
+    "bytes": 3650,
+    "immutableReferences": {
+      "2055": [
+        {
+          "length": 32,
+          "start": 494
+        },
+        {
+          "length": 32,
+          "start": 572
+        },
+        {
+          "length": 32,
+          "start": 1762
+        },
+        {
+          "length": 32,
+          "start": 2567
+        }
+      ],
+      "2058": [
+        {
+          "length": 32,
+          "start": 2081
+        },
+        {
+          "length": 32,
+          "start": 3201
+        }
+      ]
+    },
+    "linkReferences": {},
+    "sha256": "716460f43f44147ed48707f5f3927496202f0f9e183d45b2a69be9ea7bf52366"
+  },
+  "source": "contracts/src/resource/ResourceSessionRegistry420.sol",
+  "sourceBlob": "d873811d081b2ea333c010199a8ce150d918c83e",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 2063,
+        "contract": "src/resource/ResourceSessionRegistry420.sol:ResourceSessionRegistry420",
+        "label": "_sessions",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_struct(Session)2052_storage)"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_enum(State)2034": {
+        "encoding": "inplace",
+        "label": "enum ResourceSessionRegistry420.State",
+        "numberOfBytes": "1"
+      },
+      "t_mapping(t_bytes32,t_struct(Session)2052_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct ResourceSessionRegistry420.Session)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Session)2052_storage"
+      },
+      "t_struct(Session)2052_storage": {
+        "encoding": "inplace",
+        "label": "struct ResourceSessionRegistry420.Session",
+        "members": [
+          {
+            "astId": 2036,
+            "contract": "src/resource/ResourceSessionRegistry420.sol:ResourceSessionRegistry420",
+            "label": "offerId",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 2038,
+            "contract": "src/resource/ResourceSessionRegistry420.sol:ResourceSessionRegistry420",
+            "label": "consumer",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_address"
+          },
+          {
+            "astId": 2040,
+            "contract": "src/resource/ResourceSessionRegistry420.sol:ResourceSessionRegistry420",
+            "label": "maxUnits",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint128"
+          },
+          {
+            "astId": 2042,
+            "contract": "src/resource/ResourceSessionRegistry420.sol:ResourceSessionRegistry420",
+            "label": "maxSpend420",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 2044,
+            "contract": "src/resource/ResourceSessionRegistry420.sol:ResourceSessionRegistry420",
+            "label": "openedAt",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 2046,
+            "contract": "src/resource/ResourceSessionRegistry420.sol:ResourceSessionRegistry420",
+            "label": "expiresAt",
+            "offset": 8,
+            "slot": "4",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 2049,
+            "contract": "src/resource/ResourceSessionRegistry420.sol:ResourceSessionRegistry420",
+            "label": "state",
+            "offset": 16,
+            "slot": "4",
+            "type": "t_enum(State)2034"
+          },
+          {
+            "astId": 2051,
+            "contract": "src/resource/ResourceSessionRegistry420.sol:ResourceSessionRegistry420",
+            "label": "exists",
+            "offset": 17,
+            "slot": "4",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "160"
+      },
+      "t_uint128": {
+        "encoding": "inplace",
+        "label": "uint128",
+        "numberOfBytes": "16"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      },
+      "t_uint64": {
+        "encoding": "inplace",
+        "label": "uint64",
+        "numberOfBytes": "8"
+      }
+    }
+  }
+}

@@ -1,0 +1,721 @@
+{
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "nodeId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint128",
+          "name": "totalBytes",
+          "type": "uint128"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint128",
+          "name": "reservedBytes",
+          "type": "uint128"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "metadataHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "revision",
+          "type": "uint32"
+        }
+      ],
+      "name": "StorageCapacityConfigured",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "reservationId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "nodeId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint128",
+          "name": "sizeBytes",
+          "type": "uint128"
+        }
+      ],
+      "name": "StorageCapacityReleased",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "reservationId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "nodeId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint128",
+          "name": "sizeBytes",
+          "type": "uint128"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "releaseAfter",
+          "type": "uint64"
+        }
+      ],
+      "name": "StorageCapacityReserved",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "CapacityNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InsufficientCapacity",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidCapacity",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidStoreNode",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ReservationExists",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ReservationLocked",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ReservationNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Unauthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroAddress",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "authorization",
+      "outputs": [
+        {
+          "internalType": "contract ResourceAuthorization420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "nodes",
+      "outputs": [
+        {
+          "internalType": "contract ResourceNodeRegistry420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "protocolVersion",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "providers",
+      "outputs": [
+        {
+          "internalType": "contract ResourceProviderRegistry420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "systemName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "authorization_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "nodes_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "providers_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "collateralReservation",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "nodeId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint128",
+          "name": "sizeBytes",
+          "type": "uint128"
+        },
+        {
+          "internalType": "uint64",
+          "name": "releaseAfter",
+          "type": "uint64"
+        }
+      ],
+      "name": "reserveCapacity",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "reservationId",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "nodeId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "canonicalReservationId",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "nodeId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint128",
+          "name": "totalBytes",
+          "type": "uint128"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "metadataHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "configureCapacity",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "nodeId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "availableBytes",
+      "outputs": [
+        {
+          "internalType": "uint128",
+          "name": "",
+          "type": "uint128"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "nodeId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getCapacity",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint128",
+              "name": "totalBytes",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint128",
+              "name": "reservedBytes",
+              "type": "uint128"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "metadataHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "revision",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct StorageCapacityRegistry420.Capacity",
+          "name": "capacity",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "reservationId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getReservation",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "nodeId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "agreementId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint128",
+              "name": "sizeBytes",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint64",
+              "name": "releaseAfter",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bool",
+              "name": "active",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct StorageCapacityRegistry420.Reservation",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "reservationId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isReservationActive",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "reservationId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "releaseCapacity",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "creationBytecode": {
+    "bytes": 5703,
+    "immutableReferences": {},
+    "linkReferences": {},
+    "sha256": "47ffa3be748b57c8315e7e6b26d07708a2f843f2619306d18b7992a27193fa17"
+  },
+  "runtimeBytecodeTemplate": {
+    "bytes": 5368,
+    "immutableReferences": {
+      "7739": [
+        {
+          "length": 32,
+          "start": 2029
+        },
+        {
+          "length": 32,
+          "start": 3343
+        },
+        {
+          "length": 32,
+          "start": 4081
+        }
+      ],
+      "7742": [
+        {
+          "length": 32,
+          "start": 925
+        },
+        {
+          "length": 32,
+          "start": 2772
+        },
+        {
+          "length": 32,
+          "start": 4012
+        }
+      ],
+      "7745": [
+        {
+          "length": 32,
+          "start": 378
+        },
+        {
+          "length": 32,
+          "start": 1071
+        },
+        {
+          "length": 32,
+          "start": 2923
+        },
+        {
+          "length": 32,
+          "start": 4306
+        }
+      ]
+    },
+    "linkReferences": {},
+    "sha256": "22c4298e3802c861f9d204f8d86766c3011e200dc531a0d4d1a6f29f419f4c3f"
+  },
+  "source": "contracts/src/resource/StorageCapacityRegistry420.sol",
+  "sourceBlob": "8e77c84ebabc8ad7c1f8ee4241278d9eb254a0e9",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 7750,
+        "contract": "src/resource/StorageCapacityRegistry420.sol:StorageCapacityRegistry420",
+        "label": "_capacities",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_struct(Capacity)7723_storage)"
+      },
+      {
+        "astId": 7755,
+        "contract": "src/resource/StorageCapacityRegistry420.sol:StorageCapacityRegistry420",
+        "label": "_reservations",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_bytes32,t_struct(Reservation)7736_storage)"
+      },
+      {
+        "astId": 7759,
+        "contract": "src/resource/StorageCapacityRegistry420.sol:StorageCapacityRegistry420",
+        "label": "collateralReservation",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_mapping(t_bytes32,t_bytes32)"
+      }
+    ],
+    "types": {
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_bytes32,t_bytes32)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => bytes32)",
+        "numberOfBytes": "32",
+        "value": "t_bytes32"
+      },
+      "t_mapping(t_bytes32,t_struct(Capacity)7723_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct StorageCapacityRegistry420.Capacity)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Capacity)7723_storage"
+      },
+      "t_mapping(t_bytes32,t_struct(Reservation)7736_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct StorageCapacityRegistry420.Reservation)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Reservation)7736_storage"
+      },
+      "t_struct(Capacity)7723_storage": {
+        "encoding": "inplace",
+        "label": "struct StorageCapacityRegistry420.Capacity",
+        "members": [
+          {
+            "astId": 7714,
+            "contract": "src/resource/StorageCapacityRegistry420.sol:StorageCapacityRegistry420",
+            "label": "totalBytes",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint128"
+          },
+          {
+            "astId": 7716,
+            "contract": "src/resource/StorageCapacityRegistry420.sol:StorageCapacityRegistry420",
+            "label": "reservedBytes",
+            "offset": 16,
+            "slot": "0",
+            "type": "t_uint128"
+          },
+          {
+            "astId": 7718,
+            "contract": "src/resource/StorageCapacityRegistry420.sol:StorageCapacityRegistry420",
+            "label": "metadataHash",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 7720,
+            "contract": "src/resource/StorageCapacityRegistry420.sol:StorageCapacityRegistry420",
+            "label": "revision",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint32"
+          },
+          {
+            "astId": 7722,
+            "contract": "src/resource/StorageCapacityRegistry420.sol:StorageCapacityRegistry420",
+            "label": "exists",
+            "offset": 4,
+            "slot": "2",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "96"
+      },
+      "t_struct(Reservation)7736_storage": {
+        "encoding": "inplace",
+        "label": "struct StorageCapacityRegistry420.Reservation",
+        "members": [
+          {
+            "astId": 7725,
+            "contract": "src/resource/StorageCapacityRegistry420.sol:StorageCapacityRegistry420",
+            "label": "nodeId",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 7727,
+            "contract": "src/resource/StorageCapacityRegistry420.sol:StorageCapacityRegistry420",
+            "label": "agreementId",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 7729,
+            "contract": "src/resource/StorageCapacityRegistry420.sol:StorageCapacityRegistry420",
+            "label": "sizeBytes",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint128"
+          },
+          {
+            "astId": 7731,
+            "contract": "src/resource/StorageCapacityRegistry420.sol:StorageCapacityRegistry420",
+            "label": "releaseAfter",
+            "offset": 16,
+            "slot": "2",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 7733,
+            "contract": "src/resource/StorageCapacityRegistry420.sol:StorageCapacityRegistry420",
+            "label": "active",
+            "offset": 24,
+            "slot": "2",
+            "type": "t_bool"
+          },
+          {
+            "astId": 7735,
+            "contract": "src/resource/StorageCapacityRegistry420.sol:StorageCapacityRegistry420",
+            "label": "exists",
+            "offset": 25,
+            "slot": "2",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "96"
+      },
+      "t_uint128": {
+        "encoding": "inplace",
+        "label": "uint128",
+        "numberOfBytes": "16"
+      },
+      "t_uint32": {
+        "encoding": "inplace",
+        "label": "uint32",
+        "numberOfBytes": "4"
+      },
+      "t_uint64": {
+        "encoding": "inplace",
+        "label": "uint64",
+        "numberOfBytes": "8"
+      }
+    }
+  }
+}

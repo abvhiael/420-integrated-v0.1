@@ -1,0 +1,542 @@
+{
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "commitmentId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "nodeId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "proofSchemeId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "contentRoot",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "replicaRoot",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint128",
+          "name": "sizeBytes",
+          "type": "uint128"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "startTime",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "endTime",
+          "type": "uint64"
+        }
+      ],
+      "name": "StorageCommitmentRegistered",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "CommitmentExists",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "CommitmentNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InactiveProofScheme",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidCommitment",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidStoreNode",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Unauthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroAddress",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "authorization",
+      "outputs": [
+        {
+          "internalType": "contract ResourceAuthorization420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "nodes",
+      "outputs": [
+        {
+          "internalType": "contract ResourceNodeRegistry420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "protocolVersion",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "providers",
+      "outputs": [
+        {
+          "internalType": "contract ResourceProviderRegistry420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "schemes",
+      "outputs": [
+        {
+          "internalType": "contract StorageProofSchemeRegistry420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "systemName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "authorization_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "providers_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "nodes_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "schemes_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "commitmentId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "nodeId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "proofSchemeId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "contentRoot",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "replicaRoot",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint128",
+          "name": "sizeBytes",
+          "type": "uint128"
+        },
+        {
+          "internalType": "uint64",
+          "name": "startTime",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint64",
+          "name": "endTime",
+          "type": "uint64"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "metadataHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "registerCommitment",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "commitmentId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getCommitment",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "providerId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "nodeId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "proofSchemeId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "contentRoot",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "replicaRoot",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "metadataHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint128",
+              "name": "sizeBytes",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint64",
+              "name": "startTime",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "endTime",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct StorageCommitmentRegistry420.Commitment",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "commitmentId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isLive",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "creationBytecode": {
+    "bytes": 3944,
+    "immutableReferences": {},
+    "linkReferences": {},
+    "sha256": "53a07204030c8eebdac5de83004ef56f2772960a7b0b4d7dd2eb35bb9eef4b80"
+  },
+  "runtimeBytecodeTemplate": {
+    "bytes": 3563,
+    "immutableReferences": {
+      "4203": [
+        {
+          "length": 32,
+          "start": 1704
+        },
+        {
+          "length": 32,
+          "start": 3090
+        }
+      ],
+      "4206": [
+        {
+          "length": 32,
+          "start": 148
+        },
+        {
+          "length": 32,
+          "start": 1189
+        }
+      ],
+      "4209": [
+        {
+          "length": 32,
+          "start": 634
+        },
+        {
+          "length": 32,
+          "start": 1047
+        },
+        {
+          "length": 32,
+          "start": 2090
+        },
+        {
+          "length": 32,
+          "start": 3022
+        }
+      ],
+      "4212": [
+        {
+          "length": 32,
+          "start": 438
+        },
+        {
+          "length": 32,
+          "start": 951
+        },
+        {
+          "length": 32,
+          "start": 3185
+        }
+      ]
+    },
+    "linkReferences": {},
+    "sha256": "87b89e4a13e1eeb2bc0db62ef21c722c2e00c1f205ecdacb2976872f73586c1a"
+  },
+  "source": "contracts/src/resource/StorageCommitmentRegistry420.sol",
+  "sourceBlob": "a86509763153cc896c7af217c4b79a6433e5e933",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 4217,
+        "contract": "src/resource/StorageCommitmentRegistry420.sol:StorageCommitmentRegistry420",
+        "label": "_commitments",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_struct(Commitment)4200_storage)"
+      }
+    ],
+    "types": {
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_bytes32,t_struct(Commitment)4200_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct StorageCommitmentRegistry420.Commitment)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Commitment)4200_storage"
+      },
+      "t_struct(Commitment)4200_storage": {
+        "encoding": "inplace",
+        "label": "struct StorageCommitmentRegistry420.Commitment",
+        "members": [
+          {
+            "astId": 4181,
+            "contract": "src/resource/StorageCommitmentRegistry420.sol:StorageCommitmentRegistry420",
+            "label": "providerId",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 4183,
+            "contract": "src/resource/StorageCommitmentRegistry420.sol:StorageCommitmentRegistry420",
+            "label": "nodeId",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 4185,
+            "contract": "src/resource/StorageCommitmentRegistry420.sol:StorageCommitmentRegistry420",
+            "label": "proofSchemeId",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 4187,
+            "contract": "src/resource/StorageCommitmentRegistry420.sol:StorageCommitmentRegistry420",
+            "label": "contentRoot",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 4189,
+            "contract": "src/resource/StorageCommitmentRegistry420.sol:StorageCommitmentRegistry420",
+            "label": "replicaRoot",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 4191,
+            "contract": "src/resource/StorageCommitmentRegistry420.sol:StorageCommitmentRegistry420",
+            "label": "metadataHash",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 4193,
+            "contract": "src/resource/StorageCommitmentRegistry420.sol:StorageCommitmentRegistry420",
+            "label": "sizeBytes",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_uint128"
+          },
+          {
+            "astId": 4195,
+            "contract": "src/resource/StorageCommitmentRegistry420.sol:StorageCommitmentRegistry420",
+            "label": "startTime",
+            "offset": 16,
+            "slot": "6",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 4197,
+            "contract": "src/resource/StorageCommitmentRegistry420.sol:StorageCommitmentRegistry420",
+            "label": "endTime",
+            "offset": 24,
+            "slot": "6",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 4199,
+            "contract": "src/resource/StorageCommitmentRegistry420.sol:StorageCommitmentRegistry420",
+            "label": "exists",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "256"
+      },
+      "t_uint128": {
+        "encoding": "inplace",
+        "label": "uint128",
+        "numberOfBytes": "16"
+      },
+      "t_uint64": {
+        "encoding": "inplace",
+        "label": "uint64",
+        "numberOfBytes": "8"
+      }
+    }
+  }
+}

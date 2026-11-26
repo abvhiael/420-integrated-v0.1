@@ -1,0 +1,508 @@
+{
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "nodeId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "endpointHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "capacityHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "revision",
+          "type": "uint32"
+        }
+      ],
+      "name": "NodeUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "nodeId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum ResourceNodeRegistry420.State",
+          "name": "state",
+          "type": "uint8"
+        }
+      ],
+      "name": "NodeStateChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "nodeId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "serviceId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "NodeRegistered",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidNode",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidState",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NodeExists",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NodeNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Unauthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "authorization",
+      "outputs": [
+        {
+          "internalType": "contract ResourceAuthorization420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "protocolVersion",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "providers",
+      "outputs": [
+        {
+          "internalType": "contract ResourceProviderRegistry420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "systemName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "authorization_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "providers_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "nodeId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "endpointHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "capacityHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "updateNode",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "nodeId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "providerId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "serviceId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "operatorAccount",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "endpointHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "capacityHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "registerNode",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "nodeId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "serviceId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isActiveFor",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "nodeId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "enum ResourceNodeRegistry420.State",
+          "name": "next",
+          "type": "uint8"
+        }
+      ],
+      "name": "setState",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "nodeId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getNode",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "providerId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "serviceId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "operatorAccount",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "endpointHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "capacityHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "revision",
+              "type": "uint32"
+            },
+            {
+              "internalType": "enum ResourceNodeRegistry420.State",
+              "name": "state",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct ResourceNodeRegistry420.Node",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "creationBytecode": {
+    "bytes": 4493,
+    "immutableReferences": {},
+    "linkReferences": {},
+    "sha256": "693184aed2768c2e7ff92d4911b3bc7231d011c742f6db613a192f34b838481a"
+  },
+  "runtimeBytecodeTemplate": {
+    "bytes": 4192,
+    "immutableReferences": {
+      "454": [
+        {
+          "length": 32,
+          "start": 769
+        },
+        {
+          "length": 32,
+          "start": 1591
+        },
+        {
+          "length": 32,
+          "start": 2125
+        },
+        {
+          "length": 32,
+          "start": 2990
+        }
+      ],
+      "457": [
+        {
+          "length": 32,
+          "start": 152
+        },
+        {
+          "length": 32,
+          "start": 355
+        },
+        {
+          "length": 32,
+          "start": 1317
+        },
+        {
+          "length": 32,
+          "start": 2278
+        },
+        {
+          "length": 32,
+          "start": 3564
+        }
+      ]
+    },
+    "linkReferences": {},
+    "sha256": "2aabb27e1acc802a0e9d40cec1c3992f2bcfa4880032bbe6cb92d442e000a092"
+  },
+  "source": "contracts/src/resource/ResourceNodeRegistry420.sol",
+  "sourceBlob": "1c7b2fdc362b7c4371cee88dcf1841aee845e88b",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 462,
+        "contract": "src/resource/ResourceNodeRegistry420.sol:ResourceNodeRegistry420",
+        "label": "_nodes",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_struct(Node)451_storage)"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_enum(State)433": {
+        "encoding": "inplace",
+        "label": "enum ResourceNodeRegistry420.State",
+        "numberOfBytes": "1"
+      },
+      "t_mapping(t_bytes32,t_struct(Node)451_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct ResourceNodeRegistry420.Node)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Node)451_storage"
+      },
+      "t_struct(Node)451_storage": {
+        "encoding": "inplace",
+        "label": "struct ResourceNodeRegistry420.Node",
+        "members": [
+          {
+            "astId": 435,
+            "contract": "src/resource/ResourceNodeRegistry420.sol:ResourceNodeRegistry420",
+            "label": "providerId",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 437,
+            "contract": "src/resource/ResourceNodeRegistry420.sol:ResourceNodeRegistry420",
+            "label": "serviceId",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 439,
+            "contract": "src/resource/ResourceNodeRegistry420.sol:ResourceNodeRegistry420",
+            "label": "operatorAccount",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_address"
+          },
+          {
+            "astId": 441,
+            "contract": "src/resource/ResourceNodeRegistry420.sol:ResourceNodeRegistry420",
+            "label": "endpointHash",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 443,
+            "contract": "src/resource/ResourceNodeRegistry420.sol:ResourceNodeRegistry420",
+            "label": "capacityHash",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 445,
+            "contract": "src/resource/ResourceNodeRegistry420.sol:ResourceNodeRegistry420",
+            "label": "revision",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_uint32"
+          },
+          {
+            "astId": 448,
+            "contract": "src/resource/ResourceNodeRegistry420.sol:ResourceNodeRegistry420",
+            "label": "state",
+            "offset": 4,
+            "slot": "5",
+            "type": "t_enum(State)433"
+          },
+          {
+            "astId": 450,
+            "contract": "src/resource/ResourceNodeRegistry420.sol:ResourceNodeRegistry420",
+            "label": "exists",
+            "offset": 5,
+            "slot": "5",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "192"
+      },
+      "t_uint32": {
+        "encoding": "inplace",
+        "label": "uint32",
+        "numberOfBytes": "4"
+      }
+    }
+  }
+}

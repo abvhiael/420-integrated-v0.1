@@ -1,0 +1,993 @@
+{
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "paid420",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "refunded420",
+          "type": "uint256"
+        }
+      ],
+      "name": "StorageSettlementCompleted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "refunded420",
+          "type": "uint256"
+        }
+      ],
+      "name": "StorageSettlementCancelled",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "consumer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "vault",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "beneficiary",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "totalAmount420",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "windowCount",
+          "type": "uint32"
+        }
+      ],
+      "name": "StorageSettlementOpened",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint32",
+          "name": "windowIndex",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount420",
+          "type": "uint256"
+        }
+      ],
+      "name": "StorageWindowRefunded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint32",
+          "name": "windowIndex",
+          "type": "uint32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "obligationId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount420",
+          "type": "uint256"
+        }
+      ],
+      "name": "StorageWindowReserved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint32",
+          "name": "windowIndex",
+          "type": "uint32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "proofId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount420",
+          "type": "uint256"
+        }
+      ],
+      "name": "StorageWindowPaid",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "StorageSettlementAborting",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "StorageSettlementFunded",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidProof",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidSettlement",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidState",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidWindow",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_SETTLEMENT_WINDOWS",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "OBLIGATION_STORAGE_PROOF_WINDOW",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "ProofDeadlineOpen",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "SettlementExists",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "SettlementNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Unauthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroAddress",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "agreements",
+      "outputs": [
+        {
+          "internalType": "contract StorageAgreementRegistry420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "proofs",
+      "outputs": [
+        {
+          "internalType": "contract StorageProofRegistry420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "protocolVersion",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "systemName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "agreements_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "proofs_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "name": "windowState",
+      "outputs": [
+        {
+          "internalType": "enum StorageSettlementRegistry420.WindowState",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "vault",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "name": "openSettlement",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "vault",
+          "type": "address"
+        }
+      ],
+      "name": "canonicalSettlementId",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "windowIndex",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "challengeEpoch",
+          "type": "uint64"
+        }
+      ],
+      "name": "canonicalChallengeId",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "fromWindow",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "count",
+          "type": "uint32"
+        }
+      ],
+      "name": "refundAbortedWindows",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "fromWindow",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "count",
+          "type": "uint32"
+        }
+      ],
+      "name": "reserveWindows",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "windowIndex",
+          "type": "uint32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "action",
+          "type": "bytes32"
+        }
+      ],
+      "name": "canonicalOperationId",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "windowIndex",
+          "type": "uint32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "proofId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "settleWindow",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "windowIndex",
+          "type": "uint32"
+        }
+      ],
+      "name": "canonicalObligationId",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "windowIndex",
+          "type": "uint32"
+        }
+      ],
+      "name": "refundMissedWindow",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "windowIndex",
+          "type": "uint32"
+        }
+      ],
+      "name": "windowAmount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "windowIndex",
+          "type": "uint32"
+        }
+      ],
+      "name": "windowTiming",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "challengeEpoch",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint64",
+          "name": "deadline",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "abortUnfundedSettlement",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getSettlement",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "agreementId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "consumer",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "beneficiary",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "vault",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "totalAmount420",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "paid420",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "refunded420",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint32",
+              "name": "windowCount",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "reservedWindows",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "finalizedWindows",
+              "type": "uint32"
+            },
+            {
+              "internalType": "enum StorageSettlementRegistry420.State",
+              "name": "state",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct StorageSettlementRegistry420.Settlement",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "creationBytecode": {
+    "bytes": 10046,
+    "immutableReferences": {},
+    "linkReferences": {},
+    "sha256": "6f02550d4683588e30babd4878c67dec6337f6bdc5d42a51df5c8673966f5028"
+  },
+  "runtimeBytecodeTemplate": {
+    "bytes": 9772,
+    "immutableReferences": {
+      "5526": [
+        {
+          "length": 32,
+          "start": 1650
+        },
+        {
+          "length": 32,
+          "start": 4599
+        },
+        {
+          "length": 32,
+          "start": 4906
+        },
+        {
+          "length": 32,
+          "start": 5693
+        },
+        {
+          "length": 32,
+          "start": 7024
+        },
+        {
+          "length": 32,
+          "start": 8400
+        }
+      ],
+      "5529": [
+        {
+          "length": 32,
+          "start": 4821
+        },
+        {
+          "length": 32,
+          "start": 5823
+        }
+      ]
+    },
+    "linkReferences": {},
+    "sha256": "e13c095b95229c49527ec64d5cb58c5ed7f253f220d95e9bf451ed9590a05c2d"
+  },
+  "source": "contracts/src/resource/StorageSettlementRegistry420.sol",
+  "sourceBlob": "4ecc985660781227a96a63ef1556093734548850",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 5534,
+        "contract": "src/resource/StorageSettlementRegistry420.sol:StorageSettlementRegistry420",
+        "label": "_settlements",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_struct(Settlement)5523_storage)"
+      },
+      {
+        "astId": 5541,
+        "contract": "src/resource/StorageSettlementRegistry420.sol:StorageSettlementRegistry420",
+        "label": "windowState",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_bytes32,t_mapping(t_uint32,t_enum(WindowState)5495))"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_enum(State)5490": {
+        "encoding": "inplace",
+        "label": "enum StorageSettlementRegistry420.State",
+        "numberOfBytes": "1"
+      },
+      "t_enum(WindowState)5495": {
+        "encoding": "inplace",
+        "label": "enum StorageSettlementRegistry420.WindowState",
+        "numberOfBytes": "1"
+      },
+      "t_mapping(t_bytes32,t_mapping(t_uint32,t_enum(WindowState)5495))": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => mapping(uint32 => enum StorageSettlementRegistry420.WindowState))",
+        "numberOfBytes": "32",
+        "value": "t_mapping(t_uint32,t_enum(WindowState)5495)"
+      },
+      "t_mapping(t_bytes32,t_struct(Settlement)5523_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct StorageSettlementRegistry420.Settlement)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Settlement)5523_storage"
+      },
+      "t_mapping(t_uint32,t_enum(WindowState)5495)": {
+        "encoding": "mapping",
+        "key": "t_uint32",
+        "label": "mapping(uint32 => enum StorageSettlementRegistry420.WindowState)",
+        "numberOfBytes": "32",
+        "value": "t_enum(WindowState)5495"
+      },
+      "t_struct(Settlement)5523_storage": {
+        "encoding": "inplace",
+        "label": "struct StorageSettlementRegistry420.Settlement",
+        "members": [
+          {
+            "astId": 5497,
+            "contract": "src/resource/StorageSettlementRegistry420.sol:StorageSettlementRegistry420",
+            "label": "agreementId",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 5499,
+            "contract": "src/resource/StorageSettlementRegistry420.sol:StorageSettlementRegistry420",
+            "label": "consumer",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_address"
+          },
+          {
+            "astId": 5501,
+            "contract": "src/resource/StorageSettlementRegistry420.sol:StorageSettlementRegistry420",
+            "label": "beneficiary",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_address"
+          },
+          {
+            "astId": 5503,
+            "contract": "src/resource/StorageSettlementRegistry420.sol:StorageSettlementRegistry420",
+            "label": "vault",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_address"
+          },
+          {
+            "astId": 5505,
+            "contract": "src/resource/StorageSettlementRegistry420.sol:StorageSettlementRegistry420",
+            "label": "asset",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_address"
+          },
+          {
+            "astId": 5507,
+            "contract": "src/resource/StorageSettlementRegistry420.sol:StorageSettlementRegistry420",
+            "label": "totalAmount420",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 5509,
+            "contract": "src/resource/StorageSettlementRegistry420.sol:StorageSettlementRegistry420",
+            "label": "paid420",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 5511,
+            "contract": "src/resource/StorageSettlementRegistry420.sol:StorageSettlementRegistry420",
+            "label": "refunded420",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 5513,
+            "contract": "src/resource/StorageSettlementRegistry420.sol:StorageSettlementRegistry420",
+            "label": "windowCount",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_uint32"
+          },
+          {
+            "astId": 5515,
+            "contract": "src/resource/StorageSettlementRegistry420.sol:StorageSettlementRegistry420",
+            "label": "reservedWindows",
+            "offset": 4,
+            "slot": "8",
+            "type": "t_uint32"
+          },
+          {
+            "astId": 5517,
+            "contract": "src/resource/StorageSettlementRegistry420.sol:StorageSettlementRegistry420",
+            "label": "finalizedWindows",
+            "offset": 8,
+            "slot": "8",
+            "type": "t_uint32"
+          },
+          {
+            "astId": 5520,
+            "contract": "src/resource/StorageSettlementRegistry420.sol:StorageSettlementRegistry420",
+            "label": "state",
+            "offset": 12,
+            "slot": "8",
+            "type": "t_enum(State)5490"
+          },
+          {
+            "astId": 5522,
+            "contract": "src/resource/StorageSettlementRegistry420.sol:StorageSettlementRegistry420",
+            "label": "exists",
+            "offset": 13,
+            "slot": "8",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "288"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      },
+      "t_uint32": {
+        "encoding": "inplace",
+        "label": "uint32",
+        "numberOfBytes": "4"
+      }
+    }
+  }
+}

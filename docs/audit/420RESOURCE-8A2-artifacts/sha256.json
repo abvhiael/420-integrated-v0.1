@@ -1,0 +1,22 @@
+{
+  "after/AssetVault420.json": "2d18595115f5c19fd7d732455c985fadf0a21994e9a83919d360edc0c0aaf351",
+  "after/ResourceNodeRegistry420.json": "cc6f6bfc18f19b002f8a502fe62be95e991f89bb49204c0e49fd8b6faff16566",
+  "after/ResourceProviderCollateral420.json": "179077c393086680fce10c51433ba9e50ecb2028e3e65dfb21a85c1ec5b83126",
+  "after/ResourceProviderRegistry420.json": "4f97b230132f88dc98963e5795dad5a58ffa3639ef0deaf1cb0569dfda2800f7",
+  "after/ResourceSessionRegistry420.json": "cfe2d29510627f0b9a5891cbabc41614728759a85a24dad69d04153d131b000f",
+  "after/StorageAgreementRegistry420.json": "1efd23b2e4c2bb6be8f2a9432d0b6657acc11c53fb493bc4083c0cb470607f6f",
+  "after/StorageCapacityRegistry420.json": "e65b4d7ea458be490b143bdc1072ff122287e20731a39a21d649186fc39c19e1",
+  "after/StorageCommitmentRegistry420.json": "c424b9c536cec23b5e14b20662f759c35736911979e40edba41907ec751db9d5",
+  "after/StorageProofRegistry420.json": "b9ea40ae39cde7065341ee0daf194817dbb263cf0a34a5baf94b44f83303e472",
+  "after/StorageSettlementRegistry420.json": "b087a61c767d85968f9182aca7bf18650b28c402574b57e94beba5f903b865db",
+  "before/AssetVault420.json": "2bab8a922c1ee1f01d420710f20d1c3f00868ae60383bf6062c1a988da07008c",
+  "before/ResourceNodeRegistry420.json": "9fb564ababa2d05a6fa1825b37403361c7799879daddd4a3eae426b90af2984f",
+  "before/ResourceProviderRegistry420.json": "df1e830e16651151ba809ae3196f57d9649ca8757fc7413363f448990e5416bb",
+  "before/ResourceSessionRegistry420.json": "e80dc3d6c4092e53b7b8a1e8606dfb6f0de97e322d75be7923d555b046ace9bf",
+  "before/StorageAgreementRegistry420.json": "5726459d6810a2e5f961696f209714da6616b771decc91536d0fec34e71bb6f4",
+  "before/StorageCapacityRegistry420.json": "1db596bb0e9591b8ff06ec2ca8390613bffdfd745eed7feb6f5a78983d901bee",
+  "before/StorageCommitmentRegistry420.json": "c4884258b81c48a46aaed7268de51cd384c6e09e7c290565ece712c5d86deeda",
+  "before/StorageProofRegistry420.json": "e1358a622ae12410556df410efe2b2434b0c17c103887bd5813f5e73aece4125",
+  "before/StorageSettlementRegistry420.json": "bcfe6ebac6da5dc6fc3338b4bb9ffaede2172569e8bdddcc371a194c46c3c1a8",
+  "comparison.json": "c02c449314967239144a53da859e93caa8f4ae576d7619f5715c97d79eed2812"
+}

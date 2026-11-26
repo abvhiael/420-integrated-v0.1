@@ -1,0 +1,534 @@
+{
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "proofId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "commitmentId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "challengeId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "proofDigest",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "challengeEpoch",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "submittedAt",
+          "type": "uint64"
+        }
+      ],
+      "name": "StorageProofAccepted",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "ChallengeOutsideCommitment",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ChallengeReplayed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InactiveProofScheme",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InactiveStoreNode",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidProof",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_PROOF_BYTES",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "ProofExists",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ProofTooEarly",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ProofTooLate",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Reentrancy",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "VerificationFailed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroAddress",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "commitments",
+      "outputs": [
+        {
+          "internalType": "contract StorageCommitmentRegistry420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "nodes",
+      "outputs": [
+        {
+          "internalType": "contract ResourceNodeRegistry420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "protocolVersion",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "schemes",
+      "outputs": [
+        {
+          "internalType": "contract StorageProofSchemeRegistry420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "systemName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "commitments_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "schemes_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "nodes_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "challengeConsumed",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "commitmentId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "challengeId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "proofDigest",
+          "type": "bytes32"
+        }
+      ],
+      "name": "canonicalProofId",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "commitmentId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "challengeId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "challengeEpoch",
+          "type": "uint64"
+        },
+        {
+          "internalType": "bytes",
+          "name": "proof",
+          "type": "bytes"
+        }
+      ],
+      "name": "submitProof",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "proofId",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "commitmentId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "challengeId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "hasVerifiedChallenge",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "proofId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getProof",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "commitmentId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "challengeId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "proofDigest",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "challengeEpoch",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "submittedAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct StorageProofRegistry420.ProofReceipt",
+          "name": "receipt",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "creationBytecode": {
+    "bytes": 3472,
+    "immutableReferences": {},
+    "linkReferences": {},
+    "sha256": "69943523593344e4975b9c14883f24f449e072767827632f612f18940adf34e1"
+  },
+  "runtimeBytecodeTemplate": {
+    "bytes": 3183,
+    "immutableReferences": {
+      "4698": [
+        {
+          "length": 32,
+          "start": 170
+        },
+        {
+          "length": 32,
+          "start": 581
+        }
+      ],
+      "4701": [
+        {
+          "length": 32,
+          "start": 860
+        },
+        {
+          "length": 32,
+          "start": 2692
+        }
+      ],
+      "4704": [
+        {
+          "length": 32,
+          "start": 323
+        },
+        {
+          "length": 32,
+          "start": 763
+        }
+      ]
+    },
+    "linkReferences": {},
+    "sha256": "deead05e6c089160db8c648b8b106da314d58b42989105fe5712da76d798142a"
+  },
+  "source": "contracts/src/resource/StorageProofRegistry420.sol",
+  "sourceBlob": "54f1cadf9755f3cb056443e9b747adb2952e8d05",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 4709,
+        "contract": "src/resource/StorageProofRegistry420.sol:StorageProofRegistry420",
+        "label": "_proofs",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_struct(ProofReceipt)4695_storage)"
+      },
+      {
+        "astId": 4715,
+        "contract": "src/resource/StorageProofRegistry420.sol:StorageProofRegistry420",
+        "label": "challengeConsumed",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_bytes32,t_mapping(t_bytes32,t_bool))"
+      },
+      {
+        "astId": 4717,
+        "contract": "src/resource/StorageProofRegistry420.sol:StorageProofRegistry420",
+        "label": "_entered",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_uint256"
+      }
+    ],
+    "types": {
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_bytes32,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      },
+      "t_mapping(t_bytes32,t_mapping(t_bytes32,t_bool))": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => mapping(bytes32 => bool))",
+        "numberOfBytes": "32",
+        "value": "t_mapping(t_bytes32,t_bool)"
+      },
+      "t_mapping(t_bytes32,t_struct(ProofReceipt)4695_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct StorageProofRegistry420.ProofReceipt)",
+        "numberOfBytes": "32",
+        "value": "t_struct(ProofReceipt)4695_storage"
+      },
+      "t_struct(ProofReceipt)4695_storage": {
+        "encoding": "inplace",
+        "label": "struct StorageProofRegistry420.ProofReceipt",
+        "members": [
+          {
+            "astId": 4684,
+            "contract": "src/resource/StorageProofRegistry420.sol:StorageProofRegistry420",
+            "label": "commitmentId",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 4686,
+            "contract": "src/resource/StorageProofRegistry420.sol:StorageProofRegistry420",
+            "label": "challengeId",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 4688,
+            "contract": "src/resource/StorageProofRegistry420.sol:StorageProofRegistry420",
+            "label": "proofDigest",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 4690,
+            "contract": "src/resource/StorageProofRegistry420.sol:StorageProofRegistry420",
+            "label": "challengeEpoch",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 4692,
+            "contract": "src/resource/StorageProofRegistry420.sol:StorageProofRegistry420",
+            "label": "submittedAt",
+            "offset": 8,
+            "slot": "3",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 4694,
+            "contract": "src/resource/StorageProofRegistry420.sol:StorageProofRegistry420",
+            "label": "exists",
+            "offset": 16,
+            "slot": "3",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "128"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      },
+      "t_uint64": {
+        "encoding": "inplace",
+        "label": "uint64",
+        "numberOfBytes": "8"
+      }
+    }
+  }
+}

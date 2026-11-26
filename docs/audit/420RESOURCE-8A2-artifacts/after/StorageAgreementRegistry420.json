@@ -1,0 +1,1262 @@
+{
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "consumer",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "offerId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "objectId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "contentRoot",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint128",
+          "name": "sizeBytes",
+          "type": "uint128"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "startTime",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "endTime",
+          "type": "uint64"
+        }
+      ],
+      "name": "StorageAgreementProposed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "commitmentId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "nodeId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "capacityReservationId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "StorageAgreementActivated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "AgreementSettlementBound",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "AgreementSettlementFinalized",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "AgreementCollateralReleased",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "StorageAgreementCancelled",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "StorageAgreementCompleted",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "AgreementExists",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "AgreementNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "CapacityReservationMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "CommitmentMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InactiveProofScheme",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidAgreement",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidState",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidStoreOffer",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_TOTAL_SHARDS",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "Unauthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroAddress",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "authorization",
+      "outputs": [
+        {
+          "internalType": "contract ResourceAuthorization420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "capacity",
+      "outputs": [
+        {
+          "internalType": "contract StorageCapacityRegistry420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "commitments",
+      "outputs": [
+        {
+          "internalType": "contract StorageCommitmentRegistry420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "nodes",
+      "outputs": [
+        {
+          "internalType": "contract ResourceNodeRegistry420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "offers",
+      "outputs": [
+        {
+          "internalType": "contract ResourceOfferRegistry420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "protocolVersion",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "providers",
+      "outputs": [
+        {
+          "internalType": "contract ResourceProviderRegistry420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "schemes",
+      "outputs": [
+        {
+          "internalType": "contract StorageProofSchemeRegistry420",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "settlementController",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "settlementControllerCodeHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "systemName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "authorization_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "offers_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "nodes_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "providers_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "schemes_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "commitments_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "capacity_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "consumer",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "offerId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "objectId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "nonce",
+          "type": "uint256"
+        }
+      ],
+      "name": "canonicalAgreementId",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "controller",
+          "type": "address"
+        }
+      ],
+      "name": "bindSettlementController",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "agreementForCommitment",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "collateralReleased",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "collateralReservation",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "settlementFinalized",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "settlementForAgreement",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "commitmentId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "capacityReservationId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "activateAgreement",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "finalizeSettlement",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "registerSettlement",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "cancelAgreement",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "completeAgreement",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getAgreement",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "consumer",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "offerId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "objectId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "contentRoot",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "storageClass",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "repairPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "proofSchemeId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "commitmentId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "capacityReservationId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint128",
+              "name": "sizeBytes",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint64",
+              "name": "startTime",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "endTime",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "proofInterval",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint32",
+              "name": "dataShards",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "totalShards",
+              "type": "uint32"
+            },
+            {
+              "internalType": "enum StorageAgreementRegistry420.State",
+              "name": "state",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct StorageAgreementRegistry420.Agreement",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isEffective",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "releaseDischargedAgreement",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "offerId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "objectId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "contentRoot",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "manifestHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "storageClass",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "repairPolicyHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "proofSchemeId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint128",
+          "name": "sizeBytes",
+          "type": "uint128"
+        },
+        {
+          "internalType": "uint64",
+          "name": "startTime",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint64",
+          "name": "endTime",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint64",
+          "name": "proofInterval",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint32",
+          "name": "dataShards",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "totalShards",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "nonce",
+          "type": "uint256"
+        }
+      ],
+      "name": "proposeAgreement",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "agreementId",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "creationBytecode": {
+    "bytes": 10016,
+    "immutableReferences": {},
+    "linkReferences": {},
+    "sha256": "43dd33042fcfd7b8a14d6da1339f5f6cc3c32d637614a0a4b00db62367cefad8"
+  },
+  "runtimeBytecodeTemplate": {
+    "bytes": 9429,
+    "immutableReferences": {
+      "6440": [
+        {
+          "length": 32,
+          "start": 5236
+        },
+        {
+          "length": 32,
+          "start": 6698
+        }
+      ],
+      "6443": [
+        {
+          "length": 32,
+          "start": 1579
+        },
+        {
+          "length": 32,
+          "start": 2664
+        },
+        {
+          "length": 32,
+          "start": 3277
+        },
+        {
+          "length": 32,
+          "start": 6332
+        }
+      ],
+      "6446": [
+        {
+          "length": 32,
+          "start": 3428
+        },
+        {
+          "length": 32,
+          "start": 6447
+        }
+      ],
+      "6449": [
+        {
+          "length": 32,
+          "start": 400
+        },
+        {
+          "length": 32,
+          "start": 3516
+        },
+        {
+          "length": 32,
+          "start": 3955
+        },
+        {
+          "length": 32,
+          "start": 6051
+        },
+        {
+          "length": 32,
+          "start": 8845
+        }
+      ],
+      "6452": [
+        {
+          "length": 32,
+          "start": 1773
+        },
+        {
+          "length": 32,
+          "start": 7746
+        }
+      ],
+      "6455": [
+        {
+          "length": 32,
+          "start": 3124
+        },
+        {
+          "length": 32,
+          "start": 3772
+        },
+        {
+          "length": 32,
+          "start": 7102
+        },
+        {
+          "length": 32,
+          "start": 9203
+        }
+      ],
+      "6458": [
+        {
+          "length": 32,
+          "start": 3637
+        },
+        {
+          "length": 32,
+          "start": 4780
+        },
+        {
+          "length": 32,
+          "start": 6515
+        }
+      ]
+    },
+    "linkReferences": {},
+    "sha256": "fc66a94e87742fdd128b6ceac5c2937cdc41a9bf3f66fcc7d5c3e56f18be88d0"
+  },
+  "source": "contracts/src/resource/StorageAgreementRegistry420.sol",
+  "sourceBlob": "fa104adc218523f6c7614bbd86cc2ebb4b3a37e7",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 6463,
+        "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+        "label": "_agreements",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_struct(Agreement)6437_storage)"
+      },
+      {
+        "astId": 6467,
+        "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+        "label": "collateralReservation",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_bytes32,t_bytes32)"
+      },
+      {
+        "astId": 6471,
+        "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+        "label": "settlementForAgreement",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_mapping(t_bytes32,t_bytes32)"
+      },
+      {
+        "astId": 6475,
+        "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+        "label": "settlementFinalized",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_mapping(t_bytes32,t_bool)"
+      },
+      {
+        "astId": 6479,
+        "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+        "label": "collateralReleased",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_mapping(t_bytes32,t_bool)"
+      },
+      {
+        "astId": 6483,
+        "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+        "label": "agreementForCommitment",
+        "offset": 0,
+        "slot": "5",
+        "type": "t_mapping(t_bytes32,t_bytes32)"
+      },
+      {
+        "astId": 6485,
+        "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+        "label": "settlementController",
+        "offset": 0,
+        "slot": "6",
+        "type": "t_address"
+      },
+      {
+        "astId": 6487,
+        "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+        "label": "settlementControllerCodeHash",
+        "offset": 0,
+        "slot": "7",
+        "type": "t_bytes32"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_enum(State)6399": {
+        "encoding": "inplace",
+        "label": "enum StorageAgreementRegistry420.State",
+        "numberOfBytes": "1"
+      },
+      "t_mapping(t_bytes32,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      },
+      "t_mapping(t_bytes32,t_bytes32)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => bytes32)",
+        "numberOfBytes": "32",
+        "value": "t_bytes32"
+      },
+      "t_mapping(t_bytes32,t_struct(Agreement)6437_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct StorageAgreementRegistry420.Agreement)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Agreement)6437_storage"
+      },
+      "t_struct(Agreement)6437_storage": {
+        "encoding": "inplace",
+        "label": "struct StorageAgreementRegistry420.Agreement",
+        "members": [
+          {
+            "astId": 6401,
+            "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+            "label": "consumer",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address"
+          },
+          {
+            "astId": 6403,
+            "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+            "label": "offerId",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 6405,
+            "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+            "label": "objectId",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 6407,
+            "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+            "label": "contentRoot",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 6409,
+            "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+            "label": "manifestHash",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 6411,
+            "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+            "label": "storageClass",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 6413,
+            "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+            "label": "repairPolicyHash",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 6415,
+            "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+            "label": "proofSchemeId",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 6417,
+            "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+            "label": "commitmentId",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 6419,
+            "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+            "label": "capacityReservationId",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 6421,
+            "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+            "label": "sizeBytes",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_uint128"
+          },
+          {
+            "astId": 6423,
+            "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+            "label": "startTime",
+            "offset": 16,
+            "slot": "10",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 6425,
+            "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+            "label": "endTime",
+            "offset": 24,
+            "slot": "10",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 6427,
+            "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+            "label": "proofInterval",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 6429,
+            "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+            "label": "dataShards",
+            "offset": 8,
+            "slot": "11",
+            "type": "t_uint32"
+          },
+          {
+            "astId": 6431,
+            "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+            "label": "totalShards",
+            "offset": 12,
+            "slot": "11",
+            "type": "t_uint32"
+          },
+          {
+            "astId": 6434,
+            "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+            "label": "state",
+            "offset": 16,
+            "slot": "11",
+            "type": "t_enum(State)6399"
+          },
+          {
+            "astId": 6436,
+            "contract": "src/resource/StorageAgreementRegistry420.sol:StorageAgreementRegistry420",
+            "label": "exists",
+            "offset": 17,
+            "slot": "11",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "384"
+      },
+      "t_uint128": {
+        "encoding": "inplace",
+        "label": "uint128",
+        "numberOfBytes": "16"
+      },
+      "t_uint32": {
+        "encoding": "inplace",
+        "label": "uint32",
+        "numberOfBytes": "4"
+      },
+      "t_uint64": {
+        "encoding": "inplace",
+        "label": "uint64",
+        "numberOfBytes": "8"
+      }
+    }
+  }
+}

@@ -24,7 +24,7 @@ export function normalizeSalad(r,id){
 export class SaladController{
  constructor({enabled=false,fetchImpl=fetch,onChange=()=>{}}={}){this.client=createAccountSocialClient({enabled,fetchImpl});this.onChange=onChange;this.gen=0;this.busy=false;this.actor=null;this.target=null;this.state={status:enabled?'idle':'disabled',session:null,matches:[],seats:[],draft:{},selected:null,exchange:[],order:[],error:'',notice:'',large:false};}
  emit(p){this.state={...this.state,...p};this.onChange();return this.state;}
- clear(){return {draft:{},selected:null,exchange:[],order:[],confirm:'',blank:'A'};}
+ clear(){return {draft:{},selected:null,exchange:[],order:[],confirm:'',blank:'A',exchangeMode:false};}
  invalidate(){this.gen++;this.busy=false;this.actor=null;this.target=null;this.emit({status:this.client.enabled?'idle':'disabled',session:null,matches:[],seats:[],error:'',notice:'',...this.clear()});}
  async principal(){const r=await this.client.request('/v1/me');if(r.status===401)return null;if(r.status!==200||r.data?.walletRequired!==false||!isSubjectID(r.data.profile?.subject))throw Error('420ID verification unavailable');return r.data.profile.subject;}
  async refresh(id){if(!this.client.enabled)return;if(this.target!==id){this.invalidate();this.target=id;}if(this.busy)return;const gen=++this.gen;this.busy=true;

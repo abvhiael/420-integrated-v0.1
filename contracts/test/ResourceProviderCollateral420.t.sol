@@ -416,4 +416,60 @@ contract ResourceProviderCollateral420Test is ResourceProviderCollateralFixture4
         require(collateral.consumedDeposit(key) && collateral.reconciledTranche(id, 2) == 1 ether, "retry failed");
         require(collateral.totalSlashable() == 3 ether && collateral.custodyInvariant(), "retry custody");
     }
+
+    function testZeroAndBelowMinimumThenExactBoundaryTopup() public {
+        vm.deal(OWNER, 1 ether);
+        vm.prank(OWNER);
+        (bool ok,) = address(collateral).call(abi.encodeCall(collateral.deposit,(ID,keccak256("zero"))));
+        require(!ok && collateral.totalSlashable() == 0,"zero deposit accepted");
+        bytes32 id = _deposit(1 ether - 1);
+        vm.prank(OWNER);
+        providers.updateProvider(ID,0,id);
+        vm.prank(OWNER);
+        (ok,) = address(providers).call(abi.encodeCall(providers.setState,(ID,ResourceProviderRegistry420.State.ACTIVE)));
+        require(!ok && !providers.isActive(ID),"below minimum admitted");
+        _deposit(1);
+        _activate(id);
+        require(providers.isActive(ID) && collateral.totalSlashable() == 1 ether,"exact boundary denied");
+    }
+
+    function testUnauthorizedSponsorshipAndPrematureExit() public {
+        vm.prank(OTHER);
+        (bool ok,) = address(providers).call(abi.encodeCall(providers.setCollateralSponsor,(ID,OTHER)));
+        require(!ok && providers.collateralSponsor(ID) == address(0),"sponsor theft");
+        bytes32 id = _deposit(2 ether);
+        _activate(id);
+        vm.prank(OTHER);
+        (ok,) = address(collateral).call(abi.encodeCall(collateral.requestExit,(id)));
+        require(!ok,"foreign exit");
+        vm.prank(OWNER);
+        collateral.requestExit(id);
+        vm.warp(collateral.withdrawableAt(id)-1);
+        vm.prank(OWNER);
+        (ok,) = address(collateral).call(abi.encodeCall(collateral.withdraw,(id)));
+        require(!ok && collateral.totalSlashable() == 2 ether,"premature withdrawal");
+        vm.warp(collateral.withdrawableAt(id));
+        vm.prank(OWNER);
+        collateral.withdraw(id);
+        require(collateral.totalWithdrawn() == 2 ether && collateral.custodyInvariant(),"mature exit");
+    }
+
+    function testUnauthorizedHoldAndDuplicatePenaltyDecision() public {
+        bytes32 id = _deposit(3 ether);
+        bytes32 evidence = keccak256("unique evidence");
+        vm.prank(OWNER);
+        (bool ok,) = address(collateral).call(abi.encodeCall(collateral.holdPenalty,(id,evidence,1 ether)));
+        require(!ok,"unauthorized hold");
+        bytes32 key = collateral.holdPenalty(id,evidence,1 ether);
+        (ok,) = address(collateral).call(abi.encodeCall(collateral.holdPenalty,(id,evidence,1 ether)));
+        require(!ok,"duplicate evidence");
+        bytes32 other = collateral.holdPenalty(id,keccak256("other evidence"),1 ether);
+        bytes32 decision = keccak256("unique decision");
+        collateral.authorizePenalty(key,decision,OTHER);
+        (ok,) = address(collateral).call(abi.encodeCall(collateral.authorizePenalty,(other,decision,OTHER)));
+        require(!ok && collateral.outstandingPenaltyHolds(id) == 2 ether,"duplicate decision");
+        collateral.executePenalty(key,1);
+        collateral.dismissPenalty(other);
+        require(collateral.totalSlashed() == 1 ether && collateral.totalSlashable() == 2 ether && collateral.outstandingPenaltyHolds(id) == 0,"penalty conservation");
+    }
 }

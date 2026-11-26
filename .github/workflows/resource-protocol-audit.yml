@@ -235,7 +235,8 @@ jobs:
                   "check": detector.get("check"),
                   "impact": detector.get("impact"),
                   "confidence": detector.get("confidence"),
-                  "description": detector.get("description", "").splitlines()[0],
+                  "description": detector.get("description", ""),
+                  "elements": resource_elements if detector.get("impact") == "High" else [],
               }
               findings.append(item)
               if detector.get("impact") == "High":

@@ -1,3 +1,4 @@
+import {classicRequestFailure} from './classic-rooms.js';
 // BC-2.4 host-only authenticated start for an immutable Labyrinth room.
 // Never locally deal, score, advance a turn, or infer a verified match from 201.
 import {isSubjectID} from './account-social.js';
@@ -37,7 +38,7 @@ export function bindLabyrinthRoomStart(root,rooms,{history,onRouteChange,onRefre
     notify(rooms,'Room seats changed; refresh before starting Labyrinth.');
     await onRefresh?.();return;
    }
-   if(response.status!==201)throw Error('The Labyrinth game service did not authorize a start');
+   if(response.status!==201)throw Error(classicRequestFailure(response,'Labyrinth match start'));
    const verified=normalizeLabyrinthSession({...response,status:200},actor);
    if(!verified||verified.session.roomId!==room.id||
     verified.session.gameId!=='labyrinth-cribbage'||
@@ -49,8 +50,8 @@ export function bindLabyrinthRoomStart(root,rooms,{history,onRouteChange,onRefre
    history?.pushState({},'','/games/labyrinth-cribbage/play?session='+
     encodeURIComponent(verified.session.id));
    onRouteChange?.();
-  }catch{
-   notify(rooms,'Labyrinth start was not confirmed. Refresh this 420ID room; no cards or scores were generated.');
+  }catch(error){
+   notify(rooms,error.message.startsWith('Labyrinth match start — ')?error.message:'Labyrinth start was not confirmed. Refresh this 420ID room; no cards or scores were generated.');
   }finally{
    delete form.dataset.busy;
    form.querySelector('button')?.removeAttribute('disabled');

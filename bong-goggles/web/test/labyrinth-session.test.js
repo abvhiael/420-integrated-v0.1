@@ -138,6 +138,8 @@ test('BC-2.4 does not navigate after unverified or unavailable host start',async
    history:{pushState:()=>navigated++},onRouteChange:()=>navigated++});
   await handler({preventDefault:()=>{}});
   assert.equal(navigated,0);
-  assert.match(notice,/not confirmed/);
+  if(invalidResponse.status===404)assert.equal(notice,'Labyrinth match start — Required game service or room is unavailable. (HTTP 404)');
+  else assert.match(notice,/not confirmed/);
+  assert.equal(form.dataset.busy,undefined);
  }
 });

@@ -55,10 +55,10 @@ export class ProtocolDecoderRegistry420 {
   }
 
   register(descriptor: ProtocolEventDescriptor420): void {
-    if (descriptor.protocol === '420DevelopmentCompensation'
+    if ((descriptor.protocol === '420DevelopmentCompensation' || descriptor.protocol === '420Resource')
       && (!descriptor.contractAddress || !/^0x[0-9a-f]{40}$/i.test(descriptor.contractAddress)
         || BigInt(descriptor.contractAddress) === 0n)) {
-      throw new Error('compensation descriptor requires deployment address');
+      throw new Error('protocol descriptor requires deployment address');
     }
     if ((descriptor.protocol === '420Launchpad' || descriptor.protocol === '420Arbitration' || descriptor.protocol === '420Treasury' && MODERN_TREASURY_EVENTS_420.has(descriptor.eventName)) && (!descriptor.contractAddress || !/^0x[0-9a-fA-F]{40}$/.test(descriptor.contractAddress) || /^0x0{40}$/.test(descriptor.contractAddress))) throw new Error(descriptor.protocol === '420Launchpad' ? 'Launchpad descriptor requires deployment address' : 'Treasury descriptor requires deployment address');
     const key = descriptor.topic0.toLowerCase();
@@ -97,7 +97,7 @@ export class ProtocolDecoderRegistry420 {
       ?? candidates.find((candidate) => candidate.contractAddress === undefined);
     if (!descriptor) {
       // Anyone can emit a matching topic. Ignore unrelated addresses without halting canonical ingestion.
-      if (candidates.every(candidate => candidate.protocol === '420DevelopmentCompensation')) return null;
+      if (candidates.every(candidate => candidate.protocol === '420DevelopmentCompensation' || candidate.protocol === '420Resource')) return null;
       const names = [...new Set(candidates.map((candidate) => candidate.protocol + '.' + candidate.eventName))].join(',');
       throw new Error('protocol descriptor contract mismatch: ' + names);
     }
@@ -106,7 +106,7 @@ export class ProtocolDecoderRegistry420 {
     const strictLaunchpad = descriptor.protocol === '420Launchpad';
     const strictArbitration = descriptor.protocol === '420Arbitration';
     const strictCompensation = descriptor.protocol === '420DevelopmentCompensation';
-    const strict = strictTreasury || strictLaunchpad || strictArbitration || strictCompensation;
+    const strict = strictTreasury || strictLaunchpad || strictArbitration || strictCompensation || descriptor.protocol === '420Resource';
     if (strict && (!/^0x[0-9a-fA-F]{64}$/.test(log.blockHash) || !/^0x[0-9a-fA-F]{64}$/.test(log.transactionHash) || log.blockNumber < 0n || !Number.isSafeInteger(log.transactionIndex) || log.transactionIndex < 0 || !Number.isSafeInteger(log.logIndex) || log.logIndex < 0)) throw new Error(strictCompensation ? 'malformed canonical compensation log' : strictLaunchpad ? 'malformed canonical Launchpad provenance' : strictArbitration ? 'malformed canonical Arbitration provenance' : 'malformed canonical Treasury provenance');
     if (descriptor.protocol === '420Bridge' || strict) {
       const indexed = descriptor.fields.filter(field => field.indexed).length;

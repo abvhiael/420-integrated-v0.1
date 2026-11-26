@@ -1,0 +1,54 @@
+name: Resource 8A2 Indexer durable qualification
+on:
+  pull_request:
+    paths:
+      - '420-indexer/**'
+      - 'docs/audit/420RESOURCE-8A2-artifacts/**'
+      - '.github/workflows/resource-8a2-indexer.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  resource-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: indexer
+          POSTGRES_PASSWORD: indexer
+          POSTGRES_DB: indexer
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U indexer -d indexer"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: 420-indexer
+    env:
+      INDEXER_PG_URL: postgres://indexer:indexer@localhost:5432/indexer
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-package-lock
+      - run: npm run build
+      - name: Resource ABI and mandatory PostgreSQL qualification
+        run: |
+          set -euo pipefail
+          test -n "$INDEXER_PG_URL"
+          node --test --test-concurrency=1 dist/test/resource-indexer.test.js dist/test/resource-recovery-postgres.test.js | tee "$RUNNER_TEMP/resource-indexer.tap"
+          grep -Eq '^# skipped 0$' "$RUNNER_TEMP/resource-indexer.tap"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: resource-8a2-indexer-qualification
+          path: ${{ runner.temp }}/resource-indexer.tap
+          if-no-files-found: error

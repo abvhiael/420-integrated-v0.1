@@ -42,8 +42,9 @@ contract ResourceCollateralInvariantHandler420 is ResourceProviderCollateralFixt
         collateral.deposit{value:amount}(_provider(i),n);
         funded[i] += amount;
         if (providers.getProvider(_provider(i)).state != ResourceProviderRegistry420.State.ACTIVE) {
+            bytes32 id = _id(i);
             vm.prank(owner);
-            providers.updateProvider(_provider(i),0,_id(i));
+            providers.updateProvider(_provider(i),0,id);
             vm.prank(owner);
             (bool ok,) = address(providers).call(abi.encodeCall(providers.setState,(_provider(i),ResourceProviderRegistry420.State.ACTIVE)));
             // A penalty hold may legitimately prevent renewed eligibility.
@@ -112,8 +113,9 @@ contract ResourceCollateralInvariantHandler420 is ResourceProviderCollateralFixt
     function actExit(uint256 seed) external {
         uint256 i = seed % 2;
         if (collateral.getPosition(_id(i)).state != ResourceProviderCollateral420.State.BONDED) return;
+        bytes32 id = _id(i);
         vm.prank(_owner(i));
-        collateral.requestExit(_id(i));
+        collateral.requestExit(id);
         require(!providers.isActive(_provider(i)),"exit eligibility");
         assertAccounting();
     }
@@ -123,8 +125,9 @@ contract ResourceCollateralInvariantHandler420 is ResourceProviderCollateralFixt
         bool allowed = collateral.canWithdraw(_id(i));
         address owner = _owner(i);
         uint256 beforePaid = owner.balance;
+        bytes32 id = _id(i);
         vm.prank(owner);
-        (bool ok,) = address(collateral).call(abi.encodeCall(collateral.withdraw,(_id(i))));
+        (bool ok,) = address(collateral).call(abi.encodeCall(collateral.withdraw,(id)));
         require(ok == allowed,"withdrawal eligibility mismatch");
         paid[i] += owner.balance - beforePaid;
         assertAccounting();

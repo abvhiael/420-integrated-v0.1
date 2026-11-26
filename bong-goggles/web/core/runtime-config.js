@@ -29,6 +29,7 @@ export function validateRuntimeConfig(input){
     accountGames:input.features?.accountSocial===true&&input.features?.accountGames===true,
     classicRooms:roomsOn,
     classicCommunications:roomsOn&&input.features?.classicCommunications===true,
+    wordSaladRestricted:environment!=='production'&&roomsOn&&input.features?.wordSaladRestricted===true,
     chessRestricted:environment!=='production'&&roomsOn&&input.features?.classicCommunications===true&&input.features?.chessRestricted===true,
     accountXP:input.features?.accountSocial===true&&input.features?.accountXP===true,
     accountMonetization:input.features?.accountSocial===true&&input.features?.accountMonetization===true

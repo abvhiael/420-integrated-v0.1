@@ -1,0 +1,82 @@
+name: BC-4.4.2-B Word Salad Browser Qualification
+on:
+  pull_request:
+    paths:
+      - 'bong-goggles/web/**'
+      - '.github/workflows/bc-4-4-2-browser.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  responsive-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: bong-goggles/web
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build actual frontend and verify static gates
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+          node scripts/qualify-web.mjs
+      - name: Install isolated pinned Chromium test tooling
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.65.1
+          npx playwright install --with-deps chromium
+      - name: Six board sizes across four viewport classes
+        env:
+          BC442_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$BC442_SHA"
+          node test/word-salad-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bc442-fixture-browser-evidence
+          path: bong-goggles/web/bc442-browser-evidence/
+          retention-days: 90
+  live-authenticated:
+    # Never expose secrets to fork code. Require opt-in and a protected environment
+    # with reviewers before supplying dedicated, short-lived test credentials.
+    if: vars.BC442_LIVE_ENABLED == 'true' && (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' || github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+    environment: bc442-live-acceptance
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: bong-goggles/web
+    steps:
+      # Live credentials are used only with trusted main code, never PR code.
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Chromium
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.65.1
+          npx playwright install --with-deps chromium
+      - name: Authenticated live browser and reload
+        env:
+          BC442_COOKIE: ${{ secrets.BC442_COOKIE }}
+          BC442_SESSION_ID: ${{ secrets.BC442_SESSION_ID }}
+          BC442_RULES_HASH: ${{ vars.BC442_RULES_HASH }}
+        run: |
+          export BC442_SHA="$(git rev-parse HEAD)"
+          node test/word-salad-browser.mjs --live
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bc442-live-browser-evidence
+          path: bong-goggles/web/bc442-browser-evidence/
+          retention-days: 90

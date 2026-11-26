@@ -50,8 +50,8 @@ export function bindLabyrinthRoomStart(root,rooms,{history,onRouteChange,onRefre
    history?.pushState({},'','/games/labyrinth-cribbage/play?session='+
     encodeURIComponent(verified.session.id));
    onRouteChange?.();
-  }catch{
-   notify(rooms,'Labyrinth start was not confirmed. Refresh this 420ID room; no cards or scores were generated.');
+  }catch(error){
+   notify(rooms,error.message.startsWith('Labyrinth match start — ')?error.message:'Labyrinth start was not confirmed. Refresh this 420ID room; no cards or scores were generated.');
   }finally{
    delete form.dataset.busy;
    form.querySelector('button')?.removeAttribute('disabled');

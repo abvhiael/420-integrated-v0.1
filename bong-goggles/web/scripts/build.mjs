@@ -1,5 +1,5 @@
-import {SALAD_ART}
-await publishDictionaries(out); from '../core/word-salad-ui.js';
+import {publishDictionaries} from './word-salad-dictionaries.mjs';
+import {SALAD_ART} from '../core/word-salad-ui.js';
 import {cp,mkdir,rm,readFile,writeFile,stat} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {resolve,dirname} from 'node:path';
@@ -39,8 +39,7 @@ const flags=resolveClassicBuildFlags({account:accountFlag,rooms:process.env[CLAS
 const runtimeConfig=withAccountSocialBuildFlags(example,accountFlag,flags.rooms,flags.communications);
 // BC-3 release: main Pages only by default; explicit false is an operator rollback.
 const chessFlag=process.env.BG_CHESS_ACTIVATION;
-if(chessFlag!==undefined
-import {publishDictionaries} from './word-salad-dictionaries.mjs';&&!['true','false'].includes(chessFlag))throw Error('BG_CHESS_ACTIVATION must be exactly true or false');
+if(chessFlag!==undefined&&!['true','false'].includes(chessFlag))throw Error('BG_CHESS_ACTIVATION must be exactly true or false');
 const chessOn=chessFlag==='true'||(chessFlag===undefined&&process.env.CF_PAGES==='1'&&process.env.CF_PAGES_BRANCH==='main'&&runtimeConfig.features.classicCommunications);
 if(chessOn&&!runtimeConfig.features.classicCommunications)throw Error('Chess requires authenticated Classic rooms and communications');
 runtimeConfig.features.chessRestricted=Boolean(chessOn);
@@ -54,6 +53,7 @@ validateRuntimeConfig(runtimeConfig);
 for(const item of ['index.html','app.js','styles.css','game-kit.css','classic-communications.css','settings.css','branding.css','feed-branding.css','dashboard.css','classics.css','ccc-tabletop.css','ccc-practice.css','cribbage.css','labyrinth.css','chess.css','word-salad.css','welcome-landscape.svg','core','_headers']){
   await cp(resolve(root,item),resolve(out,item),{recursive:true});
 }
+await publishDictionaries(out);
 // Word Salad: publish only explicit, validated approved PNG artwork.
 for(const asset of SALAD_ART){
  const relative='assets/games/word-salad/'+asset;

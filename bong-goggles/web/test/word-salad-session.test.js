@@ -12,7 +12,7 @@ function harness(){
  const fetchImpl=async(url,opts)=>{
  if(down)throw Error('offline');
  if(url.endsWith('/v1/me'))return subject?response(200,{walletRequired:false,profile:{subject}}):response(401,{});
- if(url.endsWith('/action')){posts.push(JSON.parse(opts.body));if(hold)await hold;if(mode===200){s.sequence++;s.turnSeat=1;s.privateView.turn=1;}return response(mode,{...envelope,session:s});}
+ if(url.endsWith('/action')){posts.push(JSON.parse(opts.body));if(hold)await hold;if(posts.at(-1).expectedSequence!==s.sequence+1)return response(409,{...envelope,session:s});if(mode===200){s.sequence++;s.turnSeat=1;s.privateView.turn=1;}return response(mode,{...envelope,session:s});}
  if(url.endsWith('/classic-sessions'))return response(200,{...envelope,sessions:[s]});
  if(url.endsWith('/classic-rooms/'+roomId))return response(200,{...envelope,room:{id:roomId,gameId:'scrabble',seats:[{index:0,controller:'human',subject:actor},{index:1,controller:'bot',difficulty:'hard'}]}});
  if(readHold)await readHold;return response(readStatus,{...envelope,session:s});
@@ -71,7 +71,9 @@ test('accepted move snapshot is published before follow-up read and stalled bot 
 
 test('player commands during polling are sent once when the same revision is confirmed',async()=>{
  for(const [move,action] of [[{type:'pass'},'move'],[{type:'exchange',ids:[0]},'move'],[{type:'place',tiles:[{row:5,col:5,id:0}]},'move'],[undefined,'resign']]){
- const h=harness(),c=h.c;await c.refresh(id);let release;h.readHold=new Promise(r=>release=r);const poll=c.refresh(id);const command=c.act(move,action);await c.act(move,action);h.readHold=null;release();await Promise.all([poll,command]);assert.equal(h.posts.length,1);assert.equal(h.posts[0].action,action);assert.deepEqual(h.posts[0].move,move);
+ const h=harness(),c=h.c;await c.refresh(id);let release;h.readHold=new Promise(r=>release=r);const poll=c.refresh(id);await new Promise(r=>setTimeout(r,0));const command=c.act(move,action);assert.equal(c.state.status,'submitting');await c.act(move,action);await new Promise(r=>setTimeout(r,0));assert.equal(h.posts.length,1,'first click must reach server before background read releases');h.readHold=null;release();await Promise.all([poll,command]);assert.equal(h.posts.length,1);assert.equal(h.posts[0].action,action);assert.deepEqual(h.posts[0].move,move);
  }
 });
-test('queued command never submits after polling advances authoritative sequence',async()=>{const h=harness(),c=h.c;await c.refresh(id);let release;h.readHold=new Promise(r=>release=r);const poll=c.refresh(id);const command=c.act({type:'pass'});h.s.sequence++;h.readHold=null;release();await Promise.all([poll,command]);assert.equal(h.posts.length,0);assert.match(c.state.error,/changed/);});
+test('superseded poll cannot publish stale state and server rejects stale expected sequence',async()=>{const h=harness(),c=h.c;await c.refresh(id);let release;h.readHold=new Promise(r=>release=r);const poll=c.refresh(id);await new Promise(r=>setTimeout(r,0));h.s.sequence++;const command=c.act({type:'pass'});h.readHold=null;release();await Promise.all([poll,command]);assert.equal(h.posts.length,1);assert.equal(h.posts[0].expectedSequence,2);assert.equal(c.state.session.sequence,2);assert.match(c.state.error,/changed/);});
+
+test('superseding a poll still verifies principal before any mutation',async()=>{const h=harness(),c=h.c;await c.refresh(id);let release;h.readHold=new Promise(r=>release=r);const poll=c.refresh(id);await new Promise(r=>setTimeout(r,0));h.subject=other;const command=c.act({type:'pass'});h.readHold=null;release();await Promise.all([poll,command]);assert.equal(h.posts.length,0);assert.equal(c.state.session,null);});

@@ -27,18 +27,18 @@ export class SaladController{
  constructor({enabled=false,fetchImpl=fetch,onChange=()=>{}}={}){this.client=createAccountSocialClient({enabled,fetchImpl});this.onChange=onChange;this.gen=0;this.busy=false;this.actor=null;this.target=null;this.botWait=null;this.state={status:enabled?'idle':'disabled',session:null,matches:[],seats:[],draft:{},selected:null,exchange:[],order:[],error:'',notice:'',large:false};}
  emit(p){this.state={...this.state,...p};this.onChange();return this.state;}
  clear(){return {draft:{},selected:null,exchange:[],order:[],confirm:'',blank:'A',exchangeMode:false};}
- invalidate(){this.pendingAction=null;this.refreshPromise=null;this.gen++;this.busy=false;this.actor=null;this.target=null;this.botWait=null;this.emit({status:this.client.enabled?'idle':'disabled',session:null,matches:[],seats:[],error:'',notice:'',...this.clear()});}
- async principal(){const r=await this.client.request('/v1/me');if(r.status===401)return null;if(temporaryStatus(r.status))throw new TemporarySaladError('420ID temporarily unavailable; reconnecting');if(r.status!==200||r.data?.walletRequired!==false||!isSubjectID(r.data.profile?.subject))throw Error('420ID verification unavailable');return r.data.profile.subject;}
- refresh(id){if(this.pendingAction&&this.target===id)return this.refreshPromise;const p=this.refreshNow(id);if(this.busy&&!this.refreshPromise){this.refreshPromise=p;void p.finally(()=>{if(this.refreshPromise===p)this.refreshPromise=null;});}return p;}
- async refreshNow(id){if(!this.client.enabled)return;if(this.target!==id){this.invalidate();this.target=id;}if(this.busy)return;const gen=++this.gen;this.busy=true;
- try{const actor=await this.principal();if(gen!==this.gen)return;if(!actor){this.actor=null;this.emit({status:'guest',session:null,matches:[],seats:[],...this.clear()});return;}
+ invalidate(){this.pollAbort?.abort();this.pollAbort=null;this.pendingAction=null;this.refreshPromise=null;this.gen++;this.busy=false;this.actor=null;this.target=null;this.botWait=null;this.emit({status:this.client.enabled?'idle':'disabled',session:null,matches:[],seats:[],error:'',notice:'',...this.clear()});}
+ async principal(signal){const r=await this.client.request('/v1/me',{signal});if(r.status===401)return null;if(temporaryStatus(r.status))throw new TemporarySaladError('420ID temporarily unavailable; reconnecting');if(r.status!==200||r.data?.walletRequired!==false||!isSubjectID(r.data.profile?.subject))throw Error('420ID verification unavailable');return r.data.profile.subject;}
+ refresh(id){if(this.pendingAction&&this.target===id)return this.refreshPromise;if(this.target===id&&this.refreshPromise)return this.refreshPromise;const p=this.refreshNow(id);if(this.busy&&!this.refreshPromise){this.refreshPromise=p;void p.finally(()=>{if(this.refreshPromise===p)this.refreshPromise=null;});}return p;}
+ async refreshNow(id){if(!this.client.enabled)return;if(this.target!==id){this.invalidate();this.target=id;}if(this.busy)return;const gen=++this.gen;this.busy=true;const controller=new AbortController();this.pollAbort=controller;const signal=controller.signal;
+ try{const actor=await this.principal(signal);if(gen!==this.gen)return;if(!actor){this.actor=null;this.emit({status:'guest',session:null,matches:[],seats:[],...this.clear()});return;}
  if(actor!==this.actor){this.actor=actor;this.emit({session:null,matches:[],seats:[],...this.clear()});}
- if(!id){const r=await this.client.request('/v1/classic-sessions');if(gen!==this.gen)return;if(r.status!==200||!clean(r)||!Array.isArray(r.data.sessions)||await this.principal()!==actor)throw Error('Match list unavailable');if(gen===this.gen){const matches=r.data.sessions.filter(s=>s.gameId==='scrabble'&&saladID(s.id)&&saladID(s.roomId)&&s.rulesVersion==='v1'&&/^[a-f0-9]{64}$/.test(s.rulesHash)&&['active','finished'].includes(s.status)).map(({id,roomId,status,sequence})=>({id,roomId,status,sequence}));if(this.state.status!=='ready'||JSON.stringify(matches)!==JSON.stringify(this.state.matches))this.emit({status:'ready',session:null,matches,error:''});}return;}
+ if(!id){const r=await this.client.request('/v1/classic-sessions',{signal});if(gen!==this.gen)return;if(r.status!==200||!clean(r)||!Array.isArray(r.data.sessions)||await this.principal(signal)!==actor)throw Error('Match list unavailable');if(gen===this.gen){const matches=r.data.sessions.filter(s=>s.gameId==='scrabble'&&saladID(s.id)&&saladID(s.roomId)&&s.rulesVersion==='v1'&&/^[a-f0-9]{64}$/.test(s.rulesHash)&&['active','finished'].includes(s.status)).map(({id,roomId,status,sequence})=>({id,roomId,status,sequence}));if(this.state.status!=='ready'||JSON.stringify(matches)!==JSON.stringify(this.state.matches))this.emit({status:'ready',session:null,matches,error:''});}return;}
  if(!saladID(id))throw Error('Invalid match link');
- const r=await this.client.request('/v1/classic-sessions/'+id);if(temporaryStatus(r.status))throw new TemporarySaladError('Game service temporarily unavailable; reconnecting');let s=normalizeSalad(r,id);if(!s)throw Error('Match unavailable or access denied');
- const room=await this.client.request('/v1/classic-rooms/'+s.roomId);if(temporaryStatus(room.status))throw new TemporarySaladError('Room service temporarily unavailable; reconnecting');const seats=room.data?.room?.seats;
+ const r=await this.client.request('/v1/classic-sessions/'+id,{signal});if(gen!==this.gen)return;if(temporaryStatus(r.status))throw new TemporarySaladError('Game service temporarily unavailable; reconnecting');let s=normalizeSalad(r,id);if(!s)throw Error('Match unavailable or access denied');
+ const room=await this.client.request('/v1/classic-rooms/'+s.roomId,{signal});if(gen!==this.gen)return;if(temporaryStatus(room.status))throw new TemporarySaladError('Room service temporarily unavailable; reconnecting');const seats=room.data?.room?.seats;
  if(room.status!==200||!clean(room)||room.data.room.id!==s.roomId||room.data.room.gameId!=='scrabble'||!Array.isArray(seats)||seats.length!==s.seatCount||seats[s.viewerSeat]?.subject!==actor||seats.some((x,i)=>x.index!==i||!['human','bot'].includes(x.controller)||x.controller==='bot'&&!['easy','medium','hard'].includes(x.difficulty)))throw Error('Room seats unavailable');
- if(await this.principal()!==actor)throw Error('Account changed');if(gen!==this.gen)return;
+ if(await this.principal(signal)!==actor)throw Error('Account changed');if(gen!==this.gen)return;
  // A bot turn that survives multiple polls can be recovered through a
  // server-authorized nudge; never send a guessed computer action.
  if(s.status==='active'&&seats[s.privateView.turn]?.controller==='bot'){
@@ -57,7 +57,7 @@ export class SaladController{
  if(old?.id===id&&old.sequence===s.sequence){if(JSON.stringify(old.privateView)!==JSON.stringify(s.privateView)||old.status!==s.status||old.deadline!==s.deadline)throw Error('Conflicting server revision');if(this.state.status==='ready')return;this.emit({status:'ready',session:s,seats,error:''});return;}
  const notice=old?.id===id?s.privateView.scores.map((x,i)=>x-old.privateView.scores[i]).map((x,i)=>x?'Player '+(i+1)+': '+(x>0?'+':'')+x:'').filter(Boolean).join(' · '):'';
  this.emit({status:'ready',session:s,seats,error:'',notice,...this.clear()});
- }catch(e){if(gen===this.gen){if(e instanceof TemporarySaladError&&this.state.session?.id===id&&this.actor)this.emit({status:'reconnecting',error:e.message});else this.emit({status:'unavailable',session:null,seats:[],matches:[],error:e.message,...this.clear()});}}finally{if(gen===this.gen)this.busy=false;}}
+ }catch(e){if(gen===this.gen){if(e instanceof TemporarySaladError&&this.state.session?.id===id&&this.actor)this.emit({status:'reconnecting',error:e.message});else this.emit({status:'unavailable',session:null,seats:[],matches:[],error:e.message,...this.clear()});}}finally{if(this.pollAbort===controller)this.pollAbort=null;if(gen===this.gen)this.busy=false;}}
  canPlay(){const s=this.state.session;return this.state.status==='ready'&&s?.status==='active'&&s.viewerSeat===s.privateView.turn&&!s.privateView.forfeit[s.viewerSeat];}
  select(id){if(this.canPlay()&&this.state.session.privateView.rack.some(t=>t.id===id))this.emit({selected:id});}
  place(q,blank=this.state.blank){if(!this.canPlay())return;const s=this.state.session,v=s.privateView,id=this.state.selected,t=v.rack.find(x=>x.id===id),size=s.format.p.size;if(!t||!Number.isInteger(q)||q<0||q>=size*size||Object.hasOwn(v.board,q)||t.symbol==='?'&&!/^[A-Z]$/.test(blank))return;
@@ -65,17 +65,19 @@ export class SaladController{
  recall(q){const d={...this.state.draft};if(q===undefined)this.emit({draft:{},selected:null,exchange:[]});else{delete d[q];this.emit({draft:d});}}
  async act(move,action='move'){
   if(this.pendingAction)return;
-  const original=this.state.session,actor=this.actor,gen=this.gen;
-  if(!original||this.state.status!=='ready')return;
+  const original=this.state.session,actor=this.actor;
+  if(!original||this.state.status!=='ready'||!actor||!['move','resign'].includes(action)||action==='move'&&!this.canPlay()||original.status!=='active'||original.privateView.forfeit[original.viewerSeat])return;
   const token={};this.pendingAction=token;
   try{
-   if(this.refreshPromise)await this.refreshPromise;
-   if(this.pendingAction!==token||this.target!==original.id||this.actor!==actor||this.gen!==gen||this.state.session?.sequence!==original.sequence||this.state.status!=='ready'){if(this.target===original.id&&this.actor===actor)this.emit({error:'The game state changed. Please review the current turn and try again.'});return;}
+   // Supersede background reads, never a mutation. The action endpoint enforces
+   // authorization and expectedSequence atomically even when a read was stale.
+   if(this.pollAbort){this.gen++;this.pollAbort.abort();this.pollAbort=null;this.refreshPromise=null;this.busy=false;}
+   if(this.pendingAction!==token||this.target!==original.id||this.actor!==actor||this.state.session?.sequence!==original.sequence||this.state.status!=='ready')return;
    return await this.actNow(move,action);
   }finally{if(this.pendingAction===token)this.pendingAction=null;}
  }
  async actNow(move,action='move'){const s=this.state.session,actor=this.actor;if(!['move','resign'].includes(action)||action==='move'&&!['place','exchange','pass'].includes(move?.type)||action==='resign'&&move!==undefined&&move!==null||this.busy||!s||s.status!=='active'||(action==='move'&&!this.canPlay())||s.privateView.forfeit[s.viewerSeat])return;
- const gen=++this.gen;this.busy=true;this.emit({status:'submitting',error:''});let error='';
+ const gen=++this.gen;this.busy=true;this.emit({status:'submitting',error:'',notice:'Submitting your action…'});let error='';
  try{if(await this.principal()!==actor||gen!==this.gen)throw Error('Account changed');const requestId=globalThis.crypto?.randomUUID?.();if(!saladID(requestId))throw Error('Secure request ID unavailable');
  const r=await this.client.request('/v1/classic-sessions/'+s.id+'/action',{method:'POST',body:{requestId,action,expectedSequence:s.sequence+1,...(move?{move}:{})}});if(gen!==this.gen)return;
  if(temporaryStatus(r.status))throw new TemporarySaladError('Move confirmation temporarily unavailable; reconnecting');

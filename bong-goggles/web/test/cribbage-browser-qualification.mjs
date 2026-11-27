@@ -75,7 +75,7 @@ try{
   assert(data.board&&data.hand,'board and hand layout missing');
   if(data.large){
    assert(data.board.x>data.hand.x+data.hand.width*.7,'desktop board not on right');
-   assert(Math.abs(data.board.width-data.hand.width)<width*.2,'desktop split not balanced');
+   assert(data.board.width>=data.hand.width,'desktop board must have priority');
   }else assert(data.board.y>data.hand.y,'mobile board does not stack below cards');
   await page.addScriptTag({url:base+'/node_modules/axe-core/axe.min.js'});
   const violations=await page.evaluate(async()=>{
@@ -128,6 +128,56 @@ try{
    ' players: exact PNG, no duplicated holes, private hand buttons and axe PASS');
   await page.close();
  }
+ // Exercise the actual controller and real DOM over three complete fixture hands.
+ const page=await browser.newPage({viewport:{width:1600,height:1000}});
+ await page.route('**/app.js',route=>route.fulfill({status:200,contentType:'text/javascript',body:''}));
+ await page.goto(base+'/index.html');
+ const outcome=await page.evaluate(async()=>{
+  const {CribbageSessionController,CRIBBAGE_RULES_HASH,cribbageLegalMoves}=await import('/core/cribbage-session.js');
+  const {renderCribbageRoute,bindCribbageDom}=await import('/core/cribbage-ui.js');
+  document.body.innerHTML='<main id="match-root"></main>';
+  const root=document.querySelector('#match-root'),subject='30000000-3333-4333-8333-333333333333';
+  const s={id:'10000000-1111-4111-8111-111111111111',roomId:'20000000-2222-4222-8222-222222222222',gameId:'cribbage',seatCount:2,status:'active',sequence:1,turnSeat:0,viewerSeat:0,rulesVersion:'v1.0',rulesHash:CRIBBAGE_RULES_HASH,deadline:null,winnerSeat:null};
+  const v=s.privateView={gameId:'cribbage',variant:'standard-2p',round:1,phase:'discard',dealer:1,turn:0,seat:0,scores:[0,0],hand:[0,4,13,25,37,48],cardCounts:[6,6],cribCount:0,discarded:[false,false],starter:-1,pegCount:0,pegPile:[],pegged:[[],[]],saidGo:[false,false],lastShow:[],lastAwards:[],losers:[],winner:null};
+  const response=data=>({status:200,ok:true,headers:{get:()=> 'application/json'},json:async()=>structuredClone(data)});
+  let posts=0;
+  const ctl=new CribbageSessionController({enabled:true,setTimer:(fn)=>setTimeout(fn,15),clearTimer:clearTimeout,
+   onChange:state=>{root.innerHTML=renderCribbageRoute({screen:'play',state});bindCribbageDom(root,ctl);},
+   fetchImpl:async(path,opts)=>{
+    if(path.endsWith('/v1/me'))return response({walletRequired:false,profile:{subject}});
+    if(path.endsWith('/action')){
+     const {move,expectedSequence}=JSON.parse(opts.body);
+     if(expectedSequence!==s.sequence+1)throw Error('unexpected sequence');
+     posts++;s.sequence++;v.lastAwards=[];v.lastShow=[];
+     if(move.type==='discard'){v.hand=v.hand.filter(x=>!move.cards.includes(x));v.phase='cut';v.discarded=[true,true];v.cardCounts=[4,4];v.cribCount=4;}
+     else if(move.type==='cut'){v.phase='peg';v.starter=11;}
+     else if(move.type==='play'){
+      v.hand=v.hand.filter(x=>x!==move.card);v.cardCounts=[v.hand.length,v.hand.length];
+      if(!v.hand.length){
+       v.scores[0]+=1;v.lastAwards=[{seat:0,team:0,kind:'last-card',points:1,count:20,total:v.scores[0]}];
+       const score={fifteens:0,pairs:0,runs:0,flush:0,nobs:0,total:0};
+       v.lastShow=[{seat:0,isCrib:false,cards:[0,4,13,25],starter:11,score},{seat:1,isCrib:false,cards:[1,5,14,26],starter:11,score},{seat:1,isCrib:true,cards:[2,6,15,27],starter:11,score}];
+       v.round++;v.phase='discard';v.hand=[0,4,13,25,37,48];v.cardCounts=[6,6];v.discarded=[false,false];v.cribCount=0;v.starter=-1;
+      }
+     }else throw Error('unexpected fixture move');
+    }
+    return response({onChain:false,wager:false,rewards:false,session:s});
+   }});
+  await ctl.open(s.id);
+  const wait=async predicate=>{for(let i=0;i<300;i++){if(predicate())return;await new Promise(r=>setTimeout(r,10));}throw Error('scoring transition stalled');};
+  for(let i=0;i<18;i++){
+   await wait(()=>ctl.state.status==='ready'&&!ctl.state.scoring&&!ctl.state.submitting&&cribbageLegalMoves(ctl.state.session).length);
+   const move=cribbageLegalMoves(ctl.state.session)[0],seq=ctl.state.session.sequence;
+   for(const card of move.cards??(move.type==='play'?[move.card]:[]))root.querySelector('[data-cribbage-card="'+card+'"]').click();
+   root.querySelector('[data-cribbage-action="'+move.type+'"]').click();
+   await wait(()=>ctl.state.session.sequence===seq+1&&!ctl.state.scoring&&!ctl.state.submitting);
+  }
+  const result={round:ctl.state.session.privateView.round,posts,scoring:ctl.state.scoring,phase:ctl.state.session.privateView.phase,controls:cribbageLegalMoves(ctl.state.session).length};
+  ctl.destroy();return result;
+ });
+ assert(outcome.round===4&&outcome.posts===18&&!outcome.scoring&&outcome.phase==='discard'&&outcome.controls>0,'three complete fixture hands failed '+JSON.stringify(outcome));
+ console.log('BC-1.4 uninterrupted three-hand DOM/controller fixture PASS '+JSON.stringify(outcome));
+ await page.close();
  console.log('BC-1.4 Chromium desktop/tablet/mobile acceptance PASSED');
 }finally{
  if(browser)await browser.close();

@@ -460,7 +460,7 @@ for(const f of vehicleFiles){
  const gitSha=createHash('sha1').update(Buffer.from('blob '+raw.length+'\0')).update(raw).digest('hex');
  if(gitSha!==CHAOS_VEHICLE_SOURCE_SHA[id])throw new Error('Published vehicle token differs from approved source: '+name);
 }
-const total=baseTotal+cardTotal+mapTotal+vehicleTotal+saladArtBytes;
+const total=baseTotal+cardTotal+mapTotal+vehicleTotal+saladArtBytes+chessArtBytes;
 for(const file of files){const name=relative(root,file.path);if(name.endsWith('.js')&&file.size>limits.singleJs)throw new Error(`JavaScript asset budget exceeded: ${name}`);if(name.endsWith('.css')&&file.size>limits.singleCss)throw new Error(`CSS asset budget exceeded: ${name}`);}
 const html=await readFile(resolve(root,'index.html'),'utf8');const app=await readFile(resolve(root,'app.js'),'utf8');const css=await readFile(resolve(root,'styles.css'),'utf8');const branding=await readFile(resolve(root,'branding.css'),'utf8');
 const tabletopCss=await readFile(resolve(root,'ccc-tabletop.css'),'utf8');

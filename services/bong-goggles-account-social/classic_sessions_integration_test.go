@@ -200,3 +200,25 @@ func TestBC06ConcurrentMovesSEEDeliveryAndFailClosedRules(t *testing.T){
  if w:=request(h,"GET","/v1/classic-sessions/"+match.ID+"/events?after=2","",b);w.Code!=200||
   !strings.Contains(w.Body.String(),`"kind":"cancelled"`){t.Fatal("schema-qualified cancellation event",w.Code,w.Body.String())}
 }
+
+func TestBC06ReconcileRoomCapacityPreservesHistory(t *testing.T){
+ store,h,a,b:=bc06Fixture(t,"198.51.100.198")
+ ctx:=context.Background()
+ room:=bc06Room(t,h,a,b);match:=bc06Start(t,h,a,room.ID)
+ if _,e:=store.DB.Exec("UPDATE bg_account_social.classic_sessions SET turn_deadline=clock_timestamp()-interval '5 seconds' WHERE id=$1",match.ID);e!=nil{t.Fatal(e)}
+ if e:=h.Sessions.Expire(ctx,match.ID);e!=nil{t.Fatal(e)}
+ var status string
+ if e:=store.DB.QueryRow("SELECT status FROM bg_account_social.classic_rooms WHERE id=$1",room.ID).Scan(&status);e!=nil||status!="completed"{t.Fatal("timeout did not release room",status,e)}
+ if _,e:=store.DB.Exec("UPDATE bg_account_social.classic_rooms SET status='in_game' WHERE id=$1",room.ID);e!=nil{t.Fatal(e)}
+ abandoned,e:=h.Rooms.Create(ctx,memberA,"cribbage","private",2);if e!=nil{t.Fatal(e)}
+ if _,e=store.DB.Exec("UPDATE bg_account_social.classic_rooms SET updated_at=clock_timestamp()-interval '31 minutes' WHERE id=$1",abandoned.ID);e!=nil{t.Fatal(e)}
+ live:=bc06Room(t,h,a,b);liveMatch:=bc06Start(t,h,a,live.ID)
+ for i:=0;i<9;i++{if _,e=h.Rooms.Create(ctx,memberA,"chess","private",2);e!=nil{t.Fatal("recovered capacity",i,e)}}
+ if _,e=h.Rooms.Create(ctx,memberA,"chess","private",2);!errors.Is(e,ErrConflict){t.Fatal("quota not enforced",e)}
+ for id,want:=range map[string]string{room.ID:"completed",abandoned.ID:"cancelled",live.ID:"in_game"}{
+  if e=store.DB.QueryRow("SELECT status FROM bg_account_social.classic_rooms WHERE id=$1",id).Scan(&status);e!=nil||status!=want{t.Fatal("room reconciliation",id,status,want,e)}
+ }
+ for id,want:=range map[string]string{match.ID:"timed_out",liveMatch.ID:"active"}{
+  if e=store.DB.QueryRow("SELECT status FROM bg_account_social.classic_sessions WHERE id=$1",id).Scan(&status);e!=nil||status!=want{t.Fatal("session history changed",id,status,want,e)}
+ }
+}

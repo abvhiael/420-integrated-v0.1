@@ -170,6 +170,7 @@ func newMatchLobby(ctx context.Context,tx *sql.Tx,viewer,requestID string,digest
  var host string
  e:=tx.QueryRowContext(ctx,"SELECT subject FROM bg_account_social.members WHERE subject=$1 FOR UPDATE",viewer).Scan(&host)
  if errors.Is(e,sql.ErrNoRows){return "",ErrNotFound};if e!=nil{return "",e}
+ if e=reconcileClassicRoomCapacity(ctx,tx,viewer);e!=nil{return "",e}
  var active int
  e=tx.QueryRowContext(ctx,"SELECT count(*) FROM bg_account_social.classic_rooms WHERE host=$1 AND status IN ('open','ready','in_game')",viewer).Scan(&active)
  if e!=nil{return "",e};if active>=10{return "",ErrConflict}

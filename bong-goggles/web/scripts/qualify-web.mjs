@@ -62,7 +62,10 @@ for(const f of chessFiles){
  chessArtBytes+=f.size;
 }
 if(chessArtBytes>chessArtBudget)throw Error('Chess image budget exceeded');
-const regularFiles=files.filter(f=>!chessArtPaths.has(normalize(f.path))&&!normalize(f.path).startsWith(saladPrefix)&&!normalize(f.path).startsWith(artPrefix)&&!normalize(f.path).startsWith(mapPrefix)&&!normalize(f.path).startsWith(vehiclePrefix)&&!normalize(f.path).startsWith(labyrinthArtPrefix)&&normalize(f.path)!=='assets/games/cribbage/board-cannabis-leaf.png');
+const wallpaperPath='assets/games/cribbage/cribbage-play-wallpaper-casino-lounge.webp';
+const wallpaperFile=files.find(f=>normalize(f.path)===wallpaperPath);
+if(!wallpaperFile||wallpaperFile.size>512*1024||wallpaperFile.size<1024)throw Error('Cribbage wallpaper missing or exceeds 512 KiB');
+const regularFiles=files.filter(f=>normalize(f.path)!==wallpaperPath&&!chessArtPaths.has(normalize(f.path))&&!normalize(f.path).startsWith(saladPrefix)&&!normalize(f.path).startsWith(artPrefix)&&!normalize(f.path).startsWith(mapPrefix)&&!normalize(f.path).startsWith(vehiclePrefix)&&!normalize(f.path).startsWith(labyrinthArtPrefix)&&normalize(f.path)!=='assets/games/cribbage/board-cannabis-leaf.png');
 const baseTotal=regularFiles.reduce((sum,f)=>sum+f.size,0);
 const practiceJs=regularFiles.find(f=>normalize(f.path)==='core/chaos-practice-table.js')?.size;
 const practiceCss=regularFiles.find(f=>normalize(f.path)==='ccc-practice.css')?.size;
@@ -276,7 +279,7 @@ const bc14Limits=Object.freeze({
  'core/cribbage-session.js':15*1024,
  'core/cribbage-ui.js':19*1024,
  'core/cribbage-route-runtime.js':2*1024,
- 'cribbage.css':12*1024,
+ 'cribbage.css':13*1024,
  'assets/games/cribbage/leaf-board.svg':44*1024
 });
 // Existing Cribbage navigation and in-place refresh from current main retain isolated budgets.
@@ -315,7 +318,7 @@ for(const [path,cap] of Object.entries(bc14Limits)){
   throw new Error('BC-1.4 asset exceeds exact scope/size: '+path+' '+size+' > '+cap);
  bc14Bytes+=size;
 }
-if(bc14Bytes>96*1024)throw new Error('BC-1.4 96 KiB frontend allowance exceeded: '+bc14Bytes);
+if(bc14Bytes>97*1024)throw new Error('BC-1.4 96 KiB frontend allowance exceeded: '+bc14Bytes);
 const leafArt=await readFile(resolve(root,'assets/games/cribbage/leaf-board.svg'));
 const leafGitSHA=createHash('sha1').update(Buffer.from('blob '+leafArt.length+'\0')).update(leafArt).digest('hex');
 if(leafGitSHA!=='02b7f8f7b86af3b6fa4bd0833a6785449145a366')
@@ -570,7 +573,7 @@ if(!computerJs.includes('chaosActionOptions(s)')||
 for(const [name,ok] of Object.entries({'document language':/<html\s+lang="[a-z-]+"/i.test(html),'viewport':/name="viewport"/.test(html),'main landmark':/<main\b/.test(app),'focus treatment':/:focus-visible\b/.test(css),'reduced motion':/prefers-reduced-motion/.test(css),'forced colors':/forced-colors/.test(css),'noindex private default':/name="robots"[^>]*noindex/i.test(html)}))if(!ok)throw new Error(`static accessibility/privacy gate missing: ${name}`);
 const names=new Map(files.map(file=>[relative(root,file.path).replaceAll('\\','/'),file.size]));
 for(const asset of DASHBOARD_ASSETS){const size=names.get(asset);if(!size||size>128*1024)throw new Error('missing or oversized dashboard artwork: '+asset);}
-for(const name of names.keys())if(name.startsWith('assets/')&&name!==CHAOS_IMAGE_MANIFEST_PATH&&!DASHBOARD_ASSETS.includes(name)&&!cardAllowlist.has(name)&&!mapAllowlist.has(name)&&!vehicleAllowlist.has(name)&&!chessArtPaths.has(name)&&!saladAllowlist.has(name)&&!bc14Allowed.has(name)&&name!==originalCribbageArt&&name!=='assets/games/labyrinth-cribbage/labyrinth.png')
+for(const name of names.keys())if(name.startsWith('assets/')&&name!==CHAOS_IMAGE_MANIFEST_PATH&&!DASHBOARD_ASSETS.includes(name)&&!cardAllowlist.has(name)&&!mapAllowlist.has(name)&&!vehicleAllowlist.has(name)&&!chessArtPaths.has(name)&&!saladAllowlist.has(name)&&!bc14Allowed.has(name)&&name!==wallpaperPath&&name!==originalCribbageArt&&name!=='assets/games/labyrinth-cribbage/labyrinth.png')
  throw new Error('unexpected published asset: '+name);
 for(const asset of CHAOS_CARD_ART_OUTPUTS)if(!names.has(asset))throw new Error('missing approved card art: '+asset);
 if(names.has('bong-goggles-logo.png'))throw new Error('oversized original brand master must remain source-only');

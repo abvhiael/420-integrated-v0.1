@@ -1,0 +1,721 @@
+{
+  "pr": 1447,
+  "qualified_sha": "bb8bd4c47c6cab433a0941389ab65071f7853df5",
+  "scope": "Structured workflow/job/step outcomes; not raw runner logs or production pooler/gameplay acceptance",
+  "runs": [
+    {
+      "name": "BC-1.6 Authenticated Cribbage Challenges and Social",
+      "id": 45928612512,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45928612512",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 140275783024,
+          "name": "authenticated-postgres",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Check exact head, schema and signed two-account 420ID flows",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 140275783313,
+          "name": "social-browser",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Check exact head and focused Cribbage UI",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BC-3.3 Chess Computer Opponents",
+      "id": 45928611649,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45928611649",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 140275779373,
+          "name": "qualify-chess-bots",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify exact qualification SHA",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Qualify Chess rules, bots, strength, restart and registration (PostgreSQL 16, race)",
+              "conclusion": "success"
+            },
+            {
+              "name": "Repeat Hard PostgreSQL recovery under CPU contention",
+              "conclusion": "success"
+            },
+            {
+              "name": "Static analysis and restricted service build",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bong Goggles CCC Account Multiplayer",
+      "id": 45928611506,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45928611506",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 140275778882,
+          "name": "CCC authoritative rooms, secrecy and PostgreSQL concurrency",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install isolated game service package",
+              "conclusion": "success"
+            },
+            {
+              "name": "Check authoritative entrypoint and all JavaScript modules",
+              "conclusion": "success"
+            },
+            {
+              "name": "Validate two distinct accounts, hidden hands, stale turns, bots and real PostgreSQL row locks",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 140275779210,
+          "name": "420ID-bound zero-wager game gateway",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Compile and test authenticated account game proxy",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BC-2.5 Labyrinth Authenticated Human Multiplayer",
+      "id": 45928611698,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45928611698",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 140275779462,
+          "name": "verified-human-ui",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify exact source, signed session terminal and rematch controls",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 140275779659,
+          "name": "two-account-durable-consent",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Exact source, 420ID two-account rematch, consent, replay and legacy Cribbage parity",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BC-4.2 Word Salad Backend Qualification",
+      "id": 45928611509,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45928611509",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 140275778995,
+          "name": "word-salad-postgresql",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify exact source",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Word Salad engine, authenticated API and durable replay regression",
+              "conclusion": "success"
+            },
+            {
+              "name": "Record dictionary identities",
+              "conclusion": "success"
+            },
+            {
+              "name": "Web catalogue and tile regression",
+              "conclusion": "success"
+            },
+            {
+              "name": "Static analysis and service build",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BC-1.5 Cribbage Authenticated Multiplayer and Recovery",
+      "id": 45928611806,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45928611806",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 140275779629,
+          "name": "startup-safety",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Test fail-closed frozen Cribbage startup and runtime build",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 140275779886,
+          "name": "distinct-browser-accounts",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify exact source head",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install pinned headless Chrome",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify distinct 420ID cookie contexts, host start, private cards and reload",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 140275779897,
+          "name": "two-account-postgres",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify two-account authenticated real PostgreSQL/420ID session, recovery and mixed AI",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 140275779916,
+          "name": "frontend-room-and-recovery",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify exact source head",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify host-only start, authenticated resume and previously qualified frontend",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AUTH-8/9/10/11 Wallet-Independent BongGoggles Social",
+      "id": 45928611517,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45928611517",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 140275779273,
+          "name": "qualify-social",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify exact implementation SHA",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Social API PostgreSQL and race qualification",
+              "conclusion": "success"
+            },
+            {
+              "name": "Social API static analysis",
+              "conclusion": "success"
+            },
+            {
+              "name": "Build restricted social service",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify no implicit production startup",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Focused wallet-independent browser tests",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BC-0.5–0.10 Account Rooms, Sessions, Rules, Bots and Communications",
+      "id": 45928611541,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45928611541",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 140275779021,
+          "name": "qualify-rooms",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify exact qualification SHA",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Qualify room presence, reconnect/replay, rules and bots (PostgreSQL 16, race)",
+              "conclusion": "success"
+            },
+            {
+              "name": "Static analysis and restricted service build",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Qualify targeted room, account and shared-games web regressions",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

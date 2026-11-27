@@ -165,7 +165,7 @@ seatCount:session.seatCount,pegs:state.pegs,settings:state.settings})+'</div></d
 }
 function rules(){
 return '<section class="cribbage-info"><h3>Cribbage · 121 points</h3>'+
-'<p>Two players keep four from six dealt cards, discarding two each. Three players keep four from five and contribute one to the crib; an extra crib card comes from the stock. Four players play as opposite-seat partners and discard one card each.</p>'+
+'<p>Two players keep four from six dealt cards, discarding two each. Four players play as opposite-seat partners and discard one card each.</p>'+
 '<p>The crib belongs to the dealer. After everyone discards, cut a starter card. A Jack starter earns the dealer two for “his heels”.</p>'+
 '<p>Starting left of the dealer, each player plays a card in turn without letting the running count exceed 31. Score two for 15 or 31, two for a pair, six for three of a kind, twelve for four of a kind and the length of qualifying runs. The last playable card below 31 or a Go scores one.</p>'+
 '<p>At the show, counting starts with the player left of the dealer and proceeds clockwise. The dealer’s hand counts last, then the dealer’s crib. Fifteens, pairs, runs, hand flushes, crib five-card flushes and nobs count automatically. The first side to 121 wins.</p>'+
@@ -205,7 +205,7 @@ myGames+
 (s.error?'<p role="alert">'+esc(s.error)+'</p>':'')+'</section>';
 const boardPreview=renderCribbageBoard({scores:[0,0],seatCount:2,settings:s.settings??{}});
 const home='<div class="cribbage-intro-grid"><div class="cribbage-intro-copy"><h3>Introduction · Classic Cribbage, made for game night</h3>'+
-'<p>Play 2–4 players. Watch pegging and scoring.</p>'+
+'<p>Play two players or four in partnerships. Watch pegging and scoring.</p>'+
 '<p>The board counts hands in order, with the dealer’s crib last. Every counted announcement is held for 1.5 seconds before the next scoring event.</p>'+
 '<a class="cribbage-primary" href="/games/cribbage/play" data-route="classic-game">Open a Cribbage table</a></div>'+
 boardPreview+'</div>'+practice(pState);

@@ -8,17 +8,17 @@ const snapshot=()=>({id,roomId,gameId:'scrabble',rulesVersion:'v1',rulesHash:'a'
 const response=(status,data)=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json'}});
 const wrap=s=>({status:200,data:{...envelope,session:s}});
 function harness(){
- let s=snapshot(),subject=actor,mode=400,posts=[],down=false,hold=null;
+ let s=snapshot(),subject=actor,mode=400,posts=[],down=false,hold=null,readStatus=200;
  const fetchImpl=async(url,opts)=>{
  if(down)throw Error('offline');
  if(url.endsWith('/v1/me'))return subject?response(200,{walletRequired:false,profile:{subject}}):response(401,{});
  if(url.endsWith('/action')){posts.push(JSON.parse(opts.body));if(hold)await hold;if(mode===200){s.sequence++;s.turnSeat=1;s.privateView.turn=1;}return response(mode,{...envelope,session:s});}
  if(url.endsWith('/classic-sessions'))return response(200,{...envelope,sessions:[s]});
  if(url.endsWith('/classic-rooms/'+roomId))return response(200,{...envelope,room:{id:roomId,gameId:'scrabble',seats:[{index:0,controller:'human',subject:actor},{index:1,controller:'bot',difficulty:'hard'}]}});
- return response(200,{...envelope,session:s});
+ return response(readStatus,{...envelope,session:s});
  };
  const c=new SaladController({enabled:true,fetchImpl});
- return {c,fetchImpl,posts,get s(){return s;},set subject(x){subject=x;},set mode(x){mode=x;},set down(x){down=x;},set hold(x){hold=x;}};
+ return {c,fetchImpl,posts,get s(){return s;},set subject(x){subject=x;},set mode(x){mode=x;},set down(x){down=x;},set hold(x){hold=x;},set readStatus(x){readStatus=x;}};
 }
 test('valid private snapshot and malformed or concealed fields fail closed',()=>{
  assert.ok(normalizeSalad(wrap(snapshot()),id));
@@ -48,3 +48,5 @@ test('runtime invalidates on offline, hidden page, logout and destruction',async
  const h=harness(),win=new EventTarget(),doc=new EventTarget();win.location={pathname:'/games/scrabble/play',search:'?session='+id};win.setInterval=()=>1;win.clearInterval=()=>{};doc.hidden=false;
  const runtime=createSaladRuntime({enabled:true,win,doc,fetchImpl:h.fetchImpl});await runtime.refresh();assert.equal(runtime.state.status,'ready');win.dispatchEvent(new Event('offline'));assert.equal(runtime.state.session,null);await runtime.refresh();doc.hidden=true;doc.dispatchEvent(new Event('visibilitychange'));assert.equal(runtime.state.session,null);doc.hidden=false;await runtime.refresh();runtime.suspend();await runtime.refresh();assert.equal(runtime.state.session,null);await runtime.resume();assert.equal(runtime.state.status,'ready');runtime.destroy();assert.equal(runtime.state.session,null);
 });
+
+test('temporary service failures suspend moves, retain session identity and recover without mutation',async()=>{const h=harness(),c=h.c;await c.refresh(id);for(const status of [429,503,504]){h.readStatus=status;await c.refresh(id);assert.equal(c.state.status,'reconnecting');assert.equal(c.state.session.id,id);assert.equal(c.canPlay(),false);await c.act({type:'pass'});assert.equal(h.posts.length,0);h.readStatus=200;await c.refresh(id);assert.equal(c.state.status,'ready');assert.equal(c.canPlay(),true);}h.readStatus=403;await c.refresh(id);assert.equal(c.state.session,null);});

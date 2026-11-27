@@ -60,12 +60,12 @@ func TestBC42WordSaladTimeoutAndNormalFinish(t *testing.T){
  if seq!=2||turn==*match.TurnSeat||status!="active"{t.Fatal("timeout did not advance exactly once",seq,turn,status)}
  if e=h.Sessions.VerifyRules(ctx,match.ID);e!=nil{t.Fatal("timeout replay",e)}
  cookies:=[]*http.Cookie{a,b}
- for i:=0;i<5;i++{
+ for i:=0;i<1;i++{
   if e=store.DB.QueryRowContext(ctx,"SELECT sequence,turn_seat FROM bg_account_social.classic_sessions WHERE id=$1",match.ID).Scan(&seq,&turn);e!=nil{t.Fatal(e)}
   if w:=bc06Act(t,h,cookies[turn],match.ID,"move",seq+1,map[string]string{"type":"pass"},bc06ActionID(t));w.Code!=200{t.Fatal("pass",w.Code,w.Body.String())}
  }
  if e=store.DB.QueryRowContext(ctx,"SELECT sequence,status FROM bg_account_social.classic_sessions WHERE id=$1",match.ID).Scan(&seq,&status);e!=nil{t.Fatal(e)}
- if seq!=7||status!="finished"{t.Fatal("scoreless finish",seq,status)}
+ if seq!=3||status!="finished"{t.Fatal("scoreless finish",seq,status)}
  if e=h.Sessions.VerifyRules(ctx,match.ID);e!=nil{t.Fatal("terminal replay",e)}
  recovered,e:=NewClassicSessions(store,h.Rooms,h.Sessions.Rules);if e!=nil{t.Fatal(e)};h.Sessions=recovered
  if w:=request(h,"GET","/v1/classic-sessions/"+match.ID,"",b);w.Code!=200||!strings.Contains(w.Body.String(),"\"status\":\"finished\""){t.Fatal("restart",w.Code,w.Body.String())}

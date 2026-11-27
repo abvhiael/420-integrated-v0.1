@@ -158,6 +158,54 @@ async function fixtureRun(origin){
   }finally{await context.close();}
  }
 }
+async function startupJourney(origin){
+ for(const [n,difficulty] of [[11,'easy'],[13,'medium'],[15,'hard'],[17,'easy'],[19,'medium'],[21,'hard']]){
+  const context=await browser.newContext({viewport:{width:1366,height:768}});
+  try{
+   const s=snapshot(n),writes=[],count=s.seatCount,variant=s.privateView.variant;
+   const room={id:roomId,host:actor,gameId:'scrabble',seatCount:count,visibility:'private',status:'open',revision:1,variantId:variant,format:variant,invites:[],seats:Array.from({length:count},(_,index)=>index===0?{index,controller:'human',subject:actor,team:index}:{index,controller:'empty',team:index})};
+   let started=false;
+   await context.route('**/*',async route=>{
+    const url=new URL(route.request().url()),path=url.pathname,method=route.request().method(),reply=(data,status=200)=>route.fulfill({status,json:data});
+    if(url.origin!==origin)return route.abort();
+    if(!path.startsWith('/social-api/'))return route.continue();
+    const env={...envelope,playable:false};
+    if(path.endsWith('/v1/me'))return reply({walletRequired:false,profile:{subject:actor,displayName:'Qualification fixture'}});
+    if(path.endsWith('/classic-rooms')&&method==='POST'){
+     const b=route.request().postDataJSON();assert.deepEqual(b,{gameId:'scrabble',seatCount:count,visibility:'private',format:variant});writes.push('create');return reply({...env,room},201);
+    }
+    if(path.endsWith('/classic-rooms/'+roomId+'/change')&&method==='POST'){
+     const b=route.request().postDataJSON();assert.equal(b.expectedRevision,room.revision);assert.equal(b.action,'bot');assert.equal(b.difficulty,difficulty);assert.equal(room.seats[b.seat].controller,'empty');
+     room.seats[b.seat]={index:b.seat,team:b.seat,controller:'bot',difficulty};room.revision++;if(room.seats.every(x=>x.controller!=='empty'))room.status='ready';writes.push('bot');return reply({...env,room});
+    }
+    if(path.endsWith('/classic-sessions')&&method==='POST'){
+     assert.equal(room.status,'ready');assert.deepEqual(route.request().postDataJSON(),{roomId});writes.push('start');started=true;room.status='in_game';return reply({...envelope,session:s},201);
+    }
+    if(path.endsWith('/classic-sessions/'+id+'/action')&&method==='POST'){
+     const b=route.request().postDataJSON();assert.equal(b.expectedSequence,s.sequence+1);assert.equal(b.move.type,'pass');s.sequence++;writes.push('move');return reply({...envelope,session:s});
+    }
+    if(path.endsWith('/classic-sessions/'+id))return reply({...envelope,session:s},started?200:404);
+    if(path.endsWith('/classic-rooms/'+roomId))return reply({...env,room});
+    if(path.endsWith('/classic-sessions'))return reply({...envelope,sessions:started?[s]:[]});
+    return reply({},404);
+   });
+   const page=await context.newPage(),problems=observe(page,origin);page.on('dialog',dialog=>dialog.accept());
+   await page.goto(origin+'/games/scrabble');
+   const form=page.locator('[data-salad-create]');await form.waitFor({timeout:45000});
+   await form.locator('[name=size]').selectOption(String(n));await form.locator('[name=count]').selectOption(String(count));await form.locator('[name=opponents]').selectOption(difficulty);
+   await form.getByRole('button',{name:'Create Game'}).click();
+   await page.waitForURL('**/games/scrabble/play?session='+id,{timeout:45000});
+   await page.locator('.ws-table').waitFor({timeout:45000});
+   assert.deepEqual(writes,['create',...Array(count-1).fill('bot'),'start']);
+   await page.locator('[data-ws-action=pass]').click();
+   await page.waitForFunction(()=>document.querySelector('.ws-header')?.textContent.includes('Revision 2'));
+   assert.equal(writes.at(-1),'move');
+   await page.reload();await page.locator('.ws-table').waitFor({timeout:45000});assert.match(await page.locator('.ws-header').innerText(),/Revision 2/);
+   assert.deepEqual(problems,[]);
+   results.push({board:n,difficulty,players:count,interaction:'setup, computer seats, authoritative session start, pass, cold reload (fixture)',status:'passed'});
+  }finally{await context.close();}
+ }
+}
 async function liveRun(){
  const origin='https://bonggoggles.420integrated.org';
  const raw=process.env.BC442_COOKIE,session=process.env.BC442_SESSION_ID,hash=process.env.BC442_RULES_HASH;
@@ -186,7 +234,7 @@ async function liveRun(){
  }
 }
 try{
- if(live)await liveRun();else await fixtureRun(await localServer());
+ if(live)await liveRun();else {const origin=await localServer();await startupJourney(origin);await fixtureRun(origin);}
  if(report.status!=='skipped')report.status='passed';
 }catch(error){report.status='failed';if(!live)report.error=String(error);else report.error='Live acceptance failed; sensitive error details suppressed';process.exitCode=1;}
 finally{await browser.close();if(server)await new Promise(ok=>server.close(ok));await writeFile(resolve(OUT,'report.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));}

@@ -1,3 +1,4 @@
+import {dictionaryFiles} from './word-salad-dictionaries.mjs';
 import {WORD_SALAD_ART} from './word-salad-art-manifest.mjs';
 import {SALAD_ART} from '../core/word-salad-ui.js';
 // BG-19.13 deterministic build qualification: not a browser or network performance benchmark.
@@ -62,7 +63,14 @@ for(const f of chessFiles){
  chessArtBytes+=f.size;
 }
 if(chessArtBytes>chessArtBudget)throw Error('Chess image budget exceeded');
-const regularFiles=files.filter(f=>!chessArtPaths.has(normalize(f.path))&&!normalize(f.path).startsWith(saladPrefix)&&!normalize(f.path).startsWith(artPrefix)&&!normalize(f.path).startsWith(mapPrefix)&&!normalize(f.path).startsWith(vehiclePrefix)&&!normalize(f.path).startsWith(labyrinthArtPrefix)&&normalize(f.path)!=='assets/games/cribbage/board-cannabis-leaf.png');
+const dictionaries=await dictionaryFiles();
+const dictionaryPaths=new Set(Object.keys(dictionaries).map(name=>'word-salad-dictionaries/'+name));
+const publishedDictionaries=files.filter(f=>normalize(f.path).startsWith('word-salad-dictionaries/'));
+if(publishedDictionaries.length!==dictionaryPaths.size)throw Error('Dictionary publication count mismatch');
+let dictionaryBytes=0;
+for(const f of publishedDictionaries){const name=normalize(f.path);if(!dictionaryPaths.has(name)||await readFile(f.path,'utf8')!==dictionaries[name.split('/').at(-1)])throw Error('Dictionary publication mismatch '+name);dictionaryBytes+=f.size;}
+if(dictionaryBytes>5*1024*1024)throw Error('Word Salad dictionary asset budget exceeded');
+const regularFiles=files.filter(f=>!dictionaryPaths.has(normalize(f.path))&&!chessArtPaths.has(normalize(f.path))&&!normalize(f.path).startsWith(saladPrefix)&&!normalize(f.path).startsWith(artPrefix)&&!normalize(f.path).startsWith(mapPrefix)&&!normalize(f.path).startsWith(vehiclePrefix)&&!normalize(f.path).startsWith(labyrinthArtPrefix)&&normalize(f.path)!=='assets/games/cribbage/board-cannabis-leaf.png');
 const baseTotal=regularFiles.reduce((sum,f)=>sum+f.size,0);
 const practiceJs=regularFiles.find(f=>normalize(f.path)==='core/chaos-practice-table.js')?.size;
 const practiceCss=regularFiles.find(f=>normalize(f.path)==='ccc-practice.css')?.size;
@@ -466,7 +474,7 @@ for(const f of vehicleFiles){
  const gitSha=createHash('sha1').update(Buffer.from('blob '+raw.length+'\0')).update(raw).digest('hex');
  if(gitSha!==CHAOS_VEHICLE_SOURCE_SHA[id])throw new Error('Published vehicle token differs from approved source: '+name);
 }
-const total=baseTotal+cardTotal+mapTotal+vehicleTotal+saladArtBytes+chessArtBytes;
+const total=dictionaryBytes+baseTotal+cardTotal+mapTotal+vehicleTotal+saladArtBytes+chessArtBytes;
 for(const file of files){const name=relative(root,file.path);if(name.endsWith('.js')&&file.size>limits.singleJs)throw new Error(`JavaScript asset budget exceeded: ${name}`);if(name.endsWith('.css')&&file.size>limits.singleCss)throw new Error(`CSS asset budget exceeded: ${name}`);}
 const html=await readFile(resolve(root,'index.html'),'utf8');const app=await readFile(resolve(root,'app.js'),'utf8');const css=await readFile(resolve(root,'styles.css'),'utf8');const branding=await readFile(resolve(root,'branding.css'),'utf8');
 const tabletopCss=await readFile(resolve(root,'ccc-tabletop.css'),'utf8');

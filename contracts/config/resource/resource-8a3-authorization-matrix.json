@@ -336,15 +336,15 @@
         "operation": "registerNode",
         "principal": "Provider operator or scoped delegate",
         "directOwnership": "Provider operator",
-        "delegatedAuthority": "Exact active grant for caller",
+        "delegatedAuthority": "Exact active scoped registration grant AND provider operator consent to canonical payload and delegate",
         "component": "ResourceIds420.COMPONENT_RESOURCE",
         "action": "ResourceIds420.ACTION_REGISTER_NODE",
         "scope": "scopeNode(providerId,nodeId)",
         "service": "All canonical service classes",
         "economicLimits": "No value transfer; current capability amount 0",
         "governanceEmergency": "No direct governance override",
-        "lifecycle": "Active provider; known service; nonzero operator/commitments; unique node",
-        "openFinding": "A5: caller-selected ID; registration delegate can choose service/operator"
+        "lifecycle": "Active provider; canonical hash of provider, service, operator and initial nonzero commitments; unique ID; consume consent",
+        "openFinding": "A5.1 qualification pending"
       },
       {
         "operation": "updateNode",
@@ -372,6 +372,20 @@
         "economicLimits": "Activation requires eligible provider",
         "governanceEmergency": "No direct governance override",
         "lifecycle": "Same allowed state transitions as provider; no reactivation of retired node",
+        "openFinding": "none"
+      },
+      {
+        "operation": "setNodeRegistrationConsent",
+        "principal": "Stored provider operator",
+        "directOwnership": "Provider operator only",
+        "delegatedAuthority": "None",
+        "component": null,
+        "action": null,
+        "scope": "providerId and canonical nodeId",
+        "service": "All canonical service classes",
+        "economicLimits": "No value transfer",
+        "governanceEmergency": "No direct governance override",
+        "lifecycle": "Unregistered ID; active provider for new consent; zero revokes; provider-scoped key",
         "openFinding": "none"
       }
     ],

@@ -29,6 +29,8 @@ contract ResourceNodeRegistry420 is I420System {
     ResourceAuthorization420 public immutable authorization;
     ResourceProviderRegistry420 public immutable providers;
     mapping(bytes32 => Node) private _nodes;
+    // Append-only: provider operator consent to one exact canonical node and delegate.
+    mapping(bytes32 => bytes32) private _registrationConsent;
 
     error InvalidNode();
     error NodeExists();
@@ -36,6 +38,7 @@ contract ResourceNodeRegistry420 is I420System {
     error Unauthorized();
     error InvalidState();
 
+    event NodeRegistrationConsentChanged(bytes32 indexed nodeId, bytes32 commitment);
     event NodeRegistered(bytes32 indexed nodeId, bytes32 indexed providerId, bytes32 indexed serviceId);
     event NodeUpdated(bytes32 indexed nodeId, bytes32 endpointHash, bytes32 capacityHash, uint32 revision);
     event NodeStateChanged(bytes32 indexed nodeId, State state);
@@ -57,6 +60,48 @@ contract ResourceNodeRegistry420 is I420System {
         return 1;
     }
 
+    /// @notice Registry-local identifier commits the original registration payload.
+    /// Endpoint and capacity updates never change this identifier.
+    function canonicalNodeId(
+        bytes32 providerId,
+        bytes32 serviceId,
+        address operatorAccount,
+        bytes32 endpointHash,
+        bytes32 capacityHash
+    ) public pure returns (bytes32) {
+        if (
+            providerId == 0 || !ResourceIds420.isService(serviceId) || operatorAccount == address(0)
+                || endpointHash == 0 || capacityHash == 0
+        ) revert InvalidNode();
+        return keccak256(
+            abi.encode(
+                keccak256("420/RESOURCE/NODE/IDENTITY/V1"),
+                providerId,
+                serviceId,
+                operatorAccount,
+                endpointHash,
+                capacityHash
+            )
+        );
+    }
+
+    /// @notice Provider operator authorizes a delegate for one exact payload hash; zero revokes.
+    function setNodeRegistrationConsent(
+        bytes32 providerId,
+        bytes32 nodeId,
+        address delegate
+    ) external {
+        if (nodeId == 0) revert InvalidNode();
+        if (_nodes[nodeId].exists) revert NodeExists();
+        if (msg.sender != providers.getProvider(providerId).operatorAccount) revert Unauthorized();
+        if (delegate != address(0) && !providers.isActive(providerId)) revert InvalidState();
+        // Namespace consent by provider as well as node, so foreign providers cannot overwrite it.
+        bytes32 key = keccak256(abi.encode(providerId, nodeId));
+        bytes32 commitment = delegate == address(0) ? bytes32(0) : keccak256(abi.encode(delegate));
+        _registrationConsent[key] = commitment;
+        emit NodeRegistrationConsentChanged(nodeId, commitment);
+    }
+
     function registerNode(
         bytes32 nodeId,
         bytes32 providerId,
@@ -69,14 +114,23 @@ contract ResourceNodeRegistry420 is I420System {
             nodeId == 0 || providerId == 0 || !ResourceIds420.isService(serviceId) || operatorAccount == address(0)
                 || endpointHash == 0 || capacityHash == 0
         ) revert InvalidNode();
+        if (nodeId != canonicalNodeId(providerId, serviceId, operatorAccount, endpointHash, capacityHash)) {
+            revert InvalidNode();
+        }
         if (_nodes[nodeId].exists) revert NodeExists();
         if (!providers.isActive(providerId)) revert InvalidState();
 
         ResourceProviderRegistry420.Provider memory p = providers.getProvider(providerId);
-        if (
-            msg.sender != p.operatorAccount
-                && !authorization.isNodeAuthorized(msg.sender, providerId, nodeId, ResourceIds420.ACTION_REGISTER_NODE)
-        ) revert Unauthorized();
+        bytes32 key = keccak256(abi.encode(providerId, nodeId));
+        if (msg.sender != p.operatorAccount) {
+            if (
+                _registrationConsent[key] != keccak256(abi.encode(msg.sender))
+                    || !authorization.isNodeAuthorized(
+                        msg.sender, providerId, nodeId, ResourceIds420.ACTION_REGISTER_NODE
+                    )
+            ) revert Unauthorized();
+        }
+        delete _registrationConsent[key];
 
         _nodes[nodeId] =
             Node(providerId, serviceId, operatorAccount, endpointHash, capacityHash, 1, State.REGISTERED, true);

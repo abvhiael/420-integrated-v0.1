@@ -73,7 +73,7 @@ contract StorageObjectManifestRegistry420Test {
         e.manifests = new StorageObjectManifestRegistry420(address(e.agreements), address(e.commitments));
 
         e.providerId = e.providers.canonicalProviderId(PROVIDER, 1);
-        e.nodeId = keccak256("manifest-store-node");
+        e.nodeId = e.nodes.canonicalNodeId(e.providerId, ResourceIds420.SERVICE_STORE, PROVIDER, keccak256("endpoint"), keccak256("capacity"));
         e.offerId = keccak256("manifest-store-offer");
         e.schemeId = keccak256("manifest-proof-scheme");
         e.objectId = keccak256("object-1");

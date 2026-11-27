@@ -61,7 +61,7 @@ contract StorageProofProtocol420Test {
         e.commitments = new StorageCommitmentRegistry420(address(e.auth), address(e.providers), address(e.nodes), address(e.schemes));ResourceCollateralFixture420.enable(e.providers,address(e.commitments));
         e.proofs = new StorageProofRegistry420(address(e.commitments), address(e.schemes), address(e.nodes));
         e.providerId = e.providers.canonicalProviderId(ALICE, 1);
-        e.nodeId = keccak256("storage-node");
+        e.nodeId = e.nodes.canonicalNodeId(e.providerId, ResourceIds420.SERVICE_STORE, ALICE, keccak256("endpoint"), keccak256("capacity"));
         e.schemeId = keccak256("proof-scheme-v1");
 
         vm.prank(ALICE); e.providers.registerProvider(e.providerId, ALICE, keccak256("provider-meta"), keccak256("stake"));ResourceCollateralFixture420.fund(e.providers,e.providerId,ALICE);
@@ -96,7 +96,7 @@ contract StorageProofProtocol420Test {
         (bool denied,) = address(e.commitments).call(abi.encodeWithSelector(e.commitments.registerCommitment.selector, commitmentId, e.nodeId, e.schemeId, keccak256("content"), keccak256("replica"), uint128(1024), uint64(block.timestamp), uint64(block.timestamp + 1000), keccak256("meta")));
         require(!denied, "unrelated actor created commitment");
 
-        bytes32 relayNode = keccak256("relay-node");
+        bytes32 relayNode = e.nodes.canonicalNodeId(e.providerId, ResourceIds420.SERVICE_RELAY, ALICE, keccak256("relay-endpoint"), keccak256("relay-capacity"));
         vm.prank(ALICE); e.nodes.registerNode(relayNode, e.providerId, ResourceIds420.SERVICE_RELAY, ALICE, keccak256("relay-endpoint"), keccak256("relay-capacity"));
         vm.prank(ALICE); e.nodes.setState(relayNode, ResourceNodeRegistry420.State.ACTIVE);
         vm.prank(ALICE);

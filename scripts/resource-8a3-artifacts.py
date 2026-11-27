@@ -17,6 +17,7 @@ ALLOWED_SOURCE_CHANGES = {
     "contracts/src/resource/ResourceAuthorization420.sol",
     "contracts/src/resource/ResourceProviderRegistry420.sol",
     "contracts/src/resource/ResourceIds420.sol",
+    "contracts/src/resource/ResourceNodeRegistry420.sol",
     "contracts/src/resource/ResourceSessionRegistry420.sol",
 }
 def main():
@@ -64,11 +65,17 @@ def main():
             assert not removed and len(added)==3 and {a["name"] for a in added}=={"canonicalProviderId","setRegistrationConsent","RegistrationConsentChanged"}, added
             expected = {"canonicalProviderId": ["address","uint96"], "setRegistrationConsent": ["bytes32","address","bytes32","bytes32"], "RegistrationConsentChanged": ["bytes32","bytes32"]}
             assert all([x["type"] for x in a["inputs"]]==expected[a["name"]] for a in added)
+        elif name == "ResourceNodeRegistry420":
+            expected = {"canonicalNodeId": ["bytes32","bytes32","address","bytes32","bytes32"],
+                        "setNodeRegistrationConsent": ["bytes32","bytes32","address"],
+                        "NodeRegistrationConsentChanged": ["bytes32","bytes32"]}
+            assert not removed and len(added)==3 and {a["name"] for a in added}==set(expected), added
+            assert all([x["type"] for x in a["inputs"]]==expected[a["name"]] for a in added)
         else:
             assert not removed and not added, (name,"unapproved ABI delta",removed,added)
         oldlayout = historical.normalized_layout(old["storageLayout"])
         newlayout = historical.normalized_layout(new["storageLayout"])
-        if name == "ResourceProviderRegistry420":
+        if name in {"ResourceProviderRegistry420", "ResourceNodeRegistry420"}:
             assert newlayout[:-1]==oldlayout and newlayout[-1]["label"]=="_registrationConsent" and newlayout[-1]["type"]["label"]=="mapping(bytes32 => bytes32)", (name,"unapproved layout delta")
         else:
             assert oldlayout==newlayout, (name,"storage drift")

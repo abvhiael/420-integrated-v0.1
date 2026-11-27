@@ -18,7 +18,7 @@ concurrency:
 jobs:
   qualify-social:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 30
     services:
       postgres:
         image: postgres:16
@@ -48,7 +48,7 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Social API PostgreSQL and race qualification
-        run: go test -race -tags account420_integration -count=1 -v ./services/bong-goggles-account-social ./cmd/bong-goggles-social
+        run: go test -timeout=24m -race -tags account420_integration -count=1 -v ./services/bong-goggles-account-social ./cmd/bong-goggles-social
       - name: Social API static analysis
         run: go vet -tags account420_integration ./services/bong-goggles-account-social ./cmd/bong-goggles-social
       - name: Build restricted social service

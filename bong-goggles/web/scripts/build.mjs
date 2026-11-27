@@ -1,3 +1,4 @@
+import {publishDictionaries} from './word-salad-dictionaries.mjs';
 import {SALAD_ART} from '../core/word-salad-ui.js';
 import {cp,mkdir,rm,readFile,writeFile,stat} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
@@ -52,6 +53,7 @@ validateRuntimeConfig(runtimeConfig);
 for(const item of ['index.html','app.js','styles.css','game-kit.css','classic-communications.css','settings.css','branding.css','feed-branding.css','dashboard.css','classics.css','ccc-tabletop.css','ccc-practice.css','cribbage.css','labyrinth.css','chess.css','word-salad.css','welcome-landscape.svg','core','_headers']){
   await cp(resolve(root,item),resolve(out,item),{recursive:true});
 }
+await publishDictionaries(out);
 // Word Salad: publish only explicit, validated approved PNG artwork.
 for(const asset of SALAD_ART){
  const relative='assets/games/word-salad/'+asset;

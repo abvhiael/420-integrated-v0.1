@@ -62,6 +62,13 @@ async function inspect(page,n,view){
  await table.locator('.ws-logo').waitFor({state:'visible',timeout:45000});
  await page.waitForFunction(()=>{const img=document.querySelector('.ws-table .ws-logo');return img?.complete&&img.naturalWidth>0;},{},{timeout:45000});
  assert.equal(await table.locator('.ws-cell').count(),n*n);
+ for(const [label,kind] of [['Game dictionary','english'],['Cannabis dictionary','cannabis']]){
+  const link=table.getByRole('link',{name:label,exact:true});
+  assert.equal(await link.count(),1);
+  assert.match(await link.getAttribute('href'),new RegExp('^/word-salad-dictionaries/[a-f0-9]{64}-'+kind+'[.]txt$'));
+  assert.equal(await link.getAttribute('target'),'_blank');
+  assert.equal(await link.getAttribute('rel'),'noopener noreferrer');
+ }
  assert.equal(await table.locator('.ws-rack-tile,.ws-rack-empty').count(),BOARD_SPECS[n].rackSize);
  for(const selector of ['.ws-logo','.ws-board','.ws-rack','.ws-turn','.ws-player','.ws-bag','[data-ws-action="play-word"]','[data-ws-action="pass"]']){
   await table.locator(selector).first().waitFor({state:'visible',timeout:15000});
@@ -85,7 +92,7 @@ async function inspect(page,n,view){
   const shell=el.closest('.app-shell'),layout=el.closest('.app-layout'),main=el.closest('.app-content');
   const lr=box(layout),mr=box(main);
   if(mr.width<lr.width-30)bad.push('game does not occupy full layout lane');
-  if(innerWidth>=1101&&br.width<Math.min(750,innerWidth*.55))bad.push('desktop board too narrow');
+  if(innerWidth>=1101&&br.width<Math.min(750,innerWidth*.55,Math.max(400,innerHeight-245)))bad.push('desktop board too narrow');
   for(const rail of shell.querySelectorAll('.app-sidebar,.app-rail,.ecosystem-rail')){
    if(getComputedStyle(rail).display!=='none'&&box(rail).top<mr.bottom-1)bad.push('sidebar competes with game lane');
   }

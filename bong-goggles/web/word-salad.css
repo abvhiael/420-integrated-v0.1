@@ -27,3 +27,7 @@
 .app-shell:has(.ws-table) .ws-board{max-width:1000px;margin-inline:auto}
 @media(min-width:1101px){.app-shell:has(.ws-table) .ws-layout{grid-template-columns:minmax(0,1fr) minmax(250px,320px)}}
 @media(max-width:760px){.app-shell:has(.ws-table) .app-layout{padding-bottom:12px}.app-shell:has(.ws-table) .app-nav--mobile{position:static}.app-shell:has(.ws-table) .app-sidebar{order:1}.app-shell:has(.ws-table) .app-content{order:0}}
+
+/* Keep the square board and rack within the available desktop height where possible. */
+@media(min-width:1101px){.app-shell:has(.ws-table) .ws-board{width:min(100%,max(400px,calc(100dvh - 245px)));box-sizing:border-box}.ws-header{padding:6px 12px;margin-bottom:8px;gap:12px}.ws-logo{width:min(140px,35%)}.ws-table{padding:12px}.ws-rack{margin-top:6px;padding:6px 12px 8px}.ws-table .ws-rack-tile,.ws-rack-empty{flex-basis:48px}.ws-instruction{margin:4px 0;padding:4px}.ws-blank-picker{padding:4px}.ws-side{gap:6px}.ws-panel,.ws-turn,.ws-feedback{padding:8px}.ws-controls{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.ws-art-action{gap:4px}.ws-action-art{width:32px;height:24px}.ws-table .ws-action{padding:5px 6px}}
+.ws-action-art{pointer-events:none}

@@ -37,11 +37,24 @@ func wordSaladPinnedCorpus(raw,expected string,count int,cannabis bool)([]string
  }
  return keys,nil
 }
-func NewProductionWordSaladRulesAdapter()(*RulesAdapter,error){
+func NewLegacyProductionWordSaladRulesAdapter()(*RulesAdapter,error){
  general,e:=wordSaladPinnedCorpus(wordSaladEnglish,wordSaladEnglishSHA256,wordSaladEnglishCount,false);if e!=nil{return nil,e}
  cannabis,e:=wordSaladPinnedCorpus(wordSaladCannabis,wordSaladCannabisSHA256,wordSaladCannabisCount,true);if e!=nil{return nil,e}
  return NewWordSaladRulesAdapter(general,cannabis)
 }
 func WordSaladDictionaryHashes()(string,string){
  return wordSaladRawHash(wordSaladEnglish),wordSaladRawHash(wordSaladCannabis)
+}
+
+// Editorial supplement: colloquial English, profanity and adult slang are
+// ordinary words, not automatically cannabis bonus words. Preserve the
+// original pinned corpora for historical sessions. A changed union receives
+// its own rules hash through NewWordSaladRulesAdapter.
+const wordSaladColloquial = "ARSE ARSEHOLE ASS ASSHOLE ASSHOLES BADASS BALLSACK BASTARD BASTARDS BITCH BITCHES BOLLOCKS BONER BONERS BOOB BOOBS BOOBIE BOOBIES BULLSHIT BUTTHOLE BUTTPLUG BUTTPLUGS CHODE CHODES CLIT COCK COCKS COCKSUCKER COCKSUCKERS CRAP CUM CUMMING CUNT CUNTS DICK DICKS DICKHEAD DICKHEADS DILDO DILDOS DOUCHE DOUCHEBAG DOUCHEBAGS DUMBASS FART FARTED FARTING FARTS FUCK FUCKED FUCKER FUCKERS FUCKING FUCKS FUCKWIT GODDAMN HANDJOB HANDJOBS HELL HORNY JACKASS JACKOFF JERKOFF JIZZ MOTHERFUCKER MOTHERFUCKERS MOTHERFUCKING NUTSACK ORGASM ORGASMS PISS PISSED PISSER PISSING POOP POOPED POOPING PRICK PRICKS PUSSY PUSSIES QUEEF QUEEFED QUEEFING QUEEFS RIMJOB RIMJOBS SCROTUM SHAG SHAGGED SHAGGING SHIT SHITHEAD SHITHEADS SHITSHOW SHITTING SHITTY SKEET SLUT SLUTS SMUT TITTIES TITTY TOSSER TWAT TWATS WANK WANKED WANKER WANKERS WANKING WETDREAM WHORE WHORES"
+func NewProductionWordSaladRulesAdapter()(*RulesAdapter,error){
+ general,e:=wordSaladPinnedCorpus(wordSaladEnglish,wordSaladEnglishSHA256,wordSaladEnglishCount,false);if e!=nil{return nil,e}
+ cannabis,e:=wordSaladPinnedCorpus(wordSaladCannabis,wordSaladCannabisSHA256,wordSaladCannabisCount,true);if e!=nil{return nil,e}
+ seen:=make(map[string]bool,len(general));for _,w:=range general{seen[w]=true}
+ for _,w:=range strings.Fields(wordSaladColloquial){if !saladWordOK(w){return nil,ErrUnavailable};if !seen[w]{general=append(general,w);seen[w]=true}}
+ return NewWordSaladRulesAdapter(general,cannabis)
 }

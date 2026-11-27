@@ -79,12 +79,13 @@ export class ClassicRoomsController{
 constructor({enabled=false,fetchImpl=fetch,onChange=()=>{}}={}){
 this.client=createAccountSocialClient({enabled,fetchImpl});
 this.state={status:enabled?'loading':'disabled'};
-this.onChange=onChange;this.generation=0;
+this.onChange=onChange;this.generation=0;this.mutating=false;
 }
 emit(state){this.state={...state};this.onChange(this.state);return this.state;}
 invalidate(){this.generation++;this.emit({status:this.client.enabled?'loading':'disabled'});}
 async refresh(roomId=null){
 if(!this.client.enabled)return this.emit({status:'disabled'});
+if(this.mutating)return this.state;
 const gen=++this.generation;this.emit({status:'loading'});
 try{
 const me=await this.client.request('/v1/me');
@@ -132,11 +133,12 @@ if(gen===this.generation)return this.emit({status:'error'});
 return this.state;
 }
 async act(action,data={}){
+if(this.mutating)return this.state;
 if(!this.client.enabled||this.state.status!=='ready'||!isSubjectID(this.state.viewer))
 throw Error('420ID room session required');
 const gen=++this.generation;
 const current=this.state;
-let submitted=false,failure='';
+let submitted=false,failure='';this.mutating=true;
 try{
 let path,body;
 if(action==='create'){
@@ -170,22 +172,23 @@ if(response.status===401)return this.emit({status:'guest'});
 if(action==='create'&&response.status!==201){failure=classicRequestFailure(response,'Room creation');throw Error(failure);}
 if(response.status===409){
 this.emit({...current,notice:'Room changed on another account. Reloading its verified state.'});
-return this.refresh(current.selected?.id??null);
+this.mutating=false;return this.refresh(current.selected?.id??null);
 }
 failure=classicRequestFailure(response,action==='create'?'Room creation':'Room action');
 const returned=verifiedEnvelope(response,'room');
 if(action==='decline'||action==='leave'){
 if(!returned||!id(returned.id)||returned.id!==current.selected.id)throw Error('Unverified departure');
-return this.refresh(null);
+this.mutating=false;return this.refresh(null);
 }
 const view=normalizedRoom(returned,true);
 if(!view)throw Error('Unverified room update');
-return this.refresh(view.id);
+if(action!=='create'&&view.gameId==='scrabble'&&view.id===current.selected?.id&&view.revision>=current.selected.revision)return this.emit({...current,selected:view,notice:'Room update confirmed.'});
+this.mutating=false;return this.refresh(view.id);
 }catch(error){
 if(gen===this.generation)this.emit(submitted?{status:'error',notice:failure||'Room action not confirmed; check Multiplayer Rooms before retrying.'}:
 {...current,notice:'Invalid room request. No action was submitted.'});
 throw error;
-}
+}finally{this.mutating=false;}
 }
 }
 const note=message=>'<p class="classic-room__notice" role="status">'+esc(message)+'</p>';
@@ -266,7 +269,7 @@ if(!enabled)return start+note('Multiplayer rooms are not activated for this depl
 if(!state||state.status==='loading')return start+note('Checking your 420ID session and room access…')+'</section>';
 if(state.status==='guest')return start+note('Sign in with 420ID to browse, create or join rooms.')+
 '<p><a class="ui-button" href="/social-api/auth/start">Sign In with 420ID</a></p></section>';
-if(state.status!=='ready')return start+note('420ID room service or account verification is unavailable. No private room data is shown.')+
+if(state.status!=='ready')return start+note(state.notice||'420ID room service or account verification is unavailable. No private room data is shown.')+
 '<button type="button" data-classic-room-refresh>Retry room check</button></section>';
 const heading=start+(state.notice?note(state.notice):'');
 if(roomId!=null){

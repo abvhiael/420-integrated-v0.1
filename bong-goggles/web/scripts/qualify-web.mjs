@@ -97,7 +97,7 @@ const chessBaselines={"app.js":34748,"core/app-shell.js":13025,"core/games-ui.js
 let saladCodeBytes=0;
 for(const [name,cap] of Object.entries({'core/word-salad-ui.js':16384,'word-salad.css':8192})){const size=regularSizes.get(name);if(!Number.isSafeInteger(size)||size<256||size>cap)throw Error('Word Salad UI size invalid '+name);saladCodeBytes+=size;}
 // Separately account for production Word Salad integration, preserving historical caps.
-for(const [name,baseline] of Object.entries({"core/app-shell.js":14302,"core/classic-rooms.js":19878,"core/runtime-config.js":4076,"core/word-salad-runtime.js":3319})){
+for(const [name,baseline] of Object.entries({"core/app-shell.js":14302,"core/classic-rooms.js":19878,"core/runtime-config.js":4076,"core/word-salad-runtime.js":3319,"core/word-salad-session.js":10201})){
  const size=regularSizes.get(name),growth=size-baseline;
  if(!Number.isSafeInteger(size)||growth<0||growth>8192)throw Error('Word Salad production integration budget: '+name);
  saladCodeBytes+=growth;regularSizes.set(name,baseline);

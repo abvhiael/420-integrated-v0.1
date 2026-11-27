@@ -6,6 +6,8 @@ export function createChessRuntime({enabled=false,onChange=()=>{},win=window,doc
  const active=()=>/^\/games\/chess(?:\/|$)/.test(win.location.pathname);
  const socialSurface=()=>active()||['/social','/account/games'].includes(win.location.pathname);
  const id=()=>new URLSearchParams(win.location.search).get('session');
+ const routeKey=()=>win.location.pathname+'?session='+(id()||'');
+ let currentRoute=routeKey();
  const c=new ChessController({enabled,fetchImpl,onChange:()=>{if(active())onChange();}});
  const social=new ChessSocialController({enabled,fetchImpl,onChange:()=>{if(socialSurface())onChange();}});
  // Keep identity checks responsive without repeatedly fetching private statistics.
@@ -32,7 +34,7 @@ export function createChessRuntime({enabled=false,onChange=()=>{},win=window,doc
   }finally{refreshing=false;if(pending&&!destroyed&&socialSurface()&&!c.busy&&!social.busy)void refresh();}
  };
  const roomGo=room=>{win.history.pushState({},'','/games/rooms/'+room);win.dispatchEvent(new Event('popstate'));};
- const go=s=>{win.history.pushState({},'','/games/chess/play?session='+s.id);c.invalidate();win.dispatchEvent(new Event('popstate'));};
+ const go=s=>{win.history.pushState({},'','/games/chess/play?session='+s.id);win.dispatchEvent(new Event('popstate'));};
  async function start(form){
   if((c.busy&&!c.reading)||!c.client.enabled||c.state.status!=='ready')return;
   if(social.busy)social.invalidate();
@@ -64,7 +66,7 @@ export function createChessRuntime({enabled=false,onChange=()=>{},win=window,doc
  const timer=win.setInterval(()=>{if(socialSurface()&&!doc.hidden)refresh();},3500);
  const ticker=win.setInterval(clocks,250);
  const online=()=>refresh(true);const visible=()=>{if(!doc.hidden)void refresh(true);};win.addEventListener('online',online);doc.addEventListener('visibilitychange',visible);
- return {get state(){return {...c.state,target:id(),social:social.state};},refresh,invalidate:()=>{epoch++;pending=true;c.invalidate();social.invalidate();socialAt=0;listAt=0;authAt=0;},bind(root){if(!c.client.enabled)return;
+ return {get state(){return {...c.state,target:id(),social:social.state};},refresh,invalidate:()=>{const next=routeKey();if(next===currentRoute)return;currentRoute=next;epoch++;pending=true;c.invalidate();social.invalidate();socialAt=0;listAt=0;authAt=0;},bind(root){if(!c.client.enabled)return;
  const lobby=root.querySelector('[data-chess-room-start]');if(lobby)lobby.addEventListener('submit',async e=>{e.preventDefault();if(c.busy)return;c.busy=true;const gen=++c.gen;const roomId=win.location.pathname.split('/').at(-1);const clockProfile=new FormData(lobby).get('clockProfile');const submit=lobby.querySelector('button');submit.disabled=true;try{const actor=await c.principal();if(!actor||!chessID(roomId)||gen!==c.gen)throw Error('Room access unavailable');const r=await c.client.request('/v1/classic-sessions',{method:'POST',body:{roomId,clockProfile}});const s=normalizeChessSession({...r,status:200},r.data?.session?.id);if(r.status!==201||!s||s.roomId!==roomId||s.seat!==0||gen!==c.gen||await c.principal()!==actor)throw Error(classicRequestFailure(r,'Chess match start'));go(s);}catch(err){if(gen===c.gen){const p=doc.createElement('p');p.setAttribute('role','alert');p.textContent=err.message;lobby.append(p);}}finally{if(gen===c.gen)c.busy=false;submit.disabled=false;}});
  if(socialSurface())bindChessSocial(root,social,roomGo,active()?c.state.session:null);if(!active())return;bindChessScreen(root,c,win);root.querySelector('[data-chess-recover]')?.addEventListener('click',()=>void refresh(true));root.querySelector('[data-chess-start]')?.addEventListener('submit',e=>{e.preventDefault();void start(e.currentTarget);});clocks();},destroy(){destroyed=true;pending=false;epoch++;doc.removeEventListener('visibilitychange',visible);win.clearInterval(timer);win.clearInterval(ticker);win.removeEventListener('online',online);c.invalidate();social.invalidate();}};
 }

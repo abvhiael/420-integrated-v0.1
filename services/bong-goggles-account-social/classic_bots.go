@@ -94,8 +94,10 @@ func (s *ClassicSessions) RunBotTurn(ctx context.Context,id string)(bool,error){
  if e!=nil{return false,e}
  if controller!="bot"{return false,nil}
  if subject.Valid||!difficulty.Valid{return false,ErrUnavailable}
- policy,e:=s.botPolicy(rec.GameID,difficulty.String);if e!=nil{return false,e}
  rule,e:=s.rule(rec.GameID,rec.RulesVersion,rec.RulesHash);if e!=nil{return false,e}
+ var policy RuleDecisionPolicy
+ if old,ok:=s.historicalWordSaladBots[rec.RulesHash];rec.GameID=="scrabble"&&ok{policy,e=old.policy(difficulty.String)}else{policy,e=s.botPolicy(rec.GameID,difficulty.String)}
+ if e!=nil{return false,e}
  adapter,ok:=rule.(*RulesAdapter);if !ok{return false,ErrUnavailable}
  if e=s.verifyRulesTx(ctx,tx,rec,adapter);e!=nil{return false,fmt.Errorf("%w: bot journal verification: %v",ErrUnavailable,e)}
  var now time.Time

@@ -108,7 +108,7 @@ return cribbageLegalMoves(s).some(a=>JSON.stringify(a)===JSON.stringify(move));
 export function cribbageAwardAnnouncement(award,view){
 const n=view.scores.length,name='Player '+(award.seat+1);
 if(award.kind==='heels')return {label:name+': his heels for '+award.points,team:award.team,total:award.total};
-if(award.kind==='go'||award.kind==='last-card')return {label:name+': '+(award.kind==='go'?'Go':'Last card')+' for '+award.points,team:award.team,total:award.total};
+if(award.kind==='go'||award.kind==='last-card')return {label:name+': '+(award.kind==='go'?'Go (end of count)':'Last card')+' for '+award.points,team:award.team,total:award.total};
 const count=award.kind.includes('fifteen')?15:award.kind.includes('thirty-one')?31:award.count??view.pegCount;
 const detail=award.kind.includes('quadruple')?'four of a kind':award.kind.includes('triple')?'three of a kind':
 award.kind.includes('pair')?'a pair':award.kind.includes('run')?'a run':'';
@@ -152,7 +152,7 @@ this.generation=0;this.authGeneration=0;this.timer=null;this.busy=false;this.pol
 this.state={status:enabled?'idle':'disabled',settings:this.settings};
 }
 emit(delta){this.state=Object.freeze({...this.state,...delta,settings:{...this.settings}});
-this.onChange(this.state);return this.state;}
+try{this.onChange(this.state);}catch(e){console.error('Cribbage render failed',e);}return this.state;}
 cancelTimer(){if(this.timer!==null){this.clearTimer(this.timer);this.timer=null;}}
 invalidate(){this.generation++;this.authGeneration++;this.cancelTimer();this.busy=false;this.polling=false;this.state={status:this.client.enabled?'idle':'disabled',settings:{...this.settings}};this.onChange(this.state);}
 configure(key,value){
@@ -171,9 +171,10 @@ this.emit({pegs,scoring:true,announcement:item.label,showing:item.show??null,que
 this.cancelTimer();
 this.timer=this.setTimer(()=>{
 this.timer=null;
+try{
 this.emit({pegs:cribbageSettlePegs(this.state.pegs),announcement:'',showing:null});
-if(this.state.queue.length){this.advance();}
-else if(this.state.session)this.emit({scoring:false,pegs:reconcilePegs(this.state.pegs,this.state.session)});
+if(this.state.queue?.length){this.advance();return;}
+}finally{if(this.timer===null&&this.state.session)this.emit({scoring:false,queue:[],pegs:reconcilePegs(this.state.pegs,this.state.session)});}
 },CRIBBAGE_ANNOUNCE_MS);
 }
 async open(id,{quiet=false}={}){
@@ -196,10 +197,11 @@ const session=normalizeCribbageSnapshot(result,me.data.profile.subject);
 if(!session||session.id!==id||existing&&session.sequence<existing.sequence)
 throw Error('Unverified Cribbage snapshot; no private cards were displayed');
 if(existing&&session.sequence===existing.sequence){
-if(this.state.status!=='ready'||this.state.error)return this.emit({status:'ready',session,submitting:false,error:null,notice:''});
+if(this.state.status!=='ready'||this.state.error||this.state.scoring&&this.timer===null&&!this.state.queue?.length)return this.emit({status:'ready',session,submitting:false,error:null,notice:'',scoring:this.timer!==null||!!this.state.queue?.length});
 return this.state;
 }
 if(existing&&(this.timer!==null||this.state.queue?.length))return this.state;
+if(this.state.scoring)this.emit({scoring:false,announcement:'',showing:null});
 const replay=existing&&session.sequence===existing.sequence+1;
 const queue=replay?cribbageAnnouncementQueue(existing,session):[];
 const pegs=existing&&replay&&queue.length?

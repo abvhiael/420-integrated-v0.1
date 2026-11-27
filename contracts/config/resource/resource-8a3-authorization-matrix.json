@@ -87,7 +87,7 @@
         "service": "All canonical service classes",
         "economicLimits": "Sponsor affects eligibility and funding, not withdrawal ownership",
         "governanceEmergency": "No direct governance override",
-        "lifecycle": "Provider exists; zero clears sponsor",
+        "lifecycle": "Existing non-retired and not permanently disqualified provider; zero clears sponsor",
         "openFinding": "none"
       },
       {
@@ -150,29 +150,29 @@
         "operation": "setState",
         "principal": "Stored operator or delegate",
         "directOwnership": "Operator",
-        "delegatedAuthority": "Exact active grant for caller",
+        "delegatedAuthority": "Exact active grant for non-retirement transitions only",
         "component": "ResourceIds420.COMPONENT_RESOURCE",
         "action": "ResourceIds420.ACTION_SET_PROVIDER_STATE",
         "scope": "scopeProvider(providerId)",
         "service": "All canonical service classes",
         "economicLimits": "Activation requires current collateral eligibility",
         "governanceEmergency": "No direct governance override",
-        "lifecycle": "REGISTERED→ACTIVE/RETIRED; ACTIVE→SUSPENDED/RETIRED; SUSPENDED→ACTIVE/RETIRED",
-        "openFinding": "A4: evaluate separate retirement authority"
+        "lifecycle": "REGISTERED→ACTIVE/RETIRED; ACTIVE→SUSPENDED/RETIRED; SUSPENDED→ACTIVE/RETIRED; retirement operator only",
+        "openFinding": "none"
       },
       {
         "operation": "updateProvider",
         "principal": "Stored operator or delegate",
         "directOwnership": "Operator",
-        "delegatedAuthority": "Exact active grant for caller",
+        "delegatedAuthority": "Exact active grant for metadata only; stakeRef must equal stored value",
         "component": "ResourceIds420.COMPONENT_RESOURCE",
         "action": "ResourceIds420.ACTION_UPDATE_PROVIDER",
         "scope": "scopeProvider(providerId)",
         "service": "All canonical service classes",
-        "economicLimits": "Stake reference does not create eligibility",
+        "economicLimits": "Operator alone may replace stake reference; eligibility remains independently checked",
         "governanceEmergency": "No direct governance override",
         "lifecycle": "Existing; not ACTIVE or RETIRED",
-        "openFinding": "A4: metadata and collateral reference share action"
+        "openFinding": "none"
       },
       {
         "operation": "setRegistrationConsent",

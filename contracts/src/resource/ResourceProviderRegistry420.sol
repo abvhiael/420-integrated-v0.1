@@ -176,6 +176,7 @@ contract ResourceProviderRegistry420 is I420System {
     ) external {
         Provider storage p = _get(providerId);
         if (msg.sender != p.operatorAccount) revert Unauthorized();
+        if (p.state == State.RETIRED || permanentlyDisqualified[providerId]) revert InvalidState();
         collateralSponsor[providerId] = sponsor;
         emit CollateralSponsorChanged(providerId, sponsor);
     }
@@ -301,6 +302,8 @@ contract ResourceProviderRegistry420 is I420System {
                 && !authorization.isProviderAuthorized(msg.sender, providerId, ResourceIds420.ACTION_SET_PROVIDER_STATE)
         ) revert Unauthorized();
 
+        // Irreversible retirement is reserved to the operator, not a routine state delegate.
+        if (next == State.RETIRED && msg.sender != p.operatorAccount) revert Unauthorized();
         State old = p.state;
         bool ok = (old == State.REGISTERED && (next == State.ACTIVE || next == State.RETIRED))
             || (old == State.ACTIVE && (next == State.SUSPENDED || next == State.RETIRED))
@@ -325,6 +328,8 @@ contract ResourceProviderRegistry420 is I420System {
                 && !authorization.isProviderAuthorized(msg.sender, providerId, ResourceIds420.ACTION_UPDATE_PROVIDER)
         ) revert Unauthorized();
 
+        // Metadata delegates may preserve, but never replace, the economic reference.
+        if (msg.sender != p.operatorAccount && stakeRef != p.stakeRef) revert Unauthorized();
         p.metadataHash = metadataHash;
         p.stakeRef = stakeRef;
         p.revision++;

@@ -11,7 +11,7 @@ func configureWordSalad(mode string,sessions *social.ClassicSessions,rooms,rules
 func configureWordSaladWithFactory(mode string,sessions *social.ClassicSessions,rooms,rules,communications bool, factory func()(*social.RulesAdapter,error))error{
  switch mode{
  case "","disabled":return nil
- case "restricted-acceptance":
+ case "restricted-acceptance","production":
   if sessions==nil||sessions.Store==nil||sessions.Rooms==nil||!rooms||!rules||!communications{return errors.New("Word Salad requires authenticated room, session, replay and presence dependencies")}
   if factory==nil{return social.ErrUnavailable}
   adapter,e:=factory();if e!=nil{return e};if adapter==nil{return social.ErrUnavailable}

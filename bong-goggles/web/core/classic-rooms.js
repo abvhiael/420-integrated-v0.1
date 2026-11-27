@@ -1,3 +1,4 @@
+import {saladFormat} from './word-salad-session.js';
 // BC-0.5 — 420ID rooms and seat administration, never a match engine.
 import {createAccountSocialClient,isSubjectID} from './account-social.js';
 import {CLASSIC_ROADMAP} from './classics.js';
@@ -48,8 +49,9 @@ return Object.freeze({id:v.id,seat:v.seat,target:v.target,status:v.status});
 });
 if(invites.some(x=>!x))return null;
 if(r.gameId==='chess'&&(r.seatCount!==2||seats.some((s,i)=>s.team!==i)))return null;
-const variantId=r.gameId==='labyrinth-cribbage'?r.variantId:null;
-if(variantId!=null){
+const variantId=['labyrinth-cribbage','scrabble'].includes(r.gameId)?r.variantId:null;
+if(r.gameId==='scrabble'&&(!saladFormat(variantId,r.seatCount)||seats.some((s,i)=>s.team!==i)))return null;
+if(r.gameId==='labyrinth-cribbage'&&variantId!=null){
  const expected=r.seatCount===2?'labyrinth-2p':r.seatCount===3?'labyrinth-3p':
  r.seats[2].team===0?'labyrinth-4p-partners':'labyrinth-4p-individual';
  if(variantId!==expected)return null;
@@ -144,7 +146,7 @@ if(data.gameId==='labyrinth-cribbage'){
  if(!['individual','partnerships',''].includes(data.format??''))throw Error('Invalid Labyrinth scoring format');
  if(data.seatCount===4)body.format=data.format||'partnerships';
  else if(data.format&&data.format!=='individual')throw Error('Only four seats support partnerships');
-}else if(data.format)throw Error('Format is not allowed for this game');
+}else if(data.gameId==='scrabble'){if(!saladFormat(data.format,data.seatCount))throw Error('Invalid Word Salad board format');body.format=data.format;}else if(data.format)throw Error('Format is not allowed for this game');
 }else{
 if(!current.selected||!id(current.selected.id)||!Number.isSafeInteger(data.seat)||data.seat<0||
 data.seat>=current.selected.seatCount)throw Error('No qualified room and seat');
@@ -201,7 +203,7 @@ function makeAction(action,seat,label,extra=''){
 return '<form data-classic-room-action="'+action+'" data-room-seat="'+seat+'">'+extra+
 '<button type="submit">'+esc(label)+'</button></form>';
 }
-function roomDetail(r,state,live=null,chessEnabled=false){
+function roomDetail(r,state,live=null,chessEnabled=false,saladEnabled=false){
 const isHost=r.host===state.viewer;
 const hasSeat=r.seats.some(s=>s.subject===state.viewer);
 const friendOptions=state.friends.map(f=>'<option value="'+f.subject+'">'+esc(f.displayName)+'</option>').join('');
@@ -242,6 +244,8 @@ const labyrinthLink=r.gameId==='labyrinth-cribbage'&&live?.status==='connected'&
  esc(live.session.id)+'" data-route="classic-game">Resume your private Labyrinth table</a></p>':'';
 const chessLink=chessEnabled&&r.gameId==='chess'&&r.seats.some(s=>s.controller==='human'&&s.subject===state.viewer)&&live?.status==='connected'&&live?.session?.gameId==='chess'&&live.session.roomId===r.id&&/^[0-9a-f-]{36}$/.test(live.session.id)?'<p><a class="ui-button" data-route="classic-game" href="/games/chess/play?session='+esc(live.session.id)+'">Resume Chess</a></p>':'';
 const chessStart=chessEnabled&&r.gameId==='chess'&&isHost&&r.status==='ready'?'<form data-chess-room-start><label>Clock <select name="clockProfile">'+['untimed','1+0','2+1','3+0','3+2','5+0','5+3','10+0','15+10','30+0','30+30','60+0'].map(x=>'<option>'+x+'</option>').join('')+'</select></label><button type="submit">Start Chess</button></form>':'';
+const saladStart=saladEnabled&&r.gameId==='scrabble'&&isHost&&r.status==='ready'?'<form data-salad-room-start><button type="submit">Start Word Salad</button></form>':'';
+const saladLink=saladEnabled&&r.gameId==='scrabble'&&hasSeat&&live?.status==='connected'&&live.session?.gameId==='scrabble'&&live.session.roomId===r.id&&id(live.session.id)?'<a href="/games/scrabble/play?session='+esc(live.session.id)+'" data-route="classic-game">Resume Word Salad</a>':'';
 return '<section class="classic-room__detail"><p><a href="'+(r.gameId==='cribbage'?'/games/cribbage/history':'/games/rooms')+'" data-route="'+(r.gameId==='cribbage'?'classic-game':'classic-rooms')+'">← '+(r.gameId==='cribbage'?'Cribbage · My Games':'All rooms')+'</a></p>'+
 '<h2>'+esc(title(r.gameId))+' · '+esc(r.visibility)+' room</h2>'+
 '<p>'+r.seatCount+' seats · '+esc(r.status)+' · revision '+r.revision+
@@ -252,10 +256,10 @@ r.status==='cancelled'?'This room was cancelled.':r.status==='in_game'?'Room is 
  ['cribbage','labyrinth-cribbage'].includes(r.gameId)?
  '<form '+(r.gameId==='cribbage'?'data-cribbage-room-start':'data-labyrinth-room-start')+
  '><button type="submit">Start '+esc(title(r.gameId))+'</button></form>':'')+
- cribbageLink+labyrinthLink+chessStart+chessLink+roomLive+invites+
+ cribbageLink+labyrinthLink+chessStart+chessLink+saladStart+saladLink+roomLive+invites+
 (isHost&&(r.status==='open'||r.status==='ready')?makeAction('cancel-room',0,'Cancel room'):'')+'</section>';
 }
-export function renderClassicRooms(state,{enabled=false,roomId=null,live=null,chessEnabled=false}={}){
+export function renderClassicRooms(state,{enabled=false,roomId=null,live=null,chessEnabled=false,saladEnabled=false}={}){
 const start='<section class="classic-room" aria-label="420ID multiplayer rooms"><p><a href="/games/cribbage/history" data-route="classic-game">← Cribbage · My Games</a> · <a href="/games" data-route="games">Games catalogue</a></p>'+
 '<h2>Multiplayer rooms</h2><p>Persistent off-chain rooms for 420ID friends and public groups. No wallet, wagers or token rewards. Lobby seats do not start gameplay.</p>';
 if(!enabled)return start+note('Multiplayer rooms are not activated for this deployment.')+'</section>';
@@ -271,7 +275,7 @@ if(!state.selected)return heading+note(state.notFound?'Room not found or access 
 if(live&&['reconnecting','guest','revoked'].includes(live.status))
 return heading+note('Connection lost or room access changed. Checking 420ID and the latest authoritative state; cached private room data is hidden.')+
 '<button type="button" data-classic-room-refresh>Reconnect to room</button></section>';
-return heading+roomDetail(state.selected,state,live,chessEnabled)+'</section>';
+return heading+roomDetail(state.selected,state,live,chessEnabled,saladEnabled)+'</section>';
 }
 const creation='<section class="classic-room__create"><h3>Create a private or public room</h3>'+
 '<form data-classic-room-create><label>Game<select name="gameId">'+games+'</select></label>'+

@@ -17,7 +17,7 @@ func TestWordSaladRuntimeActivation(t *testing.T){
   if e:=configureWordSalad(mode,nil,false,false,false);e!=nil{t.Fatal(mode,e)}
   if e:=configureWordSalad(mode,s,true,true,true);e!=nil{t.Fatal(mode,e)};unchanged(t)
  }
- for _,mode:=range []string{"public-play","enabled","production","RESTRICTED-ACCEPTANCE","restricted-acceptance "}{
+ for _,mode:=range []string{"public-play","enabled","RESTRICTED-ACCEPTANCE","restricted-acceptance "}{
   if e:=configureWordSalad(mode,s,true,true,true);e==nil{t.Fatal("unsupported mode",mode)};unchanged(t)
  }
  for _,tc:=range []struct{name string;sessions *social.ClassicSessions;rooms,rules,communications bool}{
@@ -32,7 +32,7 @@ func TestWordSaladRuntimeActivation(t *testing.T){
   if e:=configureWordSaladWithFactory("restricted-acceptance",s,true,true,true,factory);!errors.Is(e,social.ErrUnavailable){t.Fatal("invalid dictionary factory accepted",e)};unchanged(t)
  }
  expected,e:=social.NewProductionWordSaladRulesAdapter();if e!=nil{t.Fatal(e)}
- if e=configureWordSalad("restricted-acceptance",s,true,true,true);e!=nil{t.Fatal(e)}
+ if e=configureWordSalad("production",s,true,true,true);e!=nil{t.Fatal(e)}
  actual:=s.Rules("scrabble");if actual==nil{t.Fatal("missing registered adapter")}
  v,h:=actual.Identity();ev,eh:=expected.Identity()
  if v!=ev||h!=eh||v!="v1"||len(h)!=64{t.Fatal("incorrect production identity",v,h)}

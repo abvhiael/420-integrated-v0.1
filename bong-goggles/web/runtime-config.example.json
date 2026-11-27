@@ -24,6 +24,7 @@
     "classicCommunications": false,
     "accountXP": false,
     "accountMonetization": false,
-    "chessRestricted": false
+    "chessRestricted": false,
+    "wordSaladProduction": false
   }
 }

@@ -46,7 +46,10 @@ try{
   const page=await context.newPage();const errors=[];
   page.on('pageerror',error=>errors.push(error.message));
   await page.goto(origin+'/games/labyrinth-cribbage',{waitUntil:'domcontentloaded'});
-  await page.locator('main').waitFor();
+  // The bootstrap shell contains <main> before async configuration and module loading finish.
+  // Wait for the actual route content, with a finite timeout; retain every assertion below.
+  await page.locator('main').getByRole('heading',{name:/Labyrinth Cribbage/i}).first().waitFor({state:'visible',timeout:30000});
+  await page.locator('main img[src="/assets/games/labyrinth-cribbage/labyrinth.png"]').first().waitFor({state:'visible',timeout:30000});
   // This route must be a real application page, never an empty/404 fallback.
   assert.match(await page.locator('main').innerText(),/Labyrinth Cribbage/i);
   const board=page.locator('img[src="/assets/games/labyrinth-cribbage/labyrinth.png"]').first();

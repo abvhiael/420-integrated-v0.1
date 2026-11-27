@@ -21,15 +21,21 @@ export function verifyAccountSocialOutput(source,generated,mode,env={}){
  const chess=chessFlag==='true'||(chessFlag===undefined&&env.CF_PAGES==='1'&&env.CF_PAGES_BRANCH==='main'&&communications);
  if(chess&&!communications)throw Error('Chess requires authenticated Classic rooms and communications');
  assert.equal(source.features.chessRestricted,false,'Canonical Chess default must remain disabled');
+ const saladFlag=env.BG_WORD_SALAD_ACTIVATION;
+ if(saladFlag!==undefined&&!['true','false'].includes(saladFlag))throw Error('Invalid BG_WORD_SALAD_ACTIVATION');
+ const salad=saladFlag==='true'||(saladFlag===undefined&&env.CF_PAGES==='1'&&env.CF_PAGES_BRANCH==='main'&&communications);
+ if(salad&&!communications)throw Error('Word Salad requires authenticated Classic rooms and communications');
+ assert.equal(source.features.wordSaladProduction,false,'Canonical Word Salad default must remain disabled');
  const expected={...source,features:{...source.features,
   accountSocial:enabled,accountMessaging:enabled,accountGames:enabled,accountXP:enabled,
-  classicRooms:rooms,classicCommunications:communications,chessRestricted:chess,accountMonetization:false}};
+  classicRooms:rooms,classicCommunications:communications,chessRestricted:chess,wordSaladProduction:salad,accountMonetization:false}};
  assert.deepEqual(generated,expected,'Built runtime config modified another feature or source field');
  const validated=validateRuntimeConfig(generated).features;
  assert.equal(validated.accountSocial,enabled);
  assert.equal(validated.classicRooms,rooms);
  assert.equal(validated.classicCommunications,communications);
  assert.equal(validated.chessRestricted,chess);
+ assert.equal(validated.wordSaladRestricted,salad);
  return chess;
 }
 if(process.argv[1]&&fileURLToPath(import.meta.url)===resolve(process.argv[1])){

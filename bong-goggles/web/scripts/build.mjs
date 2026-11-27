@@ -42,6 +42,11 @@ if(chessFlag!==undefined&&!['true','false'].includes(chessFlag))throw Error('BG_
 const chessOn=chessFlag==='true'||(chessFlag===undefined&&process.env.CF_PAGES==='1'&&process.env.CF_PAGES_BRANCH==='main'&&runtimeConfig.features.classicCommunications);
 if(chessOn&&!runtimeConfig.features.classicCommunications)throw Error('Chess requires authenticated Classic rooms and communications');
 runtimeConfig.features.chessRestricted=Boolean(chessOn);
+const saladFlag=process.env.BG_WORD_SALAD_ACTIVATION;
+if(saladFlag!==undefined&&!['true','false'].includes(saladFlag))throw Error('Invalid BG_WORD_SALAD_ACTIVATION');
+const saladOn=saladFlag==='true'||(saladFlag===undefined&&process.env.CF_PAGES==='1'&&process.env.CF_PAGES_BRANCH==='main'&&runtimeConfig.features.classicCommunications);
+if(saladOn&&!runtimeConfig.features.classicCommunications)throw Error('Word Salad requires authenticated Classic rooms and communications');
+runtimeConfig.features.wordSaladProduction=Boolean(saladOn);
 validateRuntimeConfig(runtimeConfig);
 
 for(const item of ['index.html','app.js','styles.css','game-kit.css','classic-communications.css','settings.css','branding.css','feed-branding.css','dashboard.css','classics.css','ccc-tabletop.css','ccc-practice.css','cribbage.css','labyrinth.css','chess.css','word-salad.css','welcome-landscape.svg','core','_headers']){

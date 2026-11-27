@@ -5,6 +5,9 @@ on:
     paths:
       - "contracts/src/resource/**"
       - "contracts/test/ResourceGenesis420.t.sol"
+      - "contracts/test/ResourceIdentifierDomains420.t.sol"
+      - "scripts/resource-capability-grant.py"
+      - "scripts/test-resource-capability-grant.py"
       - "contracts/test/ResourceProviderCollateral420.t.sol"
       - "contracts/test/ResourceCollateralPolicy420.t.sol"
       - "contracts/test/ResourceCollateralInvariant420.t.sol"
@@ -87,6 +90,12 @@ jobs:
       - name: Run Resource deployment binding suite
         working-directory: contracts
         run: forge test --root "$RUNNER_TEMP/resource-contracts" --match-path 'test/ResourceDeploymentBinding420.t.sol' -vvvv
+
+      - name: Run identifier domain and grant migration adversarial suite
+        run: forge test --root "$RUNNER_TEMP/resource-contracts" --match-path test/ResourceIdentifierDomains420.t.sol -vvv
+
+      - name: Test canonical grant generation against Solidity ABI vectors
+        run: python scripts/test-resource-capability-grant.py
 
       - name: Run Resource protocol adversarial suite
         working-directory: contracts

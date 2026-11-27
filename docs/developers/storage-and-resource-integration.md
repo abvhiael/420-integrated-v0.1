@@ -94,11 +94,12 @@ The current core action identifiers are:
 | update node | `420/RESOURCE/ACTION/UPDATE_NODE/V1` | provider + node |
 | set node state | `420/RESOURCE/ACTION/SET_NODE_STATE/V1` | provider + node |
 | publish offer | `420/RESOURCE/ACTION/PUBLISH_OFFER/V1` | provider + node |
-| open session | `420/RESOURCE/ACTION/OPEN_SESSION/V1` | session |
 | submit receipt | `420/RESOURCE/ACTION/SUBMIT_RECEIPT/V1` | provider + node |
 | settle | `420/RESOURCE/ACTION/SETTLE/V1` | session, with amount bound |
 
 Storage-specific capability preimages currently include `420/STORAGE/ACTION/CONFIGURE_CAPACITY/V1`, `420/STORAGE/ACTION/RESERVE_CAPACITY/V1`, `420/STORAGE/ACTION/REGISTER_PROOF_SCHEME/V1`, `420/STORAGE/ACTION/SET_PROOF_SCHEME_STATE/V1`, `420/STORAGE/ACTION/REGISTER_STORAGE_COMMITMENT/V1` and `420/STORAGE/ACTION/ACCEPT_STORAGE_AGREEMENT/V1`.
+
+Session opening is direct consumer authorization; no delegated OPEN_SESSION action exists. See [A3 grant migration](../audit/420RESOURCE-8A3-A3-identifiers.md).
 
 ### Provider and node states
 

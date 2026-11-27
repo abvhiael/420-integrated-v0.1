@@ -13,7 +13,7 @@ import "../src/resource/ResourceSessionRegistry420.sol";
 import "../src/resource/ResourceReceiptRegistry420.sol";
 import "../src/resource/ResourceRouter420.sol";
 
-interface VmResource420 { function prank(address) external; function warp(uint256) external; }
+interface VmResource420 { function prank(address) external; function warp(uint256) external; function deal(address,uint256) external; }
 // Shared legacy fixture retained for collateral custody tests; lifecycle tests use the real registry.
 contract MockResourceCaps420 is ICapabilityRegistry420 {
     mapping(bytes32=>bool) internal ok;
@@ -293,5 +293,128 @@ contract ResourceGenesis420Test {
         (ok,) = address(e.providers).call(abi.encodeCall(e.providers.setCollateralSponsor,(id,BOB)));
         require(!ok,"retired sponsor mutation");
         require(!e.providers.isActive(id),"retired active");
+    }
+
+    function _grantCollateralIdentityDelegate(Env memory e, bytes32 id) internal {
+        bytes32[3] memory actions = [ResourceIds420.ACTION_REGISTER_PROVIDER, ResourceIds420.ACTION_UPDATE_PROVIDER, ResourceIds420.ACTION_SET_PROVIDER_STATE];
+        for (uint256 i; i < actions.length; ++i) {
+            e.caps.createGrant(keccak256(abi.encode("A4.3",id,actions[i])),DELEGATE,ResourceIds420.COMPONENT_RESOURCE,actions[i],e.auth.scopeProvider(id),0,0,0,0,0);
+        }
+    }
+
+    function _denyCollateralIdentity(address caller, address target, bytes memory data, bytes4 expected) internal {
+        vm.prank(caller);
+        (bool ok, bytes memory result) = target.call(data);
+        require(!ok && result.length >= 4 && bytes4(result) == expected,"unexpected denial");
+    }
+
+    function testCollateralIdentityDelegatedForeignReferenceAndEconomicBoundary() public {
+        Env memory e = setup();
+        (bytes32 foreignId,) = registerRelayNode(e);
+        ResourceProviderCollateral420 c = ResourceProviderCollateral420(address(e.providers.collateral()));
+        bytes32 foreignPosition = c.positionId(foreignId);
+        bytes32 id = e.providers.canonicalProviderId(BOB,1);
+        _grantCollateralIdentityDelegate(e,id);
+        vm.prank(BOB);
+        e.providers.setRegistrationConsent(id,DELEGATE,0,foreignPosition);
+        vm.prank(DELEGATE);
+        e.providers.registerProvider(id,BOB,0,foreignPosition);
+        _denyCollateralIdentity(DELEGATE,address(e.providers),abi.encodeCall(e.providers.setState,(id,ResourceProviderRegistry420.State.ACTIVE)),ResourceProviderRegistry420.StakeRequired.selector);
+        _denyCollateralIdentity(DELEGATE,address(e.providers),abi.encodeCall(e.providers.updateProvider,(id,bytes32(0),c.positionId(id))),ResourceProviderRegistry420.Unauthorized.selector);
+        _denyCollateralIdentity(DELEGATE,address(e.providers),abi.encodeCall(e.providers.setCollateralSponsor,(id,DELEGATE)),ResourceProviderRegistry420.Unauthorized.selector);
+        vm.deal(DELEGATE,1 ether);
+        vm.prank(DELEGATE);
+        (bool funded, bytes memory result) = address(c).call{value:1 ether}(abi.encodeCall(c.deposit,(id,keccak256("unauthorized sponsorship"))));
+        require(!funded && bytes4(result)==ResourceProviderCollateral420.Unauthorized.selector,"unauthorized sponsor funding");
+        vm.deal(BOB,1 ether);
+        vm.prank(BOB);
+        bytes32 own = c.deposit{value:1 ether-1}(id,keccak256("partial"));
+        vm.prank(BOB);
+        e.providers.updateProvider(id,0,own);
+        _denyCollateralIdentity(DELEGATE,address(e.providers),abi.encodeCall(e.providers.setState,(id,ResourceProviderRegistry420.State.ACTIVE)),ResourceProviderRegistry420.StakeRequired.selector);
+        vm.prank(BOB);
+        c.deposit{value:1}(id,keccak256("boundary"));
+        vm.prank(DELEGATE);
+        e.providers.setState(id,ResourceProviderRegistry420.State.ACTIVE);
+        require(e.providers.isActive(id) && e.providers.isActive(foreignId),"valid delegation denied");
+        require(c.getPosition(foreignPosition).owner==ALICE && c.getPosition(own).owner==BOB && c.getPosition(own).slashable==1 ether && c.custodyInvariant(),"identity or custody corrupted");
+    }
+
+    function testCollateralIdentityDelegatedExitCannotReopenAdmissionOrStealSponsor() public {
+        Env memory e = setup();
+        ResourceProviderCollateral420 c = ResourceProviderCollateral420(address(e.providers.collateral()));
+        bytes32 id = e.providers.canonicalProviderId(ALICE,1);
+        vm.prank(ALICE);
+        e.providers.registerProvider(id,ALICE,0,0);
+        vm.prank(ALICE);
+        e.providers.setCollateralSponsor(id,BOB);
+        vm.deal(BOB,2 ether);
+        vm.prank(BOB);
+        bytes32 position = c.deposit{value:2 ether}(id,keccak256("sponsor bond"));
+        vm.prank(ALICE);
+        e.providers.updateProvider(id,0,position);
+        _grantCollateralIdentityDelegate(e,id);
+        vm.prank(DELEGATE);
+        e.providers.setState(id,ResourceProviderRegistry420.State.ACTIVE);
+        bytes32 node = keccak256("sponsored node");
+        vm.prank(ALICE);
+        e.nodes.registerNode(node,id,ResourceIds420.SERVICE_RELAY,ALICE,keccak256("endpoint"),keccak256("capacity"));
+        vm.prank(ALICE);
+        e.nodes.setState(node,ResourceNodeRegistry420.State.ACTIVE);
+        bytes32 offer = keccak256("sponsored offer");
+        vm.prank(ALICE);
+        e.offers.publishOffer(offer,node,2,1000,keccak256("terms"),uint64(block.timestamp+1000));
+        vm.prank(DELEGATE);
+        bytes32 session = e.sessions.openCanonicalSession(offer,10,uint64(block.timestamp+100),1);
+        require(c.outstandingReservations(position)==1,"missing exposure");
+        _denyCollateralIdentity(DELEGATE,address(c),abi.encodeCall(c.requestExit,(position)),ResourceProviderCollateral420.Unauthorized.selector);
+        vm.prank(BOB);
+        c.requestExit(position);
+        uint64 maturity = c.withdrawableAt(position);
+        vm.prank(DELEGATE);
+        e.providers.setState(id,ResourceProviderRegistry420.State.SUSPENDED);
+        vm.prank(DELEGATE);
+        e.providers.updateProvider(id,keccak256("new metadata"),position);
+        _denyCollateralIdentity(DELEGATE,address(e.providers),abi.encodeCall(e.providers.setState,(id,ResourceProviderRegistry420.State.ACTIVE)),ResourceProviderRegistry420.StakeRequired.selector);
+        require(!e.providers.isActive(id) && !e.offers.isEffective(offer) && !e.router.canRoute(node,ResourceIds420.SERVICE_RELAY),"exit bypassed service admission");
+        _denyCollateralIdentity(DELEGATE,address(e.sessions),abi.encodeCall(e.sessions.openCanonicalSession,(offer,uint128(10),uint64(block.timestamp+100),uint256(2))),ResourceSessionRegistry420.InvalidSession.selector);
+        vm.prank(ALICE);
+        e.providers.setCollateralSponsor(id,DELEGATE);
+        require(c.getPosition(position).owner==BOB && c.withdrawableAt(position)==maturity,"sponsor reassignment changed ownership or maturity");
+        vm.warp(maturity);
+        _denyCollateralIdentity(BOB,address(c),abi.encodeCall(c.withdraw,(position)),ResourceProviderCollateral420.Unauthorized.selector);
+        vm.prank(DELEGATE);
+        e.sessions.cancelSession(session);
+        require(c.outstandingReservations(position)==0,"reservation not released");
+        _denyCollateralIdentity(DELEGATE,address(c),abi.encodeCall(c.withdraw,(position)),ResourceProviderCollateral420.Unauthorized.selector);
+        _denyCollateralIdentity(ALICE,address(c),abi.encodeCall(c.withdraw,(position)),ResourceProviderCollateral420.Unauthorized.selector);
+        uint256 beforeBalance = BOB.balance;
+        vm.prank(BOB);
+        c.withdraw(position);
+        require(BOB.balance==beforeBalance+2 ether && c.getPosition(position).state==ResourceProviderCollateral420.State.WITHDRAWN && c.custodyInvariant(),"owner payout");
+        _denyCollateralIdentity(DELEGATE,address(e.providers),abi.encodeCall(e.providers.setState,(id,ResourceProviderRegistry420.State.ACTIVE)),ResourceProviderRegistry420.StakeRequired.selector);
+    }
+
+    function testCollateralIdentityDelegatedDisciplineAndPermanentDisqualification() public {
+        Env memory e = setup();
+        (bytes32 id,bytes32 node,bytes32 offer) = activateRelay(e);
+        ResourceProviderCollateral420 c = ResourceProviderCollateral420(address(e.providers.collateral()));
+        bytes32 position = c.positionId(id);
+        _grantCollateralIdentityDelegate(e,id);
+        e.providers.setDisciplinarySuspension(id,true,keccak256("discipline"));
+        _denyCollateralIdentity(DELEGATE,address(e.providers),abi.encodeCall(e.providers.reinstateProvider,(id,keccak256("forged"))),ResourceProviderRegistry420.Unauthorized.selector);
+        _denyCollateralIdentity(DELEGATE,address(e.providers),abi.encodeCall(e.providers.setState,(id,ResourceProviderRegistry420.State.ACTIVE)),ResourceProviderRegistry420.StakeRequired.selector);
+        require(!e.router.canRoute(node,ResourceIds420.SERVICE_RELAY) && !e.offers.isEffective(offer),"disciplinary admission");
+        e.providers.reinstateProvider(id,keccak256("remediated"));
+        vm.prank(DELEGATE);
+        e.providers.setState(id,ResourceProviderRegistry420.State.ACTIVE);
+        require(e.providers.isActive(id),"legitimate reinstatement");
+        e.providers.disqualifyProvider(id,keccak256("permanent"));
+        uint64 revision = e.providers.disciplineRevision(id);
+        _denyCollateralIdentity(DELEGATE,address(e.providers),abi.encodeCall(e.providers.reinstateProvider,(id,keccak256("forged"))),ResourceProviderRegistry420.Unauthorized.selector);
+        _denyCollateralIdentity(address(this),address(e.providers),abi.encodeCall(e.providers.reinstateProvider,(id,keccak256("retry"))),ResourceProviderRegistry420.InvalidState.selector);
+        _denyCollateralIdentity(DELEGATE,address(e.providers),abi.encodeCall(e.providers.setState,(id,ResourceProviderRegistry420.State.ACTIVE)),ResourceProviderRegistry420.StakeRequired.selector);
+        require(e.providers.permanentlyDisqualified(id) && e.providers.disciplineRevision(id)==revision && !e.providers.isActive(id) && !e.offers.isEffective(offer),"permanent disqualification bypass");
+        require(c.getPosition(position).owner==ALICE && c.custodyInvariant(),"discipline changed custody");
     }
 }

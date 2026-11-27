@@ -7,6 +7,7 @@
 .chess-board .chess-square{position:relative;display:grid;place-items:center;min-width:0;min-height:0;padding:0;border:0;border-radius:0;line-height:1;background:transparent;color:#fff4d0}
 .chess-square>span{display:grid;place-items:center;width:100%;height:100%;pointer-events:none}
 .chess-piece{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 1px 2px #000)}
+.chess-piece[src*="/pieces/white-"]{transform:translateY(-6%)}
 .chess-square small{position:absolute;bottom:1px;left:2px;font:9px system-ui;color:#fff4d0;text-shadow:0 1px 2px #000;background:#07180f}
 .chess-board .last{box-shadow:inset 0 0 0 3px #f4c55b}.chess-board .selected{box-shadow:inset 0 0 0 3px #91ff82}
 .chess-board .target:after{content:"";position:absolute;width:24%;height:24%;background:#d2ff8b;border:2px solid #123c16;border-radius:50%;pointer-events:none}

@@ -99,7 +99,7 @@ return '<button type="button" class="cribbage-card-button" data-cribbage-card="'
 '" aria-label="'+esc('Select '+cribbageCardLabel(id))+'">'+
 cardFace(id,selected.has(id),!active)+'</button>';
 }).join('');
-const note=discard?'Select '+count+' card'+(count===1?'':'s')+' to put in the dealer’s crib.':
+const note=discard?'Choose '+count+' card'+(count===1?'':'s')+' for '+(v.dealer===session.viewerSeat?'your crib':'the dealer’s crib')+'.':
 v.phase==='peg'?'Select a card, then press Play selected card. Count cannot exceed 31.':
 v.phase==='cut'?'One legal cut reveals the shared starter.':
 'Your next hand is being prepared.';

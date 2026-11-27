@@ -1,6 +1,7 @@
 package social
 
 import (
+ "time"
  "bytes"
  "encoding/json"
  "reflect"
@@ -88,4 +89,14 @@ func TestWordSaladBlankLockedAndZero(t *testing.T){
  score,e=r.place(&d,p,"classic-salad",1,[]saladPlacement{{Row:&row,Col:&colC,ID:&cID}})
  if e!=nil||!ok||score!=estimated||d.Board[61].Blank!="T"{t.Fatal("blank value or assignment changed",score,estimated,e)}
  if _,e=r.place(&d,p,"classic-salad",1,[]saladPlacement{{Row:&row,Col:&colT,ID:&blank,Blank:"Z"}});e==nil{t.Fatal("blank reassignment allowed")}
+}
+
+func TestWordSaladBotExpiredSearchFallback(t *testing.T){
+ a,p:=saladBotTestPolicies(t)
+ raw,e:=a.initialConfigured([32]byte{42},2,"17:classic-salad:untimed");if e!=nil{t.Fatal(e)}
+ f,e:=a.decode(raw);if e!=nil{t.Fatal(e)}
+ move,e:=a.ChooseMoveBounded(raw,f.Turn,"hard",p.Hard,100000,time.Now().Add(-time.Second))
+ if e!=nil||string(move)!=`{"type":"pass"}`{t.Fatal("deadline fallback",string(move),e)}
+ if _,_,_,_,e=a.Apply(raw,f.Turn,move);e!=nil{t.Fatal("fallback must pass canonical rules",e)}
+ if _,e=a.ChooseMoveBounded(raw,f.Turn,"hard",saladMaliciousPolicy{move},100000,time.Now().Add(-time.Second));e==nil{t.Fatal("untrusted policy received fallback")}
 }

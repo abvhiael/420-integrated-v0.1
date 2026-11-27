@@ -23,16 +23,27 @@ func required(name string)string{
  v:=os.Getenv(name);if v==""{log.Fatal("Missing required configuration: "+name)}
  return v
 }
-func postgres(raw string)(*sql.DB,error){
+func postgresConnectionURL(raw string)(string,error){
  u,e:=url.Parse(raw)
  if e!=nil||u.Hostname()==""||u.User==nil||u.Fragment!=""||u.ForceQuery||
   (u.Scheme!="postgres"&&u.Scheme!="postgresql")||u.Query().Get("sslmode")!="verify-full"||
-  len(u.Query()["sslmode"])!=1{return nil,errors.New("untrusted PostgreSQL connection")}
- q,e:=url.ParseQuery(u.RawQuery);if e!=nil{return nil,e}
+  len(u.Query()["sslmode"])!=1{return "",errors.New("untrusted PostgreSQL connection")}
+ q,e:=url.ParseQuery(u.RawQuery);if e!=nil{return "",e}
  for key,values:=range q{
-  if len(values)!=1||(key!="sslmode"&&key!="sslrootcert"&&key!="connect_timeout"&&key!="application_name"){return nil,errors.New("unsupported PostgreSQL option")}
+  if len(values)!=1||(key!="sslmode"&&key!="sslrootcert"&&key!="connect_timeout"&&key!="application_name"){return "",errors.New("unsupported PostgreSQL option")}
  }
- db,e:=sql.Open("postgres",raw);if e!=nil{return nil,e}
+ // lib/pq's default parameterized query path separates Parse/Describe from
+ // Bind/Execute. A transaction pooler can switch server connections between
+ // those round trips, losing the unnamed statement (SQLSTATE 26000).
+ // Force the single-round-trip extended protocol; keep parameters bound,
+ // certificate verification and the existing user-supplied option allowlist.
+ q.Set("binary_parameters","yes")
+ u.RawQuery=q.Encode()
+ return u.String(),nil
+}
+func postgres(raw string)(*sql.DB,error){
+ dsn,e:=postgresConnectionURL(raw);if e!=nil{return nil,e}
+ db,e:=sql.Open("postgres",dsn);if e!=nil{return nil,e}
  db.SetMaxOpenConns(12);db.SetMaxIdleConns(4);db.SetConnMaxLifetime(10*time.Minute)
  ctx,done:=context.WithTimeout(context.Background(),10*time.Second);defer done()
  if e=db.PingContext(ctx);e!=nil{db.Close();return nil,errors.New("database unavailable")}

@@ -148,13 +148,13 @@ export class CribbageSessionController{
 constructor({enabled=false,fetchImpl=fetch,onChange=()=>{},setTimer=setTimeout,clearTimer=clearTimeout}={}){
 this.client=createAccountSocialClient({enabled,fetchImpl});
 this.onChange=onChange;this.setTimer=setTimer;this.clearTimer=clearTimer;
-this.generation=0;this.authGeneration=0;this.timer=null;this.busy=false;this.settings={motion:'standard',announcements:true,stinkhole:false};
+this.generation=0;this.authGeneration=0;this.timer=null;this.busy=false;this.polling=false;this.settings={motion:'standard',announcements:true,stinkhole:false};
 this.state={status:enabled?'idle':'disabled',settings:this.settings};
 }
 emit(delta){this.state=Object.freeze({...this.state,...delta,settings:{...this.settings}});
 this.onChange(this.state);return this.state;}
 cancelTimer(){if(this.timer!==null){this.clearTimer(this.timer);this.timer=null;}}
-invalidate(){this.generation++;this.authGeneration++;this.cancelTimer();this.busy=false;this.state={status:this.client.enabled?'idle':'disabled',settings:{...this.settings}};this.onChange(this.state);}
+invalidate(){this.generation++;this.authGeneration++;this.cancelTimer();this.busy=false;this.polling=false;this.state={status:this.client.enabled?'idle':'disabled',settings:{...this.settings}};this.onChange(this.state);}
 configure(key,value){
 if(key==='motion'&&['standard','reduced'].includes(value))this.settings.motion=value;
 else if(key==='announcements'&&typeof value==='boolean')this.settings.announcements=value;
@@ -178,9 +178,9 @@ else if(this.state.session)this.emit({scoring:false,pegs:reconcilePegs(this.stat
 }
 async open(id,{quiet=false}={}){
 if(!this.client.enabled||!uuid.test(id))return this.emit({status:'unavailable',error:'A qualified 420ID match is required.'});
-if(this.busy)return this.state;
+if(this.busy||this.polling)return this.state;
 const generation=++this.generation,existing=this.state.session?.id===id?this.state.session:null;
-this.busy=true;
+this.polling=true;
 if(!existing&&!quiet)this.emit({status:'loading',session:null,pegs:[],queue:[],announcement:''});
 try{
 const me=await this.client.request('/v1/me');
@@ -214,14 +214,14 @@ return this.state;
 }catch(e){
 if(generation===this.generation)this.emit(existing?{status:'error',submitting:false,error:e.message??'Match temporarily unavailable'}:{status:'error',session:null,pegs:[],queue:[],error:e.message??'Match temporarily unavailable'});
 return this.state;
-}finally{if(generation===this.generation)this.busy=false;}
+}finally{if(generation===this.generation)this.polling=false;}
 }
 async act(move){
 const current=this.state.session;
 if(this.busy||this.state.status!=='ready'||!current||
 !cribbageCanSubmit(current,move))throw Error('Not a legal move for your authenticated turn');
 if(this.state.scoring||this.state.queue?.length||this.timer!==null)throw Error('Scoring announcement still playing');
-this.busy=true;
+this.busy=true;this.polling=false;
 const generation=++this.generation,requestId=globalThis.crypto?.randomUUID?.();
 if(!requestId||!uuid.test(requestId)){this.busy=false;throw Error('Secure request ID unavailable');}
 this.emit({submitting:true,error:null});

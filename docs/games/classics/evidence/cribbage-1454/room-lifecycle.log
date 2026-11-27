@@ -1,0 +1,1520 @@
+﻿2026-11-27T18:02:07.3264214Z Current runner version: '2.338.2'
+2026-11-27T18:02:07.3285899Z ##[group]Runner Image Provisioner
+2026-11-27T18:02:07.3286658Z Hosted Compute Agent
+2026-11-27T18:02:07.3287151Z Version: 20261111.635
+2026-11-27T18:02:07.3287878Z Commit: b8a594ea514ff44cadb5342986c68b1eac6e22ed
+2026-11-27T18:02:07.3288484Z Build Date: 2026-11-11T01:49:01Z
+2026-11-27T18:02:07.3289036Z Worker ID: {a2a6ff97-8aa0-4b0a-aa4a-c90c1f8c1783}
+2026-11-27T18:02:07.3289712Z Region: eastus2
+2026-11-27T18:02:07.3290214Z Cloud: Azure
+2026-11-27T18:02:07.3290709Z ##[endgroup]
+2026-11-27T18:02:07.3292229Z ##[group]Operating System
+2026-11-27T18:02:07.3292753Z Ubuntu
+2026-11-27T18:02:07.3293252Z 26.04.1
+2026-11-27T18:02:07.3293684Z LTS
+2026-11-27T18:02:07.3294205Z ##[endgroup]
+2026-11-27T18:02:07.3294677Z ##[group]Runner Image
+2026-11-27T18:02:07.3295186Z Image: ubuntu-26.04
+2026-11-27T18:02:07.3295700Z Version: 20261122.9.1
+2026-11-27T18:02:07.3296745Z Included Software: https://github.com/actions/runner-images/blob/ubuntu26/20261122.9/images/ubuntu/Ubuntu2604-Readme.md
+2026-11-27T18:02:07.3298013Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261122.9
+2026-11-27T18:02:07.3298783Z ##[endgroup]
+2026-11-27T18:02:07.3299719Z ##[group]GITHUB_TOKEN Permissions
+2026-11-27T18:02:07.3301796Z Contents: read
+2026-11-27T18:02:07.3302369Z Metadata: read
+2026-11-27T18:02:07.3302864Z ##[endgroup]
+2026-11-27T18:02:07.3304843Z Secret source: Actions
+2026-11-27T18:02:07.3305770Z Cache mode: write
+2026-11-27T18:02:07.3306568Z Prepare workflow directory
+2026-11-27T18:02:07.3643535Z Prepare all required actions
+2026-11-27T18:02:07.3681703Z Getting action download info
+2026-11-27T18:02:07.5364454Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-11-27T18:02:07.6338649Z Download action repository 'actions/setup-go@v5' (SHA:40f1582b2485089dde7abd97c1529aa768e1baff)
+2026-11-27T18:02:07.8384247Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-11-27T18:02:08.0300183Z Complete job name: qualify-rooms
+2026-11-27T18:02:08.0824247Z ##[group]Checking docker version
+2026-11-27T18:02:08.0834909Z ##[command]/usr/bin/docker version --format '{{.Server.APIVersion}}'
+2026-11-27T18:02:08.1551469Z '1.54'
+2026-11-27T18:02:08.1569669Z Docker daemon API version: '1.54'
+2026-11-27T18:02:08.1570313Z ##[command]/usr/bin/docker version --format '{{.Client.APIVersion}}'
+2026-11-27T18:02:08.1735883Z '1.54'
+2026-11-27T18:02:08.1752147Z Docker client API version: '1.54'
+2026-11-27T18:02:08.1756797Z ##[endgroup]
+2026-11-27T18:02:08.1758806Z ##[group]Clean up resources from previous jobs
+2026-11-27T18:02:08.1764135Z ##[command]/usr/bin/docker ps --all --quiet --no-trunc --filter "label=9a6a77"
+2026-11-27T18:02:08.1911303Z ##[command]/usr/bin/docker network prune --force --filter "label=9a6a77"
+2026-11-27T18:02:08.2037660Z ##[endgroup]
+2026-11-27T18:02:08.2038110Z ##[group]Create local container network
+2026-11-27T18:02:08.2046148Z ##[command]/usr/bin/docker network create --label 9a6a77 github_network_e0e8109f827d4f7fb488714fb2fd978c
+2026-11-27T18:02:08.2501870Z 1c1f5571d146ac6adcdec0e64d87baaadc3e58f58e90fa3f65151be7b5634a5a
+2026-11-27T18:02:08.2521885Z ##[endgroup]
+2026-11-27T18:02:08.2543089Z ##[group]Starting postgres service container
+2026-11-27T18:02:08.2560021Z ##[command]/usr/bin/docker pull postgres:16
+2026-11-27T18:02:08.5377891Z 16: Pulling from library/postgres
+2026-11-27T18:02:08.6730254Z 72bd85048465: Pulling fs layer
+2026-11-27T18:02:08.6731547Z 3b9319a24e33: Pulling fs layer
+2026-11-27T18:02:08.6732308Z 1be8baae3c53: Pulling fs layer
+2026-11-27T18:02:08.6732942Z 9be9d0609035: Pulling fs layer
+2026-11-27T18:02:08.6733551Z cfa3776983f1: Pulling fs layer
+2026-11-27T18:02:08.6734102Z 111f378001d9: Pulling fs layer
+2026-11-27T18:02:08.6734669Z cc2ed79b34db: Pulling fs layer
+2026-11-27T18:02:08.6735403Z 46e4f78fd254: Pulling fs layer
+2026-11-27T18:02:08.6736172Z e91b6b814ba6: Pulling fs layer
+2026-11-27T18:02:08.6736800Z c362828e9ca3: Pulling fs layer
+2026-11-27T18:02:08.6737767Z 34ff39ac908b: Pulling fs layer
+2026-11-27T18:02:08.6738405Z 40748add9f4f: Pulling fs layer
+2026-11-27T18:02:08.6739029Z 91d82016f303: Pulling fs layer
+2026-11-27T18:02:08.7733370Z cfa3776983f1: Download complete
+2026-11-27T18:02:08.7762016Z 72bd85048465: Download complete
+2026-11-27T18:02:08.7786204Z cc2ed79b34db: Download complete
+2026-11-27T18:02:08.7791975Z 34ff39ac908b: Download complete
+2026-11-27T18:02:08.7823074Z 1be8baae3c53: Download complete
+2026-11-27T18:02:08.7859498Z 9be9d0609035: Download complete
+2026-11-27T18:02:08.7883781Z 91d82016f303: Download complete
+2026-11-27T18:02:08.9206478Z 46e4f78fd254: Download complete
+2026-11-27T18:02:08.9208243Z 7aa47411d7c7: Download complete
+2026-11-27T18:02:08.9210589Z c362828e9ca3: Download complete
+2026-11-27T18:02:08.9702737Z 636bc81cf18f: Download complete
+2026-11-27T18:02:08.9706516Z 111f378001d9: Download complete
+2026-11-27T18:02:08.9712079Z e91b6b814ba6: Download complete
+2026-11-27T18:02:09.1702159Z 40748add9f4f: Download complete
+2026-11-27T18:02:09.8700441Z 3b9319a24e33: Download complete
+2026-11-27T18:02:09.9754931Z 1be8baae3c53: Pull complete
+2026-11-27T18:02:09.9827533Z 40748add9f4f: Pull complete
+2026-11-27T18:02:10.0783092Z 46e4f78fd254: Pull complete
+2026-11-27T18:02:10.0827066Z e91b6b814ba6: Pull complete
+2026-11-27T18:02:10.2725925Z 72bd85048465: Pull complete
+2026-11-27T18:02:10.2746530Z 9be9d0609035: Pull complete
+2026-11-27T18:02:10.2788880Z c362828e9ca3: Pull complete
+2026-11-27T18:02:10.2806853Z 111f378001d9: Pull complete
+2026-11-27T18:02:11.8722380Z cc2ed79b34db: Pull complete
+2026-11-27T18:02:11.8741521Z 34ff39ac908b: Pull complete
+2026-11-27T18:02:11.8743452Z 91d82016f303: Pull complete
+2026-11-27T18:02:11.8750126Z 3b9319a24e33: Pull complete
+2026-11-27T18:02:11.8928952Z cfa3776983f1: Pull complete
+2026-11-27T18:02:11.8929773Z Digest: sha256:ce81150802644ddfac1db4da9e63be6f2a3818aa6ee98a7a28838aeea65dc37a
+2026-11-27T18:02:11.8930295Z Status: Downloaded newer image for postgres:16
+2026-11-27T18:02:11.8944509Z docker.io/library/postgres:16
+2026-11-27T18:02:11.9028693Z ##[command]/usr/bin/docker create --name b98a48d91343467bbb1178d4cfbef548_postgres16_a7e766 --label 9a6a77 --network github_network_e0e8109f827d4f7fb488714fb2fd978c --network-alias postgres -p 5432:5432 --health-cmd "pg_isready -U account420_test -d account420_test" --health-interval 5s --health-timeout 5s --health-retries 10 -e "POSTGRES_DB=account420_test" -e "POSTGRES_USER=account420_test" -e "POSTGRES_PASSWORD=local_test_only" -e GITHUB_ACTIONS=true -e CI=true postgres:16
+2026-11-27T18:02:16.5349169Z faacb73d0d2448bc4f6ce7bdb75f7210ac415f6157d5145aa7dcfed6e96fa670
+2026-11-27T18:02:16.5374706Z ##[command]/usr/bin/docker start faacb73d0d2448bc4f6ce7bdb75f7210ac415f6157d5145aa7dcfed6e96fa670
+2026-11-27T18:02:16.8020554Z faacb73d0d2448bc4f6ce7bdb75f7210ac415f6157d5145aa7dcfed6e96fa670
+2026-11-27T18:02:16.8043334Z ##[command]/usr/bin/docker ps --all --filter id=faacb73d0d2448bc4f6ce7bdb75f7210ac415f6157d5145aa7dcfed6e96fa670 --filter status=running --no-trunc --format "{{.ID}} {{.Status}}"
+2026-11-27T18:02:16.8308141Z faacb73d0d2448bc4f6ce7bdb75f7210ac415f6157d5145aa7dcfed6e96fa670 Up Less than a second (health: starting)
+2026-11-27T18:02:16.8362551Z ##[command]/usr/bin/docker port faacb73d0d2448bc4f6ce7bdb75f7210ac415f6157d5145aa7dcfed6e96fa670
+2026-11-27T18:02:16.8495727Z 5432/tcp -> 0.0.0.0:5432
+2026-11-27T18:02:16.8510662Z 5432/tcp -> [::]:5432
+2026-11-27T18:02:16.8547470Z ##[endgroup]
+2026-11-27T18:02:16.8555473Z ##[group]Waiting for all services to be ready
+2026-11-27T18:02:16.8568039Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" faacb73d0d2448bc4f6ce7bdb75f7210ac415f6157d5145aa7dcfed6e96fa670
+2026-11-27T18:02:16.8703135Z starting
+2026-11-27T18:02:16.8725374Z postgres service is starting, waiting 2 seconds before checking again.
+2026-11-27T18:02:18.8721969Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" faacb73d0d2448bc4f6ce7bdb75f7210ac415f6157d5145aa7dcfed6e96fa670
+2026-11-27T18:02:18.8844835Z starting
+2026-11-27T18:02:18.8858956Z postgres service is starting, waiting 3 seconds before checking again.
+2026-11-27T18:02:22.8583554Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" faacb73d0d2448bc4f6ce7bdb75f7210ac415f6157d5145aa7dcfed6e96fa670
+2026-11-27T18:02:22.8707312Z healthy
+2026-11-27T18:02:22.8723678Z postgres service is healthy.
+2026-11-27T18:02:22.8724345Z ##[endgroup]
+2026-11-27T18:02:22.8960899Z ##[group]Run actions/checkout@v4
+2026-11-27T18:02:22.8961488Z with:
+2026-11-27T18:02:22.8961689Z   ref: 15263ad49f66537ff4c9a33db7d094a7801f06aa
+2026-11-27T18:02:22.8961940Z   persist-credentials: false
+2026-11-27T18:02:22.8962172Z   repository: abvhiael/420-integrated-v0.1
+2026-11-27T18:02:22.8964342Z   token: ***
+2026-11-27T18:02:22.8964515Z   ssh-strict: true
+2026-11-27T18:02:22.8964683Z   ssh-user: git
+2026-11-27T18:02:22.8964835Z   clean: true
+2026-11-27T18:02:22.8965026Z   sparse-checkout-cone-mode: true
+2026-11-27T18:02:22.8965242Z   fetch-depth: 1
+2026-11-27T18:02:22.8965403Z   fetch-tags: false
+2026-11-27T18:02:22.8965577Z   show-progress: true
+2026-11-27T18:02:22.8965750Z   lfs: false
+2026-11-27T18:02:22.8965913Z   submodules: false
+2026-11-27T18:02:22.8966090Z   set-safe-directory: true
+2026-11-27T18:02:22.8966285Z   allow-unsafe-pr-checkout: false
+2026-11-27T18:02:22.8966608Z env:
+2026-11-27T18:02:22.8967080Z   ACCOUNT420_TEST_DSN: ***127.0.0.1:5432/account420_test?sslmode=disable
+2026-11-27T18:02:22.8967367Z ##[endgroup]
+2026-11-27T18:02:23.2468346Z Syncing repository: abvhiael/420-integrated-v0.1
+2026-11-27T18:02:23.2469829Z ##[group]Getting Git version info
+2026-11-27T18:02:23.2470380Z Working directory is '/home/runner/work/420-integrated-v0.1/420-integrated-v0.1'
+2026-11-27T18:02:23.2471296Z [command]/usr/bin/git version
+2026-11-27T18:02:23.2471629Z git version 2.56.1
+2026-11-27T18:02:23.2479877Z ##[endgroup]
+2026-11-27T18:02:23.2485221Z Temporarily overriding HOME='/home/runner/work/_temp/50ba9774-5ffb-43b0-bb90-d5c35ffa810c' before making global git config changes
+2026-11-27T18:02:23.2486377Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-27T18:02:23.2491675Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/420-integrated-v0.1/420-integrated-v0.1
+2026-11-27T18:02:23.2544511Z Deleting the contents of '/home/runner/work/420-integrated-v0.1/420-integrated-v0.1'
+2026-11-27T18:02:23.2546973Z ##[group]Initializing the repository
+2026-11-27T18:02:23.2551063Z [command]/usr/bin/git init /home/runner/work/420-integrated-v0.1/420-integrated-v0.1
+2026-11-27T18:02:23.2628491Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-27T18:02:23.2629219Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-27T18:02:23.2629853Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-27T18:02:23.2630362Z hint: call:
+2026-11-27T18:02:23.2630633Z hint:
+2026-11-27T18:02:23.2631140Z hint: 	git config --global init.defaultBranch <name>
+2026-11-27T18:02:23.2631536Z hint:
+2026-11-27T18:02:23.2631914Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-27T18:02:23.2632527Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-27T18:02:23.2633000Z hint:
+2026-11-27T18:02:23.2633241Z hint: 	git branch -m <name>
+2026-11-27T18:02:23.2633520Z hint:
+2026-11-27T18:02:23.2633931Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-27T18:02:23.2637276Z Initialized empty Git repository in /home/runner/work/420-integrated-v0.1/420-integrated-v0.1/.git/
+2026-11-27T18:02:23.2644865Z [command]/usr/bin/git remote add origin https://github.com/abvhiael/420-integrated-v0.1
+2026-11-27T18:02:23.2697884Z ##[endgroup]
+2026-11-27T18:02:23.2698548Z ##[group]Disabling automatic garbage collection
+2026-11-27T18:02:23.2700295Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-27T18:02:23.2733406Z ##[endgroup]
+2026-11-27T18:02:23.2733861Z ##[group]Setting up auth
+2026-11-27T18:02:23.2737621Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-27T18:02:23.2767256Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-27T18:02:23.3167122Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-27T18:02:23.3203232Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-27T18:02:23.3441656Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-27T18:02:23.3470744Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-27T18:02:23.3705071Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-27T18:02:23.3743684Z ##[endgroup]
+2026-11-27T18:02:23.3744039Z ##[group]Fetching the repository
+2026-11-27T18:02:23.3750668Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 15263ad49f66537ff4c9a33db7d094a7801f06aa
+2026-11-27T18:02:35.3352068Z From https://github.com/abvhiael/420-integrated-v0.1
+2026-11-27T18:02:35.3352619Z  * branch              15263ad49f66537ff4c9a33db7d094a7801f06aa -> FETCH_HEAD
+2026-11-27T18:02:35.3356842Z ##[endgroup]
+2026-11-27T18:02:35.3357331Z ##[group]Determining the checkout info
+2026-11-27T18:02:35.3359134Z ##[endgroup]
+2026-11-27T18:02:35.3364560Z [command]/usr/bin/git sparse-checkout disable
+2026-11-27T18:02:35.3418364Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-27T18:02:35.3452634Z ##[group]Checking out the ref
+2026-11-27T18:02:35.3455811Z [command]/usr/bin/git checkout --progress --force 15263ad49f66537ff4c9a33db7d094a7801f06aa
+2026-11-27T18:02:36.4338638Z Updating files:  15% (2589/16357)
+2026-11-27T18:02:36.6592042Z Updating files:  16% (2618/16357)
+2026-11-27T18:02:36.7437079Z Updating files:  17% (2781/16357)
+2026-11-27T18:02:37.0480048Z Updating files:  18% (2945/16357)
+2026-11-27T18:02:37.0782834Z Updating files:  19% (3108/16357)
+2026-11-27T18:02:37.1371825Z Updating files:  20% (3272/16357)
+2026-11-27T18:02:37.1418671Z Updating files:  21% (3435/16357)
+2026-11-27T18:02:37.1469143Z Updating files:  22% (3599/16357)
+2026-11-27T18:02:37.1656902Z Updating files:  23% (3763/16357)
+2026-11-27T18:02:37.1762742Z Updating files:  24% (3926/16357)
+2026-11-27T18:02:37.1849889Z Updating files:  25% (4090/16357)
+2026-11-27T18:02:37.1917856Z Updating files:  26% (4253/16357)
+2026-11-27T18:02:37.1994521Z Updating files:  27% (4417/16357)
+2026-11-27T18:02:37.2071274Z Updating files:  28% (4580/16357)
+2026-11-27T18:02:37.2145141Z Updating files:  29% (4744/16357)
+2026-11-27T18:02:37.2215390Z Updating files:  30% (4908/16357)
+2026-11-27T18:02:37.2268931Z Updating files:  31% (5071/16357)
+2026-11-27T18:02:37.2332420Z Updating files:  32% (5235/16357)
+2026-11-27T18:02:37.2413052Z Updating files:  33% (5398/16357)
+2026-11-27T18:02:37.2501769Z Updating files:  34% (5562/16357)
+2026-11-27T18:02:37.2583351Z Updating files:  35% (5725/16357)
+2026-11-27T18:02:37.2947326Z Updating files:  36% (5889/16357)
+2026-11-27T18:02:37.3053418Z Updating files:  37% (6053/16357)
+2026-11-27T18:02:37.3131584Z Updating files:  38% (6216/16357)
+2026-11-27T18:02:37.3404097Z Updating files:  39% (6380/16357)
+2026-11-27T18:02:37.3591871Z Updating files:  40% (6543/16357)
+2026-11-27T18:02:37.3623390Z Updating files:  40% (6644/16357)
+2026-11-27T18:02:37.3722243Z Updating files:  41% (6707/16357)
+2026-11-27T18:02:37.3794822Z Updating files:  42% (6870/16357)
+2026-11-27T18:02:37.3884068Z Updating files:  43% (7034/16357)
+2026-11-27T18:02:37.3947350Z Updating files:  44% (7198/16357)
+2026-11-27T18:02:37.4004834Z Updating files:  45% (7361/16357)
+2026-11-27T18:02:37.4059194Z Updating files:  46% (7525/16357)
+2026-11-27T18:02:37.4149453Z Updating files:  47% (7688/16357)
+2026-11-27T18:02:37.4246295Z Updating files:  48% (7852/16357)
+2026-11-27T18:02:37.4363167Z Updating files:  49% (8015/16357)
+2026-11-27T18:02:37.4457972Z Updating files:  50% (8179/16357)
+2026-11-27T18:02:37.4525912Z Updating files:  51% (8343/16357)
+2026-11-27T18:02:37.4609986Z Updating files:  52% (8506/16357)
+2026-11-27T18:02:37.4730878Z Updating files:  53% (8670/16357)
+2026-11-27T18:02:37.4789071Z Updating files:  54% (8833/16357)
+2026-11-27T18:02:37.4842848Z Updating files:  55% (8997/16357)
+2026-11-27T18:02:37.4920199Z Updating files:  56% (9160/16357)
+2026-11-27T18:02:37.5001078Z Updating files:  57% (9324/16357)
+2026-11-27T18:02:37.5096603Z Updating files:  58% (9488/16357)
+2026-11-27T18:02:37.5191462Z Updating files:  59% (9651/16357)
+2026-11-27T18:02:37.5266601Z Updating files:  60% (9815/16357)
+2026-11-27T18:02:37.5340776Z Updating files:  61% (9978/16357)
+2026-11-27T18:02:37.5417978Z Updating files:  62% (10142/16357)
+2026-11-27T18:02:37.5495756Z Updating files:  63% (10305/16357)
+2026-11-27T18:02:37.5599896Z Updating files:  64% (10469/16357)
+2026-11-27T18:02:37.5680877Z Updating files:  65% (10633/16357)
+2026-11-27T18:02:37.5748336Z Updating files:  66% (10796/16357)
+2026-11-27T18:02:37.6123489Z Updating files:  67% (10960/16357)
+2026-11-27T18:02:37.6203762Z Updating files:  68% (11123/16357)
+2026-11-27T18:02:37.6273022Z Updating files:  69% (11287/16357)
+2026-11-27T18:02:37.6538585Z Updating files:  70% (11450/16357)
+2026-11-27T18:02:37.6699168Z Updating files:  71% (11614/16357)
+2026-11-27T18:02:37.6762765Z Updating files:  72% (11778/16357)
+2026-11-27T18:02:37.6828779Z Updating files:  73% (11941/16357)
+2026-11-27T18:02:37.6891934Z Updating files:  74% (12105/16357)
+2026-11-27T18:02:37.6966542Z Updating files:  75% (12268/16357)
+2026-11-27T18:02:37.7081353Z Updating files:  76% (12432/16357)
+2026-11-27T18:02:37.7164315Z Updating files:  77% (12595/16357)
+2026-11-27T18:02:37.7234051Z Updating files:  78% (12759/16357)
+2026-11-27T18:02:37.7296357Z Updating files:  79% (12923/16357)
+2026-11-27T18:02:37.7361577Z Updating files:  80% (13086/16357)
+2026-11-27T18:02:37.7419019Z Updating files:  81% (13250/16357)
+2026-11-27T18:02:37.8186716Z Updating files:  82% (13413/16357)
+2026-11-27T18:02:37.8257096Z Updating files:  83% (13577/16357)
+2026-11-27T18:02:37.8331356Z Updating files:  84% (13740/16357)
+2026-11-27T18:02:37.8406246Z Updating files:  85% (13904/16357)
+2026-11-27T18:02:37.8483839Z Updating files:  86% (14068/16357)
+2026-11-27T18:02:37.8555668Z Updating files:  87% (14231/16357)
+2026-11-27T18:02:37.8630683Z Updating files:  88% (14395/16357)
+2026-11-27T18:02:37.8696646Z Updating files:  89% (14558/16357)
+2026-11-27T18:02:37.8766240Z Updating files:  90% (14722/16357)
+2026-11-27T18:02:37.8841138Z Updating files:  91% (14885/16357)
+2026-11-27T18:02:37.8971772Z Updating files:  92% (15049/16357)
+2026-11-27T18:02:37.9037366Z Updating files:  93% (15213/16357)
+2026-11-27T18:02:37.9106743Z Updating files:  94% (15376/16357)
+2026-11-27T18:02:37.9159339Z Updating files:  95% (15540/16357)
+2026-11-27T18:02:37.9281860Z Updating files:  96% (15703/16357)
+2026-11-27T18:02:37.9344197Z Updating files:  97% (15867/16357)
+2026-11-27T18:02:37.9419405Z Updating files:  98% (16030/16357)
+2026-11-27T18:02:37.9942964Z Updating files:  99% (16194/16357)
+2026-11-27T18:02:37.9943717Z Updating files: 100% (16357/16357)
+2026-11-27T18:02:37.9944338Z Updating files: 100% (16357/16357), done.
+2026-11-27T18:02:38.0063416Z Note: switching to '15263ad49f66537ff4c9a33db7d094a7801f06aa'.
+2026-11-27T18:02:38.0063682Z 
+2026-11-27T18:02:38.0063845Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-27T18:02:38.0064233Z changes and commit them, and you can discard any commits you make in this
+2026-11-27T18:02:38.0064596Z state without impacting any branches by switching back to a branch.
+2026-11-27T18:02:38.0065037Z 
+2026-11-27T18:02:38.0065195Z If you want to create a new branch to retain commits you create, you may
+2026-11-27T18:02:38.0065545Z do so (now or later) by using -c with the switch command. Example:
+2026-11-27T18:02:38.0065738Z 
+2026-11-27T18:02:38.0065823Z   git switch -c <new-branch-name>
+2026-11-27T18:02:38.0065956Z 
+2026-11-27T18:02:38.0066037Z Or undo this operation with:
+2026-11-27T18:02:38.0066162Z 
+2026-11-27T18:02:38.0066227Z   git switch -
+2026-11-27T18:02:38.0066449Z 
+2026-11-27T18:02:38.0066616Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-11-27T18:02:38.0066844Z 
+2026-11-27T18:02:38.0067097Z HEAD is now at 15263ad4 Exercise quota recovery, stale timed-out rooms, abandoned setup and immutable match history
+2026-11-27T18:02:38.0201681Z ##[endgroup]
+2026-11-27T18:02:38.0246769Z [command]/usr/bin/git log -1 --format=%H
+2026-11-27T18:02:38.0270099Z 15263ad49f66537ff4c9a33db7d094a7801f06aa
+2026-11-27T18:02:38.0279361Z ##[group]Removing auth
+2026-11-27T18:02:38.0282995Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-27T18:02:38.0311615Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-27T18:02:38.0565353Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-27T18:02:38.0585892Z http.https://github.com/.extraheader
+2026-11-27T18:02:38.0592695Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-11-27T18:02:38.0621154Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-27T18:02:38.0898601Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-27T18:02:38.0927824Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-27T18:02:38.1178113Z ##[endgroup]
+2026-11-27T18:02:38.1355358Z ##[group]Run test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+2026-11-27T18:02:38.1355733Z [36;1mtest "$(git rev-parse HEAD)" = "$EXPECTED_SHA"[0m
+2026-11-27T18:02:38.1388588Z shell: /usr/bin/bash -e {0}
+2026-11-27T18:02:38.1388805Z env:
+2026-11-27T18:02:38.1389365Z   ACCOUNT420_TEST_DSN: ***127.0.0.1:5432/account420_test?sslmode=disable
+2026-11-27T18:02:38.1411405Z   EXPECTED_SHA: 15263ad49f66537ff4c9a33db7d094a7801f06aa
+2026-11-27T18:02:38.1411680Z ##[endgroup]
+2026-11-27T18:02:38.1569844Z ##[group]Run actions/setup-go@v5
+2026-11-27T18:02:38.1570065Z with:
+2026-11-27T18:02:38.1570237Z   go-version-file: go.mod
+2026-11-27T18:02:38.1570436Z   check-latest: false
+2026-11-27T18:02:38.1572885Z   token: ***
+2026-11-27T18:02:38.1573047Z   cache: true
+2026-11-27T18:02:38.1573207Z env:
+2026-11-27T18:02:38.1573621Z   ACCOUNT420_TEST_DSN: ***127.0.0.1:5432/account420_test?sslmode=disable
+2026-11-27T18:02:38.1573913Z ##[endgroup]
+2026-11-27T18:02:38.2653107Z Setup go version spec 1.23
+2026-11-27T18:02:38.2824037Z Attempting to download 1.23...
+2026-11-27T18:02:38.2952118Z (node:2752) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-27T18:02:38.2952677Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-27T18:02:38.8131141Z matching 1.23...
+2026-11-27T18:02:38.8159687Z Acquiring 1.23.12 from https://github.com/actions/go-versions/releases/download/1.23.12-16792118003/go-1.23.12-linux-x64.tar.gz
+2026-11-27T18:02:39.3780316Z Extracting Go...
+2026-11-27T18:02:39.3880375Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/b2cda87e-e59c-46fd-a1ff-6f13c601bc9e -f /home/runner/work/_temp/6f9f68c8-c51f-476f-a89e-1d8f2f7f0ee8
+2026-11-27T18:02:40.5071573Z Successfully extracted go to /home/runner/work/_temp/b2cda87e-e59c-46fd-a1ff-6f13c601bc9e
+2026-11-27T18:02:40.5072237Z Adding to the cache ...
+2026-11-27T18:02:45.3488431Z Successfully cached go to /opt/hostedtoolcache/go/1.23.12/x64
+2026-11-27T18:02:45.3490358Z Added go to the path
+2026-11-27T18:02:45.3492827Z Successfully set up Go version 1.23
+2026-11-27T18:02:45.3691147Z [command]/opt/hostedtoolcache/go/1.23.12/x64/bin/go env GOMODCACHE
+2026-11-27T18:02:45.3732084Z [command]/opt/hostedtoolcache/go/1.23.12/x64/bin/go env GOCACHE
+2026-11-27T18:02:45.3772913Z /home/runner/go/pkg/mod
+2026-11-27T18:02:45.3788071Z /home/runner/.cache/go-build
+2026-11-27T18:02:45.4693257Z Cache hit for: setup-go-Linux-x64-ubuntu26-go-1.23.12-7dac93c9c517668571e68881346e2a398a899ababebcbbc3ee3e6e630fa6cb81
+2026-11-27T18:02:45.4785339Z (node:2752) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-27T18:02:45.8494652Z Received 51457000 of 51457000 (100.0%), 140.2 MBs/sec
+2026-11-27T18:02:45.8495080Z Cache Size: ~49 MB (51457000 B)
+2026-11-27T18:02:45.8515297Z [command]/usr/bin/tar -xf /home/runner/work/_temp/82bb92c4-b435-4f9b-ad31-d9a48d8181a9/cache.tzst -P -C /home/runner/work/420-integrated-v0.1/420-integrated-v0.1 --use-compress-program unzstd
+2026-11-27T18:02:46.1873027Z Cache restored successfully
+2026-11-27T18:02:46.1900366Z Cache restored from key: setup-go-Linux-x64-ubuntu26-go-1.23.12-7dac93c9c517668571e68881346e2a398a899ababebcbbc3ee3e6e630fa6cb81
+2026-11-27T18:02:46.1924579Z go version go1.23.12 linux/amd64
+2026-11-27T18:02:46.1924809Z 
+2026-11-27T18:02:46.1925171Z ##[group]go env
+2026-11-27T18:02:46.2372255Z GO111MODULE=''
+2026-11-27T18:02:46.2372586Z GOARCH='amd64'
+2026-11-27T18:02:46.2372815Z GOBIN=''
+2026-11-27T18:02:46.2373061Z GOCACHE='/home/runner/.cache/go-build'
+2026-11-27T18:02:46.2373378Z GOENV='/home/runner/.config/go/env'
+2026-11-27T18:02:46.2373666Z GOEXE=''
+2026-11-27T18:02:46.2373905Z GOEXPERIMENT=''
+2026-11-27T18:02:46.2374139Z GOFLAGS=''
+2026-11-27T18:02:46.2374375Z GOHOSTARCH='amd64'
+2026-11-27T18:02:46.2374683Z GOHOSTOS='linux'
+2026-11-27T18:02:46.2374942Z GOINSECURE=''
+2026-11-27T18:02:46.2375209Z GOMODCACHE='/home/runner/go/pkg/mod'
+2026-11-27T18:02:46.2375506Z GONOPROXY=''
+2026-11-27T18:02:46.2375728Z GONOSUMDB=''
+2026-11-27T18:02:46.2375944Z GOOS='linux'
+2026-11-27T18:02:46.2376169Z GOPATH='/home/runner/go'
+2026-11-27T18:02:46.2376420Z GOPRIVATE=''
+2026-11-27T18:02:46.2376707Z GOPROXY='https://proxy.golang.org,direct'
+2026-11-27T18:02:46.2377085Z GOROOT='/opt/hostedtoolcache/go/1.23.12/x64'
+2026-11-27T18:02:46.2377738Z GOSUMDB='sum.golang.org'
+2026-11-27T18:02:46.2378016Z GOTMPDIR=''
+2026-11-27T18:02:46.2378248Z GOTOOLCHAIN='auto'
+2026-11-27T18:02:46.2379238Z GOTOOLDIR='/opt/hostedtoolcache/go/1.23.12/x64/pkg/tool/linux_amd64'
+2026-11-27T18:02:46.2379875Z GOVCS=''
+2026-11-27T18:02:46.2380106Z GOVERSION='go1.23.12'
+2026-11-27T18:02:46.2380363Z GODEBUG=''
+2026-11-27T18:02:46.2380600Z GOTELEMETRY='local'
+2026-11-27T18:02:46.2381060Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+2026-11-27T18:02:46.2381421Z GCCGO='gccgo'
+2026-11-27T18:02:46.2381649Z GOAMD64='v1'
+2026-11-27T18:02:46.2381875Z AR='ar'
+2026-11-27T18:02:46.2382091Z CC='gcc'
+2026-11-27T18:02:46.2382319Z CXX='g++'
+2026-11-27T18:02:46.2382539Z CGO_ENABLED='1'
+2026-11-27T18:02:46.2382930Z GOMOD='/home/runner/work/420-integrated-v0.1/420-integrated-v0.1/go.mod'
+2026-11-27T18:02:46.2383360Z GOWORK=''
+2026-11-27T18:02:46.2383589Z CGO_CFLAGS='-O2 -g'
+2026-11-27T18:02:46.2383843Z CGO_CPPFLAGS=''
+2026-11-27T18:02:46.2384089Z CGO_CXXFLAGS='-O2 -g'
+2026-11-27T18:02:46.2384609Z CGO_FFLAGS='-O2 -g'
+2026-11-27T18:02:46.2384879Z CGO_LDFLAGS='-O2 -g'
+2026-11-27T18:02:46.2385146Z PKG_CONFIG='pkg-config'
+2026-11-27T18:02:46.2385949Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build1885209011=/tmp/go-build -gno-record-gcc-switches'
+2026-11-27T18:02:46.2386900Z 
+2026-11-27T18:02:46.2387264Z ##[endgroup]
+2026-11-27T18:02:46.2801475Z ##[group]Run go test -v -timeout=24m -race -tags account420_integration -count=1 ./services/bong-goggles-account-social ./cmd/bong-goggles-social
+2026-11-27T18:02:46.2802727Z [36;1mgo test -v -timeout=24m -race -tags account420_integration -count=1 ./services/bong-goggles-account-social ./cmd/bong-goggles-social[0m
+2026-11-27T18:02:46.2836605Z shell: /usr/bin/bash -e {0}
+2026-11-27T18:02:46.2836813Z env:
+2026-11-27T18:02:46.2837357Z   ACCOUNT420_TEST_DSN: ***127.0.0.1:5432/account420_test?sslmode=disable
+2026-11-27T18:02:46.2837660Z ##[endgroup]
+2026-11-27T18:10:25.6572436Z === RUN   TestAUTH9EncryptedPrivateMessagingAndAudienceBlocks
+2026-11-27T18:10:25.6573137Z --- PASS: TestAUTH9EncryptedPrivateMessagingAndAudienceBlocks (1.04s)
+2026-11-27T18:10:25.6573809Z === RUN   TestAUTH9GameInvitationsWinnerAndNoFinancialAuthority
+2026-11-27T18:10:25.6574349Z --- PASS: TestAUTH9GameInvitationsWinnerAndNoFinancialAuthority (0.13s)
+2026-11-27T18:10:25.6575069Z === RUN   TestAUTH9ConcurrentMoveReplayAndConnectFour
+2026-11-27T18:10:25.6575571Z --- PASS: TestAUTH9ConcurrentMoveReplayAndConnectFour (0.71s)
+2026-11-27T18:10:25.6576048Z === RUN   TestAUTH9GameExpiryOutsiderAndRevocation
+2026-11-27T18:10:25.6576530Z --- PASS: TestAUTH9GameExpiryOutsiderAndRevocation (0.08s)
+2026-11-27T18:10:25.6577021Z === RUN   TestAUTH9GameBlockChangesDenyInvitesAndMoves
+2026-11-27T18:10:25.6577533Z --- PASS: TestAUTH9GameBlockChangesDenyInvitesAndMoves (0.08s)
+2026-11-27T18:10:25.6578024Z === RUN   TestAccountMessageEncryptionAndValidation
+2026-11-27T18:10:25.6578551Z --- PASS: TestAccountMessageEncryptionAndValidation (0.00s)
+2026-11-27T18:10:25.6579039Z === RUN   TestAccountGameRulesDeterminismAndZeroWager
+2026-11-27T18:10:25.6579518Z --- PASS: TestAccountGameRulesDeterminismAndZeroWager (0.00s)
+2026-11-27T18:10:25.6580034Z === RUN   TestCCCAccountProxyConfigurationAndBodyBinding
+2026-11-27T18:10:25.6580575Z --- PASS: TestCCCAccountProxyConfigurationAndBodyBinding (0.00s)
+2026-11-27T18:10:25.6581297Z === RUN   TestBC08MixedBotSessionSerializesReplaysAndKeepsSecrets
+2026-11-27T18:10:25.6581920Z --- PASS: TestBC08MixedBotSessionSerializesReplaysAndKeepsSecrets (0.28s)
+2026-11-27T18:10:25.6582495Z === RUN   TestBC08RejectMissingPolicyAndExpiredBotTurn
+2026-11-27T18:10:25.6583008Z --- PASS: TestBC08RejectMissingPolicyAndExpiredBotTurn (0.16s)
+2026-11-27T18:10:25.6583513Z === RUN   TestBC08DeterministicBotVersusBotSimulation
+2026-11-27T18:10:25.6583895Z --- PASS: TestBC08DeterministicBotVersusBotSimulation (0.06s)
+2026-11-27T18:10:25.6584486Z === RUN   TestBC08RejectIllegalUnmeteredNondeterministicAndUnboundedBots
+2026-11-27T18:10:25.6584995Z === RUN   TestBC08RejectIllegalUnmeteredNondeterministicAndUnboundedBots/illegal
+2026-11-27T18:10:25.6585471Z === RUN   TestBC08RejectIllegalUnmeteredNondeterministicAndUnboundedBots/unmetered
+2026-11-27T18:10:25.6586306Z === RUN   TestBC08RejectIllegalUnmeteredNondeterministicAndUnboundedBots/over_budget
+2026-11-27T18:10:25.6586944Z === RUN   TestBC08RejectIllegalUnmeteredNondeterministicAndUnboundedBots/nondeterministic
+2026-11-27T18:10:25.6587460Z === RUN   TestBC08RejectIllegalUnmeteredNondeterministicAndUnboundedBots/expired_deadline
+2026-11-27T18:10:25.6588165Z === RUN   TestBC08RejectIllegalUnmeteredNondeterministicAndUnboundedBots/zero_budget
+2026-11-27T18:10:25.6588656Z --- PASS: TestBC08RejectIllegalUnmeteredNondeterministicAndUnboundedBots (0.01s)
+2026-11-27T18:10:25.6589346Z     --- PASS: TestBC08RejectIllegalUnmeteredNondeterministicAndUnboundedBots/illegal (0.00s)
+2026-11-27T18:10:25.6590017Z     --- PASS: TestBC08RejectIllegalUnmeteredNondeterministicAndUnboundedBots/unmetered (0.00s)
+2026-11-27T18:10:25.6590605Z     --- PASS: TestBC08RejectIllegalUnmeteredNondeterministicAndUnboundedBots/over_budget (0.00s)
+2026-11-27T18:10:25.6591571Z     --- PASS: TestBC08RejectIllegalUnmeteredNondeterministicAndUnboundedBots/nondeterministic (0.00s)
+2026-11-27T18:10:25.6592210Z     --- PASS: TestBC08RejectIllegalUnmeteredNondeterministicAndUnboundedBots/expired_deadline (0.00s)
+2026-11-27T18:10:25.6593466Z     --- PASS: TestBC08RejectIllegalUnmeteredNondeterministicAndUnboundedBots/zero_budget (0.00s)
+2026-11-27T18:10:25.6594020Z === RUN   TestBC08BotSeatsMustUseValidControlAndDifficulty
+2026-11-27T18:10:25.6594502Z --- PASS: TestBC08BotSeatsMustUseValidControlAndDifficulty (0.00s)
+2026-11-27T18:10:25.6594817Z === RUN   TestBC322DeadAndMatePrecedence
+2026-11-27T18:10:25.6595071Z --- PASS: TestBC322DeadAndMatePrecedence (0.00s)
+2026-11-27T18:10:25.6595335Z === RUN   TestBC322MaterialPolicy
+2026-11-27T18:10:25.6595709Z --- PASS: TestBC322MaterialPolicy (0.00s)
+2026-11-27T18:10:25.6595985Z === RUN   TestBC322RepetitionClaims
+2026-11-27T18:10:25.6596219Z --- PASS: TestBC322RepetitionClaims (0.26s)
+2026-11-27T18:10:25.6596455Z === RUN   TestBC322FlagAuthority
+2026-11-27T18:10:25.6596686Z --- PASS: TestBC322FlagAuthority (0.01s)
+2026-11-27T18:10:25.6597001Z === RUN   TestBC322BareKingFlagDrawAndResignationWin
+2026-11-27T18:10:25.6597492Z --- PASS: TestBC322BareKingFlagDrawAndResignationWin (0.03s)
+2026-11-27T18:10:25.6597799Z === RUN   TestBC37ConcurrentCompleteChess
+2026-11-27T18:10:25.6598066Z --- PASS: TestBC37ConcurrentCompleteChess (1.35s)
+2026-11-27T18:10:25.6598339Z === RUN   TestBC37ChessPolicyAdversarialPlayout
+2026-11-27T18:10:25.6598724Z === RUN   TestBC37ChessPolicyAdversarialPlayout/easy
+2026-11-27T18:10:25.6599174Z === RUN   TestBC37ChessPolicyAdversarialPlayout/medium
+2026-11-27T18:10:25.6599467Z === RUN   TestBC37ChessPolicyAdversarialPlayout/hard
+2026-11-27T18:10:25.6599749Z --- PASS: TestBC37ChessPolicyAdversarialPlayout (6.88s)
+2026-11-27T18:10:25.6600148Z     --- PASS: TestBC37ChessPolicyAdversarialPlayout/easy (1.64s)
+2026-11-27T18:10:25.6600690Z     --- PASS: TestBC37ChessPolicyAdversarialPlayout/medium (1.73s)
+2026-11-27T18:10:25.6601294Z     --- PASS: TestBC37ChessPolicyAdversarialPlayout/hard (3.51s)
+2026-11-27T18:10:25.6601597Z === RUN   TestBC37ChessCompleteAI
+2026-11-27T18:10:25.6601960Z === RUN   TestBC37ChessCompleteAI/medium
+2026-11-27T18:10:25.6602329Z === RUN   TestBC37ChessCompleteAI/hard
+2026-11-27T18:10:25.6602576Z --- PASS: TestBC37ChessCompleteAI (0.12s)
+2026-11-27T18:10:25.6602863Z     --- PASS: TestBC37ChessCompleteAI/medium (0.06s)
+2026-11-27T18:10:25.6603158Z     --- PASS: TestBC37ChessCompleteAI/hard (0.06s)
+2026-11-27T18:10:25.6603414Z === RUN   TestBC33PostgresHumanBotRecovery
+2026-11-27T18:10:25.6603861Z === RUN   TestBC33PostgresHumanBotRecovery/easy
+2026-11-27T18:10:25.6604279Z === RUN   TestBC33PostgresHumanBotRecovery/medium
+2026-11-27T18:10:25.6604597Z === RUN   TestBC33PostgresHumanBotRecovery/hard
+2026-11-27T18:10:25.6604871Z --- PASS: TestBC33PostgresHumanBotRecovery (1.58s)
+2026-11-27T18:10:25.6605226Z     --- PASS: TestBC33PostgresHumanBotRecovery/easy (0.44s)
+2026-11-27T18:10:25.6605577Z     --- PASS: TestBC33PostgresHumanBotRecovery/medium (0.54s)
+2026-11-27T18:10:25.6605914Z     --- PASS: TestBC33PostgresHumanBotRecovery/hard (0.60s)
+2026-11-27T18:10:25.6606346Z === RUN   TestBC33ChessPolicies
+2026-11-27T18:10:25.6606648Z --- PASS: TestBC33ChessPolicies (0.28s)
+2026-11-27T18:10:25.6606876Z === RUN   TestBC33ChessMate
+2026-11-27T18:10:25.6607075Z --- PASS: TestBC33ChessMate (0.08s)
+2026-11-27T18:10:25.6607299Z === RUN   TestBC33ChessReplay
+2026-11-27T18:10:25.6607676Z --- PASS: TestBC33ChessReplay (0.74s)
+2026-11-27T18:10:25.6608017Z === RUN   TestBC33ComparativeStrength
+2026-11-27T18:10:25.6608611Z     classic_chess_bots_test.go:85: opening suite reference scores: map[easy:84 hard:855 medium:338]
+2026-11-27T18:10:25.6609011Z --- PASS: TestBC33ComparativeStrength (1.29s)
+2026-11-27T18:10:25.6609342Z === RUN   TestBC33DeadlineAndDeterministicBudget
+2026-11-27T18:10:25.6609793Z --- PASS: TestBC33DeadlineAndDeterministicBudget (0.25s)
+2026-11-27T18:10:25.6610225Z === RUN   TestBC33LegalExistenceMatchesFullGenerator
+2026-11-27T18:10:25.6610543Z --- PASS: TestBC33LegalExistenceMatchesFullGenerator (0.01s)
+2026-11-27T18:10:25.6610821Z === RUN   TestBC32ChessCapacity
+2026-11-27T18:10:25.6611708Z --- PASS: TestBC32ChessCapacity (0.00s)
+2026-11-27T18:10:25.6612232Z === RUN   TestBC32ChessNonTurnWhitelist
+2026-11-27T18:10:25.6612494Z --- PASS: TestBC32ChessNonTurnWhitelist (0.00s)
+2026-11-27T18:10:25.6612754Z === RUN   TestBC32ChessRepetitionAndScores
+2026-11-27T18:10:25.6613119Z --- PASS: TestBC32ChessRepetitionAndScores (0.02s)
+2026-11-27T18:10:25.6613511Z === RUN   TestBC32ChessClockBoundary
+2026-11-27T18:10:25.6613865Z --- PASS: TestBC32ChessClockBoundary (0.00s)
+2026-11-27T18:10:25.6614112Z === RUN   TestBC32TimedBoundaryAndReplay
+2026-11-27T18:10:25.6614360Z --- PASS: TestBC32TimedBoundaryAndReplay (0.05s)
+2026-11-27T18:10:25.6614611Z === RUN   TestBC32QueensGambitResignation
+2026-11-27T18:10:25.6614916Z --- PASS: TestBC32QueensGambitResignation (0.16s)
+2026-11-27T18:10:25.6615333Z === RUN   TestBC36ChessHistoryProfileStatistics
+2026-11-27T18:10:25.6615635Z --- PASS: TestBC36ChessHistoryProfileStatistics (0.77s)
+2026-11-27T18:10:25.6615900Z === RUN   TestBC35ChessConsentLifecycle
+2026-11-27T18:10:25.6616156Z --- PASS: TestBC35ChessConsentLifecycle (0.70s)
+2026-11-27T18:10:25.6616426Z === RUN   TestBC32FEN
+2026-11-27T18:10:25.6616704Z --- PASS: TestBC32FEN (0.00s)
+2026-11-27T18:10:25.6617083Z === RUN   TestBC32PGN
+2026-11-27T18:10:25.6617355Z --- PASS: TestBC32PGN (0.14s)
+2026-11-27T18:10:25.6617740Z === RUN   TestBC32ReferencePerft
+2026-11-27T18:10:25.6618213Z --- PASS: TestBC32ReferencePerft (0.32s)
+2026-11-27T18:10:25.6618627Z === RUN   TestBC32OpeningPrefixResignation
+2026-11-27T18:10:25.6619062Z --- PASS: TestBC32OpeningPrefixResignation (0.04s)
+2026-11-27T18:10:25.6619410Z === RUN   TestBC32SicilianResignation
+2026-11-27T18:10:25.6619924Z --- PASS: TestBC32SicilianResignation (0.04s)
+2026-11-27T18:10:25.6620335Z === RUN   TestBC321ChessAdapter
+2026-11-27T18:10:25.6620658Z --- PASS: TestBC321ChessAdapter (0.03s)
+2026-11-27T18:10:25.6621200Z === RUN   TestBC321ChessReplayAndTerminal
+2026-11-27T18:10:25.6636086Z --- PASS: TestBC321ChessReplayAndTerminal (0.13s)
+2026-11-27T18:10:25.6636398Z === RUN   TestBC321ChessNonTurnLifecycle
+2026-11-27T18:10:25.6636684Z --- PASS: TestBC321ChessNonTurnLifecycle (0.05s)
+2026-11-27T18:10:25.6637085Z === RUN   TestBC321ChessPerft
+2026-11-27T18:10:25.6637461Z --- PASS: TestBC321ChessPerft (0.43s)
+2026-11-27T18:10:25.6637813Z === RUN   TestBC32UntimedChessSession
+2026-11-27T18:10:25.6638119Z --- PASS: TestBC32UntimedChessSession (0.38s)
+2026-11-27T18:10:25.6638372Z === RUN   TestBC32TimedChessSession
+2026-11-27T18:10:25.6638613Z --- PASS: TestBC32TimedChessSession (0.37s)
+2026-11-27T18:10:25.6638870Z === RUN   TestBC34ChessHumanActionsAndRecovery
+2026-11-27T18:10:25.6639213Z --- PASS: TestBC34ChessHumanActionsAndRecovery (0.88s)
+2026-11-27T18:10:25.6639725Z === RUN   TestBC10ParticipantPresenceLeaseMultiDeviceRestartAndBlock
+2026-11-27T18:10:25.6640182Z --- PASS: TestBC10ParticipantPresenceLeaseMultiDeviceRestartAndBlock (0.13s)
+2026-11-27T18:10:25.6640585Z === RUN   TestBC10DurableEventResumeTurnAndCursorConflict
+2026-11-27T18:10:25.6641123Z --- PASS: TestBC10DurableEventResumeTurnAndCursorConflict (0.09s)
+2026-11-27T18:10:25.6641498Z === RUN   TestBC13AllThreeStrategiesChooseOnlyHumanLegalMoves
+2026-11-27T18:10:25.6642341Z     classic_cribbage_bots_test.go:56: independent policy choices across deals: easy/medium 102, medium/hard 48, easy/hard 97
+2026-11-27T18:10:25.6642868Z --- PASS: TestBC13AllThreeStrategiesChooseOnlyHumanLegalMoves (6.93s)
+2026-11-27T18:10:25.6643339Z === RUN   TestBC13PrivateViewOnlyAndHostileInputRejection
+2026-11-27T18:10:25.6643805Z --- PASS: TestBC13PrivateViewOnlyAndHostileInputRejection (0.05s)
+2026-11-27T18:10:25.6644121Z === RUN   TestBC13MediumPrefersKnownPeggingPoints
+2026-11-27T18:10:25.6644424Z --- PASS: TestBC13MediumPrefersKnownPeggingPoints (0.00s)
+2026-11-27T18:10:25.6644811Z === RUN   TestBC13MixedSeatSetupsAndFullBotMatches
+2026-11-27T18:10:25.6645464Z     classic_cribbage_bots_test.go:152: 2-seat bot match: actions=98, winner=1, scores=[60 127]
+2026-11-27T18:10:25.6646012Z     classic_cribbage_bots_test.go:152: 3-seat bot match: actions=199, winner=2, scores=[83 120 122]
+2026-11-27T18:10:25.6647164Z     classic_cribbage_bots_test.go:152: 4-seat bot match: actions=190, winner=3, scores=[115 124 115 124]
+2026-11-27T18:10:25.6647614Z --- PASS: TestBC13MixedSeatSetupsAndFullBotMatches (22.65s)
+2026-11-27T18:10:25.6647956Z === RUN   TestBC13HumanSeatVersusComputerOpponentsToVictory
+2026-11-27T18:10:25.6648561Z     classic_cribbage_bots_test.go:185: mixed human/bot 2-seat match: 156 accepted actions, winner=1
+2026-11-27T18:10:25.6649203Z     classic_cribbage_bots_test.go:185: mixed human/bot 3-seat match: 208 accepted actions, winner=2
+2026-11-27T18:10:25.6649738Z     classic_cribbage_bots_test.go:185: mixed human/bot 4-seat match: 167 accepted actions, winner=2
+2026-11-27T18:10:25.6650293Z --- PASS: TestBC13HumanSeatVersusComputerOpponentsToVictory (18.12s)
+2026-11-27T18:10:25.6650716Z === RUN   TestBC14AwardCarriesOriginalPeggingCount
+2026-11-27T18:10:25.6651165Z --- PASS: TestBC14AwardCarriesOriginalPeggingCount (0.00s)
+2026-11-27T18:10:25.6651456Z === RUN   TestBC12ManifestLockAndVariants
+2026-11-27T18:10:25.6651813Z --- PASS: TestBC12ManifestLockAndVariants (0.02s)
+2026-11-27T18:10:25.6652193Z === RUN   TestBC12HandScoringCanonicalFixtures
+2026-11-27T18:10:25.6652478Z === RUN   TestBC12HandScoringCanonicalFixtures/perfect29
+2026-11-27T18:10:25.6652778Z === RUN   TestBC12HandScoringCanonicalFixtures/double-run
+2026-11-27T18:10:25.6653092Z === RUN   TestBC12HandScoringCanonicalFixtures/double-double
+2026-11-27T18:10:25.6653503Z === RUN   TestBC12HandScoringCanonicalFixtures/zero
+2026-11-27T18:10:25.6653890Z === RUN   TestBC12HandScoringCanonicalFixtures/hand-four-flush
+2026-11-27T18:10:25.6654236Z === RUN   TestBC12HandScoringCanonicalFixtures/crib-four-flush-zero
+2026-11-27T18:10:25.6654578Z === RUN   TestBC12HandScoringCanonicalFixtures/crib-five-flush
+2026-11-27T18:10:25.6654925Z === RUN   TestBC12HandScoringCanonicalFixtures/nobs
+2026-11-27T18:10:25.6655345Z --- PASS: TestBC12HandScoringCanonicalFixtures (0.07s)
+2026-11-27T18:10:25.6655721Z     --- PASS: TestBC12HandScoringCanonicalFixtures/perfect29 (0.00s)
+2026-11-27T18:10:25.6656131Z     --- PASS: TestBC12HandScoringCanonicalFixtures/double-run (0.00s)
+2026-11-27T18:10:25.6656615Z     --- PASS: TestBC12HandScoringCanonicalFixtures/double-double (0.00s)
+2026-11-27T18:10:25.6657240Z     --- PASS: TestBC12HandScoringCanonicalFixtures/zero (0.00s)
+2026-11-27T18:10:25.6657685Z     --- PASS: TestBC12HandScoringCanonicalFixtures/hand-four-flush (0.00s)
+2026-11-27T18:10:25.6658139Z     --- PASS: TestBC12HandScoringCanonicalFixtures/crib-four-flush-zero (0.00s)
+2026-11-27T18:10:25.6658685Z     --- PASS: TestBC12HandScoringCanonicalFixtures/crib-five-flush (0.00s)
+2026-11-27T18:10:25.6659308Z     --- PASS: TestBC12HandScoringCanonicalFixtures/nobs (0.00s)
+2026-11-27T18:10:25.6659651Z === RUN   TestBC12PeggingRules
+2026-11-27T18:10:25.6659870Z --- PASS: TestBC12PeggingRules (0.00s)
+2026-11-27T18:10:25.6660136Z === RUN   TestBC12PrivateProjectionAndIllegalCommands
+2026-11-27T18:10:25.6660454Z --- PASS: TestBC12PrivateProjectionAndIllegalCommands (0.02s)
+2026-11-27T18:10:25.6660779Z === RUN   TestBC12DeterministicFullMatchesAndReplay
+2026-11-27T18:10:25.6661397Z === RUN   TestBC12DeterministicFullMatchesAndReplay/2-seats
+2026-11-27T18:10:25.6661991Z     classic_cribbage_test.go:134: qualified full match count=2 steps=154 rounds=12 winner=1 scores=[118 123]
+2026-11-27T18:10:25.6662416Z === RUN   TestBC12DeterministicFullMatchesAndReplay/3-seats
+2026-11-27T18:10:25.6663133Z     classic_cribbage_test.go:134: qualified full match count=3 steps=275 rounds=14 winner=2 scores=[108 109 126]
+2026-11-27T18:10:25.6663551Z === RUN   TestBC12DeterministicFullMatchesAndReplay/4-seats
+2026-11-27T18:10:25.6664051Z     classic_cribbage_test.go:134: qualified full match count=4 steps=218 rounds=8 winner=3 scores=[93 121 93 121]
+2026-11-27T18:10:25.6664699Z --- PASS: TestBC12DeterministicFullMatchesAndReplay (20.06s)
+2026-11-27T18:10:25.6665195Z     --- PASS: TestBC12DeterministicFullMatchesAndReplay/2-seats (4.11s)
+2026-11-27T18:10:25.6665845Z     --- PASS: TestBC12DeterministicFullMatchesAndReplay/3-seats (8.50s)
+2026-11-27T18:10:25.6666423Z     --- PASS: TestBC12DeterministicFullMatchesAndReplay/4-seats (7.45s)
+2026-11-27T18:10:25.6666818Z === RUN   TestBC12ImmediateWinFromHeelsAndThirtyOne
+2026-11-27T18:10:25.6667118Z --- PASS: TestBC12ImmediateWinFromHeelsAndThirtyOne (0.39s)
+2026-11-27T18:10:25.6667397Z === RUN   TestBC12RoomSeatTeamsEnforced
+2026-11-27T18:10:25.6667647Z --- PASS: TestBC12RoomSeatTeamsEnforced (0.01s)
+2026-11-27T18:10:25.6667909Z === RUN   TestBC12BoundedLongMatchReplayCapacity
+2026-11-27T18:10:25.6668356Z --- PASS: TestBC12BoundedLongMatchReplayCapacity (0.00s)
+2026-11-27T18:10:25.6668772Z === RUN   TestBC18CribbageInitialLiveProjectionUsesEmptyJSONArrays
+2026-11-27T18:10:25.6669186Z --- PASS: TestBC18CribbageInitialLiveProjectionUsesEmptyJSONArrays (0.03s)
+2026-11-27T18:10:25.6669613Z === RUN   TestBC11RejectAccountImpersonationReplayIllegalScoringAndWager
+2026-11-27T18:10:25.6670269Z --- PASS: TestBC11RejectAccountImpersonationReplayIllegalScoringAndWager (0.19s)
+2026-11-27T18:10:25.6670756Z === RUN   TestBC11CorruptPublicJournalFailsClosedAndRecoversAfterRestore
+2026-11-27T18:10:25.6671475Z --- PASS: TestBC11CorruptPublicJournalFailsClosedAndRecoversAfterRestore (0.17s)
+2026-11-27T18:10:25.6672096Z === RUN   TestBC11RuleCallbacksCannotMutateSavedStateOrUnauthorizedScore
+2026-11-27T18:10:25.6672543Z --- PASS: TestBC11RuleCallbacksCannotMutateSavedStateOrUnauthorizedScore (0.01s)
+2026-11-27T18:10:25.6673039Z === RUN   TestBC11FailClosedSeedDisclosureAndNonDeterministicView
+2026-11-27T18:10:25.6673545Z --- PASS: TestBC11FailClosedSeedDisclosureAndNonDeterministicView (0.00s)
+2026-11-27T18:10:25.6673940Z === RUN   TestBC11PublicEventOnlyAcceptsServerLifecycleMetadata
+2026-11-27T18:10:25.6674331Z --- PASS: TestBC11PublicEventOnlyAcceptsServerLifecycleMetadata (0.00s)
+2026-11-27T18:10:25.6674784Z === RUN   TestBC23SignedHumanAndOperatorBotTurnsAcrossAllFormats
+2026-11-27T18:10:25.6675357Z === RUN   TestBC23SignedHumanAndOperatorBotTurnsAcrossAllFormats/labyrinth-2p
+2026-11-27T18:10:25.6675807Z === RUN   TestBC23SignedHumanAndOperatorBotTurnsAcrossAllFormats/labyrinth-3p
+2026-11-27T18:10:25.6676298Z === RUN   TestBC23SignedHumanAndOperatorBotTurnsAcrossAllFormats/labyrinth-4p-partners
+2026-11-27T18:10:25.6676947Z === RUN   TestBC23SignedHumanAndOperatorBotTurnsAcrossAllFormats/labyrinth-4p-individual
+2026-11-27T18:10:25.6677409Z --- PASS: TestBC23SignedHumanAndOperatorBotTurnsAcrossAllFormats (15.30s)
+2026-11-27T18:10:25.6678035Z     --- PASS: TestBC23SignedHumanAndOperatorBotTurnsAcrossAllFormats/labyrinth-2p (3.69s)
+2026-11-27T18:10:25.6678659Z     --- PASS: TestBC23SignedHumanAndOperatorBotTurnsAcrossAllFormats/labyrinth-3p (3.89s)
+2026-11-27T18:10:25.6679230Z     --- PASS: TestBC23SignedHumanAndOperatorBotTurnsAcrossAllFormats/labyrinth-4p-partners (3.74s)
+2026-11-27T18:10:25.6680211Z     --- PASS: TestBC23SignedHumanAndOperatorBotTurnsAcrossAllFormats/labyrinth-4p-individual (3.99s)
+2026-11-27T18:10:25.6680691Z === RUN   TestBC23FastShowMatchesAuthoritativeSevenCardScoring
+2026-11-27T18:10:25.6681252Z --- PASS: TestBC23FastShowMatchesAuthoritativeSevenCardScoring (0.13s)
+2026-11-27T18:10:25.6681860Z === RUN   TestBC23StrategiesAllVariantsDeterministicLegalAndDistinct
+2026-11-27T18:10:25.6682293Z === RUN   TestBC23StrategiesAllVariantsDeterministicLegalAndDistinct/labyrinth-2p
+2026-11-27T18:10:25.6682745Z === RUN   TestBC23StrategiesAllVariantsDeterministicLegalAndDistinct/labyrinth-3p
+2026-11-27T18:10:25.6683355Z === RUN   TestBC23StrategiesAllVariantsDeterministicLegalAndDistinct/labyrinth-4p-partners
+2026-11-27T18:10:25.6683944Z === RUN   TestBC23StrategiesAllVariantsDeterministicLegalAndDistinct/labyrinth-4p-individual
+2026-11-27T18:10:25.6684401Z === NAME  TestBC23StrategiesAllVariantsDeterministicLegalAndDistinct
+2026-11-27T18:10:25.6685231Z     classic_labyrinth_bots_test.go:85: difficulty disagreement across 56 deals: easy/medium=49 medium/hard=25 easy/hard=48
+2026-11-27T18:10:25.6685775Z --- PASS: TestBC23StrategiesAllVariantsDeterministicLegalAndDistinct (5.31s)
+2026-11-27T18:10:25.6686794Z     --- PASS: TestBC23StrategiesAllVariantsDeterministicLegalAndDistinct/labyrinth-2p (2.32s)
+2026-11-27T18:10:25.6687397Z     --- PASS: TestBC23StrategiesAllVariantsDeterministicLegalAndDistinct/labyrinth-3p (1.23s)
+2026-11-27T18:10:25.6688135Z     --- PASS: TestBC23StrategiesAllVariantsDeterministicLegalAndDistinct/labyrinth-4p-partners (0.88s)
+2026-11-27T18:10:25.6688874Z     --- PASS: TestBC23StrategiesAllVariantsDeterministicLegalAndDistinct/labyrinth-4p-individual (0.88s)
+2026-11-27T18:10:25.6689344Z === RUN   TestBC23RejectHiddenAndForgedViewsActionsAndBudget
+2026-11-27T18:10:25.6689858Z --- PASS: TestBC23RejectHiddenAndForgedViewsActionsAndBudget (0.10s)
+2026-11-27T18:10:25.6690270Z === RUN   TestBC23MediumHardTakeCertainFifteenAndImmediate325
+2026-11-27T18:10:25.6690637Z --- PASS: TestBC23MediumHardTakeCertainFifteenAndImmediate325 (0.00s)
+2026-11-27T18:10:25.6691218Z === RUN   TestBC23FullBotAndMixedHumanMatchesEveryFormat
+2026-11-27T18:10:25.6691780Z === RUN   TestBC23FullBotAndMixedHumanMatchesEveryFormat/labyrinth-2p
+2026-11-27T18:10:25.6692370Z     classic_labyrinth_bots_test.go:211: labyrinth-2p human=false, moves=136, winner=1, scores=[171 351]
+2026-11-27T18:10:25.6692947Z     classic_labyrinth_bots_test.go:211: labyrinth-2p human=true, moves=132, winner=1, scores=[159 337]
+2026-11-27T18:10:25.6693570Z === RUN   TestBC23FullBotAndMixedHumanMatchesEveryFormat/labyrinth-3p
+2026-11-27T18:10:25.6694129Z     classic_labyrinth_bots_test.go:211: labyrinth-3p human=false, moves=306, winner=0, scores=[334 225 278]
+2026-11-27T18:10:25.6694700Z     classic_labyrinth_bots_test.go:211: labyrinth-3p human=true, moves=318, winner=2, scores=[225 221 343]
+2026-11-27T18:10:25.6695380Z === RUN   TestBC23FullBotAndMixedHumanMatchesEveryFormat/labyrinth-4p-partners
+2026-11-27T18:10:25.6695989Z     classic_labyrinth_bots_test.go:211: labyrinth-4p-partners human=false, moves=263, winner=0, scores=[337 268 337 268]
+2026-11-27T18:10:25.6696933Z     classic_labyrinth_bots_test.go:211: labyrinth-4p-partners human=true, moves=303, winner=2, scores=[348 294 348 294]
+2026-11-27T18:10:25.6697759Z === RUN   TestBC23FullBotAndMixedHumanMatchesEveryFormat/labyrinth-4p-individual
+2026-11-27T18:10:25.6698559Z     classic_labyrinth_bots_test.go:211: labyrinth-4p-individual human=false, moves=486, winner=3, scores=[299 273 204 335]
+2026-11-27T18:10:25.6699235Z     classic_labyrinth_bots_test.go:211: labyrinth-4p-individual human=true, moves=502, winner=3, scores=[257 299 277 347]
+2026-11-27T18:10:25.6699893Z --- PASS: TestBC23FullBotAndMixedHumanMatchesEveryFormat (129.19s)
+2026-11-27T18:10:25.6700423Z     --- PASS: TestBC23FullBotAndMixedHumanMatchesEveryFormat/labyrinth-2p (11.37s)
+2026-11-27T18:10:25.6701050Z     --- PASS: TestBC23FullBotAndMixedHumanMatchesEveryFormat/labyrinth-3p (30.24s)
+2026-11-27T18:10:25.6701863Z     --- PASS: TestBC23FullBotAndMixedHumanMatchesEveryFormat/labyrinth-4p-partners (31.25s)
+2026-11-27T18:10:25.6702591Z     --- PASS: TestBC23FullBotAndMixedHumanMatchesEveryFormat/labyrinth-4p-individual (56.33s)
+2026-11-27T18:10:25.6702996Z === RUN   TestBC23PolicyHasNoOpponentCardKnowledge
+2026-11-27T18:10:25.6703301Z --- PASS: TestBC23PolicyHasNoOpponentCardKnowledge (0.02s)
+2026-11-27T18:10:25.6703655Z === RUN   TestBC27TwoHumanFull325MatchColdRecoveryAndSocialLedger
+2026-11-27T18:10:25.6704470Z     classic_labyrinth_final_integration_test.go:69: BC-2.7 two-human 325-point match completed in 279 moves; scores=[303 325], winner seat=1
+2026-11-27T18:10:25.6705022Z --- PASS: TestBC27TwoHumanFull325MatchColdRecoveryAndSocialLedger (61.90s)
+2026-11-27T18:10:25.6705386Z === RUN   TestBC22RoomFormatPersistsAcrossAPIReads
+2026-11-27T18:10:25.6705692Z --- PASS: TestBC22RoomFormatPersistsAcrossAPIReads (0.08s)
+2026-11-27T18:10:25.6706031Z === RUN   TestBC22AuthenticatedTwoAccountEngineAndColdResume
+2026-11-27T18:10:25.6706390Z --- PASS: TestBC22AuthenticatedTwoAccountEngineAndColdResume (2.58s)
+2026-11-27T18:10:25.6706728Z === RUN   TestBC25LabyrinthHumanInviteResignAndRematch
+2026-11-27T18:10:25.6707301Z --- PASS: TestBC25LabyrinthHumanInviteResignAndRematch (0.60s)
+2026-11-27T18:10:25.6707611Z === RUN   TestBC25LabyrinthTeamMapForRematch
+2026-11-27T18:10:25.6707882Z --- PASS: TestBC25LabyrinthTeamMapForRematch (0.00s)
+2026-11-27T18:10:25.6708236Z === RUN   TestBC25RematchPreservesFourSeatPartnershipAndIndividualFormats
+2026-11-27T18:10:25.6708689Z === RUN   TestBC25RematchPreservesFourSeatPartnershipAndIndividualFormats/partnerships
+2026-11-27T18:10:25.6709183Z === RUN   TestBC25RematchPreservesFourSeatPartnershipAndIndividualFormats/individual
+2026-11-27T18:10:25.6709660Z --- PASS: TestBC25RematchPreservesFourSeatPartnershipAndIndividualFormats (0.55s)
+2026-11-27T18:10:25.6710240Z     --- PASS: TestBC25RematchPreservesFourSeatPartnershipAndIndividualFormats/partnerships (0.27s)
+2026-11-27T18:10:25.6710850Z     --- PASS: TestBC25RematchPreservesFourSeatPartnershipAndIndividualFormats/individual (0.28s)
+2026-11-27T18:10:25.6711500Z === RUN   TestBC26LabyrinthChallengeAndHistoryArePrivateAndGameBound
+2026-11-27T18:10:25.6711926Z --- PASS: TestBC26LabyrinthChallengeAndHistoryArePrivateAndGameBound (0.21s)
+2026-11-27T18:10:25.6712321Z === RUN   TestBC26LabyrinthHistoryStatsIndividualVsPartnership
+2026-11-27T18:10:25.6712704Z === RUN   TestBC26LabyrinthHistoryStatsIndividualVsPartnership/individual
+2026-11-27T18:10:25.6713120Z === RUN   TestBC26LabyrinthHistoryStatsIndividualVsPartnership/partnerships
+2026-11-27T18:10:25.6713522Z --- PASS: TestBC26LabyrinthHistoryStatsIndividualVsPartnership (0.00s)
+2026-11-27T18:10:25.6714002Z     --- PASS: TestBC26LabyrinthHistoryStatsIndividualVsPartnership/individual (0.00s)
+2026-11-27T18:10:25.6714525Z     --- PASS: TestBC26LabyrinthHistoryStatsIndividualVsPartnership/partnerships (0.00s)
+2026-11-27T18:10:25.6714900Z === RUN   TestBC22ManifestAndImmutableRoomVariants
+2026-11-27T18:10:25.6715210Z --- PASS: TestBC22ManifestAndImmutableRoomVariants (0.11s)
+2026-11-27T18:10:25.6715499Z === RUN   TestBC22SevenCardShowFlushRunsAndPegging
+2026-11-27T18:10:25.6715803Z --- PASS: TestBC22SevenCardShowFlushRunsAndPegging (0.00s)
+2026-11-27T18:10:25.6716109Z === RUN   TestBC22DeterministicFullGamesAndSealedReplay
+2026-11-27T18:10:25.6716438Z === RUN   TestBC22DeterministicFullGamesAndSealedReplay/labyrinth-2p
+2026-11-27T18:10:25.6716971Z     classic_labyrinth_test.go:141: qualified labyrinth-2p: rounds=13, moves=233, winner=0, scores=[334 320]
+2026-11-27T18:10:25.6717409Z === RUN   TestBC22DeterministicFullGamesAndSealedReplay/labyrinth-3p
+2026-11-27T18:10:25.6717930Z     classic_labyrinth_test.go:141: qualified labyrinth-3p: rounds=15, moves=414, winner=1, scores=[307 326 277]
+2026-11-27T18:10:25.6718406Z === RUN   TestBC22DeterministicFullGamesAndSealedReplay/labyrinth-4p-partners
+2026-11-27T18:10:25.6719016Z     classic_labyrinth_test.go:141: qualified labyrinth-4p-partners: rounds=9, moves=307, winner=1, scores=[291 326 291 326]
+2026-11-27T18:10:25.6719530Z === RUN   TestBC22DeterministicFullGamesAndSealedReplay/labyrinth-4p-individual
+2026-11-27T18:10:25.6720145Z     classic_labyrinth_test.go:141: qualified labyrinth-4p-individual: rounds=16, moves=629, winner=1, scores=[302 327 260 311]
+2026-11-27T18:10:25.6720635Z --- PASS: TestBC22DeterministicFullGamesAndSealedReplay (60.35s)
+2026-11-27T18:10:25.6721227Z     --- PASS: TestBC22DeterministicFullGamesAndSealedReplay/labyrinth-2p (7.36s)
+2026-11-27T18:10:25.6721707Z     --- PASS: TestBC22DeterministicFullGamesAndSealedReplay/labyrinth-3p (14.74s)
+2026-11-27T18:10:25.6722212Z     --- PASS: TestBC22DeterministicFullGamesAndSealedReplay/labyrinth-4p-partners (12.22s)
+2026-11-27T18:10:25.6722759Z     --- PASS: TestBC22DeterministicFullGamesAndSealedReplay/labyrinth-4p-individual (26.04s)
+2026-11-27T18:10:25.6723134Z === RUN   TestBC22HeelsCanImmediatelyWin325
+2026-11-27T18:10:25.6723397Z --- PASS: TestBC22HeelsCanImmediatelyWin325 (0.24s)
+2026-11-27T18:10:25.6723697Z === RUN   TestBC16AuthenticatedChallengeHistoryAndRematch
+2026-11-27T18:10:25.6724040Z --- PASS: TestBC16AuthenticatedChallengeHistoryAndRematch (0.45s)
+2026-11-27T18:10:25.6724622Z === RUN   TestBC16RematchReusesMixedBotSeatsWithoutConsentBypass
+2026-11-27T18:10:25.6725009Z --- PASS: TestBC16RematchReusesMixedBotSeatsWithoutConsentBypass (0.63s)
+2026-11-27T18:10:25.6725363Z === RUN   TestBC16BotOnlyRematchReadyForAuthorizedHost
+2026-11-27T18:10:25.6725686Z --- PASS: TestBC16BotOnlyRematchReadyForAuthorizedHost (0.37s)
+2026-11-27T18:10:25.6726104Z === RUN   TestBC12TwoIndependent420IDAccountsRestartConcurrentMoveAndTerminalReplay
+2026-11-27T18:10:25.6726620Z --- PASS: TestBC12TwoIndependent420IDAccountsRestartConcurrentMoveAndTerminalReplay (0.55s)
+2026-11-27T18:10:25.6727078Z === RUN   TestBC12DeterministicRulePropertyAndBoundedBotSimulation
+2026-11-27T18:10:25.6727481Z --- PASS: TestBC12DeterministicRulePropertyAndBoundedBotSimulation (2.59s)
+2026-11-27T18:10:25.6727815Z === RUN   TestBC12RuleAndViewFaultBudget
+2026-11-27T18:10:25.6728061Z --- PASS: TestBC12RuleAndViewFaultBudget (0.07s)
+2026-11-27T18:10:25.6728345Z === RUN   TestBC05PrivateFriendsSeatsDeclineAndCancel
+2026-11-27T18:10:25.6728669Z --- PASS: TestBC05PrivateFriendsSeatsDeclineAndCancel (0.14s)
+2026-11-27T18:10:25.6728961Z === RUN   TestBC05PublicJoinTeamsBlocksAndCAS
+2026-11-27T18:10:25.6729237Z --- PASS: TestBC05PublicJoinTeamsBlocksAndCAS (0.09s)
+2026-11-27T18:10:25.6729520Z === RUN   TestBC05ConcurrentSeatAdmissionAndRoomQuota
+2026-11-27T18:10:25.6729822Z --- PASS: TestBC05ConcurrentSeatAdmissionAndRoomQuota (0.13s)
+2026-11-27T18:10:25.6730105Z === RUN   TestBC05RoomSeatLimitsAndTeams
+2026-11-27T18:10:25.6730352Z --- PASS: TestBC05RoomSeatLimitsAndTeams (0.00s)
+2026-11-27T18:10:25.6730662Z === RUN   TestBC07DeterministicVersionedActionsRoundsScoresAndTie
+2026-11-27T18:10:25.6731183Z --- PASS: TestBC07DeterministicVersionedActionsRoundsScoresAndTie (0.03s)
+2026-11-27T18:10:25.6731601Z === RUN   TestBC07RejectMalformedUnknownDuplicateAndTamperedSavedState
+2026-11-27T18:10:25.6732034Z --- PASS: TestBC07RejectMalformedUnknownDuplicateAndTamperedSavedState (0.01s)
+2026-11-27T18:10:25.6732441Z === RUN   TestBC07PrivateViewsRandomReplayTamperingAndBudget
+2026-11-27T18:10:25.6732798Z --- PASS: TestBC07PrivateViewsRandomReplayTamperingAndBudget (0.01s)
+2026-11-27T18:10:25.6733230Z === RUN   TestBC07BotPolicyContractOnlySeesOwnViewAndReturnsLegalAction
+2026-11-27T18:10:25.6733675Z --- PASS: TestBC07BotPolicyContractOnlySeesOwnViewAndReturnsLegalAction (0.00s)
+2026-11-27T18:10:25.6734096Z === RUN   TestBC07DurableSeededReplayPrivateViewsAndSessionResults
+2026-11-27T18:10:25.6734495Z --- PASS: TestBC07DurableSeededReplayPrivateViewsAndSessionResults (0.35s)
+2026-11-27T18:10:25.6734896Z === RUN   TestBC07RejectTamperedSavedStateTranscriptAndRulesHash
+2026-11-27T18:10:25.6735279Z --- PASS: TestBC07RejectTamperedSavedStateTranscriptAndRulesHash (0.16s)
+2026-11-27T18:10:25.6735679Z === RUN   TestBC15VerifiedPrefixDetectsHistoricalTamperAndColdRestart
+2026-11-27T18:10:25.6736091Z --- PASS: TestBC15VerifiedPrefixDetectsHistoricalTamperAndColdRestart (0.39s)
+2026-11-27T18:10:25.6736508Z === RUN   TestBC15VerifiedReplayPrefixIsBoundedCopiedAndMonotone
+2026-11-27T18:10:25.6736894Z --- PASS: TestBC15VerifiedReplayPrefixIsBoundedCopiedAndMonotone (0.00s)
+2026-11-27T18:10:25.6737252Z === RUN   TestBC15VerifiedReplayPrefixConcurrentReaders
+2026-11-27T18:10:25.6737581Z --- PASS: TestBC15VerifiedReplayPrefixConcurrentReaders (0.00s)
+2026-11-27T18:10:25.6737919Z === RUN   TestBC15RuleTraceDigestBindsEveryHistoricalField
+2026-11-27T18:10:25.6738260Z --- PASS: TestBC15RuleTraceDigestBindsEveryHistoricalField (0.00s)
+2026-11-27T18:10:25.6738594Z === RUN   TestBC06SessionMovesReplaysPrivacyAndRestart
+2026-11-27T18:10:25.6738912Z --- PASS: TestBC06SessionMovesReplaysPrivacyAndRestart (0.29s)
+2026-11-27T18:10:25.6739226Z === RUN   TestBC06TimeoutSweepResignationAndBlocks
+2026-11-27T18:10:25.6739522Z --- PASS: TestBC06TimeoutSweepResignationAndBlocks (0.12s)
+2026-11-27T18:10:25.6739846Z === RUN   TestBC06ConcurrentMovesSEEDeliveryAndFailClosedRules
+2026-11-27T18:10:25.6740210Z --- PASS: TestBC06ConcurrentMovesSEEDeliveryAndFailClosedRules (0.37s)
+2026-11-27T18:10:25.6740789Z === RUN   TestBC06ReconcileRoomCapacityPreservesHistory
+2026-11-27T18:10:25.6741245Z --- PASS: TestBC06ReconcileRoomCapacityPreservesHistory (0.42s)
+2026-11-27T18:10:25.6741565Z === RUN   TestBC06RuleEngineIsAlwaysExplicitAndBounded
+2026-11-27T18:10:25.6741890Z --- PASS: TestBC06RuleEngineIsAlwaysExplicitAndBounded (0.00s)
+2026-11-27T18:10:25.6742260Z === RUN   TestBC06PublicEventAndSeatViewNeverIncludeConcealedRulesState
+2026-11-27T18:10:25.6742691Z --- PASS: TestBC06PublicEventAndSeatViewNeverIncludeConcealedRulesState (0.00s)
+2026-11-27T18:10:25.6743113Z === RUN   TestBC06EventCursorCannotSmuggleUnboundedOrNegativeSequence
+2026-11-27T18:10:25.6743535Z --- PASS: TestBC06EventCursorCannotSmuggleUnboundedOrNegativeSequence (0.00s)
+2026-11-27T18:10:25.6743875Z === RUN   TestBC42WordSaladBotPostgres
+2026-11-27T18:10:25.6744109Z === RUN   TestBC42WordSaladBotPostgres/easy
+2026-11-27T18:10:25.6744357Z === RUN   TestBC42WordSaladBotPostgres/medium
+2026-11-27T18:10:25.6744618Z === RUN   TestBC42WordSaladBotPostgres/hard
+2026-11-27T18:10:25.6744866Z --- PASS: TestBC42WordSaladBotPostgres (3.16s)
+2026-11-27T18:10:25.6745175Z     --- PASS: TestBC42WordSaladBotPostgres/easy (0.36s)
+2026-11-27T18:10:25.6745497Z     --- PASS: TestBC42WordSaladBotPostgres/medium (0.31s)
+2026-11-27T18:10:25.6745814Z     --- PASS: TestBC42WordSaladBotPostgres/hard (0.33s)
+2026-11-27T18:10:25.6746095Z === RUN   TestBC42WordSaladAlternatingProductionTurns
+2026-11-27T18:10:25.6746395Z === RUN   TestBC42WordSaladAlternatingProductionTurns/easy
+2026-11-27T18:10:25.6746997Z     classic_word_salad_bots_integration_test.go:100: production dictionary: human=25 computer=25 human placements=25 final sequence=51
+2026-11-27T18:10:25.6747506Z === RUN   TestBC42WordSaladAlternatingProductionTurns/medium
+2026-11-27T18:10:25.6748080Z     classic_word_salad_bots_integration_test.go:100: production dictionary: human=25 computer=25 human placements=24 final sequence=51
+2026-11-27T18:10:25.6748554Z === RUN   TestBC42WordSaladAlternatingProductionTurns/hard
+2026-11-27T18:10:25.6749119Z     classic_word_salad_bots_integration_test.go:100: production dictionary: human=25 computer=25 human placements=25 final sequence=51
+2026-11-27T18:10:25.6749615Z --- PASS: TestBC42WordSaladAlternatingProductionTurns (31.98s)
+2026-11-27T18:10:25.6750016Z     --- PASS: TestBC42WordSaladAlternatingProductionTurns/easy (8.93s)
+2026-11-27T18:10:25.6750436Z     --- PASS: TestBC42WordSaladAlternatingProductionTurns/medium (9.98s)
+2026-11-27T18:10:25.6750862Z     --- PASS: TestBC42WordSaladAlternatingProductionTurns/hard (10.96s)
+2026-11-27T18:10:25.6751319Z === RUN   TestWordSaladBotGameplay
+2026-11-27T18:10:25.6751544Z === RUN   TestWordSaladBotGameplay/easy
+2026-11-27T18:10:25.6751779Z === RUN   TestWordSaladBotGameplay/medium
+2026-11-27T18:10:25.6752021Z === RUN   TestWordSaladBotGameplay/hard
+2026-11-27T18:10:25.6752255Z --- PASS: TestWordSaladBotGameplay (7.17s)
+2026-11-27T18:10:25.6752545Z     --- PASS: TestWordSaladBotGameplay/easy (0.85s)
+2026-11-27T18:10:25.6752859Z     --- PASS: TestWordSaladBotGameplay/medium (1.64s)
+2026-11-27T18:10:25.6753162Z     --- PASS: TestWordSaladBotGameplay/hard (2.56s)
+2026-11-27T18:10:25.6753409Z === RUN   TestWordSaladBotDifficulty
+2026-11-27T18:10:25.6753645Z --- PASS: TestWordSaladBotDifficulty (0.00s)
+2026-11-27T18:10:25.6753898Z === RUN   TestWordSaladBotHiddenIndependence
+2026-11-27T18:10:25.6754180Z --- PASS: TestWordSaladBotHiddenIndependence (2.25s)
+2026-11-27T18:10:25.6754471Z === RUN   TestWordSaladBotRejectsUnauthorizedActions
+2026-11-27T18:10:25.6754779Z --- PASS: TestWordSaladBotRejectsUnauthorizedActions (2.17s)
+2026-11-27T18:10:25.6755060Z === RUN   TestWordSaladBlankLockedAndZero
+2026-11-27T18:10:25.6755319Z --- PASS: TestWordSaladBlankLockedAndZero (0.00s)
+2026-11-27T18:10:25.6755589Z === RUN   TestWordSaladBotExpiredSearchFallback
+2026-11-27T18:10:25.6755870Z --- PASS: TestWordSaladBotExpiredSearchFallback (2.15s)
+2026-11-27T18:10:25.6756138Z === RUN   TestBC42WordSaladDurableSession
+2026-11-27T18:10:25.6756603Z --- PASS: TestBC42WordSaladDurableSession (2.05s)
+2026-11-27T18:10:25.6756875Z === RUN   TestBC42WordSaladTimeoutAndNormalFinish
+2026-11-27T18:10:25.6757165Z --- PASS: TestBC42WordSaladTimeoutAndNormalFinish (2.29s)
+2026-11-27T18:10:25.6757433Z === RUN   TestBC42WordSaladPersistedMoves
+2026-11-27T18:10:25.6757683Z --- PASS: TestBC42WordSaladPersistedMoves (3.32s)
+2026-11-27T18:10:25.6757944Z === RUN   TestBC42WordSaladMultiplayerResignation
+2026-11-27T18:10:25.6758224Z --- PASS: TestBC42WordSaladMultiplayerResignation (2.50s)
+2026-11-27T18:10:25.6758491Z === RUN   TestBC42WordSaladBagExhaustion
+2026-11-27T18:10:25.6758748Z --- PASS: TestBC42WordSaladBagExhaustion (9.30s)
+2026-11-27T18:10:25.6758997Z === RUN   TestBC42WordSaladMigration012
+2026-11-27T18:10:25.6759240Z === RUN   TestBC42WordSaladMigration012/fresh
+2026-11-27T18:10:25.6759488Z === RUN   TestBC42WordSaladMigration012/legacy
+2026-11-27T18:10:25.6759744Z --- PASS: TestBC42WordSaladMigration012 (3.97s)
+2026-11-27T18:10:25.6760063Z     --- PASS: TestBC42WordSaladMigration012/fresh (1.97s)
+2026-11-27T18:10:25.6760390Z     --- PASS: TestBC42WordSaladMigration012/legacy (2.00s)
+2026-11-27T18:10:25.6760656Z === RUN   TestWordSaladConfigurationMatrix
+2026-11-27T18:10:25.6761107Z --- PASS: TestWordSaladConfigurationMatrix (2.12s)
+2026-11-27T18:10:25.6761451Z === RUN   TestWordSaladPlacementGeometryAndScoring
+2026-11-27T18:10:25.6761759Z === RUN   TestWordSaladPlacementGeometryAndScoring/opening
+2026-11-27T18:10:25.6762091Z === RUN   TestWordSaladPlacementGeometryAndScoring/opening/centre
+2026-11-27T18:10:25.6762452Z === RUN   TestWordSaladPlacementGeometryAndScoring/opening/off-centre
+2026-11-27T18:10:25.6762820Z === RUN   TestWordSaladPlacementGeometryAndScoring/opening/lone_hybrid
+2026-11-27T18:10:25.6763185Z === RUN   TestWordSaladPlacementGeometryAndScoring/opening/gap
+2026-11-27T18:10:25.6763530Z === RUN   TestWordSaladPlacementGeometryAndScoring/opening/diagonal
+2026-11-27T18:10:25.6763903Z === RUN   TestWordSaladPlacementGeometryAndScoring/connection_and_overlaps
+2026-11-27T18:10:25.6764340Z === RUN   TestWordSaladPlacementGeometryAndScoring/crosswords_and_one-time_centre
+2026-11-27T18:10:25.6764739Z === RUN   TestWordSaladPlacementGeometryAndScoring/hybrids_and_blanks
+2026-11-27T18:10:25.6765102Z === RUN   TestWordSaladPlacementGeometryAndScoring/all_premium_types
+2026-11-27T18:10:25.6765448Z === RUN   TestWordSaladPlacementGeometryAndScoring/full_harvest
+2026-11-27T18:10:25.6765783Z --- PASS: TestWordSaladPlacementGeometryAndScoring (0.00s)
+2026-11-27T18:10:25.6766168Z     --- PASS: TestWordSaladPlacementGeometryAndScoring/opening (0.00s)
+2026-11-27T18:10:25.6766645Z         --- PASS: TestWordSaladPlacementGeometryAndScoring/opening/centre (0.00s)
+2026-11-27T18:10:25.6767166Z         --- PASS: TestWordSaladPlacementGeometryAndScoring/opening/off-centre (0.00s)
+2026-11-27T18:10:25.6767713Z         --- PASS: TestWordSaladPlacementGeometryAndScoring/opening/lone_hybrid (0.00s)
+2026-11-27T18:10:25.6768233Z         --- PASS: TestWordSaladPlacementGeometryAndScoring/opening/gap (0.00s)
+2026-11-27T18:10:25.6768740Z         --- PASS: TestWordSaladPlacementGeometryAndScoring/opening/diagonal (0.00s)
+2026-11-27T18:10:25.6769234Z     --- PASS: TestWordSaladPlacementGeometryAndScoring/connection_and_overlaps (0.00s)
+2026-11-27T18:10:25.6769782Z     --- PASS: TestWordSaladPlacementGeometryAndScoring/crosswords_and_one-time_centre (0.00s)
+2026-11-27T18:10:25.6770298Z     --- PASS: TestWordSaladPlacementGeometryAndScoring/hybrids_and_blanks (0.00s)
+2026-11-27T18:10:25.6770776Z     --- PASS: TestWordSaladPlacementGeometryAndScoring/all_premium_types (0.00s)
+2026-11-27T18:10:25.6771407Z     --- PASS: TestWordSaladPlacementGeometryAndScoring/full_harvest (0.00s)
+2026-11-27T18:10:25.6771763Z === RUN   TestWordSaladExchangeConservationAndStreak
+2026-11-27T18:10:25.6772081Z --- PASS: TestWordSaladExchangeConservationAndStreak (0.04s)
+2026-11-27T18:10:25.6772391Z === RUN   TestWordSaladPartialDrawAndScorelessReset
+2026-11-27T18:10:25.6772828Z --- PASS: TestWordSaladPartialDrawAndScorelessReset (0.03s)
+2026-11-27T18:10:25.6773220Z === RUN   TestWordSaladTiedResultAndForfeit
+2026-11-27T18:10:25.6773482Z --- PASS: TestWordSaladTiedResultAndForfeit (0.02s)
+2026-11-27T18:10:25.6773751Z === RUN   TestBC42WordSaladConcurrentIntegrity
+2026-11-27T18:10:25.6774029Z --- PASS: TestBC42WordSaladConcurrentIntegrity (0.63s)
+2026-11-27T18:10:25.6774329Z === RUN   TestBC42WordSaladJournalRollbackAndCorruption
+2026-11-27T18:10:25.6774648Z --- PASS: TestBC42WordSaladJournalRollbackAndCorruption (0.37s)
+2026-11-27T18:10:25.6774947Z === RUN   TestBC42WordSaladTimeoutRaces
+2026-11-27T18:10:25.6775223Z === RUN   TestBC42WordSaladTimeoutRaces/move/expired=false
+2026-11-27T18:10:25.6775526Z === RUN   TestBC42WordSaladTimeoutRaces/move/expired=true
+2026-11-27T18:10:25.6775831Z === RUN   TestBC42WordSaladTimeoutRaces/resign/expired=false
+2026-11-27T18:10:25.6776128Z === RUN   TestBC42WordSaladTimeoutRaces/resign/expired=true
+2026-11-27T18:10:25.6776411Z --- PASS: TestBC42WordSaladTimeoutRaces (0.73s)
+2026-11-27T18:10:25.6776777Z     --- PASS: TestBC42WordSaladTimeoutRaces/move/expired=false (0.20s)
+2026-11-27T18:10:25.6777174Z     --- PASS: TestBC42WordSaladTimeoutRaces/move/expired=true (0.15s)
+2026-11-27T18:10:25.6777573Z     --- PASS: TestBC42WordSaladTimeoutRaces/resign/expired=false (0.16s)
+2026-11-27T18:10:25.6777982Z     --- PASS: TestBC42WordSaladTimeoutRaces/resign/expired=true (0.13s)
+2026-11-27T18:10:25.6778282Z === RUN   TestWordSaladProfilesAndReplay
+2026-11-27T18:10:25.6778530Z --- PASS: TestWordSaladProfilesAndReplay (0.73s)
+2026-11-27T18:10:25.6778814Z === RUN   TestWordSaladSubmittedPlacement
+2026-11-27T18:10:25.6779065Z --- PASS: TestWordSaladSubmittedPlacement (0.02s)
+2026-11-27T18:10:25.6779338Z === RUN   TestAUTH10AuthenticatedLedgerAndRevocation
+2026-11-27T18:10:25.6779642Z --- PASS: TestAUTH10AuthenticatedLedgerAndRevocation (0.07s)
+2026-11-27T18:10:25.6779957Z === RUN   TestAUTH10ModerationReversalAndNoRestoreFarming
+2026-11-27T18:10:25.6780306Z --- PASS: TestAUTH10ModerationReversalAndNoRestoreFarming (0.25s)
+2026-11-27T18:10:25.6780639Z === RUN   TestAUTH10ConcurrentDailyCapsAndUniqueSource
+2026-11-27T18:10:25.6781095Z --- PASS: TestAUTH10ConcurrentDailyCapsAndUniqueSource (0.36s)
+2026-11-27T18:10:25.6781414Z === RUN   TestAUTH10XPJournalRuntimeOnlySelectInsert
+2026-11-27T18:10:25.6781706Z --- PASS: TestAUTH10XPJournalRuntimeOnlySelectInsert (0.10s)
+2026-11-27T18:10:25.6781991Z === RUN   TestAUTH10BlockedCommentCannotCreateXP
+2026-11-27T18:10:25.6782273Z --- PASS: TestAUTH10BlockedCommentCannotCreateXP (0.13s)
+2026-11-27T18:10:25.6782605Z === RUN   TestAUTH10XPStartupRejectsMissingAndMutablePrivileges
+2026-11-27T18:10:25.6782978Z --- PASS: TestAUTH10XPStartupRejectsMissingAndMutablePrivileges (0.04s)
+2026-11-27T18:10:25.6783308Z === RUN   TestXPPolicyV1BoundedAndNoSelfReplies
+2026-11-27T18:10:25.6783586Z --- PASS: TestXPPolicyV1BoundedAndNoSelfReplies (0.00s)
+2026-11-27T18:10:25.6783928Z === RUN   TestSSORedirectProbesReal420IDReadinessWithoutCredentials
+2026-11-27T18:10:25.6784336Z --- PASS: TestSSORedirectProbesReal420IDReadinessWithoutCredentials (0.00s)
+2026-11-27T18:10:25.6784725Z === RUN   TestSSORedirectReadinessFailsClosedOnSleepingIdentity
+2026-11-27T18:10:25.6785111Z === RUN   TestSSORedirectReadinessFailsClosedOnSleepingIdentity/render_sleeping
+2026-11-27T18:10:25.6785545Z === RUN   TestSSORedirectReadinessFailsClosedOnSleepingIdentity/gateway_bad
+2026-11-27T18:10:25.6785952Z === RUN   TestSSORedirectReadinessFailsClosedOnSleepingIdentity/unavailable
+2026-11-27T18:10:25.6786387Z === RUN   TestSSORedirectReadinessFailsClosedOnSleepingIdentity/unauthorized_redirect
+2026-11-27T18:10:25.6786879Z === RUN   TestSSORedirectReadinessFailsClosedOnSleepingIdentity/HTML_masquerading_as_success
+2026-11-27T18:10:25.6787351Z === RUN   TestSSORedirectReadinessFailsClosedOnSleepingIdentity/wrong_readiness
+2026-11-27T18:10:25.6787782Z === RUN   TestSSORedirectReadinessFailsClosedOnSleepingIdentity/unknown_fields
+2026-11-27T18:10:25.6788326Z === RUN   TestSSORedirectReadinessFailsClosedOnSleepingIdentity/malformed_JSON
+2026-11-27T18:10:25.6788884Z === RUN   TestSSORedirectReadinessFailsClosedOnSleepingIdentity/two_JSON_values
+2026-11-27T18:10:25.6789321Z --- PASS: TestSSORedirectReadinessFailsClosedOnSleepingIdentity (0.00s)
+2026-11-27T18:10:25.6789843Z     --- PASS: TestSSORedirectReadinessFailsClosedOnSleepingIdentity/render_sleeping (0.00s)
+2026-11-27T18:10:25.6790391Z     --- PASS: TestSSORedirectReadinessFailsClosedOnSleepingIdentity/gateway_bad (0.00s)
+2026-11-27T18:10:25.6791076Z     --- PASS: TestSSORedirectReadinessFailsClosedOnSleepingIdentity/unavailable (0.00s)
+2026-11-27T18:10:25.6791655Z     --- PASS: TestSSORedirectReadinessFailsClosedOnSleepingIdentity/unauthorized_redirect (0.00s)
+2026-11-27T18:10:25.6792273Z     --- PASS: TestSSORedirectReadinessFailsClosedOnSleepingIdentity/HTML_masquerading_as_success (0.00s)
+2026-11-27T18:10:25.6792861Z     --- PASS: TestSSORedirectReadinessFailsClosedOnSleepingIdentity/wrong_readiness (0.00s)
+2026-11-27T18:10:25.6793428Z     --- PASS: TestSSORedirectReadinessFailsClosedOnSleepingIdentity/unknown_fields (0.00s)
+2026-11-27T18:10:25.6793967Z     --- PASS: TestSSORedirectReadinessFailsClosedOnSleepingIdentity/malformed_JSON (0.00s)
+2026-11-27T18:10:25.6794505Z     --- PASS: TestSSORedirectReadinessFailsClosedOnSleepingIdentity/two_JSON_values (0.00s)
+2026-11-27T18:10:25.6794933Z === RUN   TestSSORedirectReadinessFailsClosedOnNetworkFailure
+2026-11-27T18:10:25.6795299Z --- PASS: TestSSORedirectReadinessFailsClosedOnNetworkFailure (0.00s)
+2026-11-27T18:10:25.6795685Z === RUN   TestAUTH11PrivateMonetizationStatusRevocationAndModeGate
+2026-11-27T18:10:25.6796079Z --- PASS: TestAUTH11PrivateMonetizationStatusRevocationAndModeGate (0.04s)
+2026-11-27T18:10:25.6796467Z === RUN   TestAUTH11MonetizationBrokerUnavailableFailsClosed
+2026-11-27T18:10:25.6796813Z --- PASS: TestAUTH11MonetizationBrokerUnavailableFailsClosed (0.03s)
+2026-11-27T18:10:25.6797181Z === RUN   TestAUTH12SocialRuntimeRejectsMissingAndForbiddenGrants
+2026-11-27T18:10:25.6797573Z --- PASS: TestAUTH12SocialRuntimeRejectsMissingAndForbiddenGrants (0.10s)
+2026-11-27T18:10:25.6797939Z === RUN   TestAUTH12SSOCallbackBruteForceBoundedBySocketIP
+2026-11-27T18:10:25.6798275Z --- PASS: TestAUTH12SSOCallbackBruteForceBoundedBySocketIP (0.12s)
+2026-11-27T18:10:25.6798621Z === RUN   TestAUTH12RejectsCaseFoldedAndUnicodeSocialJSONKeys
+2026-11-27T18:10:25.6798973Z --- PASS: TestAUTH12RejectsCaseFoldedAndUnicodeSocialJSONKeys (0.00s)
+2026-11-27T18:10:25.6799318Z === RUN   TestAccountSocialWalletIndependentLifecycle
+2026-11-27T18:10:25.6799629Z --- PASS: TestAccountSocialWalletIndependentLifecycle (0.10s)
+2026-11-27T18:10:25.6799924Z === RUN   TestSocialBlockScopeAndBrowserCSRF
+2026-11-27T18:10:25.6800200Z --- PASS: TestSocialBlockScopeAndBrowserCSRF (0.05s)
+2026-11-27T18:10:25.6800512Z === RUN   TestSSOCallbackOneUseAcrossWorkersAndFailureClosed
+2026-11-27T18:10:25.6800866Z --- PASS: TestSSOCallbackOneUseAcrossWorkersAndFailureClosed (0.06s)
+2026-11-27T18:10:25.6801354Z === RUN   TestOffChainModerationAndDistributedRateLimits
+2026-11-27T18:10:25.6801707Z --- PASS: TestOffChainModerationAndDistributedRateLimits (0.04s)
+2026-11-27T18:10:25.6802033Z === RUN   TestReportsRemainPrivateToSocialRuntimeRole
+2026-11-27T18:10:25.6802339Z --- PASS: TestReportsRemainPrivateToSocialRuntimeRole (0.04s)
+2026-11-27T18:10:25.6802655Z === RUN   TestLoginRateLimiterIgnoresEphemeralSourcePort
+2026-11-27T18:10:25.6802985Z --- PASS: TestLoginRateLimiterIgnoresEphemeralSourcePort (0.05s)
+2026-11-27T18:10:25.6803279Z === RUN   TestBC33FixtureRateLimitIsolation
+2026-11-27T18:10:25.6803539Z --- PASS: TestBC33FixtureRateLimitIsolation (0.14s)
+2026-11-27T18:10:25.6803819Z === RUN   TestSocialValidationAndSecureSessionStorage
+2026-11-27T18:10:25.6804130Z --- PASS: TestSocialValidationAndSecureSessionStorage (0.00s)
+2026-11-27T18:10:25.6804423Z === RUN   TestTrustedWorkerIngressIsSecretBound
+2026-11-27T18:10:25.6804703Z --- PASS: TestTrustedWorkerIngressIsSecretBound (0.00s)
+2026-11-27T18:10:25.6804989Z === RUN   TestWordSaladProductionDictionaryIntegrity
+2026-11-27T18:10:25.6805551Z --- PASS: TestWordSaladProductionDictionaryIntegrity (1.66s)
+2026-11-27T18:10:25.6805848Z === RUN   TestWordSaladDictionaryIdentity
+2026-11-27T18:10:25.6806107Z --- PASS: TestWordSaladDictionaryIdentity (0.02s)
+2026-11-27T18:10:25.6806365Z === RUN   TestWordSaladDictionaryModes
+2026-11-27T18:10:25.6806612Z --- PASS: TestWordSaladDictionaryModes (0.00s)
+2026-11-27T18:10:25.6806832Z PASS
+2026-11-27T18:10:25.6807163Z ok  	github.com/420integrated/420-integrated/services/bong-goggles-account-social	454.204s
+2026-11-27T18:10:25.6807603Z === RUN   TestBC33OperatorActivationPreservesCribbageAndFailsClosed
+2026-11-27T18:10:25.6808029Z --- PASS: TestBC33OperatorActivationPreservesCribbageAndFailsClosed (0.00s)
+2026-11-27T18:10:25.6808450Z === RUN   TestBC15CribbageOperatorActivationIsIndependentAndFailClosed
+2026-11-27T18:10:25.6808873Z --- PASS: TestBC15CribbageOperatorActivationIsIndependentAndFailClosed (0.00s)
+2026-11-27T18:10:25.6809292Z === RUN   TestBC25OperatorActivationPreservesCribbageAndFailsClosed
+2026-11-27T18:10:25.6809697Z --- PASS: TestBC25OperatorActivationPreservesCribbageAndFailsClosed (0.00s)
+2026-11-27T18:10:25.6810023Z === RUN   TestPostgresPoolerProtocol
+2026-11-27T18:10:25.6810262Z --- PASS: TestPostgresPoolerProtocol (0.00s)
+2026-11-27T18:10:25.6810511Z === RUN   TestWordSaladRuntimeActivation
+2026-11-27T18:10:25.6810780Z === RUN   TestWordSaladRuntimeActivation/missing_session
+2026-11-27T18:10:25.6811255Z === RUN   TestWordSaladRuntimeActivation/missing_store
+2026-11-27T18:10:25.6811559Z === RUN   TestWordSaladRuntimeActivation/missing_room_service
+2026-11-27T18:10:25.6811859Z === RUN   TestWordSaladRuntimeActivation/room_readiness
+2026-11-27T18:10:25.6812147Z === RUN   TestWordSaladRuntimeActivation/rules_readiness
+2026-11-27T18:10:25.6812456Z === RUN   TestWordSaladRuntimeActivation/communications_readiness
+2026-11-27T18:10:25.6812758Z --- PASS: TestWordSaladRuntimeActivation (4.29s)
+2026-11-27T18:10:25.6813115Z     --- PASS: TestWordSaladRuntimeActivation/missing_session (0.00s)
+2026-11-27T18:10:25.6813511Z     --- PASS: TestWordSaladRuntimeActivation/missing_store (0.00s)
+2026-11-27T18:10:25.6813906Z     --- PASS: TestWordSaladRuntimeActivation/missing_room_service (0.00s)
+2026-11-27T18:10:25.6814302Z     --- PASS: TestWordSaladRuntimeActivation/room_readiness (0.00s)
+2026-11-27T18:10:25.6814676Z     --- PASS: TestWordSaladRuntimeActivation/rules_readiness (0.00s)
+2026-11-27T18:10:25.6815094Z     --- PASS: TestWordSaladRuntimeActivation/communications_readiness (0.00s)
+2026-11-27T18:10:25.6815448Z PASS
+2026-11-27T18:10:25.6815802Z ok  	github.com/420integrated/420-integrated/cmd/bong-goggles-social	5.346s
+2026-11-27T18:10:25.9934011Z ##[group]Run go vet -tags account420_integration ./services/bong-goggles-account-social ./cmd/bong-goggles-social
+2026-11-27T18:10:25.9934671Z [36;1mgo vet -tags account420_integration ./services/bong-goggles-account-social ./cmd/bong-goggles-social[0m
+2026-11-27T18:10:25.9935138Z [36;1mgo build -o /tmp/bonggoggles-social ./cmd/bong-goggles-social[0m
+2026-11-27T18:10:25.9964478Z shell: /usr/bin/bash -e {0}
+2026-11-27T18:10:25.9964697Z env:
+2026-11-27T18:10:25.9965180Z   ACCOUNT420_TEST_DSN: ***127.0.0.1:5432/account420_test?sslmode=disable
+2026-11-27T18:10:25.9965486Z ##[endgroup]
+2026-11-27T18:10:37.5984738Z ##[group]Run actions/setup-node@v4
+2026-11-27T18:10:37.5984979Z with:
+2026-11-27T18:10:37.5985150Z   node-version: 22
+2026-11-27T18:10:37.5985325Z   always-auth: false
+2026-11-27T18:10:37.5985507Z   check-latest: false
+2026-11-27T18:10:37.5987558Z   token: ***
+2026-11-27T18:10:37.5987734Z env:
+2026-11-27T18:10:37.5988127Z   ACCOUNT420_TEST_DSN: ***127.0.0.1:5432/account420_test?sslmode=disable
+2026-11-27T18:10:37.5988422Z ##[endgroup]
+2026-11-27T18:10:37.7158122Z Found in cache @ /opt/hostedtoolcache/node/22.23.5/x64
+2026-11-27T18:10:37.7162818Z (node:7774) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-27T18:10:37.7163685Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-27T18:10:37.7165022Z ##[group]Environment details
+2026-11-27T18:10:38.0779383Z node: v22.23.5
+2026-11-27T18:10:38.0779692Z npm: 10.9.9
+2026-11-27T18:10:38.0779931Z yarn: 1.22.22
+2026-11-27T18:10:38.0780712Z ##[endgroup]
+2026-11-27T18:10:38.0905711Z ##[group]Run node --check bong-goggles/web/core/classic-rooms.js
+2026-11-27T18:10:38.0906089Z [36;1mnode --check bong-goggles/web/core/classic-rooms.js[0m
+2026-11-27T18:10:38.0906427Z [36;1mnode --check bong-goggles/web/core/classic-communications.js[0m
+2026-11-27T18:10:38.0906735Z [36;1mnode --check bong-goggles/web/app.js[0m
+2026-11-27T18:10:38.0907669Z [36;1mnode --test bong-goggles/web/test/classic-rooms.test.js bong-goggles/web/test/classic-communications.test.js bong-goggles/web/test/420id-login-ui.test.js bong-goggles/web/test/account-identity.test.js bong-goggles/web/test/shared-game-ui.test.js bong-goggles/web/test/account-social-build-config.test.js[0m
+2026-11-27T18:10:38.0941264Z shell: /usr/bin/bash -e {0}
+2026-11-27T18:10:38.0941482Z env:
+2026-11-27T18:10:38.0942137Z   ACCOUNT420_TEST_DSN: ***127.0.0.1:5432/account420_test?sslmode=disable
+2026-11-27T18:10:38.0942443Z ##[endgroup]
+2026-11-27T18:10:38.2049371Z TAP version 13
+2026-11-27T18:10:38.2752852Z # Subtest: header exposes a prominent same-origin 420ID login with no Wallet requirement
+2026-11-27T18:10:38.2771774Z ok 1 - header exposes a prominent same-origin 420ID login with no Wallet requirement
+2026-11-27T18:10:38.2772361Z   ---
+2026-11-27T18:10:38.2772663Z   duration_ms: 4.143677
+2026-11-27T18:10:38.2772972Z   type: 'test'
+2026-11-27T18:10:38.2773227Z   ...
+2026-11-27T18:10:38.2773863Z # Subtest: Account Social error has real login and live retry controls, not broken route reload
+2026-11-27T18:10:38.2774755Z ok 2 - Account Social error has real login and live retry controls, not broken route reload
+2026-11-27T18:10:38.2775291Z   ---
+2026-11-27T18:10:38.2775545Z   duration_ms: 0.190623
+2026-11-27T18:10:38.2775897Z   type: 'test'
+2026-11-27T18:10:38.2776112Z   ...
+2026-11-27T18:10:38.2776697Z # Subtest: Home offers login and retry when backend times out; no cached community posts are shown
+2026-11-27T18:10:38.2777655Z ok 3 - Home offers login and retry when backend times out; no cached community posts are shown
+2026-11-27T18:10:38.2778184Z   ---
+2026-11-27T18:10:38.2778441Z   duration_ms: 0.99604
+2026-11-27T18:10:38.2778770Z   type: 'test'
+2026-11-27T18:10:38.2779025Z   ...
+2026-11-27T18:10:38.2779691Z # Subtest: verified 420ID member is not mislabelled as Wallet guest, and untrusted display name is escaped
+2026-11-27T18:10:38.2780722Z ok 4 - verified 420ID member is not mislabelled as Wallet guest, and untrusted display name is escaped
+2026-11-27T18:10:38.2781428Z   ---
+2026-11-27T18:10:38.2781680Z   duration_ms: 0.504059
+2026-11-27T18:10:38.2782009Z   type: 'test'
+2026-11-27T18:10:38.2782251Z   ...
+2026-11-27T18:10:38.2783007Z # Subtest: expired session between profile and feed resolves to guest without displaying posts or enabling writes
+2026-11-27T18:10:38.2784165Z ok 5 - expired session between profile and feed resolves to guest without displaying posts or enabling writes
+2026-11-27T18:10:38.2784778Z   ---
+2026-11-27T18:10:38.2785054Z   duration_ms: 1.402924
+2026-11-27T18:10:38.2785354Z   type: 'test'
+2026-11-27T18:10:38.2785623Z   ...
+2026-11-27T18:10:38.2786239Z # Subtest: temporary 420ID outage keeps failed data private but renders a reconnect path
+2026-11-27T18:10:38.2787098Z ok 6 - temporary 420ID outage keeps failed data private but renders a reconnect path
+2026-11-27T18:10:38.2787637Z   ---
+2026-11-27T18:10:38.2787910Z   duration_ms: 0.365063
+2026-11-27T18:10:38.2788263Z   type: 'test'
+2026-11-27T18:10:38.2788521Z   ...
+2026-11-27T18:10:38.2795040Z # Subtest: existing click binding supports Retry while disabled account social never creates login controls
+2026-11-27T18:10:38.2796815Z ok 7 - existing click binding supports Retry while disabled account social never creates login controls
+2026-11-27T18:10:38.2797828Z   ---
+2026-11-27T18:10:38.2798126Z   duration_ms: 7.367096
+2026-11-27T18:10:38.2798439Z   type: 'test'
+2026-11-27T18:10:38.2798694Z   ...
+2026-11-27T18:10:38.2814190Z # Subtest: login and account actions remain obvious and keyboard-accessible at mobile sizes
+2026-11-27T18:10:38.2815807Z ok 8 - login and account actions remain obvious and keyboard-accessible at mobile sizes
+2026-11-27T18:10:38.2816369Z   ---
+2026-11-27T18:10:38.2816650Z   duration_ms: 2.40254
+2026-11-27T18:10:38.2816951Z   type: 'test'
+2026-11-27T18:10:38.2817205Z   ...
+2026-11-27T18:10:38.3080486Z # Subtest: BC-0.4 accepts only a server-confirmed wallet-optional 420ID profile
+2026-11-27T18:10:38.3105587Z ok 9 - BC-0.4 accepts only a server-confirmed wallet-optional 420ID profile
+2026-11-27T18:10:38.3114482Z   ---
+2026-11-27T18:10:38.3114950Z   duration_ms: 2.098048
+2026-11-27T18:10:38.3115419Z   type: 'test'
+2026-11-27T18:10:38.3115820Z   ...
+2026-11-27T18:10:38.3116750Z # Subtest: BC-0.4 reads /v1/me using existing same-origin HttpOnly session with no wallet, feed or token storage
+2026-11-27T18:10:38.3118066Z ok 10 - BC-0.4 reads /v1/me using existing same-origin HttpOnly session with no wallet, feed or token storage
+2026-11-27T18:10:38.3118876Z   ---
+2026-11-27T18:10:38.3119300Z   duration_ms: 0.879927
+2026-11-27T18:10:38.3119747Z   type: 'test'
+2026-11-27T18:10:38.3120140Z   ...
+2026-11-27T18:10:38.3120900Z # Subtest: BC-0.4 a 401 or invalid session clears previous account instead of showing stale data
+2026-11-27T18:10:38.3122212Z ok 11 - BC-0.4 a 401 or invalid session clears previous account instead of showing stale data
+2026-11-27T18:10:38.3122905Z   ---
+2026-11-27T18:10:38.3123311Z   duration_ms: 0.618229
+2026-11-27T18:10:38.3123761Z   type: 'test'
+2026-11-27T18:10:38.3124165Z   ...
+2026-11-27T18:10:38.3124994Z # Subtest: BC-0.4 fail-closed outage retries only idempotent account reads and never invents guest state
+2026-11-27T18:10:38.3126197Z ok 12 - BC-0.4 fail-closed outage retries only idempotent account reads and never invents guest state
+2026-11-27T18:10:38.3126953Z   ---
+2026-11-27T18:10:38.3127360Z   duration_ms: 7.221535
+2026-11-27T18:10:38.3127804Z   type: 'test'
+2026-11-27T18:10:38.3128184Z   ...
+2026-11-27T18:10:38.3128904Z # Subtest: BC-0.4 out-of-order authentication results cannot overwrite a newer account
+2026-11-27T18:10:38.3129885Z ok 13 - BC-0.4 out-of-order authentication results cannot overwrite a newer account
+2026-11-27T18:10:38.3130549Z   ---
+2026-11-27T18:10:38.3131121Z   duration_ms: 0.551249
+2026-11-27T18:10:38.3131569Z   type: 'test'
+2026-11-27T18:10:38.3131943Z   ...
+2026-11-27T18:10:38.3132691Z # Subtest: BC-0.4 quiet revalidation preserves active drafts but detects an identity change
+2026-11-27T18:10:38.3133761Z ok 14 - BC-0.4 quiet revalidation preserves active drafts but detects an identity change
+2026-11-27T18:10:38.3134399Z   ---
+2026-11-27T18:10:38.3134803Z   duration_ms: 0.430019
+2026-11-27T18:10:38.3135245Z   type: 'test'
+2026-11-27T18:10:38.3135623Z   ...
+2026-11-27T18:10:38.3136458Z # Subtest: BC-0.4 signout posts exactly once, revokes the same 420ID session and clears profile
+2026-11-27T18:10:38.3137569Z ok 15 - BC-0.4 signout posts exactly once, revokes the same 420ID session and clears profile
+2026-11-27T18:10:38.3138269Z   ---
+2026-11-27T18:10:38.3138716Z   duration_ms: 0.860639
+2026-11-27T18:10:38.3139224Z   type: 'test'
+2026-11-27T18:10:38.3139646Z   ...
+2026-11-27T18:10:38.3140397Z # Subtest: BC-0.4 failed signout clears local identity and never retries a write
+2026-11-27T18:10:38.3141593Z ok 16 - BC-0.4 failed signout clears local identity and never retries a write
+2026-11-27T18:10:38.3142258Z   ---
+2026-11-27T18:10:38.3142702Z   duration_ms: 0.284583
+2026-11-27T18:10:38.3143144Z   type: 'test'
+2026-11-27T18:10:38.3143527Z   ...
+2026-11-27T18:10:38.3144336Z # Subtest: BC-0.4 signout fences overlapping identity rechecks and cannot be duplicated
+2026-11-27T18:10:38.3145433Z ok 17 - BC-0.4 signout fences overlapping identity rechecks and cannot be duplicated
+2026-11-27T18:10:38.3146141Z   ---
+2026-11-27T18:10:38.3147185Z   duration_ms: 0.601123
+2026-11-27T18:10:38.3147698Z   type: 'test'
+2026-11-27T18:10:38.3148116Z   ...
+2026-11-27T18:10:38.3149030Z # Subtest: BC-0.4 Sign In is visible on every Games screen and signed-in account identity is wallet optional
+2026-11-27T18:10:38.3150613Z ok 18 - BC-0.4 Sign In is visible on every Games screen and signed-in account identity is wallet optional
+2026-11-27T18:10:38.3151650Z   ---
+2026-11-27T18:10:38.3152158Z   duration_ms: 20.978816
+2026-11-27T18:10:38.3152650Z   type: 'test'
+2026-11-27T18:10:38.3153088Z   ...
+2026-11-27T18:10:38.3153963Z # Subtest: BC-0.4 identity is independent of social feed loading, failure, wallet and sign-in expiry
+2026-11-27T18:10:38.3155163Z ok 19 - BC-0.4 identity is independent of social feed loading, failure, wallet and sign-in expiry
+2026-11-27T18:10:38.3155916Z   ---
+2026-11-27T18:10:38.3156382Z   duration_ms: 1.83118
+2026-11-27T18:10:38.3156844Z   type: 'test'
+2026-11-27T18:10:38.3157263Z   ...
+2026-11-27T18:10:38.3158120Z # Subtest: BC-0.4 untrusted display names are HTML-escaped on header, game pages and sidebar
+2026-11-27T18:10:38.3159273Z ok 20 - BC-0.4 untrusted display names are HTML-escaped on header, game pages and sidebar
+2026-11-27T18:10:38.3159995Z   ---
+2026-11-27T18:10:38.3160456Z   duration_ms: 0.361087
+2026-11-27T18:10:38.3161089Z   type: 'test'
+2026-11-27T18:10:38.3161537Z   ...
+2026-11-27T18:10:38.3162512Z # Subtest: BC-0.4 browser wiring revalidates identities on every route and visibility, keeps mutation paths separate
+2026-11-27T18:10:38.3163860Z ok 21 - BC-0.4 browser wiring revalidates identities on every route and visibility, keeps mutation paths separate
+2026-11-27T18:10:38.3164673Z   ---
+2026-11-27T18:10:38.3165116Z   duration_ms: 5.807028
+2026-11-27T18:10:38.3165581Z   type: 'test'
+2026-11-27T18:10:38.3165960Z   ...
+2026-11-27T18:10:38.3251923Z # Subtest: Pages account activation flag uses the exact documented variable
+2026-11-27T18:10:38.3287772Z ok 22 - Pages account activation flag uses the exact documented variable
+2026-11-27T18:10:38.3288549Z   ---
+2026-11-27T18:10:38.3288974Z   duration_ms: 0.986926
+2026-11-27T18:10:38.3289438Z   type: 'test'
+2026-11-27T18:10:38.3289818Z   ...
+2026-11-27T18:10:38.3291671Z # Subtest: BC-0.5 classic rooms require two explicit activation flags
+2026-11-27T18:10:38.3297868Z ok 23 - BC-0.5 classic rooms require two explicit activation flags
+2026-11-27T18:10:38.3298675Z   ---
+2026-11-27T18:10:38.3299128Z   duration_ms: 1.019175
+2026-11-27T18:10:38.3299605Z   type: 'test'
+2026-11-27T18:10:38.3300022Z   ...
+2026-11-27T18:10:38.3300853Z # Subtest: unset and explicit false keep wallet-free features disabled and preserve complete config
+2026-11-27T18:10:38.3302169Z ok 24 - unset and explicit false keep wallet-free features disabled and preserve complete config
+2026-11-27T18:10:38.3302905Z   ---
+2026-11-27T18:10:38.3303347Z   duration_ms: 1.015549
+2026-11-27T18:10:38.3303836Z   type: 'test'
+2026-11-27T18:10:38.3304256Z   ...
+2026-11-27T18:10:38.3305106Z # Subtest: opt-in true changes only four wallet-free account flags, never monetization or other features
+2026-11-27T18:10:38.3306256Z ok 25 - opt-in true changes only four wallet-free account flags, never monetization or other features
+2026-11-27T18:10:38.3307003Z   ---
+2026-11-27T18:10:38.3307440Z   duration_ms: 0.429578
+2026-11-27T18:10:38.3307907Z   type: 'test'
+2026-11-27T18:10:38.3308310Z   ...
+2026-11-27T18:10:38.3309125Z # Subtest: build activation is strict and rejects ambiguous, empty, non-string and unsafe values
+2026-11-27T18:10:38.3310242Z ok 26 - build activation is strict and rejects ambiguous, empty, non-string and unsafe values
+2026-11-27T18:10:38.3311134Z   ---
+2026-11-27T18:10:38.3311683Z   duration_ms: 0.427626
+2026-11-27T18:10:38.3312160Z   type: 'test'
+2026-11-27T18:10:38.3312580Z   ...
+2026-11-27T18:10:38.3313247Z # Subtest: build refuses incomplete or malformed runtime configuration
+2026-11-27T18:10:38.3314135Z ok 27 - build refuses incomplete or malformed runtime configuration
+2026-11-27T18:10:38.3314744Z   ---
+2026-11-27T18:10:38.3315616Z   duration_ms: 0.257222
+2026-11-27T18:10:38.3316088Z   type: 'test'
+2026-11-27T18:10:38.3316487Z   ...
+2026-11-27T18:10:38.3317339Z # Subtest: BC-1.8 production Pages main activates Classic rooms and messages only with active 420ID
+2026-11-27T18:10:38.3318686Z ok 28 - BC-1.8 production Pages main activates Classic rooms and messages only with active 420ID
+2026-11-27T18:10:38.3319469Z   ---
+2026-11-27T18:10:38.3319909Z   duration_ms: 0.443058
+2026-11-27T18:10:38.3320396Z   type: 'test'
+2026-11-27T18:10:38.3320824Z   ...
+2026-11-27T18:10:38.3321935Z # Subtest: BC-3 output verifier covers Chess default, production, preview, rollback and dependency gates
+2026-11-27T18:10:38.3323129Z ok 29 - BC-3 output verifier covers Chess default, production, preview, rollback and dependency gates
+2026-11-27T18:10:38.3323905Z   ---
+2026-11-27T18:10:38.3324324Z   duration_ms: 11.011311
+2026-11-27T18:10:38.3324781Z   type: 'test'
+2026-11-27T18:10:38.3325204Z   ...
+2026-11-27T18:10:38.3326081Z # Subtest: Word Salad production build verifies independent activation, rollback and dependency boundaries
+2026-11-27T18:10:38.3327338Z ok 30 - Word Salad production build verifies independent activation, rollback and dependency boundaries
+2026-11-27T18:10:38.3328099Z   ---
+2026-11-27T18:10:38.3328548Z   duration_ms: 2.150515
+2026-11-27T18:10:38.3329006Z   type: 'test'
+2026-11-27T18:10:38.3329405Z   ...
+2026-11-27T18:10:38.3562991Z # Subtest: BC-0.10 multi-account same-origin room heartbeat + revision reconciliation and turn notification
+2026-11-27T18:10:38.3592082Z ok 31 - BC-0.10 multi-account same-origin room heartbeat + revision reconciliation and turn notification
+2026-11-27T18:10:38.3593011Z   ---
+2026-11-27T18:10:38.3593613Z   duration_ms: 4.273039
+2026-11-27T18:10:38.3593955Z   type: 'test'
+2026-11-27T18:10:38.3594224Z   ...
+2026-11-27T18:10:38.3594812Z # Subtest: BC-0.10 second device on the next turn gets its own seat-only notification
+2026-11-27T18:10:38.3595652Z ok 32 - BC-0.10 second device on the next turn gets its own seat-only notification
+2026-11-27T18:10:38.3596197Z   ---
+2026-11-27T18:10:38.3596467Z   duration_ms: 0.687692
+2026-11-27T18:10:38.3596766Z   type: 'test'
+2026-11-27T18:10:38.3597012Z   ...
+2026-11-27T18:10:38.3597713Z # Subtest: BC-0.10 event gaps resnapshot without fabricating moves, stale or future revisions reject
+2026-11-27T18:10:38.3598704Z ok 33 - BC-0.10 event gaps resnapshot without fabricating moves, stale or future revisions reject
+2026-11-27T18:10:38.3599255Z   ---
+2026-11-27T18:10:38.3599524Z   duration_ms: 1.003261
+2026-11-27T18:10:38.3599832Z   type: 'test'
+2026-11-27T18:10:38.3600074Z   ...
+2026-11-27T18:10:38.3600710Z # Subtest: BC-0.10 revoked cookie, removed room and disabled backend fail closed without cached state
+2026-11-27T18:10:38.3631731Z ok 34 - BC-0.10 revoked cookie, removed room and disabled backend fail closed without cached state
+2026-11-27T18:10:38.3632297Z   ---
+2026-11-27T18:10:38.3632570Z   duration_ms: 0.72686
+2026-11-27T18:10:38.3632908Z   type: 'test'
+2026-11-27T18:10:38.3633174Z   ...
+2026-11-27T18:10:38.3633882Z # Subtest: BC-0.10 stale in-flight requests after sign-out/navigation never restore old 420ID projections
+2026-11-27T18:10:38.3634894Z ok 35 - BC-0.10 stale in-flight requests after sign-out/navigation never restore old 420ID projections
+2026-11-27T18:10:38.3635484Z   ---
+2026-11-27T18:10:38.3635765Z   duration_ms: 0.860248
+2026-11-27T18:10:38.3636048Z   type: 'test'
+2026-11-27T18:10:38.3636303Z   ...
+2026-11-27T18:10:38.3636978Z # Subtest: BC-0.10 authorized cursor URL only; arbitrary query, identity and cross-origin URLs rejected
+2026-11-27T18:10:38.3637966Z ok 36 - BC-0.10 authorized cursor URL only; arbitrary query, identity and cross-origin URLs rejected
+2026-11-27T18:10:38.3638551Z   ---
+2026-11-27T18:10:38.3638830Z   duration_ms: 0.581814
+2026-11-27T18:10:38.3639130Z   type: 'test'
+2026-11-27T18:10:38.3639375Z   ...
+2026-11-27T18:10:38.3639993Z # Subtest: BC-0.10 UI communications is an independent opt-in requiring activated rooms and 420ID
+2026-11-27T18:10:38.3641511Z ok 37 - BC-0.10 UI communications is an independent opt-in requiring activated rooms and 420ID
+2026-11-27T18:10:38.3642064Z   ---
+2026-11-27T18:10:38.3642338Z   duration_ms: 0.963832
+2026-11-27T18:10:38.3642638Z   type: 'test'
+2026-11-27T18:10:38.3642963Z   ...
+2026-11-27T18:10:38.3773043Z # Subtest: BC-0.5 canonical 25-game catalogue and strict seat limits are pinned without new game engines
+2026-11-27T18:10:38.3774428Z ok 38 - BC-0.5 canonical 25-game catalogue and strict seat limits are pinned without new game engines
+2026-11-27T18:10:38.3775331Z   ---
+2026-11-27T18:10:38.3781574Z   duration_ms: 1.749549
+2026-11-27T18:10:38.3782105Z   type: 'test'
+2026-11-27T18:10:38.3782526Z   ...
+2026-11-27T18:10:38.3783266Z # Subtest: BC-0.5 browse and detail routes are public and do not require a wallet
+2026-11-27T18:10:38.3784209Z ok 39 - BC-0.5 browse and detail routes are public and do not require a wallet
+2026-11-27T18:10:38.3784862Z   ---
+2026-11-27T18:10:38.3785326Z   duration_ms: 0.567523
+2026-11-27T18:10:38.3785827Z   type: 'test'
+2026-11-27T18:10:38.3786240Z   ...
+2026-11-27T18:10:38.3787067Z # Subtest: BC-0.5 login/disabled/loading fail closed; empty-state does not advertise playable matches
+2026-11-27T18:10:38.3788287Z ok 40 - BC-0.5 login/disabled/loading fail closed; empty-state does not advertise playable matches
+2026-11-27T18:10:38.3789042Z   ---
+2026-11-27T18:10:38.3789479Z   duration_ms: 1.611865
+2026-11-27T18:10:38.3789945Z   type: 'test'
+2026-11-27T18:10:38.3790357Z   ...
+2026-11-27T18:10:38.3791279Z # Subtest: BC-0.5 room list renders public/private creation and safe game links
+2026-11-27T18:10:38.3792248Z ok 41 - BC-0.5 room list renders public/private creation and safe game links
+2026-11-27T18:10:38.3792868Z   ---
+2026-11-27T18:10:38.3793293Z   duration_ms: 0.445702
+2026-11-27T18:10:38.3793753Z   type: 'test'
+2026-11-27T18:10:38.3794148Z   ...
+2026-11-27T18:10:38.3794911Z # Subtest: BC-0.5 seat controls display team, friend invite and bot difficulty by authority
+2026-11-27T18:10:38.3795944Z ok 42 - BC-0.5 seat controls display team, friend invite and bot difficulty by authority
+2026-11-27T18:10:38.3796597Z   ---
+2026-11-27T18:10:38.3797064Z   duration_ms: 2.65836
+2026-11-27T18:10:38.3797539Z   type: 'test'
+2026-11-27T18:10:38.3797952Z   ...
+2026-11-27T18:10:38.3798624Z # Subtest: BC-0.5 same-origin 420ID loading and server room/friend reads
+2026-11-27T18:10:38.3799511Z ok 43 - BC-0.5 same-origin 420ID loading and server room/friend reads
+2026-11-27T18:10:38.3800133Z   ---
+2026-11-27T18:10:38.3800573Z   duration_ms: 1.217338
+2026-11-27T18:10:38.3801232Z   type: 'test'
+2026-11-27T18:10:38.3801669Z   ...
+2026-11-27T18:10:38.3802450Z # Subtest: BC-0.5 creates a room with server-defined host and revision, never a wallet
+2026-11-27T18:10:38.3803429Z ok 44 - BC-0.5 creates a room with server-defined host and revision, never a wallet
+2026-11-27T18:10:38.3804072Z   ---
+2026-11-27T18:10:38.3804506Z   duration_ms: 0.988879
+2026-11-27T18:10:38.3804957Z   type: 'test'
+2026-11-27T18:10:38.3805371Z   ...
+2026-11-27T18:10:38.3806098Z # Subtest: BC-0.5 invitation target and bot difficulty are validated before one-shot POST
+2026-11-27T18:10:38.3807129Z ok 45 - BC-0.5 invitation target and bot difficulty are validated before one-shot POST
+2026-11-27T18:10:38.3807807Z   ---
+2026-11-27T18:10:38.3808243Z   duration_ms: 0.74709
+2026-11-27T18:10:38.3808698Z   type: 'test'
+2026-11-27T18:10:38.3809112Z   ...
+2026-11-27T18:10:38.3809895Z # Subtest: BC-0.5 invalid 420ID, bad room data, private data and false on-chain flag fail closed
+2026-11-27T18:10:38.3811109Z ok 46 - BC-0.5 invalid 420ID, bad room data, private data and false on-chain flag fail closed
+2026-11-27T18:10:38.3811858Z   ---
+2026-11-27T18:10:38.3812288Z   duration_ms: 0.650877
+2026-11-27T18:10:38.3812739Z   type: 'test'
+2026-11-27T18:10:38.3813163Z   ...
+2026-11-27T18:10:38.3813893Z # Subtest: BC-0.5 session and stale response ordering never restore a previous room
+2026-11-27T18:10:38.3814855Z ok 47 - BC-0.5 session and stale response ordering never restore a previous room
+2026-11-27T18:10:38.3815801Z   ---
+2026-11-27T18:10:38.3816297Z   duration_ms: 0.552611
+2026-11-27T18:10:38.3816735Z   type: 'test'
+2026-11-27T18:10:38.3817143Z   ...
+2026-11-27T18:10:38.3818136Z # Subtest: BC-0.5 an unconfirmed room mutation immediately drops cached private room data
+2026-11-27T18:10:38.3819235Z ok 48 - BC-0.5 an unconfirmed room mutation immediately drops cached private room data
+2026-11-27T18:10:38.3819912Z   ---
+2026-11-27T18:10:38.3820331Z   duration_ms: 0.543597
+2026-11-27T18:10:38.3820798Z   type: 'test'
+2026-11-27T18:10:38.3821373Z   ...
+2026-11-27T18:10:38.3822199Z # Subtest: BC-0.5 feature flag remains explicit and bound to the existing off-chain account-games gate
+2026-11-27T18:10:38.3823542Z ok 49 - BC-0.5 feature flag remains explicit and bound to the existing off-chain account-games gate
+2026-11-27T18:10:38.3824376Z   ---
+2026-11-27T18:10:38.3824838Z   duration_ms: 0.424992
+2026-11-27T18:10:38.3825345Z   type: 'test'
+2026-11-27T18:10:38.3825776Z   ...
+2026-11-27T18:10:38.3844850Z # Subtest: BC-0.5 browser forms are actually wired; prior Classic UI and Wallet actions remain intact
+2026-11-27T18:10:38.3849297Z ok 50 - BC-0.5 browser forms are actually wired; prior Classic UI and Wallet actions remain intact
+2026-11-27T18:10:38.3850156Z   ---
+2026-11-27T18:10:38.3850689Z   duration_ms: 12.986365
+2026-11-27T18:10:38.3851329Z   type: 'test'
+2026-11-27T18:10:38.3851756Z   ...
+2026-11-27T18:10:38.3875059Z # Subtest: BC-0.6 active/completed rooms lock seats and omit lobby actions
+2026-11-27T18:10:38.3882938Z ok 51 - BC-0.6 active/completed rooms lock seats and omit lobby actions
+2026-11-27T18:10:38.3901675Z   ---
+2026-11-27T18:10:38.3911944Z   duration_ms: 0.499492
+2026-11-27T18:10:38.3912436Z   type: 'test'
+2026-11-27T18:10:38.3912919Z   ...
+2026-11-27T18:10:38.3913874Z # Subtest: Cribbage room link resolves only same-420ID rule-bound match and returns to My Games
+2026-11-27T18:10:38.3914941Z ok 52 - Cribbage room link resolves only same-420ID rule-bound match and returns to My Games
+2026-11-27T18:10:38.3915614Z   ---
+2026-11-27T18:10:38.3916026Z   duration_ms: 0.441967
+2026-11-27T18:10:38.3916451Z   type: 'test'
+2026-11-27T18:10:38.3916818Z   ...
+2026-11-27T18:10:38.3917687Z # Subtest: room lifecycle diagnostics distinguish HTTP failures without exposing upstream private data
+2026-11-27T18:10:38.3918905Z ok 53 - room lifecycle diagnostics distinguish HTTP failures without exposing upstream private data
+2026-11-27T18:10:38.3919702Z   ---
+2026-11-27T18:10:38.3920186Z   duration_ms: 0.181359
+2026-11-27T18:10:38.3920605Z   type: 'test'
+2026-11-27T18:10:38.3921176Z   ...
+2026-11-27T18:10:38.4803367Z # Subtest: BC-0.3 eight screen routes resolve for all 25 games and legacy entries without a wallet
+2026-11-27T18:10:38.4852142Z ok 54 - BC-0.3 eight screen routes resolve for all 25 games and legacy entries without a wallet
+2026-11-27T18:10:38.4895834Z   ---
+2026-11-27T18:10:38.4896249Z   duration_ms: 42.333341
+2026-11-27T18:10:38.4896650Z   type: 'test'
+2026-11-27T18:10:38.4897013Z   ...
+2026-11-27T18:10:38.4897552Z # Subtest: BC-0.3 rejects nested/unknown screen segments and unknown games
+2026-11-27T18:10:38.4898423Z ok 55 - BC-0.3 rejects nested/unknown screen segments and unknown games
+2026-11-27T18:10:38.4898911Z   ---
+2026-11-27T18:10:38.4899314Z   duration_ms: 0.419764
+2026-11-27T18:10:38.4899671Z   type: 'test'
+2026-11-27T18:10:38.4899963Z   ...
+2026-11-27T18:10:38.4900613Z # Subtest: BC-0.3 overview and rules are honest and variants do not masquerade as rulebooks
+2026-11-27T18:10:38.4901717Z ok 56 - BC-0.3 overview and rules are honest and variants do not masquerade as rulebooks
+2026-11-27T18:10:38.4902301Z   ---
+2026-11-27T18:10:38.4902587Z   duration_ms: 0.313145
+2026-11-27T18:10:38.4902975Z   type: 'test'
+2026-11-27T18:10:38.4903405Z   ...
+2026-11-27T18:10:38.4904330Z # Subtest: BC-0.3 opponent setup exposes seat types and all bot difficulties but cannot submit
+2026-11-27T18:10:38.4905233Z ok 57 - BC-0.3 opponent setup exposes seat types and all bot difficulties but cannot submit
+2026-11-27T18:10:38.4906228Z   ---
+2026-11-27T18:10:38.4906525Z   duration_ms: 0.409187
+2026-11-27T18:10:38.4906835Z   type: 'test'
+2026-11-27T18:10:38.4907087Z   ...
+2026-11-27T18:10:38.4907663Z # Subtest: BC-0.3 Chaos separates 420ID online rooms from an explicit local CPU game
+2026-11-27T18:10:38.4908697Z ok 58 - BC-0.3 Chaos separates 420ID online rooms from an explicit local CPU game
+2026-11-27T18:10:38.4909180Z   ---
+2026-11-27T18:10:38.4909448Z   duration_ms: 0.294026
+2026-11-27T18:10:38.4909750Z   type: 'test'
+2026-11-27T18:10:38.4910020Z   ...
+2026-11-27T18:10:38.4910723Z # Subtest: BC-0.3 table, results, history and rematch stay fail-closed without an authenticated projection
+2026-11-27T18:10:38.4911939Z ok 59 - BC-0.3 table, results, history and rematch stay fail-closed without an authenticated projection
+2026-11-27T18:10:38.4912488Z   ---
+2026-11-27T18:10:38.4912764Z   duration_ms: 0.293696
+2026-11-27T18:10:38.4913083Z   type: 'test'
+2026-11-27T18:10:38.4913337Z   ...
+2026-11-27T18:10:38.4913900Z # Subtest: BC-0.3 table uses only bounded public cells, safe scores and seat labels
+2026-11-27T18:10:38.4914669Z ok 60 - BC-0.3 table uses only bounded public cells, safe scores and seat labels
+2026-11-27T18:10:38.4915134Z   ---
+2026-11-27T18:10:38.4915427Z   duration_ms: 21.314531
+2026-11-27T18:10:38.4915760Z   type: 'test'
+2026-11-27T18:10:38.4916019Z   ...
+2026-11-27T18:10:38.4916677Z # Subtest: BC-0.3 result, history and rematch use verified data but never activate unconnected actions
+2026-11-27T18:10:38.4917626Z ok 61 - BC-0.3 result, history and rematch use verified data but never activate unconnected actions
+2026-11-27T18:10:38.4918192Z   ---
+2026-11-27T18:10:38.4918486Z   duration_ms: 0.457539
+2026-11-27T18:10:38.4918781Z   type: 'test'
+2026-11-27T18:10:38.4919034Z   ...
+2026-11-27T18:10:38.4919702Z # Subtest: BC-0.3 hostile text cannot inject HTML, URL attributes, extra private data or oversized state
+2026-11-27T18:10:38.4920670Z ok 62 - BC-0.3 hostile text cannot inject HTML, URL attributes, extra private data or oversized state
+2026-11-27T18:10:38.4921422Z   ---
+2026-11-27T18:10:38.4921708Z   duration_ms: 0.634192
+2026-11-27T18:10:38.4922013Z   type: 'test'
+2026-11-27T18:10:38.4922259Z   ...
+2026-11-27T18:10:38.4922819Z # Subtest: BC-0.3 shared styles and navigation accessibility ship with the web app
+2026-11-27T18:10:38.4923808Z ok 63 - BC-0.3 shared styles and navigation accessibility ship with the web app
+2026-11-27T18:10:38.4924451Z   ---
+2026-11-27T18:10:38.4924852Z   duration_ms: 13.46652
+2026-11-27T18:10:38.4945175Z   type: 'test'
+2026-11-27T18:10:38.4945460Z   ...
+2026-11-27T18:10:38.5013271Z 1..63
+2026-11-27T18:10:38.5013640Z # tests 63
+2026-11-27T18:10:38.5013906Z # suites 0
+2026-11-27T18:10:38.5014151Z # pass 63
+2026-11-27T18:10:38.5014400Z # fail 0
+2026-11-27T18:10:38.5014660Z # cancelled 0
+2026-11-27T18:10:38.5014944Z # skipped 0
+2026-11-27T18:10:38.5015265Z # todo 0
+2026-11-27T18:10:38.5015657Z # duration_ms 314.719914
+2026-11-27T18:10:38.5136488Z Post job cleanup.
+2026-11-27T18:10:38.6135753Z (node:7918) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-27T18:10:38.6136459Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-27T18:10:38.6283519Z Post job cleanup.
+2026-11-27T18:10:38.7309943Z (node:7926) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-27T18:10:38.7311189Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-27T18:10:38.7422527Z [command]/opt/hostedtoolcache/go/1.23.12/x64/bin/go env GOMODCACHE
+2026-11-27T18:10:38.7482023Z [command]/opt/hostedtoolcache/go/1.23.12/x64/bin/go env GOCACHE
+2026-11-27T18:10:38.7503413Z /home/runner/go/pkg/mod
+2026-11-27T18:10:38.7528871Z /home/runner/.cache/go-build
+2026-11-27T18:10:38.7538032Z Cache hit occurred on the primary key setup-go-Linux-x64-ubuntu26-go-1.23.12-7dac93c9c517668571e68881346e2a398a899ababebcbbc3ee3e6e630fa6cb81, not saving cache.
+2026-11-27T18:10:38.7682135Z Post job cleanup.
+2026-11-27T18:10:38.8435241Z [command]/usr/bin/git version
+2026-11-27T18:10:38.8473871Z git version 2.56.1
+2026-11-27T18:10:38.8507169Z Temporarily overriding HOME='/home/runner/work/_temp/19201fd0-83f1-41b0-ad67-ee614aa96efe' before making global git config changes
+2026-11-27T18:10:38.8508239Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-27T18:10:38.8512238Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/420-integrated-v0.1/420-integrated-v0.1
+2026-11-27T18:10:38.8546239Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-27T18:10:38.8576831Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-27T18:10:38.8879291Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-27T18:10:38.8913316Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-27T18:10:38.9206193Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-27T18:10:38.9240471Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-27T18:10:38.9612944Z Print service container logs: b98a48d91343467bbb1178d4cfbef548_postgres16_a7e766
+2026-11-27T18:10:38.9616408Z ##[command]/usr/bin/docker logs --details faacb73d0d2448bc4f6ce7bdb75f7210ac415f6157d5145aa7dcfed6e96fa670
+2026-11-27T18:10:38.9743795Z  initdb: warning: enabling "trust" authentication for local connections
+2026-11-27T18:10:38.9744432Z  The files belonging to this database system will be owned by user "postgres".
+2026-11-27T18:10:38.9745338Z  initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+2026-11-27T18:10:38.9746545Z  2026-11-27 18:02:18.098 UTC [1] LOG:  starting PostgreSQL 16.16 (Debian 16.16-1.pgdg13+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+2026-11-27T18:10:38.9747422Z  2026-11-27 18:02:18.098 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2026-11-27T18:10:38.9748037Z  2026-11-27 18:02:18.098 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2026-11-27T18:10:38.9748649Z  2026-11-27 18:02:18.099 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-11-27T18:10:38.9749304Z  2026-11-27 18:02:18.101 UTC [64] LOG:  database system was shut down at 2026-11-27 18:02:17 UTC
+2026-11-27T18:10:38.9749919Z  2026-11-27 18:02:18.104 UTC [1] LOG:  database system is ready to accept connections
+2026-11-27T18:10:38.9750837Z  2026-11-27 18:03:08.597 UTC [166] ERROR:  update or delete on table "classic_rooms" violates foreign key constraint "classic_sessions_room_id_fkey" on table "classic_sessions"
+2026-11-27T18:10:38.9752167Z  2026-11-27 18:03:08.597 UTC [166] DETAIL:  Key (id)=(bdb6721e-fb62-46ce-bc22-957e78edff7f) is still referenced from table "classic_sessions".
+2026-11-27T18:10:38.9752751Z  2026-11-27 18:03:08.597 UTC [166] STATEMENT:  DELETE FROM bg_account_social.classic_rooms WHERE host=$1
+2026-11-27T18:10:38.9753147Z  2026-11-27 18:07:18.180 UTC [62] LOG:  checkpoint starting: time
+2026-11-27T18:10:38.9753769Z  2026-11-27 18:07:52.341 UTC [548] ERROR:  update or delete on table "classic_sessions" violates foreign key constraint "classic_match_requests_source_session_id_fkey" on table "classic_match_requests"
+2026-11-27T18:10:38.9754545Z  2026-11-27 18:07:52.341 UTC [548] DETAIL:  Key (id)=(f8e1a0ae-fbc4-4f54-b2bd-24da4e836594) is still referenced from table "classic_match_requests".
+2026-11-27T18:10:38.9755258Z  2026-11-27 18:07:52.341 UTC [548] STATEMENT:  DELETE FROM bg_account_social.classic_sessions WHERE room_id IN (SELECT id FROM bg_account_social.classic_rooms WHERE host=$1)
+2026-11-27T18:10:38.9756313Z  2026-11-27 18:07:52.342 UTC [548] ERROR:  update or delete on table "classic_rooms" violates foreign key constraint "classic_sessions_room_id_fkey" on table "classic_sessions"
+2026-11-27T18:10:38.9757008Z  2026-11-27 18:07:52.342 UTC [548] DETAIL:  Key (id)=(6b9847b9-b3fc-4f16-927f-b2035dd58c5d) is still referenced from table "classic_sessions".
+2026-11-27T18:10:38.9757585Z  2026-11-27 18:07:52.342 UTC [548] STATEMENT:  DELETE FROM bg_account_social.classic_rooms WHERE host=$1
+2026-11-27T18:10:38.9758186Z  2026-11-27 18:07:52.411 UTC [647] ERROR:  update or delete on table "classic_rooms" violates foreign key constraint "classic_sessions_room_id_fkey" on table "classic_sessions"
+2026-11-27T18:10:38.9758869Z  2026-11-27 18:07:52.411 UTC [647] DETAIL:  Key (id)=(6b9847b9-b3fc-4f16-927f-b2035dd58c5d) is still referenced from table "classic_sessions".
+2026-11-27T18:10:38.9759389Z  2026-11-27 18:07:52.411 UTC [647] STATEMENT:  DELETE FROM bg_account_social.classic_rooms WHERE host=$1
+2026-11-27T18:10:38.9760052Z  2026-11-27 18:07:55.000 UTC [648] ERROR:  update or delete on table "classic_sessions" violates foreign key constraint "classic_match_requests_source_session_id_fkey" on table "classic_match_requests"
+2026-11-27T18:10:38.9760896Z  2026-11-27 18:07:55.000 UTC [648] DETAIL:  Key (id)=(f8e1a0ae-fbc4-4f54-b2bd-24da4e836594) is still referenced from table "classic_match_requests".
+2026-11-27T18:10:38.9762406Z  2026-11-27 18:07:55.000 UTC [648] STATEMENT:  DELETE FROM bg_account_social.classic_sessions WHERE room_id IN (SELECT id FROM bg_account_social.classic_rooms WHERE host=$1)
+2026-11-27T18:10:38.9763214Z  2026-11-27 18:07:55.002 UTC [648] ERROR:  update or delete on table "classic_rooms" violates foreign key constraint "classic_sessions_room_id_fkey" on table "classic_sessions"
+2026-11-27T18:10:38.9763911Z  2026-11-27 18:07:55.002 UTC [648] DETAIL:  Key (id)=(6b9847b9-b3fc-4f16-927f-b2035dd58c5d) is still referenced from table "classic_sessions".
+2026-11-27T18:10:38.9764451Z  2026-11-27 18:07:55.002 UTC [648] STATEMENT:  DELETE FROM bg_account_social.classic_rooms WHERE host=$1
+2026-11-27T18:10:38.9765125Z  2026-11-27 18:07:55.580 UTC [649] ERROR:  update or delete on table "classic_sessions" violates foreign key constraint "classic_match_requests_source_session_id_fkey" on table "classic_match_requests"
+2026-11-27T18:10:38.9765892Z  2026-11-27 18:07:55.580 UTC [649] DETAIL:  Key (id)=(f8e1a0ae-fbc4-4f54-b2bd-24da4e836594) is still referenced from table "classic_match_requests".
+2026-11-27T18:10:38.9766582Z  2026-11-27 18:07:55.580 UTC [649] STATEMENT:  DELETE FROM bg_account_social.classic_sessions WHERE room_id IN (SELECT id FROM bg_account_social.classic_rooms WHERE host=$1)
+2026-11-27T18:10:38.9767331Z  2026-11-27 18:07:55.582 UTC [649] ERROR:  update or delete on table "classic_rooms" violates foreign key constraint "classic_sessions_room_id_fkey" on table "classic_sessions"
+2026-11-27T18:10:38.9768010Z  2026-11-27 18:07:55.582 UTC [649] DETAIL:  Key (id)=(6b9847b9-b3fc-4f16-927f-b2035dd58c5d) is still referenced from table "classic_sessions".
+2026-11-27T18:10:38.9768546Z  2026-11-27 18:07:55.582 UTC [649] STATEMENT:  DELETE FROM bg_account_social.classic_rooms WHERE host=$1
+2026-11-27T18:10:38.9769423Z  2026-11-27 18:07:57.037 UTC [62] LOG:  checkpoint complete: wrote 392 buffers (2.4%); 1 WAL file(s) added, 0 removed, 0 recycled; write=38.764 s, sync=0.005 s, total=38.858 s; sync files=216, longest=0.001 s, average=0.001 s; distance=3335 kB, estimate=3335 kB; lsn=0/1DBD2B8, redo lsn=0/1C84FD0
+2026-11-27T18:10:38.9770364Z  2026-11-27 18:10:12.757 UTC [928] ERROR:  new row for relation "classic_rooms" violates check constraint "classic_rooms_word_salad_format_check"
+2026-11-27T18:10:38.9771421Z  2026-11-27 18:10:12.757 UTC [928] DETAIL:  Failing row contains (b355e808-3cb0-4e20-a450-727321b007ff, 10000000-1111-4111-8111-111111111111, scrabble, public, 3, open, 1, 2026-11-27 18:10:12.757432+00, 2026-11-27 18:10:12.757432+00, 11:classic-salad).
+2026-11-27T18:10:38.9772491Z  2026-11-27 18:10:12.757 UTC [928] STATEMENT:  INSERT INTO bg_account_social.classic_rooms(id,host,game_id,visibility,seat_count,format) VALUES($1,$2,$3,'public',$4,$5)
+2026-11-27T18:10:38.9773206Z  2026-11-27 18:10:12.757 UTC [928] ERROR:  new row for relation "classic_rooms" violates check constraint "classic_rooms_word_salad_format_check"
+2026-11-27T18:10:38.9774071Z  2026-11-27 18:10:12.757 UTC [928] DETAIL:  Failing row contains (c7fc8297-296d-4754-9fe1-6d11ceb071b0, 10000000-1111-4111-8111-111111111111, scrabble, public, 4, open, 1, 2026-11-27 18:10:12.757849+00, 2026-11-27 18:10:12.757849+00, 13:classic-salad).
+2026-11-27T18:10:38.9774979Z  2026-11-27 18:10:12.757 UTC [928] STATEMENT:  INSERT INTO bg_account_social.classic_rooms(id,host,game_id,visibility,seat_count,format) VALUES($1,$2,$3,'public',$4,$5)
+2026-11-27T18:10:38.9775657Z  2026-11-27 18:10:12.758 UTC [928] ERROR:  new row for relation "classic_rooms" violates check constraint "classic_rooms_word_salad_format_check"
+2026-11-27T18:10:38.9776475Z  2026-11-27 18:10:12.758 UTC [928] DETAIL:  Failing row contains (4954469d-8d08-49a2-a792-87bc5b09912d, 10000000-1111-4111-8111-111111111111, scrabble, public, 2, open, 1, 2026-11-27 18:10:12.758266+00, 2026-11-27 18:10:12.758267+00, 15:wrong).
+2026-11-27T18:10:38.9777346Z  2026-11-27 18:10:12.758 UTC [928] STATEMENT:  INSERT INTO bg_account_social.classic_rooms(id,host,game_id,visibility,seat_count,format) VALUES($1,$2,$3,'public',$4,$5)
+2026-11-27T18:10:38.9778128Z  2026-11-27 18:10:12.758 UTC [928] ERROR:  new row for relation "classic_rooms" violates check constraint "classic_rooms_word_salad_format_check"
+2026-11-27T18:10:38.9778972Z  2026-11-27 18:10:12.758 UTC [928] DETAIL:  Failing row contains (e3bccb7c-97a7-480d-8867-d4059a315046, 10000000-1111-4111-8111-111111111111, chess, public, 2, open, 1, 2026-11-27 18:10:12.758666+00, 2026-11-27 18:10:12.758666+00, 15:classic-salad).
+2026-11-27T18:10:38.9779852Z  2026-11-27 18:10:12.758 UTC [928] STATEMENT:  INSERT INTO bg_account_social.classic_rooms(id,host,game_id,visibility,seat_count,format) VALUES($1,$2,$3,'public',$4,$5)
+2026-11-27T18:10:38.9780398Z  2026-11-27 18:10:14.470 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-27T18:10:38.9781332Z  2026-11-27 18:10:14.527 UTC [62] LOG:  checkpoint complete: wrote 219 buffers (1.3%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.049 s, sync=0.008 s, total=0.058 s; sync files=95, longest=0.005 s, average=0.001 s; distance=8467 kB, estimate=8467 kB; lsn=0/24C9D68, redo lsn=0/24C9D30
+2026-11-27T18:10:38.9782261Z  2026-11-27 18:10:14.715 UTC [929] ERROR:  new row for relation "classic_rooms" violates check constraint "classic_rooms_word_salad_format_check"
+2026-11-27T18:10:38.9783112Z  2026-11-27 18:10:14.715 UTC [929] DETAIL:  Failing row contains (13b9e19b-e188-4850-89f1-81421e53e0e4, 10000000-1111-4111-8111-111111111111, scrabble, public, 3, open, 1, 2026-11-27 18:10:14.715881+00, 2026-11-27 18:10:14.715881+00, 11:classic-salad).
+2026-11-27T18:10:38.9784008Z  2026-11-27 18:10:14.715 UTC [929] STATEMENT:  INSERT INTO bg_account_social.classic_rooms(id,host,game_id,visibility,seat_count,format) VALUES($1,$2,$3,'public',$4,$5)
+2026-11-27T18:10:38.9784679Z  2026-11-27 18:10:14.716 UTC [929] ERROR:  new row for relation "classic_rooms" violates check constraint "classic_rooms_word_salad_format_check"
+2026-11-27T18:10:38.9785528Z  2026-11-27 18:10:14.716 UTC [929] DETAIL:  Failing row contains (90b6f9aa-6a6f-4708-9dc5-59a07db6a169, 10000000-1111-4111-8111-111111111111, scrabble, public, 4, open, 1, 2026-11-27 18:10:14.716314+00, 2026-11-27 18:10:14.716314+00, 13:classic-salad).
+2026-11-27T18:10:38.9786404Z  2026-11-27 18:10:14.716 UTC [929] STATEMENT:  INSERT INTO bg_account_social.classic_rooms(id,host,game_id,visibility,seat_count,format) VALUES($1,$2,$3,'public',$4,$5)
+2026-11-27T18:10:38.9787076Z  2026-11-27 18:10:14.716 UTC [929] ERROR:  new row for relation "classic_rooms" violates check constraint "classic_rooms_word_salad_format_check"
+2026-11-27T18:10:38.9788009Z  2026-11-27 18:10:14.716 UTC [929] DETAIL:  Failing row contains (b9131195-b66d-4f87-987f-94f4bd4395c3, 10000000-1111-4111-8111-111111111111, scrabble, public, 2, open, 1, 2026-11-27 18:10:14.716699+00, 2026-11-27 18:10:14.716699+00, 15:wrong).
+2026-11-27T18:10:38.9788872Z  2026-11-27 18:10:14.716 UTC [929] STATEMENT:  INSERT INTO bg_account_social.classic_rooms(id,host,game_id,visibility,seat_count,format) VALUES($1,$2,$3,'public',$4,$5)
+2026-11-27T18:10:38.9789556Z  2026-11-27 18:10:14.717 UTC [929] ERROR:  new row for relation "classic_rooms" violates check constraint "classic_rooms_word_salad_format_check"
+2026-11-27T18:10:38.9790390Z  2026-11-27 18:10:14.717 UTC [929] DETAIL:  Failing row contains (129d2610-41d8-4d1d-8ba0-3a6d5e88ed05, 10000000-1111-4111-8111-111111111111, chess, public, 2, open, 1, 2026-11-27 18:10:14.717079+00, 2026-11-27 18:10:14.717079+00, 15:classic-salad).
+2026-11-27T18:10:38.9791417Z  2026-11-27 18:10:14.717 UTC [929] STATEMENT:  INSERT INTO bg_account_social.classic_rooms(id,host,game_id,visibility,seat_count,format) VALUES($1,$2,$3,'public',$4,$5)
+2026-11-27T18:10:38.9791969Z  2026-11-27 18:10:16.519 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-27T18:10:38.9792829Z  2026-11-27 18:10:16.522 UTC [62] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=4, longest=0.001 s, average=0.001 s; distance=5300 kB, estimate=8150 kB; lsn=0/29F6E00, redo lsn=0/29F6DC8
+2026-11-27T18:10:38.9793779Z  2026-11-27 18:10:19.497 UTC [940] ERROR:  new row for relation "classic_rule_moves" violates check constraint "r6_test_reject_97aa0969717e4b0286bb944470e8c489"
+2026-11-27T18:10:38.9794892Z  2026-11-27 18:10:19.497 UTC [940] DETAIL:  Failing row contains (97aa0969-717e-4b02-86bb-944470e8c489, 2, 0, {"type": "place", "tiles": [{"id": 136, "col": 8, "row": 8, "bla..., f352cc6c1e38256fe7b60636851760f72e95b7d91e26ad14e17f656e399a4435, 05c071ea47c59fd1220d6f65ccca794cc7823f6cf52afc1fc022f09f40095f12, 2026-11-27 18:10:19.49768+00).
+2026-11-27T18:10:38.9795871Z  2026-11-27 18:10:19.497 UTC [940] STATEMENT:  INSERT INTO bg_account_social.classic_rule_moves
+2026-11-27T18:10:38.9796253Z  	 (session_id,sequence,actor_seat,action,before_hash,after_hash)
+2026-11-27T18:10:38.9796527Z  	 VALUES($1,$2,$3,$4,$5,$6)
+2026-11-27T18:10:38.9796749Z  This user must also own the server process.
+2026-11-27T18:10:38.9796968Z  
+2026-11-27T18:10:38.9797194Z  The database cluster will be initialized with locale "en_US.utf8".
+2026-11-27T18:10:38.9797544Z  The default database encoding has accordingly been set to "UTF8".
+2026-11-27T18:10:38.9797995Z  The default text search configuration will be set to "english".
+2026-11-27T18:10:38.9798332Z  
+2026-11-27T18:10:38.9798509Z  Data page checksums are disabled.
+2026-11-27T18:10:38.9798711Z  
+2026-11-27T18:10:38.9798949Z  fixing permissions on existing directory /var/lib/postgresql/data ... ok
+2026-11-27T18:10:38.9799264Z  creating subdirectories ... ok
+2026-11-27T18:10:38.9799528Z  selecting dynamic shared memory implementation ... posix
+2026-11-27T18:10:38.9799800Z  selecting default max_connections ... 100
+2026-11-27T18:10:38.9800030Z  selecting default shared_buffers ... 128MB
+2026-11-27T18:10:38.9800275Z  selecting default time zone ... Etc/UTC
+2026-11-27T18:10:38.9800499Z  creating configuration files ... ok
+2026-11-27T18:10:38.9800720Z  running bootstrap script ... ok
+2026-11-27T18:10:38.9801117Z  performing post-bootstrap initialization ... ok
+2026-11-27T18:10:38.9801372Z  syncing data to disk ... ok
+2026-11-27T18:10:38.9801555Z  
+2026-11-27T18:10:38.9801700Z  
+2026-11-27T18:10:38.9801893Z  Success. You can now start the database server using:
+2026-11-27T18:10:38.9802128Z  
+2026-11-27T18:10:38.9802382Z      pg_ctl -D /var/lib/postgresql/data -l logfile start
+2026-11-27T18:10:38.9802624Z  
+2026-11-27T18:10:38.9803103Z  waiting for server to start....2026-11-27 18:02:17.671 UTC [48] LOG:  starting PostgreSQL 16.16 (Debian 16.16-1.pgdg13+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+2026-11-27T18:10:38.9803871Z  2026-11-27 18:02:17.671 UTC [48] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-11-27T18:10:38.9804309Z  2026-11-27 18:02:17.713 UTC [51] LOG:  database system was shut down at 2026-11-27 18:02:17 UTC
+2026-11-27T18:10:38.9804704Z  2026-11-27 18:02:17.716 UTC [48] LOG:  database system is ready to accept connections
+2026-11-27T18:10:38.9804987Z   done
+2026-11-27T18:10:38.9805148Z  server started
+2026-11-27T18:10:38.9805311Z  CREATE DATABASE
+2026-11-27T18:10:38.9805473Z  
+2026-11-27T18:10:38.9805618Z  
+2026-11-27T18:10:38.9805876Z  /usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*
+2026-11-27T18:10:38.9806176Z  
+2026-11-27T18:10:38.9806372Z  2026-11-27 18:02:17.879 UTC [48] LOG:  received fast shutdown request
+2026-11-27T18:10:38.9806770Z  waiting for server to shut down....2026-11-27 18:02:17.880 UTC [48] LOG:  aborting any active transactions
+2026-11-27T18:10:38.9807277Z  2026-11-27 18:02:17.881 UTC [48] LOG:  background worker "logical replication launcher" (PID 54) exited with exit code 1
+2026-11-27T18:10:38.9807666Z  2026-11-27 18:02:17.882 UTC [49] LOG:  shutting down
+2026-11-27T18:10:38.9807967Z  2026-11-27 18:02:17.883 UTC [49] LOG:  checkpoint starting: shutdown immediate
+2026-11-27T18:10:38.9809002Z  2026-11-27 18:02:17.993 UTC [49] LOG:  checkpoint complete: wrote 935 buffers (5.7%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.081 s, sync=0.028 s, total=0.111 s; sync files=301, longest=0.026 s, average=0.001 s; distance=4346 kB, estimate=4346 kB; lsn=0/1943060, redo lsn=0/1943060
+2026-11-27T18:10:38.9809784Z  2026-11-27 18:02:17.999 UTC [48] LOG:  database system is shut down
+2026-11-27T18:10:38.9810045Z   done
+2026-11-27T18:10:38.9810196Z  server stopped
+2026-11-27T18:10:38.9810358Z  
+2026-11-27T18:10:38.9810554Z  PostgreSQL init process complete; ready for start up.
+2026-11-27T18:10:38.9810792Z  
+2026-11-27T18:10:38.9814836Z Stop and remove container: b98a48d91343467bbb1178d4cfbef548_postgres16_a7e766
+2026-11-27T18:10:38.9818859Z ##[command]/usr/bin/docker rm --force faacb73d0d2448bc4f6ce7bdb75f7210ac415f6157d5145aa7dcfed6e96fa670
+2026-11-27T18:10:39.6634000Z faacb73d0d2448bc4f6ce7bdb75f7210ac415f6157d5145aa7dcfed6e96fa670
+2026-11-27T18:10:39.6660445Z Remove container network: github_network_e0e8109f827d4f7fb488714fb2fd978c
+2026-11-27T18:10:39.6664614Z ##[command]/usr/bin/docker network rm github_network_e0e8109f827d4f7fb488714fb2fd978c
+2026-11-27T18:10:39.7181362Z github_network_e0e8109f827d4f7fb488714fb2fd978c
+2026-11-27T18:10:39.7259128Z Cleaning up orphan processes
+2026-11-27T18:10:39.7600523Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-go@v5, actions/setup-node@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

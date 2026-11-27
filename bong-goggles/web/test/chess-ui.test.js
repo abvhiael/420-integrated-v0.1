@@ -113,3 +113,30 @@ test('sustained Chess polling distinguishes identity outage, revocation and chan
  }
  mode='normal';await c.refresh(null);assert.equal(c.state.status,'ready');
 });
+
+test('active Chess route never renders setup during recovery or revoked identity',()=>{
+ for(const status of ['idle','unavailable','guest','submitting']){
+  const html=renderChessScreen('play',{target:id,status,session:null});
+  assert.doesNotMatch(html,/data-chess-start/);
+  assert.match(html,status==='guest'?/recover this match/:/Retry match recovery/);
+  assert.doesNotMatch(html,/data-chess-square=/);
+ }
+});
+test('opponent revision racing legal-action read is reconciled without losing match',async()=>{
+ let seq=1,race=true,posts=0;const seen=[];
+ const c=new ChessController({enabled:true,onChange:()=>seen.push(c.state),fetchImpl:async(url,opts)=>{
+  let data;
+  if(url.endsWith('/v1/me'))data={walletRequired:false,profile:{subject:actor}};
+  else if(url.endsWith('/chess-actions')){
+   if(race){seq++;race=false;}
+   data=envelope({sequence:seq,actions:[{type:'move',uci:'e2e4'}]}).data;
+  }else{
+   if(opts.method==='POST'){posts++;seq+=2;}
+   const s=fixture();s.sequence=seq;data=envelope({session:s}).data;
+  }
+  return new Response(JSON.stringify(data),{headers:{'content-type':'application/json'}});
+ }});
+ await c.refresh(id);assert.equal(c.state.session.sequence,2);
+ for(let i=0;i<3;i++){await c.act({type:'move',uci:'e2e4'});assert.equal(c.state.session.sequence,4+i*2);assert.equal(c.state.session.id,id);}
+ assert.equal(posts,3);assert.ok(seen.some(s=>s.status==='submitting'&&s.session?.sequence===4));
+});

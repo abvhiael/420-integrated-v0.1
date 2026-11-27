@@ -24,11 +24,11 @@ const server=createServer(async(req,res)=>{
  }catch{res.writeHead(404);res.end();}
 });
 const trace=[];const record=(event)=>{trace.push(event);if(trace.length>80)trace.shift();};
-let browser,seq=1,board=fixture().privateView.board,last='',san='',outage=false,posts=0,dropReply=false,failedReads=0,authenticatedReads=0;const errors=[];
-const moves=['e2e4','e7e5','g1f3','b8c6'];const notation=['e4','e5','Nf3','Nc6'];
-// After the four submitted plies the game is still active. Advertise a
-// real legal continuation, but never accept an unexpected fifth POST.
-const nextMove=()=>moves[seq-1]??(seq===moves.length+1?'d2d3':null);
+let browser,seq=1,board=fixture().privateView.board,last='',san='',outage=false,revoked=false,posts=0,dropReply=false,failedReads=0,authenticatedReads=0;const errors=[];
+const moves=['e2e4','e7e5','g1f3','b8c6','d2d3'];const notation=['e4','e5','Nf3','Nc6','d3'];
+// After five submitted plies the game remains active; advertise a legal
+// continuation but reject any unexpected sixth POST.
+const nextMove=()=>moves[seq-1]??(seq===moves.length+1?'g8f6':null);
 const index=sq=>(Number(sq[1])-1)*8+'abcdefgh'.indexOf(sq[0]);
 const session=seat=>{const s=fixture(seat);s.sequence=seq;s.turnSeat=(seq-1)%2;Object.assign(s.privateView,{board,turn:s.turnSeat,lastMove:last,lastSAN:san});return s;};
 try{
@@ -47,6 +47,7 @@ try{
    if(outage&&seat===0){failedReads++;await r.abort('internetdisconnected');return;}
    assert.ok(cookie.includes('bc34_actor='+subject),'original authenticated cookie must survive');
    if(p==='/v1/me'&&seat===0)authenticatedReads++;
+   if(revoked&&seat===0){await r.fulfill({status:401,json:{error:'unauthorized'}});return;}
    let status=200,data;
    if(p==='/v1/me')data={walletRequired:false,profile:{subject}};
    else if(p==='/v1/classic-sessions/'+id+'/chess-actions'){
@@ -82,13 +83,28 @@ try{
   if(san)try{await page.getByText('Last move: '+san,{exact:true}).waitFor({timeout:15000});}catch(e){console.error('Chess move transport/render diagnostic',JSON.stringify({uci,san,seq,posts,trace,visible:await page.locator('main').innerText()}));throw e;}
  };
  const url=w.url();
+ const assertRecovery=async(guest=false)=>{
+  await w.getByText(guest?'Sign in with 420ID to recover this match.':'Recovering the authoritative Chess position…',{exact:true}).waitFor({timeout:15000});
+  assert.equal(w.url(),url);
+  assert.equal(await w.evaluate(()=>window.bc37DocumentMarker),'same-document');
+  assert.equal(await w.locator('[data-chess-start], [data-chess-square], [data-chess-action], [data-chess-promotion]').count(),0);
+  if(!guest)assert.equal(await w.locator('[data-chess-recover]').count(),1);
+ };
+ // Observe every render, not merely the final settled state.
+ await w.evaluate(()=>{
+  window.bc37SetupRenders=0;
+  new MutationObserver(records=>{
+   for(const record of records)for(const node of record.addedNodes)
+    if(node.nodeType===1&&(node.matches('[data-chess-start]')||node.querySelector('[data-chess-start]')))window.bc37SetupRenders++;
+  }).observe(document.body,{childList:true,subtree:true});
+ });
  await w.evaluate(()=>{window.bc37DocumentMarker='same-document';});
  await move(w,'e2e4','e4');
  await b.getByText('Black to move · Your turn',{exact:true}).waitFor({timeout:15000});
  // Transport failure, not a 401 or logout. Only White loses connectivity.
  outage=true;await white.context.setOffline(true);
  await w.locator('[data-chess-square]').first().waitFor({state:'detached',timeout:15000});
- await w.getByText('Chess session unavailable.',{exact:true}).waitFor();
+ await assertRecovery();
  assert.equal(await w.locator('[data-chess-action], [data-chess-promotion]').count(),0);
  assert.equal(posts,1);
  await move(b,'e7e5','e5');
@@ -105,7 +121,7 @@ try{
  // must reconcile the committed revision, never blindly resend a POST.
  dropReply=true;await move(w,'g1f3',null);
  await w.locator('[data-chess-square]').first().waitFor({state:'detached',timeout:15000});
- await w.getByText('Chess session unavailable.',{exact:true}).waitFor();
+ await assertRecovery();
  assert.equal(posts,3);assert.equal(seq,4);
  await b.getByText('Black to move · Your turn',{exact:true}).waitFor({timeout:15000});
  outage=false;
@@ -117,9 +133,19 @@ try{
  await w.getByText('White to move · Your turn',{exact:true}).waitFor();
  assert.equal(posts,4);assert.equal(seq,5);assert.ok(failedReads>0);
  assert.equal(await w.locator('[data-chess-square="c6"]').getAttribute('aria-label'),'c6, Black knight');
- await w.locator('[data-chess-square="d2"]').click();
- await w.locator('[data-chess-square="d3"].target').waitFor({timeout:15000});
- assert.equal(posts,4,'selecting a legal continuation must not submit a move');
+ // Revoke authorization while the board is visible; recover only after
+ // the original authenticated principal is re-established.
+ revoked=true;
+ await assertRecovery(true);
+ assert.equal(posts,4);
+ revoked=false;
+ await w.getByText('Last move: Nc6',{exact:true}).waitFor({timeout:15000});
+ assert.equal(await w.locator('[data-chess-square]').count(),64);
+ assert.equal(await w.locator('[data-chess-square="c6"]').getAttribute('aria-label'),'c6, Black knight');
+ await move(w,'d2d3','d3');
+ assert.equal(posts,5);assert.equal(seq,6);
+ assert.equal(await w.locator('[data-chess-square="d3"]').getAttribute('aria-label'),'d3, White pawn');
+ assert.equal(await w.evaluate(()=>window.bc37SetupRenders),0,'active match must never render setup');
  assert.equal(w.url(),url);assert.equal(await w.evaluate(()=>window.bc37DocumentMarker),'same-document');
  assert.deepEqual(errors,[]);
  console.log('BC-3.7 Chromium: temporary network loss, same-document reconnect, opponent progress, lost committed response, no duplicate POST and resumed gameplay passed');

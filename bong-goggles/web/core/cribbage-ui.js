@@ -53,7 +53,6 @@ return '<figure class="cribbage-leaf" aria-label="Cannabis-leaf cribbage scoring
 '<svg viewBox="0 0 '+CRIBBAGE_BOARD_SIZE.width+' '+CRIBBAGE_BOARD_SIZE.height+
 '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Leaf-shaped 121-point cribbage board">'+
 '<image href="'+CRIBBAGE_BOARD_ART+'" x="0" y="0" width="1448" height="1086" preserveAspectRatio="none"/>'+
-
 '<g aria-hidden="true">'+mark+'</g><g class="cribbage-pegs">'+tokens+'</g></svg>'+
 '<figcaption><ol class="cribbage-board-totals">'+table+
 '</ol><p>Two pegs leapfrog as the server awards points. '+(seatCount===4?
@@ -99,9 +98,9 @@ return '<button type="button" class="cribbage-card-button" data-cribbage-card="'
 cardFace(id,selected.has(id),!active)+'</button>';
 }).join('');
 const note=discard?'Choose '+count+' card'+(count===1?'':'s')+' for '+(v.dealer===session.viewerSeat?'your crib':'the dealer’s crib')+'.':
-v.phase==='peg'?'Select a card, then press Play selected card. Count cannot exceed 31.':
-v.phase==='cut'?'One legal cut reveals the shared starter.':
-'Your next hand is being prepared.';
+v.phase==='peg'?'Select a card, then Play. Count cannot exceed 31.':
+v.phase==='cut'?'Cut to reveal the starter.':
+'Preparing next hand.';
 const action=discard?
 '<button class="cribbage-primary" type="button" data-cribbage-action="discard"'+
 (ready&&interactive?'':' disabled')+'>Send '+count+' to crib</button>':
@@ -116,7 +115,7 @@ v.phase==='peg'&&turn&&legal.some(x=>x.type==='go')?
 '';
 return '<section class="cribbage-hand-area" aria-label="Your private hand">'+
 '<div class="cribbage-section-title"><h3>Your hand</h3><span>'+v.hand.length+' cards</span></div>'+
-'<p>'+esc(state.submitting?'Submitting your move…':state.scoring?'Counting points — play resumes automatically.':note)+'</p><div class="cribbage-hand-cards">'+cards+'</div>'+
+'<p>'+esc(state.submitting?'Submitting move…':state.scoring?'Counting points…':note)+'</p><div class="cribbage-hand-cards">'+cards+'</div>'+
 '<div class="cribbage-actions">'+action+(selected.size?
 '<button type="button" data-cribbage-action="clear">Clear selection</button>':'')+'</div></section>';
 }

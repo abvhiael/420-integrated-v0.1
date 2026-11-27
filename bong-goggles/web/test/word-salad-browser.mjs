@@ -65,7 +65,10 @@ async function inspect(page,n,view){
  for(const [label,kind] of [['Game dictionary','english'],['Cannabis dictionary','cannabis']]){
   const link=table.getByRole('link',{name:label,exact:true});
   assert.equal(await link.count(),1);
-  assert.match(await link.getAttribute('href'),new RegExp('^/word-salad-dictionaries/[a-f0-9]{64}-'+kind+'[.]txt
+  assert.match(await link.getAttribute('href'),new RegExp('^/word-salad-dictionaries/[a-f0-9]{64}-'+kind+'[.]txt$'));
+  assert.equal(await link.getAttribute('target'),'_blank');
+  assert.equal(await link.getAttribute('rel'),'noopener noreferrer');
+ }
  assert.equal(await table.locator('.ws-rack-tile,.ws-rack-empty').count(),BOARD_SPECS[n].rackSize);
  for(const selector of ['.ws-logo','.ws-board','.ws-rack','.ws-turn','.ws-player','.ws-bag','[data-ws-action="play-word"]','[data-ws-action="pass"]']){
   await table.locator(selector).first().waitFor({state:'visible',timeout:15000});

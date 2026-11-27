@@ -71,7 +71,7 @@ func TestBC42WordSaladAlternatingProductionTurns(t *testing.T){
   match,e:=h.Sessions.startWithSeedSource(ctx,memberA,room.ID,"",func()([32]byte,error){return [32]byte{42},nil});if e!=nil{t.Fatal(e)}
   human,computer,words:=0,0,0
   svc:=h.Sessions
-  for j:=0;j<50&&match.Status=="active";j++{
+  for j:=0;j<600&&match.Status=="active";j++{
    before:=r6Record(t,store,match.ID)
    if before.TurnSeat==nil{t.Fatal("missing turn")}
    seat:=*before.TurnSeat
@@ -94,6 +94,16 @@ func TestBC42WordSaladAlternatingProductionTurns(t *testing.T){
    if match.Status=="active"&&(match.TurnSeat==nil||*match.TurnSeat==seat){t.Fatal("turn failed to advance")}
    if j==5{svc,e=NewClassicSessions(store,h.Rooms,resolve);if e!=nil{t.Fatal(e)};if e=svc.EnableBots(policies);e!=nil{t.Fatal(e)}}
   }
+  if match.Status!="finished"{t.Fatal("game did not naturally complete",match.Status,match.Sequence)}
+  final:=r6Record(t,store,match.ID)
+  frame,e:=a.decode(final.State);if e!=nil{t.Fatal(e)}
+  data,e:=saladDecode(frame);if e!=nil{t.Fatal(e)}
+  if !frame.Terminal||final.TurnSeat!=nil||(data.Ending!="out"&&data.Ending!="scoreless"){t.Fatal("invalid natural completion",data.Ending)}
+  expected:=[]int{0};if frame.Scores[1]>frame.Scores[0]{expected=[]int{1}}else if frame.Scores[1]==frame.Scores[0]{expected=[]int{0,1}}
+  if len(data.Winners)!=len(expected){t.Fatal("winner count",data.Winners,frame.Scores)}
+  for k,w:=range expected{if data.Winners[k]!=w{t.Fatal("winner mismatch",data.Winners,frame.Scores)}}
+  if len(expected)==1{if final.WinnerSeat==nil||*final.WinnerSeat!=expected[0]{t.Fatal("persisted winner mismatch")}}else if final.WinnerSeat!=nil{t.Fatal("tie has sole winner")}
+  t.Logf("natural completion: %s scores=%v winners=%v",data.Ending,frame.Scores,data.Winners)
   if human<2||computer<2||words<1{t.Fatal("insufficient genuine alternating play",human,computer,words)}
   if e=svc.VerifyRules(ctx,match.ID);e!=nil{t.Fatal("cold journal replay",e)}
   r6Counts(t,store,match.ID,[3]int{1+human+computer,human+computer,human})

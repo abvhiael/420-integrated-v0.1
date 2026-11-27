@@ -13,7 +13,10 @@ export function bindClassicRoomsDom(root,classicRoomsController,{isSurface,onRef
    const game=create.elements.namedItem('gameId')?.value,range=ROOM_LIMITS[game];
    const select=create.elements.namedItem('seatCount');
    if(!select||!range)return;
-   for(const option of select.options)option.disabled=Number(option.value)<range[0]||Number(option.value)>range[1];
+   for(const option of select.options){
+    option.hidden=game==='cribbage'&&Number(option.value)===3;
+    option.disabled=option.hidden||Number(option.value)<range[0]||Number(option.value)>range[1];
+   }
    if(select.selectedOptions[0]?.disabled)select.value=String(range[0]);
    const options=create.querySelector('[data-labyrinth-room-format]');
    if(options){options.hidden=!(game==='labyrinth-cribbage'&&Number(select.value)===4);}

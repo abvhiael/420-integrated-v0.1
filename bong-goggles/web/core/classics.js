@@ -12,7 +12,7 @@ export const CLASSIC_COLLECTIONS=Object.freeze([
   item('cross-country-chaos','Cross-Country Chaos','2–4','account','Three regional races, one champion. Separate 420ID accounts.')
  ])}),
  Object.freeze({id:'cards',title:'Card Games',games:Object.freeze([
-  item('cribbage','Cribbage','2–4','registry','Canonical two-player session registry only; interactive ruleset not enabled.'),
+  item('cribbage','Cribbage','2 or 4','registry','Canonical two-player session registry only; interactive ruleset not enabled.'),
   item('labyrinth-cribbage','Labyrinth Cribbage','2–4','playable','325 points; six-card hands; partnerships default; developer-authorized release.'),
   item('crazy-eights','Crazy Eights','2–4'),
   item('euchre','Euchre','4'),

@@ -130,6 +130,7 @@ func (c *ClassicRooms) Create(ctx context.Context,viewer,game,visibility string,
 // independently seals the corresponding rules variant for replay.
 func (c *ClassicRooms) CreateWithFormat(ctx context.Context,viewer,game,visibility string,count int,format string)(ClassicRoomView,error){
  var empty ClassicRoomView
+ if game=="cribbage"&&count==3{return empty,ErrInvalid}
  if game=="russian-cribbage"{return empty,ErrInvalid} // legacy IDs may be read but not newly created
  if game=="labyrinth-cribbage"{
   if count==4{

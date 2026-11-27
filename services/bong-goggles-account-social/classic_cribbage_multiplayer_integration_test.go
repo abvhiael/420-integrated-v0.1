@@ -172,13 +172,14 @@ func TestBC15TwoIndependent420IDAccountsPlayAndColdResume(t *testing.T){
 func TestBC15QualifiedMixed420IDAndComputerSeatPersistence(t *testing.T){
  store,h,host,peer,_:=bc15Fixture(t,"198.51.100.216")
  bc15AdvanceRateWindow(t,store)
- for _,n:=range []int{3,4}{
+ if w:=request(h,"POST","/v1/classic-rooms",body(map[string]any{"gameId":"cribbage","visibility":"public","seatCount":3}),host);w.Code!=400{t.Fatalf("retired three-seat room must be rejected: %d %s",w.Code,w.Body.String())}
+ for _,n:=range []int{4}{
   bc15AdvanceRateWindow(t,store)
   room:=bc15Room(t,h,host,peer,n)
   match:=bc06Start(t,h,host,room.ID)
   if match.TurnSeat==nil{t.Fatal("no turn")}
   botMoves:=0
-  for step:=0;step<80;step++{
+  for step:=0;step<400;step++{
    if step>0&&step%20==0{bc15AdvanceRateWindow(t,store)}
    current:=bc15Get(t,h,host,match.ID)
    if current.Status!="active"{break}
@@ -204,6 +205,7 @@ func TestBC15QualifiedMixed420IDAndComputerSeatPersistence(t *testing.T){
     if e:=h.Sessions.VerifyRules(context.Background(),match.ID);e!=nil{t.Fatal("AI journal replay",e)}
    }
   }
+  if final:=bc15Get(t,h,host,match.ID);final.Status!="finished"{t.Fatal("mixed partnership match did not finish",final.Status)}
   if botMoves<3{t.Fatal("unqualified bot activity",n,botMoves)}
   if e:=h.Sessions.VerifyRules(context.Background(),match.ID);e!=nil{t.Fatal("mixed seat journal",e)}
   if w:=request(h,"GET","/v1/classic-sessions/"+match.ID,"");w.Code!=401{t.Fatal("outsider recovered private bot/human match")}

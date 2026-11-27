@@ -48,7 +48,7 @@ const http=(status,data)=>({status,ok:status>=200&&status<300,headers:{get:()=> 
 test('BC-1.4 exactly 120 unique numbered holes per score track, shared 121 and separate 2-peg parks',()=>{
  assert.equal(CRIBBAGE_BOARD_ART,'/assets/games/cribbage/board-cannabis-leaf.png');
  assert.deepEqual(CRIBBAGE_PARKS.green,[{x:460,y:804},{x:498,y:804}]);
- assert.deepEqual(CRIBBAGE_PARKS.ivory,[{x:460,y:842},{x:498,y:842}]);
+ assert.deepEqual(CRIBBAGE_PARKS.ivory,[{x:458,y:843},{x:498,y:843}]);
  assert.deepEqual(Object.keys(CRIBBAGE_HOLES),['green','ivory','amber']);
  for(const lane of Object.keys(CRIBBAGE_HOLES)){
   const holes=CRIBBAGE_HOLES[lane];
@@ -219,6 +219,8 @@ test('BC-1.4 authenticated session posts only a validated server move and holds 
  assert.ok(calls.some(x=>x.path==='/social-api/v1/classic-sessions/'+id+'/action'));
  timer.flush();
  assert.equal(controller.state.announcement,'');
+ assert.deepEqual([controller.state.pegs[0].a,controller.state.pegs[0].b],[2,0]);
+ assert.equal(controller.state.scoring,false);
  controller.destroy();
 });
 
@@ -272,4 +274,31 @@ test('In-place Cribbage updates retain the outer shell and its current match rou
  element.outerHTML='sentinel';
  assert.equal(updateCribbageView(root,route,null,false,'/games/rooms'),false);
  assert.equal(element.outerHTML,'sentinel');
+});
+
+test('Transient refresh preserves active match and selection; verified recovery resumes input',async()=>{
+ let fail=false;
+ const controller=new CribbageSessionController({enabled:true,fetchImpl:async path=>{
+  if(path.endsWith('/v1/me'))return http(200,{walletRequired:false,profile:{subject}});
+  return fail?http(503,{}):http(200,snapshot().data);
+ }});
+ await controller.open(id);
+ controller.emit({selection:[0]});
+ fail=true;await controller.open(id,{quiet:true});
+ assert.equal(controller.state.status,'error');
+ assert.equal(controller.state.session.id,id);
+ assert.deepEqual(controller.state.selection,[0]);
+ fail=false;await controller.open(id,{quiet:true});
+ assert.equal(controller.state.status,'ready');
+ assert.deepEqual(controller.state.selection,[0]);
+ controller.destroy();
+});
+test('Next hand is visible but input remains locked during score playback',()=>{
+ const s=accepted(),state={status:'ready',session:s,selection:[0,4],scoring:true};
+ const html=renderCribbageRoute({screen:'play',state});
+ assert.match(html,/Counting the previous hand/);
+ assert.match(html,/data-cribbage-card="0" disabled/);
+ assert.match(html,/data-cribbage-action="discard" disabled/);
+ const own={...s,privateView:{...s.privateView,dealer:0}};
+ assert.match(renderCribbageRoute({screen:'play',state:{...state,scoring:false,session:own}}),/Choose 2 cards for your crib/);
 });

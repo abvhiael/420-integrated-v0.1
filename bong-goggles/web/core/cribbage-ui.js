@@ -1,5 +1,3 @@
-// BC-1.4: usable left-side hand/table, right-side approved leaf score board.
-// Reads only the verified 420ID seat projection. Never renders secret opponent cards.
 import {escapeHtml as esc} from './design-system.js';
 import {resignCribbageMatch} from './classic-cribbage-multiplayer.js';
 import {renderCribbageSocial} from './classic-cribbage-social.js';
@@ -91,33 +89,34 @@ const ready=discard&&selected.size===count&&cribbageCanSubmit(session,{
 type:'discard',cards:v.hand.filter(id=>selected.has(id))
 });
 const readyPlay=v.phase==='peg'&&selected.size===1&&validPlay.has([...selected][0])&&
- cribbageCanSubmit(session,{type:'play',card:[...selected][0]});
+cribbageCanSubmit(session,{type:'play',card:[...selected][0]});
+const interactive=state.status==='ready'&&!state.submitting&&!state.scoring;
 const cards=v.hand.map(id=>{
-const active=turn&&state.status==='ready'&&!state.submitting&&(discard||validPlay.has(id));
+const active=turn&&interactive&&(discard||validPlay.has(id));
 return '<button type="button" class="cribbage-card-button" data-cribbage-card="'+id+'"'+
 (active?'':' disabled')+' aria-pressed="'+(selected.has(id)?'true':'false')+
 '" aria-label="'+esc('Select '+cribbageCardLabel(id))+'">'+
 cardFace(id,selected.has(id),!active)+'</button>';
 }).join('');
-const note=discard?'Select '+count+' card'+(count===1?'':'s')+' to put in the dealer’s crib.':
+const note=discard?'Choose '+count+' card'+(count===1?'':'s')+' for '+(v.dealer===session.viewerSeat?'your crib':'the dealer’s crib')+'.':
 v.phase==='peg'?'Select a card, then press Play selected card. Count cannot exceed 31.':
 v.phase==='cut'?'One legal cut reveals the shared starter.':
 'Your next hand is being prepared.';
 const action=discard?
 '<button class="cribbage-primary" type="button" data-cribbage-action="discard"'+
-(ready&&state.status==='ready'&&!state.submitting?'':' disabled')+'>Send '+count+' to crib</button>':
+(ready&&interactive?'':' disabled')+'>Send '+count+' to crib</button>':
 v.phase==='cut'&&turn?
-'<button class="cribbage-primary" type="button" data-cribbage-action="cut"'+(state.status==='ready'?'':' disabled')+'>Cut the deck</button>':
+'<button class="cribbage-primary" type="button" data-cribbage-action="cut"'+(interactive?'':' disabled')+'>Cut the deck</button>':
 v.phase==='peg'&&turn&&validPlay.size?
 '<button class="cribbage-primary" type="button" data-cribbage-action="play"'+
-(readyPlay&&state.status==='ready'&&!state.submitting?'':' disabled')+'>Play selected card</button>':
+(readyPlay&&interactive?'':' disabled')+'>Play selected card</button>':
 v.phase==='peg'&&turn&&legal.some(x=>x.type==='go')?
 '<button class="cribbage-primary" type="button" data-cribbage-action="go"'+
-(state.status==='ready'?'':' disabled')+'>Say “Go”</button>':
+(interactive?'':' disabled')+'>Say “Go”</button>':
 '';
 return '<section class="cribbage-hand-area" aria-label="Your private hand">'+
 '<div class="cribbage-section-title"><h3>Your hand</h3><span>'+v.hand.length+' cards</span></div>'+
-'<p>'+esc(note)+'</p><div class="cribbage-hand-cards">'+cards+'</div>'+
+'<p>'+esc(state.scoring?'Counting the previous hand — play resumes automatically.':note)+'</p><div class="cribbage-hand-cards">'+cards+'</div>'+
 '<div class="cribbage-actions">'+action+(selected.size?
 '<button type="button" data-cribbage-action="clear">Clear selection</button>':'')+'</div></section>';
 }
@@ -164,7 +163,7 @@ seatCount:session.seatCount,pegs:state.pegs,settings:state.settings})+'</div></d
 }
 function rules(){
 return '<section class="cribbage-info"><h3>Cribbage · 121 points</h3>'+
-'<p>Two players keep four from six dealt cards, discarding two each. Three players keep four from five and contribute one to the crib; an extra crib card comes from the stock. Four players play as opposite-seat partners and discard one card each.</p>'+
+'<p>Two players keep four from six dealt cards, discarding two each. Four players play as opposite-seat partners and discard one card each.</p>'+
 '<p>The crib belongs to the dealer. After everyone discards, cut a starter card. A Jack starter earns the dealer two for “his heels”.</p>'+
 '<p>Starting left of the dealer, each player plays a card in turn without letting the running count exceed 31. Score two for 15 or 31, two for a pair, six for three of a kind, twelve for four of a kind and the length of qualifying runs. The last playable card below 31 or a Go scores one.</p>'+
 '<p>At the show, counting starts with the player left of the dealer and proceeds clockwise. The dealer’s hand counts last, then the dealer’s crib. Fifteens, pairs, runs, hand flushes, crib five-card flushes and nobs count automatically. The first side to 121 wins.</p>'+
@@ -204,7 +203,7 @@ myGames+
 (s.error?'<p role="alert">'+esc(s.error)+'</p>':'')+'</section>';
 const boardPreview=renderCribbageBoard({scores:[0,0],seatCount:2,settings:s.settings??{}});
 const home='<div class="cribbage-intro-grid"><div class="cribbage-intro-copy"><h3>Introduction · Classic Cribbage, made for game night</h3>'+
-'<p>Play 2–4 players. Watch pegging and scoring.</p>'+
+'<p>Play two players or four in partnerships. Watch pegging and scoring.</p>'+
 '<p>The board counts hands in order, with the dealer’s crib last. Every counted announcement is held for 1.5 seconds before the next scoring event.</p>'+
 '<a class="cribbage-primary" href="/games/cribbage/play" data-route="classic-game">Open a Cribbage table</a></div>'+
 boardPreview+'</div>'+practice(pState);

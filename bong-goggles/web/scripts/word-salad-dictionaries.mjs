@@ -20,10 +20,10 @@ export async function dictionaryFiles(){
  const identity=(g,c)=>{const h=createHash('sha256');h.update(Buffer.from([0]));h.update(g.join('\n')+'\n');h.update(Buffer.from([1]));h.update(c.join('\n')+'\n');return h.digest('hex');};
  const files={};
  for(const [g,label] of [[english,'legacy'],[general,'current']]){
-  const id=identity(g,cannabis);
-  files[label+'-english.txt']=g.join('\n')+'\n';
-  files[label+'-cannabis.txt']=cannabis.join('\n')+'\n';
-  files[label+'-identity.txt']=id+'\n';
+  const id=sha('scrabble\nv1\nword-salad-v1;four-seat-cap;hybrid42;dictionary-sha256='+identity(g,cannabis));
+  files[id+'-english.txt']=g.join('\n')+'\n';
+  files[id+'-cannabis.txt']=cannabis.join('\n')+'\n';
+
  }
  return files;
 }

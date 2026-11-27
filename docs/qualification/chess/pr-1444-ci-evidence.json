@@ -1,0 +1,744 @@
+{
+  "pr": 1444,
+  "qualified_sha": "55b4b3641d53d27cfdaf463f3f236aeb191d4077",
+  "scope": "Structured workflow/job/step evidence; not raw runner logs or live production gameplay acceptance",
+  "runs": [
+    {
+      "name": "BC-4.4.2-B Word Salad Browser Qualification",
+      "id": 45922144090,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45922144090",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 140255105465,
+          "name": "responsive-browser",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Build actual frontend and verify static gates",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install isolated pinned Chromium test tooling",
+              "conclusion": "success"
+            },
+            {
+              "name": "Six board sizes across four viewport classes",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 140255107270,
+          "name": "live-authenticated",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "name": "BC-3.6 Chess History and Social Integration",
+      "id": 45922142195,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45922142195",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 140255098926,
+          "name": "chess-web",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify exact source",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install web build dependencies (manifest-pinned)",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete web regression and build qualification",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install pinned browser qualification dependencies",
+              "conclusion": "success"
+            },
+            {
+              "name": "Chess real-browser history, profiles, multiplayer and accessibility qualification",
+              "conclusion": "success"
+            },
+            {
+              "name": "Preserve public release lock",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 140255099297,
+          "name": "chess-postgresql",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify exact source",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete Chess backend and authoritative API regression",
+              "conclusion": "success"
+            },
+            {
+              "name": "Static analysis and service build",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BC-3.4 Chess Player Interface",
+      "id": 45922142188,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45922142188",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 140255098928,
+          "name": "chess-web",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify exact source",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install web build dependencies (manifest-pinned)",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete web regression and build qualification",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install pinned browser qualification dependencies",
+              "conclusion": "success"
+            },
+            {
+              "name": "Chess real-browser two-seat and accessibility qualification",
+              "conclusion": "success"
+            },
+            {
+              "name": "Preserve public release lock",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 140255099311,
+          "name": "chess-postgresql",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify exact source",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete Chess backend and authoritative API regression",
+              "conclusion": "success"
+            },
+            {
+              "name": "Static analysis and service build",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BC-3.7 Chess Automated and Adversarial Qualification",
+      "id": 45922142187,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45922142187",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 140255098699,
+          "name": "chess-postgresql",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify exact source",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete Chess backend, adversarial concurrency, AI and authoritative API regression",
+              "conclusion": "success"
+            },
+            {
+              "name": "Static analysis and service build",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 140255099159,
+          "name": "chess-web",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify exact source",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install web build dependencies (manifest-pinned)",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete web regression and build qualification",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install pinned browser qualification dependencies",
+              "conclusion": "success"
+            },
+            {
+              "name": "Chess real-browser history, profiles, multiplayer, accessibility and network recovery qualification",
+              "conclusion": "success"
+            },
+            {
+              "name": "Preserve public release lock",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bong Goggles Web Verification",
+      "id": 45922142145,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45922142145",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 140255098465,
+          "name": "verify-bong-goggles-web",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install web build dependencies",
+              "conclusion": "success"
+            },
+            {
+              "name": "Static web checks",
+              "conclusion": "success"
+            },
+            {
+              "name": "Web unit tests",
+              "conclusion": "success"
+            },
+            {
+              "name": "Public social feed HTTP route regression tests",
+              "conclusion": "success"
+            },
+            {
+              "name": "Default web build keeps account features disabled",
+              "conclusion": "success"
+            },
+            {
+              "name": "Explicit Cloudflare account-social activation build",
+              "conclusion": "success"
+            },
+            {
+              "name": "Main-branch Pages production activation build (dashboard variables absent)",
+              "conclusion": "success"
+            },
+            {
+              "name": "BG-19.13 static asset and accessibility qualification",
+              "conclusion": "success"
+            },
+            {
+              "name": "Frontend secret scan",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AUTH-8/9/10/11 Wallet-Independent BongGoggles Social",
+      "id": 45922142238,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45922142238",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 140255099113,
+          "name": "qualify-social",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify exact implementation SHA",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Social API PostgreSQL and race qualification",
+              "conclusion": "success"
+            },
+            {
+              "name": "Social API static analysis",
+              "conclusion": "success"
+            },
+            {
+              "name": "Build restricted social service",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify no implicit production startup",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Focused wallet-independent browser tests",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BC-4.2 Word Salad Backend Qualification",
+      "id": 45922142248,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45922142248",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 140255098970,
+          "name": "word-salad-postgresql",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify exact source",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Word Salad engine, authenticated API and durable replay regression",
+              "conclusion": "success"
+            },
+            {
+              "name": "Record dictionary identities",
+              "conclusion": "success"
+            },
+            {
+              "name": "Web catalogue and tile regression",
+              "conclusion": "success"
+            },
+            {
+              "name": "Static analysis and service build",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BC-3.5 Chess Player Interface",
+      "id": 45922142234,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45922142234",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 140255098934,
+          "name": "chess-postgresql",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify exact source",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete Chess backend and authoritative API regression",
+              "conclusion": "success"
+            },
+            {
+              "name": "Static analysis and service build",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-go@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 140255099308,
+          "name": "chess-web",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify exact source",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install web build dependencies (manifest-pinned)",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete web regression and build qualification",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install pinned browser qualification dependencies",
+              "conclusion": "success"
+            },
+            {
+              "name": "Chess real-browser two-seat and accessibility qualification",
+              "conclusion": "success"
+            },
+            {
+              "name": "Preserve public release lock",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -142,7 +142,7 @@ let submitted=false,failure='';this.mutating=true;
 try{
 let path,body;
 if(action==='create'){
-if(!validCount(data.gameId,Number(data.seatCount))||!['private','public'].includes(data.visibility))throw Error('Invalid room configuration');
+if((data.gameId==='cribbage'&&Number(data.seatCount)===3)||!validCount(data.gameId,Number(data.seatCount))||!['private','public'].includes(data.visibility))throw Error('Invalid room configuration');
 path='/v1/classic-rooms';body={gameId:data.gameId,seatCount:Number(data.seatCount),visibility:data.visibility};
 if(data.gameId==='labyrinth-cribbage'){
  if(!['individual','partnerships',''].includes(data.format??''))throw Error('Invalid Labyrinth scoring format');

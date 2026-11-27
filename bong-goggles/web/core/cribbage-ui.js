@@ -116,7 +116,7 @@ v.phase==='peg'&&turn&&legal.some(x=>x.type==='go')?
 '';
 return '<section class="cribbage-hand-area" aria-label="Your private hand">'+
 '<div class="cribbage-section-title"><h3>Your hand</h3><span>'+v.hand.length+' cards</span></div>'+
-'<p>'+esc(state.scoring?'Counting the previous hand — play resumes automatically.':note)+'</p><div class="cribbage-hand-cards">'+cards+'</div>'+
+'<p>'+esc(state.submitting?'Submitting your move…':state.scoring?'Counting points — play resumes automatically.':note)+'</p><div class="cribbage-hand-cards">'+cards+'</div>'+
 '<div class="cribbage-actions">'+action+(selected.size?
 '<button type="button" data-cribbage-action="clear">Clear selection</button>':'')+'</div></section>';
 }
@@ -226,7 +226,7 @@ if(!controller?.client.enabled)return;
 bindPractice(root,controller);
 const state=controller.state,session=state.session;
 for(const button of root.querySelectorAll('[data-cribbage-card]'))button.addEventListener('click',()=>{
-if(!session||state.submitting||state.queue?.length)return;
+if(!session||controller.state.status!=='ready'||controller.state.submitting||controller.state.scoring)return;
 const id=Number(button.dataset.cribbageCard),v=controller.state.session?.privateView;
 if(!v||!v.hand.includes(id))return;
 if(v.phase!=='discard'&&v.phase!=='peg')return;
@@ -241,7 +241,7 @@ if(action==='cancel-resign'){controller.emit({resignPending:false});return;}
 if(action==='confirm-resign'){void resignCribbageMatch(controller).catch(()=>{});return;}
 if(action==='clear'){controller.emit({selection:[]});return;}
 if(action==='refresh'){if(controller.state.session)void controller.open(controller.state.session.id,{quiet:true});return;}
-if(!v)return;
+if(!v||controller.state.submitting||controller.state.scoring)return;
 let move=null;
 if(action==='discard')move={type:'discard',cards:v.hand.filter(id=>(controller.state.selection??[]).includes(id))};
 else if(action==='play'){
@@ -251,7 +251,7 @@ if(cards.length===1)move={type:'play',card:cards[0]};
 else if(action==='cut')move={type:'cut'};
 else if(action==='go')move={type:'go'};
 if(move&&cribbageCanSubmit(controller.state.session,move))
-void controller.act(move).catch(()=>{});
+void controller.act(move).catch(e=>{if(controller.state.status==='ready'&&!controller.state.submitting)controller.emit({notice:e.message});});
 });
 for(const setting of root.querySelectorAll('[data-cribbage-setting]'))setting.addEventListener('change',()=>{
 const key=setting.dataset.cribbageSetting;

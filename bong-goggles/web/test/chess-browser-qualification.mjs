@@ -5,9 +5,10 @@ import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
 import {resolve,extname,sep} from 'node:path';
 import {chromium} from 'playwright';
+import {chessArtPaths} from '../scripts/chess-art.mjs';
 import {id,roomId,actor,fixture,envelope} from './chess-fixture.mjs';
 const root=resolve(import.meta.dirname,'..'),peer='22222222-2222-4222-8222-222222222222';
-const types={'.html':'text/html','.css':'text/css','.js':'text/javascript','.json':'application/json','.svg':'image/svg+xml'};
+const types={'.html':'text/html','.css':'text/css','.js':'text/javascript','.json':'application/json','.svg':'image/svg+xml','.webp':'image/webp'};
 const server=createServer(async(req,res)=>{
  try{
   let p=new URL(req.url,'http://localhost').pathname;
@@ -18,7 +19,7 @@ const server=createServer(async(req,res)=>{
    res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify(cfg));return;
   }
   if(p==='/'||p.startsWith('/games/'))p='/index.html';
-  const path=resolve(root,'.'+p);if(!path.startsWith(root+sep)){res.writeHead(403);res.end();return;}
+  const path=resolve(root,p.startsWith('/assets/games/chess/')?'dist'+p:'.'+p);if(!path.startsWith(root+sep)){res.writeHead(403);res.end();return;}
   const bytes=await readFile(path);res.writeHead(200,{'Content-Type':types[extname(path)]??'application/octet-stream'});res.end(bytes);
  }catch{res.writeHead(404);res.end();}
 });
@@ -57,6 +58,20 @@ try{
   return {page,context};
  }
  const white=await open(0,1366),black=await open(1,390),w=white.page,b=black.page;
+ for(const page of [w,b]){
+  await page.waitForFunction(()=>Array.from(document.querySelectorAll('.chess-piece,.chess-title img')).length===33&&Array.from(document.querySelectorAll('.chess-piece,.chess-title img')).every(i=>i.complete&&i.naturalWidth>0));
+  const artwork=await page.locator('.chess-piece').evaluateAll(images=>[...new Set(images.map(i=>new URL(i.src).pathname))].sort());
+  assert.equal(artwork.length,12);
+  for(const path of artwork)assert.ok(chessArtPaths.has(path.slice(1)));
+  for(const [selector,filename] of [['.chess-screen','chess-wallpaper.webp'],['.chess-board-frame','chess-board.webp']]){
+   const url=await page.locator(selector).evaluate(el=>getComputedStyle(el).backgroundImage);
+   assert.ok(url.includes(filename));
+   const response=await page.request.get(origin+'/assets/games/chess/'+filename);
+   assert.equal(response.status(),200);assert.match(response.headers()['content-type'],/image\/webp/);
+  }
+ }
+ for(const path of chessArtPaths){const response=await w.request.get(origin+'/'+path);assert.equal(response.status(),200,path);assert.match(response.headers()['content-type'],/image\/webp/);}
+
  assert.equal(await w.locator('[data-chess-square]').first().getAttribute('data-chess-square'),'a8');
  assert.equal(await b.locator('[data-chess-square]').first().getAttribute('data-chess-square'),'h1');
  await w.locator('[data-chess-square="e2"]').click();await w.locator('[data-chess-square="e4"].target').waitFor();

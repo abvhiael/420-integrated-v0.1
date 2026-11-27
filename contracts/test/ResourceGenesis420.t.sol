@@ -210,4 +210,88 @@ contract ResourceGenesis420Test {
         e.providers.registerProvider(second,ALICE,meta,stake);
         require(e.providers.getProvider(second).operatorAccount==ALICE,"second provider");
     }
+
+    function testProviderAdministrationAuthorityIsolation() public {
+        Env memory e = setup();
+        bytes32 id = e.providers.canonicalProviderId(ALICE, 1);
+        bytes32 original = keccak256("original");
+        bytes32 changed = keccak256("changed");
+        bytes32 stake = keccak256("stake");
+        vm.prank(ALICE);
+        e.providers.registerProvider(id, ALICE, original, stake);
+        bytes32 grantId = keccak256("metadata-only");
+        e.caps.createGrant(grantId,DELEGATE,ResourceIds420.COMPONENT_RESOURCE,ResourceIds420.ACTION_UPDATE_PROVIDER,e.auth.scopeProvider(id),0,0,0,0,0);
+        vm.prank(DELEGATE);
+        e.providers.updateProvider(id,changed,stake);
+        require(e.providers.getProvider(id).metadataHash==changed,"metadata delegate denied");
+        vm.prank(DELEGATE);
+        (bool ok,) = address(e.providers).call(abi.encodeCall(e.providers.updateProvider,(id,original,bytes32(0))));
+        require(!ok,"metadata grant cleared collateral");
+        vm.prank(DELEGATE);
+        (ok,) = address(e.providers).call(abi.encodeCall(e.providers.updateProvider,(id,original,changed)));
+        require(!ok,"metadata grant replaced collateral");
+        vm.prank(DELEGATE);
+        (ok,) = address(e.providers).call(abi.encodeCall(e.providers.setCollateralSponsor,(id,DELEGATE)));
+        require(!ok,"metadata grant changed sponsor");
+        vm.prank(DELEGATE);
+        (ok,) = address(e.providers).call(abi.encodeCall(e.providers.setState,(id,ResourceProviderRegistry420.State.RETIRED)));
+        require(!ok,"metadata grant retired provider");
+        vm.prank(DELEGATE);
+        (ok,) = address(e.providers).call(abi.encodeCall(e.providers.setState,(id,ResourceProviderRegistry420.State.ACTIVE)));
+        require(!ok,"metadata grant activated provider");
+        vm.prank(DELEGATE);
+        (ok,) = address(e.providers).call(abi.encodeCall(e.providers.reinstateProvider,(id,changed)));
+        require(!ok,"metadata grant reinstated provider");
+        vm.prank(DELEGATE);
+        (ok,) = address(e.providers).call(abi.encodeCall(e.providers.setDisciplinarySuspension,(id,true,changed)));
+        require(!ok,"metadata grant disciplined provider");
+        vm.prank(DELEGATE);
+        (ok,) = address(e.providers).call(abi.encodeCall(e.providers.disqualifyProvider,(id,changed)));
+        require(!ok,"metadata grant disqualified provider");
+        vm.prank(DELEGATE);
+        (ok,) = address(e.providers).call(abi.encodeCall(e.providers.setAdmissionSuspended,(true)));
+        require(!ok,"metadata grant suspended admission");
+        vm.prank(DELEGATE);
+        (ok,) = address(e.providers).call(abi.encodeCall(e.providers.publishCollateralPolicy,(1,1,1,10000,true,changed)));
+        require(!ok,"metadata grant changed policy");
+        require(e.providers.getProvider(id).stakeRef==stake && e.providers.getProvider(id).revision==2 && e.providers.collateralSponsor(id)==address(0),"unauthorized mutation");
+        e.caps.revokeGrant(grantId);
+        vm.prank(DELEGATE);
+        (ok,) = address(e.providers).call(abi.encodeCall(e.providers.updateProvider,(id,original,stake)));
+        require(!ok,"revoked grant");
+        vm.prank(ALICE);
+        e.providers.updateProvider(id,original,bytes32(0));
+        vm.prank(ALICE);
+        e.providers.setCollateralSponsor(id,BOB);
+        require(e.providers.collateralSponsor(id)==BOB,"operator sponsor denied");
+    }
+
+    function testProviderStateDelegateCannotRetireOrReinstateDiscipline() public {
+        Env memory e = setup();
+        (bytes32 id,) = registerRelayNode(e);
+        e.caps.createGrant(keccak256("state-only"),DELEGATE,ResourceIds420.COMPONENT_RESOURCE,ResourceIds420.ACTION_SET_PROVIDER_STATE,e.auth.scopeProvider(id),0,0,0,0,0);
+        vm.prank(DELEGATE);
+        e.providers.setState(id,ResourceProviderRegistry420.State.SUSPENDED);
+        vm.prank(DELEGATE);
+        e.providers.setState(id,ResourceProviderRegistry420.State.ACTIVE);
+        vm.prank(DELEGATE);
+        (bool ok,) = address(e.providers).call(abi.encodeCall(e.providers.setState,(id,ResourceProviderRegistry420.State.RETIRED)));
+        require(!ok,"state grant retired provider");
+        e.providers.setDisciplinarySuspension(id,true,keccak256("discipline"));
+        vm.prank(DELEGATE);
+        (ok,) = address(e.providers).call(abi.encodeCall(e.providers.setState,(id,ResourceProviderRegistry420.State.ACTIVE)));
+        require(!ok,"state grant bypassed discipline");
+        vm.prank(ALICE);
+        (ok,) = address(e.providers).call(abi.encodeCall(e.providers.reinstateProvider,(id,keccak256("remediation"))));
+        require(!ok,"operator reinstated discipline");
+        e.providers.reinstateProvider(id,keccak256("remediation"));
+        vm.prank(DELEGATE);
+        e.providers.setState(id,ResourceProviderRegistry420.State.ACTIVE);
+        vm.prank(ALICE);
+        e.providers.setState(id,ResourceProviderRegistry420.State.RETIRED);
+        vm.prank(ALICE);
+        (ok,) = address(e.providers).call(abi.encodeCall(e.providers.setCollateralSponsor,(id,BOB)));
+        require(!ok,"retired sponsor mutation");
+        require(!e.providers.isActive(id),"retired active");
+    }
 }

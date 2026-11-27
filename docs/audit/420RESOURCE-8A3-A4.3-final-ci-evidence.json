@@ -1,0 +1,389 @@
+{
+  "qualifiedHead": "abacd5a7210f802a0cccf9399620d0f2af6b03e9",
+  "pr": 1453,
+  "runs": [
+    {
+      "id": 45952359383,
+      "name": "420Bet Dice Level 1",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45952359383"
+    },
+    {
+      "id": 45952359354,
+      "name": "420Docs Qualification",
+      "status": "completed",
+      "conclusion": "skipped",
+      "html_url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45952359354"
+    },
+    {
+      "id": 45952359433,
+      "name": "420Bet Poker WS7 Consolidated Adversarial Security",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45952359433"
+    },
+    {
+      "id": 45952359565,
+      "name": "420ResourceProtocol Audit Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45952359565"
+    }
+  ],
+  "resourceJobs": [
+    {
+      "id": 140350893927,
+      "name": "resource-storage",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 45952359565,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Checkout exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Verify exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run foundry-rs/foundry-toolchain@v1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Stage scoped Resource test owners and pinned import closure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Run storage protocol suites",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Post Run foundry-rs/foundry-toolchain@v1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Post Checkout exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        }
+      ]
+    },
+    {
+      "id": 140350894187,
+      "name": "resource-contract-core",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 45952359565,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Checkout exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Verify exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run foundry-rs/foundry-toolchain@v1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Verify Resource 8A3 operation authorization matrix",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Verify C6 production policy disposition",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Verify deterministic Resource deployment package",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Stage scoped Resource test owners and pinned import closure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Build Resource contract family",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Run Resource collateral custody suite",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Run Resource collateral policy suite",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Run Resource stateful collateral invariants",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Run Resource deployment binding suite",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Run identifier domain and grant migration adversarial suite",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Test canonical grant generation against Solidity ABI vectors",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Run Resource protocol adversarial suite",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        },
+        {
+          "name": "Check Resource Solidity formatting",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17
+        },
+        {
+          "name": "Post Run foundry-rs/foundry-toolchain@v1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 33
+        },
+        {
+          "name": "Post Checkout exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 34
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 35
+        }
+      ]
+    },
+    {
+      "id": 140350894280,
+      "name": "resource-runtime-sdk",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 45952359565,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Checkout exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Verify exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Test Resource Network runtime",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Test storage SDK",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Post Checkout exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        }
+      ]
+    },
+    {
+      "id": 140350894296,
+      "name": "resource-security",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 45952359565,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Checkout exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Verify exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run foundry-rs/foundry-toolchain@v1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Reject dangerous Resource primitives",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Stage scoped Resource test owners and pinned import closure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Re-run Resource core under hardening profile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Re-run collateral custody and policy under hardening profile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Install Slither",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Targeted Resource Slither high-severity gate",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Post Run foundry-rs/foundry-toolchain@v1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19
+        },
+        {
+          "name": "Post Checkout exact qualification head",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21
+        }
+      ]
+    }
+  ],
+  "originalWorkflowArtifacts": [],
+  "archiveSource": "Original GitHub Actions run log ZIP; no workflow artifacts were published for this test-only change.",
+  "verifiedNewTests": [
+    "testCollateralIdentityDelegatedDisciplineAndPermanentDisqualification",
+    "testCollateralIdentityDelegatedExitCannotReopenAdmissionOrStealSponsor",
+    "testCollateralIdentityDelegatedForeignReferenceAndEconomicBoundary"
+  ]
+}

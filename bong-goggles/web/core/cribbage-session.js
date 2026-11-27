@@ -171,7 +171,7 @@ export class CribbageSessionController{
   this.emit({});
  }
  advance(){
-  if(this.state.status!=='ready'||!this.state.queue?.length)return;
+  if(!this.state.session||!this.state.queue?.length)return;
   const [item,...remaining]=this.state.queue;
   let pegs=this.state.pegs??[];
   if(item.total!==null&&item.total!==undefined)pegs=cribbageLeap(pegs,item.team,item.total);
@@ -216,7 +216,7 @@ export class CribbageSessionController{
    const pegs=existing&&replay&&queue.length?
     this.state.pegs:reconcilePegs(existing?this.state.pegs:null,session);
    if(!replay){this.cancelTimer();}
-   this.emit({status:'ready',session,pegs,queue:replay?queue:[],error:null,resignPending:false,selection:[],submitting:false,
+   this.emit({status:'ready',session,pegs,scoring:replay&&queue.length>0,queue:replay?queue:[],error:null,resignPending:false,selection:[],submitting:false,
     announcement:replay?'':this.state.announcement??'',
     showing:null,notice:existing&&session.sequence>existing.sequence+1?
      'Resynchronized to verified scores; missed announcements were not invented.':''});
@@ -231,7 +231,7 @@ export class CribbageSessionController{
   const current=this.state.session;
   if(this.busy||this.state.status!=='ready'||!current||
    !cribbageCanSubmit(current,move))throw Error('Not a legal move for your authenticated turn');
-  if(this.state.queue?.length||this.timer!==null)throw Error('Scoring announcement still playing');
+  if(this.state.scoring||this.state.queue?.length||this.timer!==null)throw Error('Scoring announcement still playing');
   this.busy=true;
   const generation=++this.generation,requestId=globalThis.crypto?.randomUUID?.();
   if(!requestId||!uuid.test(requestId)){this.busy=false;throw Error('Secure request ID unavailable');}
@@ -248,7 +248,7 @@ export class CribbageSessionController{
    if(!session||session.id!==current.id||session.viewerSeat!==current.viewerSeat||
     session.sequence!==current.sequence+1)throw Error('Move was not confirmed by the match server');
    const queue=cribbageAnnouncementQueue(current,session);
-   this.emit({status:'ready',session,selection:[],submitting:false,resignPending:false,queue,announcement:'',
+   this.emit({status:'ready',session,selection:[],submitting:false,resignPending:false,scoring:queue.length>0,queue,announcement:'',
     notice:'',pegs:queue.length?this.state.pegs:reconcilePegs(this.state.pegs,session)});
    if(queue.length)this.advance();
    return this.state;

@@ -19,7 +19,7 @@ type ClassicRule interface {
  View(json.RawMessage,int)(json.RawMessage,error)
 }
 type ClassicRuleResolver func(string)ClassicRule
-type ClassicSessions struct{Store *Store;Rooms *ClassicRooms;Rules ClassicRuleResolver;Bots map[string]ClassicBotPolicies;botMu sync.Mutex;verifiedMu sync.Mutex;verifiedPrefixes map[string]verifiedRulePrefix}
+type ClassicSessions struct{Store *Store;Rooms *ClassicRooms;Rules ClassicRuleResolver;Bots map[string]ClassicBotPolicies;botMu sync.Mutex;verifiedMu sync.Mutex;verifiedPrefixes map[string]verifiedRulePrefix; historicalWordSalad map[string]*RulesAdapter; historicalWordSaladBots map[string]ClassicBotPolicies}
 const classicTurnSeconds=120
 const classicMaxStateBytes=16384
 const classicMaxActionBytes=4096
@@ -67,7 +67,10 @@ func (s *ClassicSessions) rule(game,version,hash string)(ClassicRule,error){
  impl:=s.Rules(game);if impl==nil{return nil,ErrUnavailable}
  v,h:=impl.Identity()
  if v==""||len(v)>80||!classicRuleHash.MatchString(h){return nil,ErrUnavailable}
- if version!=""&&(v!=version||h!=hash){return nil,ErrUnavailable}
+ if version!=""&&(v!=version||h!=hash){
+  if game=="scrabble"{if old:=s.historicalWordSalad[hash];old!=nil{ov,oh:=old.Identity();if ov==version&&oh==hash{return old,nil}}}
+  return nil,ErrUnavailable
+ }
  return impl,nil
 }
 func validRuleState(b json.RawMessage)bool{return len(b)>0&&len(b)<=classicMaxStateBytes&&json.Valid(b)}
@@ -213,4 +216,14 @@ func (s *ClassicSessions) Events(ctx context.Context,viewer,id string,after int6
  if e!=nil||next!=high{return nil,0,ErrUnavailable}
  if e=tx.Commit();e!=nil{return nil,0,e}
  return out,high,nil
+}
+
+// RegisterHistoricalWordSalad is startup-only; new rooms still use Rules.
+// Existing persisted games select exactly the adapter and policy they pinned.
+func(s *ClassicSessions) RegisterHistoricalWordSalad(a *RulesAdapter)error{
+ if s==nil||a==nil||a.definition.GameID!="scrabble"{return ErrInvalid}
+ v,h:=a.Identity();if v!="v1"||!classicRuleHash.MatchString(h){return ErrInvalid}
+ p,e:=NewWordSaladBotPolicies(a);if e!=nil{return e}
+ if s.historicalWordSalad==nil{s.historicalWordSalad=make(map[string]*RulesAdapter);s.historicalWordSaladBots=make(map[string]ClassicBotPolicies)}
+ s.historicalWordSalad[h]=a;s.historicalWordSaladBots[h]=p;return nil
 }

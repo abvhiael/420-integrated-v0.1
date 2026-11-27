@@ -74,6 +74,10 @@ contract ResourceProviderRegistry420 is I420System {
     event ProviderDisciplineChanged(bytes32 indexed providerId, bool suspended);
     event CollateralSponsorChanged(bytes32 indexed providerId, address indexed sponsor);
 
+    // Append-only storage: operator consent is bound to the exact delegate and registration payload.
+    mapping(bytes32 => bytes32) private _registrationConsent;
+    event RegistrationConsentChanged(bytes32 indexed providerId, bytes32 commitment);
+
     error InvalidProvider();
     error ProviderExists();
     error ProviderNotFound();
@@ -239,18 +243,47 @@ contract ResourceProviderRegistry420 is I420System {
         return 1;
     }
 
+    /// @notice Registry-local canonical identifier: operator address followed by a nonzero 96-bit serial.
+    function canonicalProviderId(
+        address operatorAccount,
+        uint96 serial
+    ) public pure returns (bytes32) {
+        if (operatorAccount == address(0) || serial == 0) revert InvalidProvider();
+        return bytes32((uint256(uint160(operatorAccount)) << 96) | uint256(serial));
+    }
+
+    /// @notice Authorize one exact delegated registration; zero delegate revokes consent.
+    function setRegistrationConsent(
+        bytes32 providerId,
+        address delegate,
+        bytes32 metadataHash,
+        bytes32 stakeRef
+    ) external {
+        if (providerId != canonicalProviderId(msg.sender, uint96(uint256(providerId)))) revert InvalidProvider();
+        if (_providers[providerId].exists) revert ProviderExists();
+        bytes32 commitment = delegate == address(0)
+            ? bytes32(0)
+            : keccak256(abi.encode(providerId, msg.sender, delegate, metadataHash, stakeRef));
+        _registrationConsent[providerId] = commitment;
+        emit RegistrationConsentChanged(providerId, commitment);
+    }
+
     function registerProvider(
         bytes32 providerId,
         address operatorAccount,
         bytes32 metadataHash,
         bytes32 stakeRef
     ) external {
-        if (providerId == 0 || operatorAccount == address(0)) revert InvalidProvider();
+        if (providerId != canonicalProviderId(operatorAccount, uint96(uint256(providerId)))) revert InvalidProvider();
         if (_providers[providerId].exists) revert ProviderExists();
-        if (
-            msg.sender != operatorAccount
-                && !authorization.isProviderAuthorized(msg.sender, providerId, ResourceIds420.ACTION_REGISTER_PROVIDER)
-        ) revert Unauthorized();
+        if (msg.sender != operatorAccount) {
+            bytes32 commitment = keccak256(abi.encode(providerId, operatorAccount, msg.sender, metadataHash, stakeRef));
+            if (
+                _registrationConsent[providerId] != commitment
+                    || !authorization.isProviderAuthorized(msg.sender, providerId, ResourceIds420.ACTION_REGISTER_PROVIDER)
+            ) revert Unauthorized();
+        }
+        delete _registrationConsent[providerId];
 
         _providers[providerId] = Provider(operatorAccount, metadataHash, stakeRef, 1, State.REGISTERED, true);
         emit ProviderRegistered(providerId, operatorAccount, stakeRef);

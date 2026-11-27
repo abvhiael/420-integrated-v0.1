@@ -423,4 +423,141 @@ contract ResourceGenesis420Test {
         require(e.providers.permanentlyDisqualified(id) && e.providers.disciplineRevision(id)==revision && !e.providers.isActive(id) && !e.offers.isEffective(offer),"permanent disqualification bypass");
         require(c.getPosition(position).owner==ALICE && c.custodyInvariant(),"discipline changed custody");
     }
+
+    // A4.4: independent acceptance cases, with real scoped grants and funded providers.
+    function _a44Provider(Env memory e, address operator, uint96 serial) internal returns (bytes32 id) {
+        id = e.providers.canonicalProviderId(operator,serial);
+        vm.prank(operator);
+        e.providers.registerProvider(id,operator,keccak256(abi.encode(operator,serial)),0);
+        ResourceCollateralFixture420.fund(e.providers,id,operator);
+    }
+
+    function _a44Grant(Env memory e, bytes32 id, bytes32 action) internal returns (bytes32 grantId) {
+        grantId = keccak256(abi.encode("A4.4",id,action));
+        e.caps.createGrant(grantId,DELEGATE,ResourceIds420.COMPONENT_RESOURCE,action,e.auth.scopeProvider(id),0,0,0,0,0);
+        require(e.auth.isProviderAuthorized(DELEGATE,id,action),"grant not effective");
+    }
+
+    function _a44Snapshot(Env memory e, bytes32 id) internal view returns (bytes32) {
+        return keccak256(abi.encode(e.providers.getProvider(id),e.providers.collateralSponsor(id),e.providers.disciplinarySuspension(id),e.providers.permanentlyDisqualified(id),e.providers.disciplineEvidence(id),e.providers.disciplineRevision(id)));
+    }
+
+    function _a44RejectUpdate(Env memory e, address caller, bytes32 id) internal {
+        bytes32 beforeState = _a44Snapshot(e,id);
+        bytes32 stake = e.providers.getProvider(id).stakeRef;
+        _denyCollateralIdentity(caller,address(e.providers),abi.encodeCall(e.providers.updateProvider,(id,keccak256("unauthorized"),stake)),ResourceProviderRegistry420.Unauthorized.selector);
+        require(_a44Snapshot(e,id)==beforeState,"rejected update mutated provider");
+    }
+
+    function testA44ProviderACannotModifyProviderB() public {
+        Env memory e = setup();
+        bytes32 a = _a44Provider(e,ALICE,1);
+        bytes32 b = _a44Provider(e,BOB,1);
+        bytes32 beforeA = _a44Snapshot(e,a);
+        _a44RejectUpdate(e,ALICE,b);
+        _a44RejectUpdate(e,BOB,a);
+        require(_a44Snapshot(e,a)==beforeA,"foreign update changed caller provider");
+        bytes32 beforeB = _a44Snapshot(e,b);
+        _denyCollateralIdentity(ALICE,address(e.providers),abi.encodeCall(e.providers.setState,(b,ResourceProviderRegistry420.State.RETIRED)),ResourceProviderRegistry420.Unauthorized.selector);
+        require(_a44Snapshot(e,b)==beforeB,"foreign retirement mutated provider");
+    }
+
+    function testA44DelegateUpdatesAuthorizedProvider() public {
+        Env memory e = setup();
+        bytes32 id = _a44Provider(e,ALICE,1);
+        _a44Grant(e,id,ResourceIds420.ACTION_UPDATE_PROVIDER);
+        ResourceProviderRegistry420.Provider memory beforeP = e.providers.getProvider(id);
+        bytes32 metadata = keccak256("authorized metadata");
+        vm.prank(DELEGATE);
+        e.providers.updateProvider(id,metadata,beforeP.stakeRef);
+        ResourceProviderRegistry420.Provider memory afterP = e.providers.getProvider(id);
+        require(afterP.metadataHash==metadata && afterP.revision==beforeP.revision+1,"authorized update missing");
+        require(afterP.operatorAccount==beforeP.operatorAccount && afterP.stakeRef==beforeP.stakeRef && afterP.state==beforeP.state && afterP.exists,"metadata changed protected fields");
+    }
+
+    function testA44DelegateCannotModifyAnotherProvider() public {
+        Env memory e = setup();
+        bytes32 a = _a44Provider(e,ALICE,1);
+        bytes32 b = _a44Provider(e,BOB,1);
+        bytes32 sibling = _a44Provider(e,ALICE,2);
+        _a44Grant(e,a,ResourceIds420.ACTION_UPDATE_PROVIDER);
+        require(!e.auth.isProviderAuthorized(DELEGATE,b,ResourceIds420.ACTION_UPDATE_PROVIDER),"foreign scope effective");
+        _a44RejectUpdate(e,DELEGATE,b);
+        _a44RejectUpdate(e,DELEGATE,sibling);
+        bytes32 stake = e.providers.getProvider(a).stakeRef;
+        vm.prank(DELEGATE);
+        e.providers.updateProvider(a,keccak256("correct scope"),stake);
+        require(e.providers.getProvider(a).metadataHash==keccak256("correct scope"),"positive scope control");
+    }
+
+    function testA44MetadataGrantCannotRetireProvider() public {
+        Env memory e = setup();
+        bytes32 id = _a44Provider(e,ALICE,1);
+        _a44Grant(e,id,ResourceIds420.ACTION_UPDATE_PROVIDER);
+        bytes32 beforeState = _a44Snapshot(e,id);
+        _denyCollateralIdentity(DELEGATE,address(e.providers),abi.encodeCall(e.providers.setState,(id,ResourceProviderRegistry420.State.RETIRED)),ResourceProviderRegistry420.Unauthorized.selector);
+        require(_a44Snapshot(e,id)==beforeState,"retirement mutated provider");
+        vm.prank(ALICE);
+        e.providers.setState(id,ResourceProviderRegistry420.State.RETIRED);
+        require(e.providers.getProvider(id).state==ResourceProviderRegistry420.State.RETIRED,"operator retirement denied");
+    }
+
+    function testA44UnauthorizedCollateralSponsorRejected() public {
+        Env memory e = setup();
+        bytes32 id = _a44Provider(e,ALICE,1);
+        _grantCollateralIdentityDelegate(e,id);
+        bytes32 beforeState = _a44Snapshot(e,id);
+        _denyCollateralIdentity(DELEGATE,address(e.providers),abi.encodeCall(e.providers.setCollateralSponsor,(id,DELEGATE)),ResourceProviderRegistry420.Unauthorized.selector);
+        _denyCollateralIdentity(BOB,address(e.providers),abi.encodeCall(e.providers.setCollateralSponsor,(id,BOB)),ResourceProviderRegistry420.Unauthorized.selector);
+        require(_a44Snapshot(e,id)==beforeState,"sponsor mutation");
+        ResourceProviderCollateral420 c = ResourceProviderCollateral420(address(e.providers.collateral()));
+        vm.deal(DELEGATE,1 ether);
+        vm.prank(DELEGATE);
+        (bool ok,bytes memory result) = address(c).call{value:1 ether}(abi.encodeCall(c.deposit,(id,keccak256("A4.4 unauthorized sponsor"))));
+        require(!ok && result.length>=4 && bytes4(result)==ResourceProviderCollateral420.Unauthorized.selector,"sponsor deposit accepted");
+        require(c.getPosition(c.positionId(id)).owner==ALICE && c.custodyInvariant(),"custody mutated");
+    }
+
+    function testA44DisciplinarySuspendedProviderCannotActivate() public {
+        Env memory e = setup();
+        (bytes32 id,) = registerRelayNode(e);
+        _a44Grant(e,id,ResourceIds420.ACTION_SET_PROVIDER_STATE);
+        e.providers.setDisciplinarySuspension(id,true,keccak256("A4.4 discipline"));
+        bytes32 beforeState = _a44Snapshot(e,id);
+        _denyCollateralIdentity(ALICE,address(e.providers),abi.encodeCall(e.providers.setState,(id,ResourceProviderRegistry420.State.ACTIVE)),ResourceProviderRegistry420.StakeRequired.selector);
+        _denyCollateralIdentity(DELEGATE,address(e.providers),abi.encodeCall(e.providers.setState,(id,ResourceProviderRegistry420.State.ACTIVE)),ResourceProviderRegistry420.StakeRequired.selector);
+        require(_a44Snapshot(e,id)==beforeState && !e.providers.isActive(id),"disciplinary bypass");
+        e.providers.reinstateProvider(id,keccak256("A4.4 remediation"));
+        vm.prank(ALICE);
+        e.providers.setState(id,ResourceProviderRegistry420.State.ACTIVE);
+        require(e.providers.isActive(id),"legitimate reinstatement denied");
+    }
+
+    function testA44DisqualifiedProviderCannotReinstate() public {
+        Env memory e = setup();
+        (bytes32 id,) = registerRelayNode(e);
+        _grantCollateralIdentityDelegate(e,id);
+        e.providers.disqualifyProvider(id,keccak256("A4.4 permanent"));
+        bytes32 beforeState = _a44Snapshot(e,id);
+        bytes memory callData = abi.encodeCall(e.providers.reinstateProvider,(id,keccak256("A4.4 attempted reinstatement")));
+        _denyCollateralIdentity(ALICE,address(e.providers),callData,ResourceProviderRegistry420.Unauthorized.selector);
+        _denyCollateralIdentity(DELEGATE,address(e.providers),callData,ResourceProviderRegistry420.Unauthorized.selector);
+        _denyCollateralIdentity(address(this),address(e.providers),callData,ResourceProviderRegistry420.InvalidState.selector);
+        require(_a44Snapshot(e,id)==beforeState && !e.providers.isActive(id),"permanent disqualification mutated");
+    }
+
+    function testA44RevokedDelegateCannotUpdateProvider() public {
+        Env memory e = setup();
+        bytes32 id = _a44Provider(e,ALICE,1);
+        bytes32 grantId = _a44Grant(e,id,ResourceIds420.ACTION_UPDATE_PROVIDER);
+        bytes32 stake = e.providers.getProvider(id).stakeRef;
+        vm.prank(DELEGATE);
+        e.providers.updateProvider(id,keccak256("before revocation"),stake);
+        e.caps.revokeGrant(grantId);
+        require(!e.auth.isProviderAuthorized(DELEGATE,id,ResourceIds420.ACTION_UPDATE_PROVIDER),"revoked grant effective");
+        _a44RejectUpdate(e,DELEGATE,id);
+        vm.prank(ALICE);
+        e.providers.updateProvider(id,keccak256("owner after revocation"),stake);
+        require(e.providers.getProvider(id).metadataHash==keccak256("owner after revocation"),"owner update denied");
+    }
 }

@@ -1,0 +1,3 @@
+# A4.4 — Provider adversarial qualification
+
+Eight independent acceptance tests in ResourceGenesis420Test exercise the real capability registry, provider registry and funded collateral fixture. Every negative case asserts the exact revert selector and unchanged protected provider state; positive controls establish actual grant efficacy and operator authority. Cross-provider delegation includes another provider of the same operator. Suspension means disciplinary suspension, not voluntary suspension, preserving the qualified A4.2 lifecycle. No production source, ABI, storage or capability change is proposed. The existing Resource qualification workflow runs these tests in ordinary and hardening profiles. CI and permanent evidence retention remain pending.

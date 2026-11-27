@@ -325,3 +325,41 @@ test('One click wins over an in-flight poll for discard, cut and play; late poll
   controller.destroy();
  }
 });
+
+test('Last card must be submitted before final-card scoring and counting cannot strand next hand after render error',async()=>{
+ const timer=tick(),before=snapshot(2,'peg',8),after=snapshot(2,'discard',9);
+ Object.assign(before.data.session.privateView,{hand:[4],cardCounts:[1,0],pegCount:20,pegPile:[9,22],scores:[0,0]});
+ Object.assign(after.data.session.privateView,{round:2,scores:[1,0],lastAwards:[{seat:0,team:0,kind:'last-card',points:1,count:25,total:1}]});
+ let posts=0,fail=false;
+ const controller=new CribbageSessionController({enabled:true,setTimer:timer.setTimer,clearTimer:timer.clearTimer,
+  onChange:state=>{if(fail&&state.scoring)throw Error('simulated display failure');},
+  fetchImpl:async(path,opts)=>{
+   if(path.endsWith('/v1/me'))return http(200,{walletRequired:false,profile:{subject}});
+   if(path.endsWith('/action')){posts++;assert.deepEqual(JSON.parse(opts.body).move,{type:'play',card:4});return http(200,after.data);}
+   return http(200,before.data);
+  }});
+ await controller.open(id);
+ assert.equal(controller.state.scoring,false);assert.equal(posts,0);
+ assert.deepEqual(cribbageLegalMoves(controller.state.session),[{type:'play',card:4}]);
+ fail=true;await controller.act({type:'play',card:4});
+ assert.equal(posts,1);assert.match(controller.state.announcement,/Last card/);
+ timer.flush();
+ assert.equal(controller.state.scoring,false);assert.equal(controller.state.session.privateView.round,2);
+ assert.equal(controller.state.pegs[0].score,1);
+ assert.ok(cribbageLegalMoves(controller.state.session).length>0);
+ controller.destroy();
+});
+
+test('Verified same-sequence poll clears stranded scoring queue and restores legal controls',async()=>{
+ const response=snapshot(2,'peg',8);
+ const controller=new CribbageSessionController({enabled:true,fetchImpl:async path=>
+  path.endsWith('/v1/me')?http(200,{walletRequired:false,profile:{subject}}):http(200,response.data)});
+ await controller.open(id);
+ controller.emit({scoring:true,queue:[{label:'orphaned'}],announcement:'Counting points'});
+ await controller.open(id,{quiet:true});
+ assert.equal(controller.state.scoring,false);
+ assert.deepEqual(controller.state.queue,[]);
+ assert.equal(controller.state.announcement,'');
+ assert.ok(cribbageLegalMoves(controller.state.session).length);
+ controller.destroy();
+});

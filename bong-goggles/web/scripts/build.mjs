@@ -171,6 +171,10 @@ if(canonical.length!==2698098||canonicalSha!=='4c358c6cc77b2a6f6dd33865dbf7654de
  canonical.readUInt32BE(16)!==1448||canonical.readUInt32BE(20)!==1086)
  throw Error('Supplied Cribbage board is missing or altered');
 await cp(resolve(root,exactBoard),resolve(out,exactBoard));
+const wallpaper='assets/games/cribbage/cribbage-play-wallpaper-casino-lounge';
+const wallpaperPNG=await readFile(resolve(root,wallpaper+'.png'));
+if(createHash('sha1').update(Buffer.from('blob '+wallpaperPNG.length+'\0')).update(wallpaperPNG).digest('hex')!=='7b2d71add6878a505d8cfc9da3dc4fd77cb1e7d2')throw Error('Cribbage wallpaper differs from approved upload');
+await sharp(wallpaperPNG).resize({width:1920,withoutEnlargement:true}).webp({quality:82}).toFile(resolve(out,wallpaper+'.webp'));
 
 // The exact approved PNG stays in the source tree as the master; do not publish
 // its 1.5 MB original to the static site. All variants derive from that same file.

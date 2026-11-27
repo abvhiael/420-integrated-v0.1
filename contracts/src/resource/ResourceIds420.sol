@@ -15,7 +15,6 @@ library ResourceIds420 {
     bytes32 internal constant ACTION_UPDATE_NODE = keccak256("420/RESOURCE/ACTION/UPDATE_NODE/V1");
     bytes32 internal constant ACTION_SET_NODE_STATE = keccak256("420/RESOURCE/ACTION/SET_NODE_STATE/V1");
     bytes32 internal constant ACTION_PUBLISH_OFFER = keccak256("420/RESOURCE/ACTION/PUBLISH_OFFER/V1");
-    bytes32 internal constant ACTION_OPEN_SESSION = keccak256("420/RESOURCE/ACTION/OPEN_SESSION/V1");
     bytes32 internal constant ACTION_SUBMIT_RECEIPT = keccak256("420/RESOURCE/ACTION/SUBMIT_RECEIPT/V1");
     bytes32 internal constant ACTION_SETTLE = keccak256("420/RESOURCE/ACTION/SETTLE/V1");
 

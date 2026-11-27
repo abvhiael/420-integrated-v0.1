@@ -30,7 +30,7 @@ DECL = re.compile(r"\bfunction\s+(\w+)\s*\(([^{}]*?)\)\s*([^{};]*)\{")
 def mask(source):
     return LEX.sub(lambda m: re.sub(r"[^\n]", " ", m.group()), source)
 
-def inventory(source):
+def inventory(source, include_read_only=False):
     s = mask(source)
     result = {}
     for m in DECL.finditer(s):
@@ -38,7 +38,7 @@ def inventory(source):
         if not re.search(r"\b(public|external)\b", modifiers):
             continue
         # The deliberately disabled legacy selector is an authority-relevant exception.
-        if re.search(r"\b(view|pure)\b", modifiers) and name != "openSession":
+        if not include_read_only and re.search(r"\b(view|pure)\b", modifiers) and name != "openSession":
             continue
         if name in result:
             raise ValueError(f"overloaded operation needs explicit signature inventory: {name}")
@@ -102,10 +102,21 @@ def verify(root):
                      f"{label}: unexpected delegated authority")
                 need(not re.search(r"\b(?:ResourceIds420|StorageIds420|StorageProofIds420)\.ACTION_", body),
                      f"{label}: undeclared action reference")
-    # OPEN_SESSION is a declared but unused historical action; the current entry
-    # point uses direct consumer identity. Do not silently admit it as a grant.
-    expected_actions = {k for k in ids if ".ACTION_" in k} - {"ResourceIds420.ACTION_OPEN_SESSION"}
+    expected_actions = {k for k in ids if ".ACTION_" in k}
     need(declared_actions == expected_actions, "action coverage drift")
+    expected_by_adapter = {name: set() for name in ("Provider", "Node", "Session", "ProofScheme")}
+    for rows in contracts.values():
+        for row in rows:
+            if row["action"]:
+                kind = re.match(r"scope(Provider|Node|Session|ProofScheme)\(", row["scope"])
+                need(kind is not None, "delegated action missing typed scope")
+                if kind:
+                    expected_by_adapter[kind.group(1)].add(row["action"])
+    for kind, expected in expected_by_adapter.items():
+        body = inventory(auth, include_read_only=True).get("is" + kind + "Authorized", "")
+        actual = set(re.findall(r"(?:ResourceIds420|StorageIds420|StorageProofIds420)\.ACTION_\w+", body))
+        need(actual == expected, f"{kind} adapter allowlist drift: {actual ^ expected}")
+
     need(set(data["readOnly"]) == {"ResourceAuthorization420", "ResourceRouter420"}, "read-only inventory drift")
     need(all(not contracts.get(k) for k in data["readOnly"]), "read-only contract gained mutator")
     need("revert InvalidSession();" in inventory((src / "ResourceSessionRegistry420.sol").read_text()).get("openSession",""), "legacy selector disposition drift")

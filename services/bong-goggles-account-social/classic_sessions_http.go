@@ -101,6 +101,13 @@ func (h *Handler) classicSessionsHTTP(ctx context.Context,w http.ResponseWriter,
   if e!=nil{classicRoomError(w,e);return}
   writeJSON(w,200,map[string]any{"sequence":state.Sequence,"actions":actions,"onChain":false,"wager":false,"rewards":false});return
  }
+ if len(parts)==2&&parts[1]=="recover-bot"&&r.Method=="POST"{
+  var req struct{}
+  if strictJSON(r,&req)!=nil{deny(w,400);return}
+  state,e:=h.Sessions.RecoverWordSaladBot(ctx,viewer,id)
+  if e!=nil{classicRoomError(w,e);return}
+  writeJSON(w,200,map[string]any{"session":state,"onChain":false,"wager":false,"rewards":false});return
+ }
  if len(parts)==2&&parts[1]=="action"&&r.Method=="POST"{
   var req ClassicSessionAction
   if strictJSON(r,&req)!=nil{deny(w,400);return}

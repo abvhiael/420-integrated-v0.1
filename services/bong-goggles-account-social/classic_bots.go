@@ -170,7 +170,7 @@ func (s *ClassicSessions) SweepBots(ctx context.Context)(int,error){
  rows,e:=s.Store.DB.QueryContext(ctx,"SELECT sess.id FROM bg_account_social.classic_sessions sess "+
   "JOIN bg_account_social.classic_room_seats seat ON seat.room_id=sess.room_id "+
   "AND seat.seat_index=sess.turn_seat WHERE sess.status='active' AND seat.controller='bot' "+
-  "ORDER BY sess.turn_deadline,sess.id LIMIT 8")
+  "ORDER BY sess.updated_at,sess.id LIMIT 8")
  if e!=nil{return 0,e}
  ids:=[]string{}
  for rows.Next(){var id string;if e=rows.Scan(&id);e!=nil{rows.Close();return 0,e};ids=append(ids,id)}

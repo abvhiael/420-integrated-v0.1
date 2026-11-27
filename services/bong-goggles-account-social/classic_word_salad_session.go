@@ -34,3 +34,15 @@ func(s *ClassicSessions)expireWordSaladLocked(ctx context.Context,tx *sql.Tx,r *
  if e=s.publish(ctx,tx,*r,kind,actor);e!=nil{return e}
  return s.saveRuleMove(ctx,tx,r.ID,r.Sequence,actor,action,before,state,a)
 }
+
+// RecoverWordSaladBot is an authenticated, bounded nudge for an existing
+// stalled computer turn. It cannot choose a seat/action or advance a human
+// turn. RunBotTurn rechecks the authoritative row under the canonical locks.
+func(s *ClassicSessions) RecoverWordSaladBot(ctx context.Context,viewer,id string)(ClassicSessionView,error){
+ var empty ClassicSessionView
+ view,e:=s.Get(ctx,viewer,id);if e!=nil{return empty,e}
+ if view.GameID!="scrabble"{return empty,ErrNotFound}
+ if view.Status!="active"||view.TurnSeat==nil||*view.TurnSeat==view.ViewerSeat{return view,nil}
+ if _,e=s.RunBotTurn(ctx,id);e!=nil{return empty,e}
+ return s.Get(ctx,viewer,id)
+}

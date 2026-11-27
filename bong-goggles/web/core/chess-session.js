@@ -56,20 +56,26 @@ export class ChessController{
    }
    if(!chessID(id))throw Error('Invalid match link');
    const r=await this.client.request('/v1/classic-sessions/'+id);if(gen!==this.gen)return;
-   const s=normalizeChessSession(r,id);if(!s)throw Error('Match not authorized or unavailable');
+   const s=normalizeChessSession(r,id);if(!s)throw Error('Match not authorized or unavailable ('+r.status+')');
    const previous=this.state.session;
    if(previous?.id===id&&s.sequence<previous.sequence)throw Error('Stale match');
-   let snapshot=s,actions=null;
+   let snapshot=s,actions=null,lastLegalStatus=0;
    for(let attempt=0;attempt<3;attempt++){
     const legal=await this.client.request('/v1/classic-sessions/'+id+'/chess-actions');
     if(gen!==this.gen)return;
-    actions=normalizeChessActions(legal,snapshot);if(actions)break;
-    if(legal.status!==200||!Number.isSafeInteger(legal.data?.sequence)||legal.data.sequence<=snapshot.sequence)break;
+    lastLegalStatus=legal.status;actions=normalizeChessActions(legal,snapshot);if(actions)break;
+    if(legal.status!==409&&(legal.status!==200||!Number.isSafeInteger(legal.data?.sequence)||legal.data.sequence<=snapshot.sequence))break;
     const next=normalizeChessSession(await this.client.request('/v1/classic-sessions/'+id),id);
     if(gen!==this.gen)return;
     if(!next||next.sequence<snapshot.sequence)break;snapshot=next;
    }
-   if(!actions)throw Error('Position changed; refreshing legal actions');
+   if(!actions){
+    // A revision conflict is not an authorization failure. Reconfirm the actor
+    // before displaying the freshly authorized snapshot with moves disabled.
+    if(lastLegalStatus!==409)throw Error('Legal actions unavailable ('+lastLegalStatus+')');
+    await this.confirmPrincipal(actor);if(gen!==this.gen)return;
+    this.emit({status:'recovering',session:snapshot,actions:[],selected:null,promotion:[],offer:false,error:'Position changed; waiting for current legal moves.'});return;
+   }
    await this.confirmPrincipal(actor);
    if(gen!==this.gen)return;
    if(previous?.id===id&&previous.sequence===snapshot.sequence&&previous.seat===snapshot.seat&&this.state.status==='ready')return;

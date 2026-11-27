@@ -136,15 +136,15 @@
         "operation": "registerProvider",
         "principal": "Proposed operator or scoped delegate",
         "directOwnership": "Proposed operator",
-        "delegatedAuthority": "Exact active grant for caller",
+        "delegatedAuthority": "Exact active scoped grant AND operator consent to exact delegate and payload",
         "component": "ResourceIds420.COMPONENT_RESOURCE",
         "action": "ResourceIds420.ACTION_REGISTER_PROVIDER",
         "scope": "scopeProvider(providerId)",
         "service": "All canonical service classes",
         "economicLimits": "No value transfer; current capability amount 0",
         "governanceEmergency": "No direct governance override",
-        "lifecycle": "Nonzero ID/operator; unique ID",
-        "openFinding": "A4: caller-selected provider ID and delegate operator substitution"
+        "lifecycle": "Canonical operator namespace; nonzero serial; unique ID; consume consent",
+        "openFinding": "A4.1 implementation pending qualification"
       },
       {
         "operation": "setState",
@@ -173,6 +173,20 @@
         "governanceEmergency": "No direct governance override",
         "lifecycle": "Existing; not ACTIVE or RETIRED",
         "openFinding": "A4: metadata and collateral reference share action"
+      },
+      {
+        "operation": "setRegistrationConsent",
+        "principal": "Operator encoded in provider identifier",
+        "directOwnership": "Operator only",
+        "delegatedAuthority": "None",
+        "component": null,
+        "action": null,
+        "scope": "Canonical providerId",
+        "service": "All canonical service classes",
+        "economicLimits": "No value transfer; current capability amount 0",
+        "governanceEmergency": "No direct governance override",
+        "lifecycle": "Unregistered ID only; replace or revoke exact consent",
+        "openFinding": "none"
       }
     ],
     "ResourceProviderCollateral420": [

@@ -40,7 +40,7 @@ contract StorageCapacityRegistry420Test {
         e.providers = new ResourceProviderRegistry420(address(e.auth),address(this));ResourceCollateralFixture420.deploy(e.providers,address(e.caps));
         e.nodes = new ResourceNodeRegistry420(address(e.auth), address(e.providers));
         e.capacity = new StorageCapacityRegistry420(address(e.auth), address(e.nodes), address(e.providers));ResourceCollateralFixture420.enable(e.providers,address(e.capacity));
-        e.providerId = keccak256("capacity-provider");
+        e.providerId = e.providers.canonicalProviderId(ALICE, 1);
         e.nodeId = keccak256("capacity-store-node");
 
         vm.prank(ALICE); e.providers.registerProvider(e.providerId, ALICE, keccak256("provider-meta"), keccak256("stake"));ResourceCollateralFixture420.fund(e.providers,e.providerId,ALICE);

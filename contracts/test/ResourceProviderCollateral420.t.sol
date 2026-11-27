@@ -84,7 +84,7 @@ abstract contract ResourceProviderCollateralFixture420 {
     VmResourceCollateral420 constant vm = VmResourceCollateral420(address(uint160(uint256(keccak256("hevm cheat code")))));
     address constant OWNER = address(0xA11CE);
     address constant OTHER = address(0xB0B);
-    bytes32 constant ID = keccak256("resource-provider");
+    bytes32 constant ID = bytes32((uint256(uint160(OWNER)) << 96) | 1);
     bytes32 constant VID = keccak256("resource-collateral-vault");
     uint256 nonce;
     MockResourceCaps420 caps;
@@ -197,7 +197,7 @@ contract ResourceProviderCollateral420Test is ResourceProviderCollateralFixture4
     function testPositionCannotActivateSecondProviderOrAlias() public {
         bytes32 id = _deposit(2 ether);
         _activate(id);
-        bytes32 second = keccak256("second");
+        bytes32 second = providers.canonicalProviderId(OWNER, 2);
         vm.prank(OWNER);
         providers.registerProvider(second,OWNER,0,id);
         vm.prank(OWNER);

@@ -72,7 +72,7 @@ contract StorageObjectManifestRegistry420Test {
         e.agreements = new StorageAgreementRegistry420(address(e.auth), address(e.offers), address(e.nodes), address(e.providers), address(e.schemes), address(e.commitments), address(e.capacity));ResourceCollateralFixture420.enable(e.providers,address(e.agreements));
         e.manifests = new StorageObjectManifestRegistry420(address(e.agreements), address(e.commitments));
 
-        e.providerId = keccak256("manifest-provider");
+        e.providerId = e.providers.canonicalProviderId(PROVIDER, 1);
         e.nodeId = keccak256("manifest-store-node");
         e.offerId = keccak256("manifest-store-offer");
         e.schemeId = keccak256("manifest-proof-scheme");

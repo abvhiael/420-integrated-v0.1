@@ -15,6 +15,7 @@ historical = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(historical)
 ALLOWED_SOURCE_CHANGES = {
     "contracts/src/resource/ResourceAuthorization420.sol",
+    "contracts/src/resource/ResourceProviderRegistry420.sol",
     "contracts/src/resource/ResourceIds420.sol",
     "contracts/src/resource/ResourceSessionRegistry420.sol",
 }
@@ -59,9 +60,18 @@ def main():
             canonical = next(a for a in added if a["name"]=="openCanonicalSession")
             assert [x["type"] for x in canonical["inputs"]]==["bytes32","uint128","uint64","uint256"]
             assert [x["type"] for x in canonical["outputs"]]==["bytes32"]
+        elif name == "ResourceProviderRegistry420":
+            assert not removed and len(added)==3 and {a["name"] for a in added}=={"canonicalProviderId","setRegistrationConsent","RegistrationConsentChanged"}, added
+            expected = {"canonicalProviderId": ["address","uint96"], "setRegistrationConsent": ["bytes32","address","bytes32","bytes32"], "RegistrationConsentChanged": ["bytes32","bytes32"]}
+            assert all([x["type"] for x in a["inputs"]]==expected[a["name"]] for a in added)
         else:
             assert not removed and not added, (name,"unapproved ABI delta",removed,added)
-        assert historical.normalized_layout(old["storageLayout"])==historical.normalized_layout(new["storageLayout"]), (name,"storage drift")
+        oldlayout = historical.normalized_layout(old["storageLayout"])
+        newlayout = historical.normalized_layout(new["storageLayout"])
+        if name == "ResourceProviderRegistry420":
+            assert newlayout[:-1]==oldlayout and newlayout[-1]["label"]=="_registrationConsent" and newlayout[-1]["type"]["label"]=="mapping(bytes32 => bytes32)", (name,"unapproved layout delta")
+        else:
+            assert oldlayout==newlayout, (name,"storage drift")
         report.append({"contract":name,"removedABI":removed,"addedABI":added,"storagePreserved":True,
                        "oldRuntime":old["runtimeBytecodeTemplate"],"newRuntime":new["runtimeBytecodeTemplate"]})
     historical.write(out/"comparison.json",{"baseline":BASE,"qualified":head,"contracts":report,

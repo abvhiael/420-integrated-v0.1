@@ -67,7 +67,7 @@ contract StorageAgreementRegistry420Test {
         e.capacity = new StorageCapacityRegistry420(address(e.auth), address(e.nodes), address(e.providers));ResourceCollateralFixture420.enable(e.providers,address(e.capacity));
         e.agreements = new StorageAgreementRegistry420(address(e.auth), address(e.offers), address(e.nodes), address(e.providers), address(e.schemes), address(e.commitments), address(e.capacity));ResourceCollateralFixture420.enable(e.providers,address(e.agreements));
 
-        e.providerId = keccak256("provider");
+        e.providerId = e.providers.canonicalProviderId(ALICE, 1);
         e.nodeId = keccak256("store-node");
         e.offerId = keccak256("store-offer");
         e.schemeId = keccak256("proof-scheme");

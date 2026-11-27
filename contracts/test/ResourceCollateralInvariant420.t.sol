@@ -5,7 +5,7 @@ import "./ResourceProviderCollateral420.t.sol";
 // The handler is the sole fuzz target. Independent ghost balances are updated
 // only after successful calls, and every action checks exact conservation.
 contract ResourceCollateralInvariantHandler420 is ResourceProviderCollateralFixture420 {
-    bytes32 constant SECOND = keccak256("invariant-second");
+    bytes32 constant SECOND = bytes32((uint256(uint160(OTHER)) << 96) | 1);
     uint256[2] private funded;
     uint256[2] private paid;
     uint256[2] private confiscated;

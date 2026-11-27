@@ -60,7 +60,7 @@ contract StorageProofProtocol420Test {
         e.schemes = new StorageProofSchemeRegistry420(address(e.auth));
         e.commitments = new StorageCommitmentRegistry420(address(e.auth), address(e.providers), address(e.nodes), address(e.schemes));ResourceCollateralFixture420.enable(e.providers,address(e.commitments));
         e.proofs = new StorageProofRegistry420(address(e.commitments), address(e.schemes), address(e.nodes));
-        e.providerId = keccak256("storage-provider");
+        e.providerId = e.providers.canonicalProviderId(ALICE, 1);
         e.nodeId = keccak256("storage-node");
         e.schemeId = keccak256("proof-scheme-v1");
 

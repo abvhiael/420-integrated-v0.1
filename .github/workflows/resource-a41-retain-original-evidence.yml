@@ -1,0 +1,49 @@
+name: Resource A4.1 retain original evidence
+on:
+  push:
+    branches: [audit/resource-8a3-a4-provider]
+    paths: ['.github/workflows/resource-a41-retain-original-evidence.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  retain:
+    if: github.ref == 'refs/heads/audit/resource-8a3-a4-provider'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Verify and permanently retain original A4.1 archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          archive=docs/audit/420RESOURCE-8A3-A4.1-original-artifacts
+          mkdir -p "$archive"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/15167167540/zip" > "$archive/resource-8a2-compiler-evidence.zip"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/15167102679/zip" > "$archive/resource-8a3-compiler-evidence.zip"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/15167216714/zip" > "$archive/resource-8a2-indexer-qualification.zip"
+          cd "$archive"
+          cat > SHA256SUMS <<'EOF'
+          69a589ca3ea9c45a9e0e39f4be79164bca24f038c3a45d2277b91557b26d900e  resource-8a2-compiler-evidence.zip
+          564babaacd3771f845ab33c4f39610ef5cd8e40181543ff3c02f61174dbd7ba2  resource-8a3-compiler-evidence.zip
+          d58844dd82473d11c5b6329ca432d4ef757e505d5fcca36f781a9f66f11d43e3  resource-8a2-indexer-qualification.zip
+          EOF
+          sha256sum -c SHA256SUMS
+          test "$(wc -c < resource-8a2-compiler-evidence.zip)" -eq 44821
+          test "$(wc -c < resource-8a3-compiler-evidence.zip)" -eq 67008
+          test "$(wc -c < resource-8a2-indexer-qualification.zip)" -eq 507
+          for f in *.zip; do unzip -t "$f"; done
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f -- "$archive"
+          if git diff --cached --quiet; then exit 0; fi
+          test "$(git ls-remote origin refs/heads/audit/resource-8a3-a4-provider | cut -f1)" = "$EXPECTED_HEAD"
+          git commit -m "Retain original verified A4.1 qualification ZIP archives"
+          git push origin HEAD:refs/heads/audit/resource-8a3-a4-provider

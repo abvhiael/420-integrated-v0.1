@@ -147,3 +147,9 @@
 .cribbage-practice button{background:#c2edac;color:#143321;border:2px solid #a8d291}
 .cribbage-practice button:disabled{opacity:.6}
 .cribbage-practice :focus-visible{outline:3px solid #ffd773}
+/* Full-width Cribbage room; original board and peg coordinates stay intact. */
+.app-shell:has(.cribbage-app) .app-layout{background:#071910 url('/assets/games/cribbage/cribbage-play-wallpaper-casino-lounge.webp') center top/cover fixed;width:100%;grid-template-columns:208px minmax(0,1fr)}
+.cribbage-app{margin-inline:auto;width:100%;background:#071910b8}
+.cribbage-right .cribbage-leaf{max-width:760px;margin-inline:auto}
+@media(min-width:1121px){.cribbage-layout{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr)}}
+@media(max-width:800px){.app-shell:has(.cribbage-app) .app-layout{grid-template-columns:minmax(0,1fr)}}

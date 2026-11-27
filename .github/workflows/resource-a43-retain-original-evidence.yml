@@ -1,0 +1,46 @@
+name: Resource A4.3 retain original evidence
+on:
+  push:
+    branches: [audit/resource-8a3-a43-collateral-identity]
+    paths: ['.github/workflows/resource-a43-retain-original-evidence.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  retain:
+    if: github.ref == 'refs/heads/audit/resource-8a3-a43-collateral-identity'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Retain original qualified Resource workflow logs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          archive=docs/audit/420RESOURCE-8A3-A4.3-original-evidence
+          mkdir -p "$archive"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/45952359565" > "$archive/run.json"
+          jq -e '.head_sha == "abacd5a7210f802a0cccf9399620d0f2af6b03e9" and .conclusion == "success"' "$archive/run.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/45952359565/logs" > "$archive/resource-qualification-45952359565.zip"
+          cd "$archive"
+          unzip -t resource-qualification-45952359565.zip
+          sha256sum resource-qualification-45952359565.zip run.json > SHA256SUMS
+          sha256sum -c SHA256SUMS
+          unzip -p resource-qualification-45952359565.zip > /tmp/resource-a43-original.log
+          for test in testCollateralIdentityDelegatedDisciplineAndPermanentDisqualification testCollateralIdentityDelegatedExitCannotReopenAdmissionOrStealSponsor testCollateralIdentityDelegatedForeignReferenceAndEconomicBoundary; do
+            grep -F "[PASS] $test()" /tmp/resource-a43-original.log
+          done
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f -- "$archive"
+          if git diff --cached --quiet; then exit 0; fi
+          test "$(git ls-remote origin refs/heads/audit/resource-8a3-a43-collateral-identity | cut -f1)" = "$EXPECTED_HEAD"
+          git commit -m "Retain verified original A4.3 qualification run logs"
+          git push origin HEAD:refs/heads/audit/resource-8a3-a43-collateral-identity

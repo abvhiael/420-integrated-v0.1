@@ -114,7 +114,7 @@ contract StorageSettlementRegistry420Test {
     }
 
     function _configureRegistries(Env storage e) private {
-        e.providerId = keccak256("settlement-provider");
+        e.providerId = e.providers.canonicalProviderId(PROVIDER, 1);
         e.nodeId = keccak256("settlement-node");
         e.offerId = keccak256("settlement-offer");
         e.schemeId = keccak256("settlement-scheme");

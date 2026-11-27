@@ -17,7 +17,7 @@ contract ResourceCollateralPolicy420Test {
         registry = new ResourceProviderRegistry420(address(new ResourceAuthorization420(address(new ResourcePolicyCaps420()))),address(this));
     }
     function testUnconfiguredPolicyFailsClosed() public {
-        bytes32 id = keccak256("provider");
+        bytes32 id = registry.canonicalProviderId(address(this), 1);
         registry.registerProvider(id,address(this),0,keccak256("forged"));
         (bool ok,) = address(registry).call(abi.encodeCall(registry.setState,(id,ResourceProviderRegistry420.State.ACTIVE)));
         require(!ok && !registry.isActive(id) && registry.minimumCollateral()==0,"unconfigured admission");

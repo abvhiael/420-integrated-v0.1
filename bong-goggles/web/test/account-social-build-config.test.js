@@ -101,7 +101,7 @@ test('BC-3 output verifier covers Chess default, production, preview, rollback a
   [explicit,true,true,true,false]
  ]){
   const out={...example,features:{...example.features,accountSocial:enabled,accountMessaging:enabled,
-   accountGames:enabled,accountXP:enabled,classicRooms:rooms,classicCommunications:communications,chessRestricted:chess}};
+   accountGames:enabled,accountXP:enabled,classicRooms:rooms,classicCommunications:communications,chessRestricted:chess,wordSaladProduction:env.CF_PAGES==='1'&&env.CF_PAGES_BRANCH==='main'&&communications}};
   const mode=enabled?'enabled':'disabled';
   assert.equal(verifyAccountSocialOutput(example,out,mode,env),chess);
   assert.throws(()=>verifyAccountSocialOutput(example,{...out,features:{...out.features,chessRestricted:!chess}},mode,env),/modified another/);
@@ -112,4 +112,21 @@ test('BC-3 output verifier covers Chess default, production, preview, rollback a
   assert.throws(()=>verifyAccountSocialOutput(example,example,env.BG_ACCOUNT_SOCIAL_ACTIVATION==='true'?'enabled':'disabled',env),/Chess requires/);
  }
  for(const bad of ['TRUE','1','',' true'])assert.throws(()=>verifyAccountSocialOutput(example,example,'disabled',{BG_CHESS_ACTIVATION:bad}),/BG_CHESS_ACTIVATION/);
+});
+
+test('Word Salad production build verifies independent activation, rollback and dependency boundaries',()=>{
+ const main={CF_PAGES:'1',CF_PAGES_BRANCH:'main',BG_ACCOUNT_SOCIAL_ACTIVATION:'true'};
+ const base=withAccountSocialBuildFlags(example,'true','true','true');
+ for(const [flag,on] of [[undefined,true],['true',true],['false',false]]){
+  const env={...main,BG_WORD_SALAD_ACTIVATION:flag};
+  const out={...base,features:{...base.features,chessRestricted:true,wordSaladProduction:on}};
+  verifyAccountSocialOutput(example,out,'enabled',env);
+  assert.equal(validateRuntimeConfig({...out,environment:'production'}).features.wordSaladRestricted,on);
+  assert.throws(()=>verifyAccountSocialOutput(example,{...out,features:{...out.features,wordSaladProduction:!on}},'enabled',env),/modified another/);
+ }
+ assert.throws(()=>verifyAccountSocialOutput(example,example,'disabled',{BG_WORD_SALAD_ACTIVATION:'true'}),/Word Salad requires/);
+ assert.throws(()=>verifyAccountSocialOutput(example,example,'disabled',{BG_WORD_SALAD_ACTIVATION:'TRUE'}),/BG_WORD_SALAD_ACTIVATION/);
+ const config={...base,environment:'production',features:{...base.features,wordSaladRestricted:true,wordSaladProduction:false}};
+ assert.equal(validateRuntimeConfig(config).features.wordSaladRestricted,false);
+ assert.equal(validateRuntimeConfig({...config,features:{...config.features,wordSaladProduction:true,classicCommunications:false}}).features.wordSaladRestricted,false);
 });

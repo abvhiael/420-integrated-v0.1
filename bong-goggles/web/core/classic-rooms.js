@@ -146,7 +146,7 @@ if(data.gameId==='labyrinth-cribbage'){
  if(!['individual','partnerships',''].includes(data.format??''))throw Error('Invalid Labyrinth scoring format');
  if(data.seatCount===4)body.format=data.format||'partnerships';
  else if(data.format&&data.format!=='individual')throw Error('Only four seats support partnerships');
-}else if(data.gameId==='scrabble'){if(!saladFormat(data.format,data.seatCount))throw Error('Invalid Word Salad board format');body.format=data.format;}else if(data.format)throw Error('Format is not allowed for this game');
+}else if(data.gameId==='scrabble'){const format=data.format||'17:classic-salad:live';if(!saladFormat(format,Number(data.seatCount)))throw Error('Invalid Word Salad board format');body.format=format;}else if(data.format)throw Error('Format is not allowed for this game');
 }else{
 if(!current.selected||!id(current.selected.id)||!Number.isSafeInteger(data.seat)||data.seat<0||
 data.seat>=current.selected.seatCount)throw Error('No qualified room and seat');

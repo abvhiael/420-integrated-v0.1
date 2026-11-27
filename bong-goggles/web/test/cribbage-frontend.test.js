@@ -296,9 +296,32 @@ test('Transient refresh preserves active match and selection; verified recovery 
 test('Next hand is visible but input remains locked during score playback',()=>{
  const s=accepted(),state={status:'ready',session:s,selection:[0,4],scoring:true};
  const html=renderCribbageRoute({screen:'play',state});
- assert.match(html,/Counting the previous hand/);
+ assert.match(html,/Counting points/);
  assert.match(html,/data-cribbage-card="0" disabled/);
  assert.match(html,/data-cribbage-action="discard" disabled/);
  const own={...s,privateView:{...s.privateView,dealer:0}};
  assert.match(renderCribbageRoute({screen:'play',state:{...state,scoring:false,session:own}}),/Choose 2 cards for your crib/);
+});
+
+test('One click wins over an in-flight poll for discard, cut and play; late poll cannot roll back',async()=>{
+ for(const [phase,move] of [['discard',{type:'discard',cards:[0,4]}],['cut',{type:'cut'}],['peg',{type:'play',card:0}]]){
+  const initial=snapshot(2,phase,1),next=snapshot(2,phase,2);
+  let hold=false,release,posts=0;
+  const controller=new CribbageSessionController({enabled:true,fetchImpl:async(path,opts)=>{
+   if(path.endsWith('/v1/me'))return http(200,{walletRequired:false,profile:{subject}});
+   if(path.endsWith('/action')){posts++;assert.deepEqual(JSON.parse(opts.body).move,move);return http(200,next.data);}
+   if(hold)return new Promise(resolve=>{release=()=>resolve(http(200,initial.data));});
+   return http(200,initial.data);
+  }});
+  await controller.open(id);
+  hold=true;
+  const poll=controller.open(id,{quiet:true});
+  while(!release)await new Promise(resolve=>setImmediate(resolve));
+  await controller.act(move);
+  assert.equal(posts,1);
+  assert.equal(controller.state.session.sequence,2);
+  release();await poll;
+  assert.equal(controller.state.session.sequence,2);
+  controller.destroy();
+ }
 });

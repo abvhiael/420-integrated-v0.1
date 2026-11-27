@@ -8,17 +8,17 @@ const snapshot=()=>({id,roomId,gameId:'scrabble',rulesVersion:'v1',rulesHash:'a'
 const response=(status,data)=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json'}});
 const wrap=s=>({status:200,data:{...envelope,session:s}});
 function harness(){
- let s=snapshot(),subject=actor,mode=400,posts=[],down=false,hold=null,readStatus=200;
+ let s=snapshot(),subject=actor,mode=400,posts=[],down=false,hold=null,readHold=null,readStatus=200;
  const fetchImpl=async(url,opts)=>{
  if(down)throw Error('offline');
  if(url.endsWith('/v1/me'))return subject?response(200,{walletRequired:false,profile:{subject}}):response(401,{});
  if(url.endsWith('/action')){posts.push(JSON.parse(opts.body));if(hold)await hold;if(mode===200){s.sequence++;s.turnSeat=1;s.privateView.turn=1;}return response(mode,{...envelope,session:s});}
  if(url.endsWith('/classic-sessions'))return response(200,{...envelope,sessions:[s]});
  if(url.endsWith('/classic-rooms/'+roomId))return response(200,{...envelope,room:{id:roomId,gameId:'scrabble',seats:[{index:0,controller:'human',subject:actor},{index:1,controller:'bot',difficulty:'hard'}]}});
- return response(readStatus,{...envelope,session:s});
+ if(readHold)await readHold;return response(readStatus,{...envelope,session:s});
  };
  const c=new SaladController({enabled:true,fetchImpl});
- return {c,fetchImpl,posts,get s(){return s;},set subject(x){subject=x;},set mode(x){mode=x;},set down(x){down=x;},set hold(x){hold=x;},set readStatus(x){readStatus=x;}};
+ return {c,fetchImpl,posts,get s(){return s;},set subject(x){subject=x;},set mode(x){mode=x;},set down(x){down=x;},set hold(x){hold=x;},set readStatus(x){readStatus=x;},set readHold(x){readHold=x;}};
 }
 test('valid private snapshot and malformed or concealed fields fail closed',()=>{
  assert.ok(normalizeSalad(wrap(snapshot()),id));
@@ -68,3 +68,10 @@ test('accepted move snapshot is published before follow-up read and stalled bot 
  await c.refresh(id);assert.equal(recoveries,1);
  }finally{Date.now=clock;}
 });
+
+test('player commands during polling are sent once when the same revision is confirmed',async()=>{
+ for(const [move,action] of [[{type:'pass'},'move'],[{type:'exchange',ids:[0]},'move'],[{type:'place',tiles:[{row:5,col:5,id:0}]},'move'],[undefined,'resign']]){
+ const h=harness(),c=h.c;await c.refresh(id);let release;h.readHold=new Promise(r=>release=r);const poll=c.refresh(id);const command=c.act(move,action);await c.act(move,action);h.readHold=null;release();await Promise.all([poll,command]);assert.equal(h.posts.length,1);assert.equal(h.posts[0].action,action);assert.deepEqual(h.posts[0].move,move);
+ }
+});
+test('queued command never submits after polling advances authoritative sequence',async()=>{const h=harness(),c=h.c;await c.refresh(id);let release;h.readHold=new Promise(r=>release=r);const poll=c.refresh(id);const command=c.act({type:'pass'});h.s.sequence++;h.readHold=null;release();await Promise.all([poll,command]);assert.equal(h.posts.length,0);assert.match(c.state.error,/changed/);});

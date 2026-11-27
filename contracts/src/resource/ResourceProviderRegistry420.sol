@@ -280,7 +280,9 @@ contract ResourceProviderRegistry420 is I420System {
             bytes32 commitment = keccak256(abi.encode(providerId, operatorAccount, msg.sender, metadataHash, stakeRef));
             if (
                 _registrationConsent[providerId] != commitment
-                    || !authorization.isProviderAuthorized(msg.sender, providerId, ResourceIds420.ACTION_REGISTER_PROVIDER)
+                    || !authorization.isProviderAuthorized(
+                        msg.sender, providerId, ResourceIds420.ACTION_REGISTER_PROVIDER
+                    )
             ) revert Unauthorized();
         }
         delete _registrationConsent[providerId];

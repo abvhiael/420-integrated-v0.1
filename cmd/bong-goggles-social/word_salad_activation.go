@@ -8,7 +8,9 @@ func configureWordSalad(mode string,sessions *social.ClassicSessions,rooms,rules
  if mode!="restricted-acceptance"&&mode!="production"{return configureWordSaladWithFactory(mode,sessions,rooms,rules,communications,social.NewProductionWordSaladRulesAdapter)}
  legacy,e:=social.NewLegacyProductionWordSaladRulesAdapter();if e!=nil{return e}
  if e=configureWordSaladWithFactory(mode,sessions,rooms,rules,communications,social.NewProductionWordSaladRulesAdapter);e!=nil{return e}
- return sessions.RegisterHistoricalWordSalad(legacy)
+ if e=sessions.RegisterHistoricalWordSalad(legacy);e!=nil{return e}
+ previous,e:=social.NewPreviousProductionWordSaladRulesAdapter();if e!=nil{return e}
+ return sessions.RegisterHistoricalWordSalad(previous)
 }
 // Explicit factory seam permits startup failure qualification without modifying embedded assets.
 func configureWordSaladWithFactory(mode string,sessions *social.ClassicSessions,rooms,rules,communications bool, factory func()(*social.RulesAdapter,error))error{

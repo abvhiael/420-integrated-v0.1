@@ -199,7 +199,7 @@ const session=normalizeCribbageSnapshot(result,me.data.profile.subject);
 if(!session||session.id!==id||existing&&session.sequence<existing.sequence)
 throw Error('Unverified Cribbage snapshot; no private cards were displayed');
 if(existing&&session.sequence===existing.sequence){
-if(this.state.status!=='ready'||this.state.error||this.state.scoring&&this.timer===null&&!this.state.queue?.length)return this.emit({status:'ready',session,submitting:false,error:null,notice:'',scoring:this.timer!==null||!!this.state.queue?.length});
+if(this.state.status!=='ready'||this.state.error||this.state.scoring&&this.timer===null)return this.emit({status:'ready',session,submitting:false,error:null,notice:'',scoring:this.timer!==null,...(this.timer===null?{queue:[],announcement:'',showing:null,pegs:reconcilePegs(this.state.pegs,session)}:{})});
 return this.state;
 }
 if(existing&&this.timer!==null)return this.state;

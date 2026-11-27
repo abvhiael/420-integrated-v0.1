@@ -1,0 +1,32 @@
+name: Cribbage artwork qualification
+on:
+  pull_request:
+    paths:
+      - 'bong-goggles/web/assets/games/cribbage/**'
+      - 'bong-goggles/web/core/cribbage-board.js'
+      - 'bong-goggles/web/scripts/verify-cribbage-artwork.py'
+      - '.github/workflows/cribbage-artwork-qualification.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  survey:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install numpy==2.2.6 opencv-python-headless==4.12.0.88
+      - name: Verify and generate evidence
+        run: python bong-goggles/web/scripts/verify-cribbage-artwork.py --output cribbage-artwork-evidence
+      - name: Retain survey evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cribbage-artwork-${{ github.event.pull_request.head.sha || github.sha }}
+          path: cribbage-artwork-evidence/
+          retention-days: 90
+          if-no-files-found: error

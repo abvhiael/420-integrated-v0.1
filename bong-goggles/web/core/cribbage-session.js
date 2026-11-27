@@ -124,7 +124,7 @@ export function cribbageAwardAnnouncement(award,view){
 export function cribbageAnnouncementQueue(previous,next){
  if(!previous||!next||next.sequence!==previous.sequence+1||next.gameId!=='cribbage')return [];
  const view=next.privateView,past=previous.privateView;
- const newShow=JSON.stringify(view.lastShow)!==JSON.stringify(past.lastShow)&&view.lastShow.length>0;
+ const newShow=(view.round!==past.round||JSON.stringify(view.lastShow)!==JSON.stringify(past.lastShow))&&view.lastShow.length>0;
  const awards=view.lastAwards;
  const queue=[];
  if(!newShow){
@@ -143,6 +143,14 @@ export function cribbageAnnouncementQueue(previous,next){
    team,total:award?.total??null,show:item});
  }
  return queue;
+}
+// Reconcile authoritative totals without collapsing the two physical pegs.
+function reconcilePegs(pegs,session){
+ if(!pegs?.length)return cribbageNewPegs(session.privateView.scores,session.seatCount);
+ const teams=cribbageTeams(session.seatCount);
+ for(let seat=0;seat<teams.length;seat++)
+  pegs=cribbageLeap(pegs,teams[seat],session.privateView.scores[seat]);
+ return cribbageSettlePegs(pegs);
 }
 export class CribbageSessionController{
  constructor({enabled=false,fetchImpl=fetch,onChange=()=>{},setTimer=setTimeout,clearTimer=clearTimeout}={}){
@@ -167,13 +175,13 @@ export class CribbageSessionController{
   const [item,...remaining]=this.state.queue;
   let pegs=this.state.pegs??[];
   if(item.total!==null&&item.total!==undefined)pegs=cribbageLeap(pegs,item.team,item.total);
-  this.emit({pegs,announcement:item.label,showing:item.show??null,queue:remaining});
+  this.emit({pegs,scoring:true,announcement:item.label,showing:item.show??null,queue:remaining});
   this.cancelTimer();
   this.timer=this.setTimer(()=>{
    this.timer=null;
    this.emit({pegs:cribbageSettlePegs(this.state.pegs),announcement:'',showing:null});
    if(this.state.queue.length){this.advance();}
-   else if(this.state.session)this.emit({pegs:cribbageNewPegs(this.state.session.privateView.scores,this.state.session.seatCount)});
+   else if(this.state.session)this.emit({scoring:false,pegs:reconcilePegs(this.state.pegs,this.state.session)});
   },CRIBBAGE_ANNOUNCE_MS);
  }
  async open(id,{quiet=false}={}){
@@ -197,7 +205,7 @@ export class CribbageSessionController{
     throw Error('Unverified Cribbage snapshot; no private cards were displayed');
    // A normal heartbeat cannot restart announcements or reset back pegs.
    if(existing&&session.sequence===existing.sequence){
- if(this.state.status!=='ready')return this.emit({status:'ready',session,submitting:false,error:null,notice:'',selection:[]});
+ if(this.state.status!=='ready'||this.state.error)return this.emit({status:'ready',session,submitting:false,error:null,notice:''});
  return this.state;
 }
    // Preserve the 1.5-second per-award sequence; the next poll will catch
@@ -206,7 +214,7 @@ export class CribbageSessionController{
    const replay=existing&&session.sequence===existing.sequence+1;
    const queue=replay?cribbageAnnouncementQueue(existing,session):[];
    const pegs=existing&&replay&&queue.length?
-    this.state.pegs:cribbageNewPegs(session.privateView.scores,session.seatCount);
+    this.state.pegs:reconcilePegs(existing?this.state.pegs:null,session);
    if(!replay){this.cancelTimer();}
    this.emit({status:'ready',session,pegs,queue:replay?queue:[],error:null,resignPending:false,selection:[],submitting:false,
     announcement:replay?'':this.state.announcement??'',
@@ -215,8 +223,7 @@ export class CribbageSessionController{
    if(replay&&queue.length)this.advance();
    return this.state;
   }catch(e){
-   if(generation===this.generation)this.emit({status:'error',session:null,pegs:[],queue:[],
-    error:e.message??'Match temporarily unavailable'});
+   if(generation===this.generation)this.emit(existing?{status:'error',submitting:false,error:e.message??'Match temporarily unavailable'}:{status:'error',session:null,pegs:[],queue:[],error:e.message??'Match temporarily unavailable'});
    return this.state;
   }finally{if(generation===this.generation)this.busy=false;}
  }
@@ -242,7 +249,7 @@ export class CribbageSessionController{
     session.sequence!==current.sequence+1)throw Error('Move was not confirmed by the match server');
    const queue=cribbageAnnouncementQueue(current,session);
    this.emit({status:'ready',session,selection:[],submitting:false,resignPending:false,queue,announcement:'',
-    notice:'',pegs:queue.length?this.state.pegs:cribbageNewPegs(session.privateView.scores,session.seatCount)});
+    notice:'',pegs:queue.length?this.state.pegs:reconcilePegs(this.state.pegs,session)});
    if(queue.length)this.advance();
    return this.state;
   }catch(e){

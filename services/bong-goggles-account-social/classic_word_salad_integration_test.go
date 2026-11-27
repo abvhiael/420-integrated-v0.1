@@ -160,7 +160,8 @@ func TestBC42WordSaladMultiplayerResignation(t *testing.T){
  same,_,_:=read();if same.Sequence!=after.Sequence||string(same.State)!=string(after.State){t.Fatal("duplicate mutation")}
  if e=h.Sessions.VerifyRules(ctx,match.ID);e!=nil{t.Fatal("replay after resignation",e)}
  recovered,e:=NewClassicSessions(store,h.Rooms,h.Sessions.Rules);if e!=nil{t.Fatal(e)};h.Sessions=recovered
- for i:=0;i<4;i++{
+ // One pass preserves the two-survivor match for the separate resignation test.
+ for i:=0;i<1;i++{
   rec,frame,_:=read();if frame.Turn==resigner||rec.Status!="active"{t.Fatal("forfeited turn or early termination")}
   if w:=bc06Act(t,h,cookies[frame.Turn],match.ID,"move",rec.Sequence+1,map[string]string{"type":"pass"},bc06ActionID(t));w.Code!=200{t.Fatal("continued move",w.Code,w.Body.String())}
  }

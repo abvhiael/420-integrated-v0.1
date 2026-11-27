@@ -1,0 +1,304 @@
+{
+  "sourceSHA": "15263ad49f66537ff4c9a33db7d094a7801f06aa",
+  "pr": 1454,
+  "workflows": [
+    {
+      "id": 46046307461,
+      "name": "AUTH-8/9/10/11 Wallet-Independent BongGoggles Social",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 590,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307461/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307461/logs",
+      "workflow_id": 425547946
+    },
+    {
+      "id": 46046307536,
+      "name": "BC-2.2 Labyrinth Cribbage Authoritative Engine",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 157,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307536/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307536/logs",
+      "workflow_id": 427353180
+    },
+    {
+      "id": 46046307605,
+      "name": "BC-1.5 Cribbage Authenticated Multiplayer and Recovery",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 259,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307605/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307605/logs",
+      "workflow_id": 427133283
+    },
+    {
+      "id": 46046307609,
+      "name": "BC-2.6 Labyrinth History and Social Integration",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 42,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307609/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307609/logs",
+      "workflow_id": 428422280
+    },
+    {
+      "id": 46046307635,
+      "name": "BC-3.7 Chess Automated and Adversarial Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 113,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307635/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307635/logs",
+      "workflow_id": 429612951
+    },
+    {
+      "id": 46046307513,
+      "name": "BC-2.5 Labyrinth Authenticated Human Multiplayer",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 784,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307513/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307513/logs",
+      "workflow_id": 428374312
+    },
+    {
+      "id": 46046307573,
+      "name": "BC-1.6 Authenticated Cribbage Challenges and Social",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 137,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307573/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307573/logs",
+      "workflow_id": 427191679
+    },
+    {
+      "id": 46046307640,
+      "name": "BC-3.6 Chess History and Social Integration",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 116,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307640/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307640/logs",
+      "workflow_id": 429558163
+    },
+    {
+      "id": 46046307644,
+      "name": "BC-1.4 Cribbage Player Frontend",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 245,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307644/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307644/logs",
+      "workflow_id": 427102744
+    },
+    {
+      "id": 46046307730,
+      "name": "BC-2.1 Labyrinth Cribbage Rules Specification",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 1291,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307730/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307730/logs",
+      "workflow_id": 427331612
+    },
+    {
+      "id": 46046307495,
+      "name": "Bong Goggles CCC Account Multiplayer",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 687,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307495/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307495/logs",
+      "workflow_id": 426329429
+    },
+    {
+      "id": 46046307539,
+      "name": "BC-4.2 Word Salad Backend Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 101,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307539/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307539/logs",
+      "workflow_id": 430631799
+    },
+    {
+      "id": 46046307510,
+      "name": "BC-1.8 Real BongGoggles Public Target Preflight",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 146,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307510/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307510/logs",
+      "workflow_id": 427241559
+    },
+    {
+      "id": 46046307805,
+      "name": "BC-4.4.2-B Word Salad Browser Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 60,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307805/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307805/logs",
+      "workflow_id": 432046175
+    },
+    {
+      "id": 46046307540,
+      "name": "Bong Goggles Web Verification",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 1671,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307540/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307540/logs",
+      "workflow_id": 361846473
+    },
+    {
+      "id": 46046307676,
+      "name": "BC-0.5–0.10 Account Rooms, Sessions, Rules, Bots and Communications",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 428,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307676/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307676/logs",
+      "workflow_id": 426414570
+    },
+    {
+      "id": 46046307682,
+      "name": "BC-3.4 Chess Player Interface",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 119,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307682/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307682/logs",
+      "workflow_id": 429470329
+    },
+    {
+      "id": 46046307603,
+      "name": "BC-3.3 Chess Computer Opponents",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 78,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307603/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307603/logs",
+      "workflow_id": 429365165
+    },
+    {
+      "id": 46046307680,
+      "name": "BC-0.12 Classics Test and Release Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 410,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307680/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307680/logs",
+      "workflow_id": 426513903
+    },
+    {
+      "id": 46046307751,
+      "name": "BC-3.5 Chess Player Interface",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 117,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307751/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46046307751/logs",
+      "workflow_id": 429517307
+    }
+  ],
+  "roomLifecycleJobs": [
+    {
+      "id": 140666336365,
+      "name": "qualify-rooms",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 46046307676,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Initialize containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Verify exact qualification SHA",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Qualify room presence, reconnect/replay, rules and bots (PostgreSQL 16, race)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Static analysis and restricted service build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Qualify targeted room, account and shared-games web regressions",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17
+        },
+        {
+          "name": "Stop containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19
+        }
+      ]
+    }
+  ],
+  "roomLifecycleArtifactMetadata": [],
+  "scope": "Workflow receipts and artifact metadata; not original binary artifacts."
+}

@@ -15,3 +15,5 @@ Canonical scopes use Ethereum Keccak-256 of Solidity abi.encode(string, bytes32.
 6. Retain chain/block identity, grant/revocation receipts, old/new mapping, budget reconciliation and deployment evidence. Fail closed on incomplete inventory or verification. Live receipts remain required in Resource Audit 9; local CI is not live migration evidence.
 
 Qualification: the A1 source inventory gate checks exact adapter action sets; ResourceIdentifierDomains420 exercises all 15 actions plus retired and unknown actions against every scope using real CapabilityRegistry grants, including legacy and wrong component. The deployment generator emits deterministic ABI-derived vectors for independent SDK consumption. No security gates are waived.
+
+Independent Go SDK APIs `ResourceIdentifier`, `ResourceScopeHash` and `DeriveResourceGrant` use native ABI encoding and Ethereum Keccak, without invoking cast or loading expected hashes at runtime. Fixed vectors in `sdk/storage420/testdata/resource_identifier_vectors.json` are checked by Solidity, Go and cast-based deployment tooling. The SDK does not create authority.

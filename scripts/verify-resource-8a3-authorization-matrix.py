@@ -30,7 +30,7 @@ DECL = re.compile(r"\bfunction\s+(\w+)\s*\(([^{}]*?)\)\s*([^{};]*)\{")
 def mask(source):
     return LEX.sub(lambda m: re.sub(r"[^\n]", " ", m.group()), source)
 
-def inventory(source):
+def inventory(source, include_read_only=False):
     s = mask(source)
     result = {}
     for m in DECL.finditer(s):
@@ -38,7 +38,7 @@ def inventory(source):
         if not re.search(r"\b(public|external)\b", modifiers):
             continue
         # The deliberately disabled legacy selector is an authority-relevant exception.
-        if re.search(r"\b(view|pure)\b", modifiers) and name != "openSession":
+        if not include_read_only and re.search(r"\b(view|pure)\b", modifiers) and name != "openSession":
             continue
         if name in result:
             raise ValueError(f"overloaded operation needs explicit signature inventory: {name}")
@@ -113,8 +113,7 @@ def verify(root):
                 if kind:
                     expected_by_adapter[kind.group(1)].add(row["action"])
     for kind, expected in expected_by_adapter.items():
-        match = re.search(r"function is" + kind + r"Authorized\b[^{}]*\{(.*?)return _authorized|function is" + kind + r"Authorized\b[^{}]*\{(.*?)// A session-scoped", auth, re.S)
-        body = next((x for x in match.groups() if x is not None), "") if match else ""
+        body = inventory(auth, include_read_only=True).get("is" + kind + "Authorized", "")
         actual = set(re.findall(r"(?:ResourceIds420|StorageIds420|StorageProofIds420)\.ACTION_\w+", body))
         need(actual == expected, f"{kind} adapter allowlist drift: {actual ^ expected}")
 

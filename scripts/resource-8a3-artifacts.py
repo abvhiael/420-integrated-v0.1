@@ -15,6 +15,7 @@ historical = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(historical)
 ALLOWED_SOURCE_CHANGES = {
     "contracts/src/resource/ResourceAuthorization420.sol",
+    "contracts/src/resource/ResourceIds420.sol",
     "contracts/src/resource/ResourceSessionRegistry420.sol",
 }
 def main():

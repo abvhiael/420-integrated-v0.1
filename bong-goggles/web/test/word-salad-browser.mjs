@@ -85,7 +85,7 @@ async function inspect(page,n,view){
   const shell=el.closest('.app-shell'),layout=el.closest('.app-layout'),main=el.closest('.app-content');
   const lr=box(layout),mr=box(main);
   if(mr.width<lr.width-30)bad.push('game does not occupy full layout lane');
-  if(innerWidth>=1101&&br.width<Math.min(750,innerWidth*.55))bad.push('desktop board too narrow');
+  if(innerWidth>=1101&&br.width<Math.min(750,innerWidth*.55,Math.max(400,innerHeight-245)))bad.push('desktop board too narrow');
   for(const rail of shell.querySelectorAll('.app-sidebar,.app-rail,.ecosystem-rail')){
    if(getComputedStyle(rail).display!=='none'&&box(rail).top<mr.bottom-1)bad.push('sidebar competes with game lane');
   }

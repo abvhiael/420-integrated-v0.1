@@ -21,26 +21,28 @@ export function normalizeSalad(r,id){
  else if(!Number.isInteger(v.turn)||v.turn<0||v.turn>=n||v.forfeit[v.turn]||s.turnSeat!==v.turn||s.winnerSeat!==null||v.ending!==''||!(v.winners===null||Array.isArray(v.winners)&&!v.winners.length)||!(timing==='untimed'?s.deadline===null:typeof s.deadline==='string'&&Number.isFinite(Date.parse(s.deadline))))return null;
  return {...s,privateView:v,format:fmt};
 }
+const temporaryStatus=s=>[429,502,503,504].includes(s);
+class TemporarySaladError extends Error{}
 export class SaladController{
  constructor({enabled=false,fetchImpl=fetch,onChange=()=>{}}={}){this.client=createAccountSocialClient({enabled,fetchImpl});this.onChange=onChange;this.gen=0;this.busy=false;this.actor=null;this.target=null;this.state={status:enabled?'idle':'disabled',session:null,matches:[],seats:[],draft:{},selected:null,exchange:[],order:[],error:'',notice:'',large:false};}
  emit(p){this.state={...this.state,...p};this.onChange();return this.state;}
  clear(){return {draft:{},selected:null,exchange:[],order:[],confirm:'',blank:'A',exchangeMode:false};}
  invalidate(){this.gen++;this.busy=false;this.actor=null;this.target=null;this.emit({status:this.client.enabled?'idle':'disabled',session:null,matches:[],seats:[],error:'',notice:'',...this.clear()});}
- async principal(){const r=await this.client.request('/v1/me');if(r.status===401)return null;if(r.status!==200||r.data?.walletRequired!==false||!isSubjectID(r.data.profile?.subject))throw Error('420ID verification unavailable');return r.data.profile.subject;}
+ async principal(){const r=await this.client.request('/v1/me');if(r.status===401)return null;if(temporaryStatus(r.status))throw new TemporarySaladError('420ID temporarily unavailable; reconnecting');if(r.status!==200||r.data?.walletRequired!==false||!isSubjectID(r.data.profile?.subject))throw Error('420ID verification unavailable');return r.data.profile.subject;}
  async refresh(id){if(!this.client.enabled)return;if(this.target!==id){this.invalidate();this.target=id;}if(this.busy)return;const gen=++this.gen;this.busy=true;
  try{const actor=await this.principal();if(gen!==this.gen)return;if(!actor){this.actor=null;this.emit({status:'guest',session:null,matches:[],seats:[],...this.clear()});return;}
  if(actor!==this.actor){this.actor=actor;this.emit({session:null,matches:[],seats:[],...this.clear()});}
  if(!id){const r=await this.client.request('/v1/classic-sessions');if(gen!==this.gen)return;if(r.status!==200||!clean(r)||!Array.isArray(r.data.sessions)||await this.principal()!==actor)throw Error('Match list unavailable');if(gen===this.gen){const matches=r.data.sessions.filter(s=>s.gameId==='scrabble'&&saladID(s.id)&&saladID(s.roomId)&&s.rulesVersion==='v1'&&/^[a-f0-9]{64}$/.test(s.rulesHash)&&['active','finished'].includes(s.status)).map(({id,roomId,status,sequence})=>({id,roomId,status,sequence}));if(this.state.status!=='ready'||JSON.stringify(matches)!==JSON.stringify(this.state.matches))this.emit({status:'ready',session:null,matches,error:''});}return;}
  if(!saladID(id))throw Error('Invalid match link');
- const r=await this.client.request('/v1/classic-sessions/'+id),s=normalizeSalad(r,id);if(!s)throw Error('Match unavailable or access denied');
- const room=await this.client.request('/v1/classic-rooms/'+s.roomId);const seats=room.data?.room?.seats;
+ const r=await this.client.request('/v1/classic-sessions/'+id);if(temporaryStatus(r.status))throw new TemporarySaladError('Game service temporarily unavailable; reconnecting');const s=normalizeSalad(r,id);if(!s)throw Error('Match unavailable or access denied');
+ const room=await this.client.request('/v1/classic-rooms/'+s.roomId);if(temporaryStatus(room.status))throw new TemporarySaladError('Room service temporarily unavailable; reconnecting');const seats=room.data?.room?.seats;
  if(room.status!==200||!clean(room)||room.data.room.id!==s.roomId||room.data.room.gameId!=='scrabble'||!Array.isArray(seats)||seats.length!==s.seatCount||seats[s.viewerSeat]?.subject!==actor||seats.some((x,i)=>x.index!==i||!['human','bot'].includes(x.controller)||x.controller==='bot'&&!['easy','medium','hard'].includes(x.difficulty)))throw Error('Room seats unavailable');
  if(await this.principal()!==actor)throw Error('Account changed');if(gen!==this.gen)return;
  const old=this.state.session;if(old?.id===id&&(s.sequence<old.sequence||s.roomId!==old.roomId||s.viewerSeat!==old.viewerSeat||s.rulesHash!==old.rulesHash||s.privateView.variant!==old.privateView.variant||s.seatCount!==old.seatCount))throw Error('Session identity or revision changed');
  if(old?.id===id&&old.sequence===s.sequence){if(JSON.stringify(old.privateView)!==JSON.stringify(s.privateView)||old.status!==s.status||old.deadline!==s.deadline)throw Error('Conflicting server revision');if(this.state.status==='ready')return;this.emit({status:'ready',session:s,seats,error:''});return;}
  const notice=old?.id===id?s.privateView.scores.map((x,i)=>x-old.privateView.scores[i]).map((x,i)=>x?'Player '+(i+1)+': '+(x>0?'+':'')+x:'').filter(Boolean).join(' · '):'';
  this.emit({status:'ready',session:s,seats,error:'',notice,...this.clear()});
- }catch(e){if(gen===this.gen)this.emit({status:'unavailable',session:null,seats:[],matches:[],error:e.message,...this.clear()});}finally{if(gen===this.gen)this.busy=false;}}
+ }catch(e){if(gen===this.gen){if(e instanceof TemporarySaladError&&this.state.session?.id===id&&this.actor)this.emit({status:'reconnecting',error:e.message});else this.emit({status:'unavailable',session:null,seats:[],matches:[],error:e.message,...this.clear()});}}finally{if(gen===this.gen)this.busy=false;}}
  canPlay(){const s=this.state.session;return this.state.status==='ready'&&s?.status==='active'&&s.viewerSeat===s.privateView.turn&&!s.privateView.forfeit[s.viewerSeat];}
  select(id){if(this.canPlay()&&this.state.session.privateView.rack.some(t=>t.id===id))this.emit({selected:id});}
  place(q,blank=this.state.blank){if(!this.canPlay())return;const s=this.state.session,v=s.privateView,id=this.state.selected,t=v.rack.find(x=>x.id===id),size=s.format.p.size;if(!t||!Number.isInteger(q)||q<0||q>=size*size||Object.hasOwn(v.board,q)||t.symbol==='?'&&!/^[A-Z]$/.test(blank))return;
@@ -50,10 +52,11 @@ export class SaladController{
  const gen=++this.gen;this.busy=true;this.emit({status:'submitting',error:''});let error='';
  try{if(await this.principal()!==actor||gen!==this.gen)throw Error('Account changed');const requestId=globalThis.crypto?.randomUUID?.();if(!saladID(requestId))throw Error('Secure request ID unavailable');
  const r=await this.client.request('/v1/classic-sessions/'+s.id+'/action',{method:'POST',body:{requestId,action,expectedSequence:s.sequence+1,...(move?{move}:{})}});if(gen!==this.gen)return;
+ if(temporaryStatus(r.status))throw new TemporarySaladError('Move confirmation temporarily unavailable; reconnecting');
  if(r.status===400)error='That move was rejected by the rules or dictionary. Check your words and try again.';
  else if(r.status===409)error='The turn changed. Reloaded authoritative state.';
  else {const next=normalizeSalad(r,s.id);if(!next||next.sequence<s.sequence+1||next.roomId!==s.roomId||next.viewerSeat!==s.viewerSeat||next.rulesHash!==s.rulesHash||next.privateView.variant!==s.privateView.variant)throw Error('Move not confirmed. Recheck the match before retrying.');}
  this.emit({status:'idle',...(r.status===400?{}:this.clear())});
- }catch(e){error=e.message;if(gen===this.gen)this.emit({status:'unavailable',session:null,...this.clear()});}
+ }catch(e){error=e.message;if(gen===this.gen){if(e instanceof TemporarySaladError)this.emit({status:'reconnecting',error});else this.emit({status:'unavailable',session:null,...this.clear()});}}
  finally{if(gen===this.gen){this.busy=false;await this.refresh(s.id);if(error&&this.target===s.id&&this.actor===actor)this.emit({error});}}}
 }

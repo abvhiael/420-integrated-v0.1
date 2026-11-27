@@ -1,6 +1,6 @@
 import {BOARD_SPECS,MODES} from './word-salad-rules.js';
 import {classicRequestFailure,normalizeClassicRoom} from './classic-rooms.js';
-import {renderSaladTable,bindSaladTable} from './word-salad-ui.js';
+import {renderSaladTable,bindSaladTable,updateSaladTable} from './word-salad-ui.js';
 import {SaladController,saladID,saladFormat,normalizeSalad,clean} from './word-salad-session.js';
 import {escapeHtml as esc} from './design-system.js';
 export function createSaladRuntime({enabled=false,onChange=()=>{},win=window,doc=document,fetchImpl=fetch}={}){
@@ -9,6 +9,7 @@ export function createSaladRuntime({enabled=false,onChange=()=>{},win=window,doc
  const c=new SaladController({enabled,fetchImpl,onChange:()=>{if(active())onChange();}});
  let suspended=false;
  let writing=false,lastList=0;
+ const update=root=>active()&&id()&&c.state.session?.id===id()&&updateSaladTable(root,c.state);
  const refresh=(force=false)=>{if(active()&&!suspended&&enabled&&!writing&&(force||id()||c.state.status!=='ready'||Date.now()-lastList>=15000)){lastList=Date.now();return c.refresh(id());}};
  const go=path=>{win.history.pushState({},'',path);win.dispatchEvent(new Event('popstate'));};
  async function submit(form,startRoom=false){
@@ -56,7 +57,7 @@ export function createSaladRuntime({enabled=false,onChange=()=>{},win=window,doc
  const visibility=()=>{if(doc.hidden){if(active())invalidate();}else online();};
  const timer=win.setInterval(()=>{if(!doc.hidden)void refresh();},3500);
  win.addEventListener('online',online);win.addEventListener('offline',offline);doc.addEventListener('visibilitychange',visibility);
- return {controller:c,get state(){return c.state;},refresh,invalidate,suspend(){suspended=true;invalidate();},resume(){suspended=false;return refresh();},identity(state){if(!active()||!enabled)return;if(state?.status==='guest'||state?.status==='error'||state?.status==='ready'&&c.actor&&state.profile?.subject!==c.actor)invalidate();},bind(root){if(active()&&enabled)bindSaladTable(root,c,win);const form=root.querySelector('[data-salad-create]');if(form){const sync=()=>{const max=BOARD_SPECS[form.elements.size.value]?.maxPlayers||2;for(const opt of form.elements.count.options)opt.disabled=Number(opt.value)>max;if(Number(form.elements.count.value)>max)form.elements.count.value=String(max);};form.elements.size.addEventListener('change',sync);sync();form.addEventListener('submit',e=>{e.preventDefault();void submit(e.currentTarget);});}root.querySelector('[data-salad-room-start]')?.addEventListener('submit',e=>{e.preventDefault();void submit(e.currentTarget,true);});root.querySelector('[data-salad-refresh]')?.addEventListener('click',()=>void refresh(true));},destroy(){suspended=true;win.clearInterval(timer);win.removeEventListener('online',online);win.removeEventListener('offline',offline);doc.removeEventListener('visibilitychange',visibility);invalidate();}};
+ return {controller:c,update,get state(){return c.state;},refresh,invalidate,suspend(){suspended=true;invalidate();},resume(){suspended=false;return refresh();},identity(state){if(!active()||!enabled)return;if(state?.status==='guest'||state?.status==='ready'&&c.actor&&state.profile?.subject!==c.actor)invalidate();},bind(root){if(active()&&enabled)bindSaladTable(root,c,win);const form=root.querySelector('[data-salad-create]');if(form){const sync=()=>{const max=BOARD_SPECS[form.elements.size.value]?.maxPlayers||2;for(const opt of form.elements.count.options)opt.disabled=Number(opt.value)>max;if(Number(form.elements.count.value)>max)form.elements.count.value=String(max);};form.elements.size.addEventListener('change',sync);sync();form.addEventListener('submit',e=>{e.preventDefault();void submit(e.currentTarget);});}root.querySelector('[data-salad-room-start]')?.addEventListener('submit',e=>{e.preventDefault();void submit(e.currentTarget,true);});if(!root.querySelector('.ws-table'))root.querySelector('[data-salad-refresh]')?.addEventListener('click',()=>void refresh(true));},destroy(){suspended=true;win.clearInterval(timer);win.removeEventListener('online',online);win.removeEventListener('offline',offline);doc.removeEventListener('visibilitychange',visibility);invalidate();}};
 }
 // Restricted session discovery/recovery surface; gameplay rendering belongs to BC-4.4.2 onward.
 export function renderSaladRecovery(state,screen){

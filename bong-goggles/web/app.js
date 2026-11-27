@@ -297,7 +297,7 @@ apply({action:form.dataset.chaosMove,index:Number(form.dataset.card),target:data
 });
 }
 
-function renderCurrent(message=null){const bootstrap=deriveBootstrapState({config:runtimeConfig,connectedChainId:walletView?.chainId??null});if(bootstrap.state==='maintenance'){publicFeedReader?.invalidate();publicFeedProjection=null;render({state:bootstrap.state,detail:'Bong Goggles is temporarily in maintenance mode.'});return;}const walletHref=runtimeConfig?buildWalletHandoffUrl(runtimeConfig.walletUrl,{action:'connect',returnUrl:window.location.href}):null;root.dataset.state=bootstrap.state;const existingInput=root.querySelector('[data-chaos-online-chat] textarea');const draft=existingInput?.value;
+function renderCurrent(message=null){const bootstrap=deriveBootstrapState({config:runtimeConfig,connectedChainId:walletView?.chainId??null});if(bootstrap.state==='maintenance'){publicFeedReader?.invalidate();publicFeedProjection=null;render({state:bootstrap.state,detail:'Bong Goggles is temporarily in maintenance mode.'});return;}const walletHref=runtimeConfig?buildWalletHandoffUrl(runtimeConfig.walletUrl,{action:'connect',returnUrl:window.location.href}):null;root.dataset.state=bootstrap.state;if(saladRuntime?.update(root))return;const existingInput=root.querySelector('[data-chaos-online-chat] textarea');const draft=existingInput?.value;
 const focused=existingInput===document.activeElement;const selection=focused?[existingInput.selectionStart,existingInput.selectionEnd]:null;
 const existingLog=root.querySelector('[data-chaos-chat-log]');
 const scrolled=existingLog?{top:existingLog.scrollTop,nearBottom:existingLog.scrollHeight-existingLog.scrollTop-existingLog.clientHeight<36}:null;

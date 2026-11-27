@@ -92,8 +92,9 @@ type:'discard',cards:v.hand.filter(id=>selected.has(id))
 });
 const readyPlay=v.phase==='peg'&&selected.size===1&&validPlay.has([...selected][0])&&
  cribbageCanSubmit(session,{type:'play',card:[...selected][0]});
+const interactive=state.status==='ready'&&!state.submitting&&!state.scoring;
 const cards=v.hand.map(id=>{
-const active=turn&&state.status==='ready'&&!state.submitting&&(discard||validPlay.has(id));
+const active=turn&&interactive&&(discard||validPlay.has(id));
 return '<button type="button" class="cribbage-card-button" data-cribbage-card="'+id+'"'+
 (active?'':' disabled')+' aria-pressed="'+(selected.has(id)?'true':'false')+
 '" aria-label="'+esc('Select '+cribbageCardLabel(id))+'">'+
@@ -105,19 +106,19 @@ v.phase==='cut'?'One legal cut reveals the shared starter.':
 'Your next hand is being prepared.';
 const action=discard?
 '<button class="cribbage-primary" type="button" data-cribbage-action="discard"'+
-(ready&&state.status==='ready'&&!state.submitting?'':' disabled')+'>Send '+count+' to crib</button>':
+(ready&&interactive?'':' disabled')+'>Send '+count+' to crib</button>':
 v.phase==='cut'&&turn?
-'<button class="cribbage-primary" type="button" data-cribbage-action="cut"'+(state.status==='ready'?'':' disabled')+'>Cut the deck</button>':
+'<button class="cribbage-primary" type="button" data-cribbage-action="cut"'+(interactive?'':' disabled')+'>Cut the deck</button>':
 v.phase==='peg'&&turn&&validPlay.size?
 '<button class="cribbage-primary" type="button" data-cribbage-action="play"'+
-(readyPlay&&state.status==='ready'&&!state.submitting?'':' disabled')+'>Play selected card</button>':
+(readyPlay&&interactive?'':' disabled')+'>Play selected card</button>':
 v.phase==='peg'&&turn&&legal.some(x=>x.type==='go')?
 '<button class="cribbage-primary" type="button" data-cribbage-action="go"'+
-(state.status==='ready'?'':' disabled')+'>Say “Go”</button>':
+(interactive?'':' disabled')+'>Say “Go”</button>':
 '';
 return '<section class="cribbage-hand-area" aria-label="Your private hand">'+
 '<div class="cribbage-section-title"><h3>Your hand</h3><span>'+v.hand.length+' cards</span></div>'+
-'<p>'+esc(note)+'</p><div class="cribbage-hand-cards">'+cards+'</div>'+
+'<p>'+esc(state.scoring?'Counting the previous hand — play resumes automatically.':note)+'</p><div class="cribbage-hand-cards">'+cards+'</div>'+
 '<div class="cribbage-actions">'+action+(selected.size?
 '<button type="button" data-cribbage-action="clear">Clear selection</button>':'')+'</div></section>';
 }

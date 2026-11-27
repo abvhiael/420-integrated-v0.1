@@ -164,7 +164,7 @@ async function startupJourney(origin){
   try{
    const s=snapshot(n),writes=[],count=s.seatCount,variant=s.privateView.variant;
    const room={id:roomId,host:actor,gameId:'scrabble',seatCount:count,visibility:'private',status:'open',revision:1,variantId:variant,format:variant,invites:[],seats:Array.from({length:count},(_,index)=>index===0?{index,controller:'human',subject:actor,team:index}:{index,controller:'empty',team:index})};
-   let started=false;
+   let started=false,transient=0;
    await context.route('**/*',async route=>{
     const url=new URL(route.request().url()),path=url.pathname,method=route.request().method(),reply=(data,status=200)=>route.fulfill({status,json:data});
     if(url.origin!==origin)return route.abort();
@@ -184,7 +184,7 @@ async function startupJourney(origin){
     if(path.endsWith('/classic-sessions/'+id+'/action')&&method==='POST'){
      const b=route.request().postDataJSON();assert.equal(b.expectedSequence,s.sequence+1);assert.equal(b.move.type,'pass');s.sequence++;writes.push('move');return reply({...envelope,session:s});
     }
-    if(path.endsWith('/classic-sessions/'+id))return reply({...envelope,session:s},started?200:404);
+    if(path.endsWith('/classic-sessions/'+id)){if(transient){const status=transient;transient=0;return reply({},status);}return reply({...envelope,session:s},started?200:404);}
     if(path.endsWith('/classic-rooms/'+roomId))return reply({...env,room});
     if(path.endsWith('/classic-sessions'))return reply({...envelope,sessions:started?[s]:[]});
     return reply({},404);
@@ -197,12 +197,32 @@ async function startupJourney(origin){
    await page.waitForURL('**/games/scrabble/play?session='+id,{timeout:45000});
    await page.locator('.ws-table').waitFor({timeout:45000});
    assert.deepEqual(writes,['create',...Array(count-1).fill('bot'),'start']);
-   await page.locator('[data-ws-action=pass]').click();
-   await page.waitForFunction(()=>document.querySelector('.ws-header')?.textContent.includes('Revision 2'));
-   assert.equal(writes.at(-1),'move');
-   await page.reload();await page.locator('.ws-table').waitFor({timeout:45000});assert.match(await page.locator('.ws-header').innerText(),/Revision 2/);
+   const decode=()=>page.locator('.ws-table').evaluate(async el=>{await Promise.all([...el.querySelectorAll('img')].map(async img=>{await img.decode();if(!img.naturalWidth)throw Error('Artwork failed to decode');}));});
+   await decode();
+   await page.evaluate(()=>{window.__wsAnchor=document.querySelector('.ws-table');window.__wsCell=document.querySelector('.ws-square');});
+   const same=()=>page.evaluate(()=>window.__wsAnchor===document.querySelector('.ws-table')&&window.__wsCell===document.querySelector('.ws-square'));
+   const turns=n===11?50:2;
+   for(let i=0;i<turns;i++){
+    await page.locator('[data-ws-action=pass]').click();
+    await page.waitForFunction(revision=>document.querySelector('.ws-header')?.textContent.includes('Revision '+revision),i+2);
+    await page.locator('[data-ws-action=pass]').waitFor();
+    await decode();assert.ok(await same(),'Table or artwork was remounted');
+    assert.equal(new URL(page.url()).searchParams.get('session'),id);
+   }
+   assert.equal(writes.filter(x=>x==='move').length,turns);
+   for(const status of [429,503,504]){
+    transient=status;await page.locator('[data-salad-refresh]').click();
+    await page.waitForFunction(()=>document.querySelector('.ws-turn')?.textContent.includes('Reconnecting'));
+    assert.ok(await same());assert.equal(await page.locator('[data-ws-action=pass]').isDisabled(),true);
+    assert.equal(await page.locator('.ws-rack-tile').count(),0);
+    await page.locator('[data-salad-refresh]').click();
+    await page.waitForFunction(()=>document.querySelector('.ws-turn')?.textContent==='Your turn');
+    await decode();assert.ok(await same());
+   }
+   await page.waitForLoadState('networkidle');await decode();
+   await page.reload();await page.locator('.ws-table').waitFor({timeout:45000});await decode();assert.match(await page.locator('.ws-header').innerText(),new RegExp('Revision '+(turns+1)));
    assert.deepEqual(problems,[]);
-   results.push({board:n,difficulty,players:count,interaction:'setup, computer seats, authoritative session start, pass, cold reload (fixture)',status:'passed'});
+   results.push({board:n,difficulty,players:count,turns,interaction:'setup, computer seats, sustained fixture turns, stable DOM identity, rate-limit/outage recovery, decoded artwork and cold reload',status:'passed'});
   }finally{await context.close();}
  }
 }

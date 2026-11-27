@@ -78,3 +78,17 @@ func TestWordSaladDictionaryModes(t *testing.T){
  for i,ch:=range "CA"{row,col,id:=mid-2+i,mid+2,get(string(ch));d.Racks[0]=append(d.Racks[0],id);tiles=append(tiles,saladPlacement{Row:&row,Col:&col,ID:&id})}
  if _,e=r.place(&d,p,"extra-dank",0,tiles);e==nil{t.Fatal("existing cannabis word counted as newly formed")}
 }
+
+func TestWordSaladColloquialAndHistoricalIdentity(t *testing.T){
+ old,e:=NewLegacyProductionWordSaladRulesAdapter();if e!=nil{t.Fatal(e)}
+ next,e:=NewProductionWordSaladRulesAdapter();if e!=nil{t.Fatal(e)}
+ oldV,oldH:=old.Identity();newV,newH:=next.Identity();if oldH==newH{t.Fatal("supplement did not change identity")}
+ r:=next.module.(wordSaladRules);for _,w:=range []string{"QUEEF","QUEEFS","FUCK","BULLSHIT","WANKER","DICKHEAD"}{if !r.general[w]{t.Fatal("missing colloquial word",w)}}
+ s:=&ClassicSessions{Rules:func(game string)ClassicRule{if game=="scrabble"{return next};return nil}}
+ if e=s.RegisterHistoricalWordSalad(old);e!=nil{t.Fatal(e)}
+ if a,e:=s.rule("scrabble",oldV,oldH);e!=nil||a!=old{t.Fatal("old match unavailable",e)}
+ if a,e:=s.rule("scrabble",newV,newH);e!=nil||a!=next{t.Fatal("new match unavailable",e)}
+ if a,e:=s.rule("scrabble","","");e!=nil||a!=next{t.Fatal("new room not using updated dictionary",e)}
+ if _,e=s.rule("scrabble",oldV,strings.Repeat("0",64));!errors.Is(e,ErrUnavailable){t.Fatal("unknown hash accepted",e)}
+ if !s.historicalWordSaladBots[oldH].complete(){t.Fatal("historical policies missing")}
+}

@@ -48,7 +48,7 @@ const http=(status,data)=>({status,ok:status>=200&&status<300,headers:{get:()=> 
 test('BC-1.4 exactly 120 unique numbered holes per score track, shared 121 and separate 2-peg parks',()=>{
  assert.equal(CRIBBAGE_BOARD_ART,'/assets/games/cribbage/board-cannabis-leaf.png');
  assert.deepEqual(CRIBBAGE_PARKS.green,[{x:460,y:804},{x:498,y:804}]);
- assert.deepEqual(CRIBBAGE_PARKS.ivory,[{x:460,y:842},{x:498,y:842}]);
+ assert.deepEqual(CRIBBAGE_PARKS.ivory,[{x:458,y:843},{x:498,y:843}]);
  assert.deepEqual(Object.keys(CRIBBAGE_HOLES),['green','ivory','amber']);
  for(const lane of Object.keys(CRIBBAGE_HOLES)){
   const holes=CRIBBAGE_HOLES[lane];

@@ -56,9 +56,15 @@ function observe(page,origin){
 async function inspect(page,n,view){
  const table=page.locator('.ws-table');
  await table.waitFor({timeout:45000});
+ // The app may replace its shell during initial independent identity/indexer
+ // completion. Wait for actual visible, decoded artwork rather than sampling
+ // the image before its intrinsic dimensions are known.
+ await table.locator('.ws-logo').waitFor({state:'visible',timeout:45000});
+ await page.waitForFunction(()=>{const img=document.querySelector('.ws-table .ws-logo');return img?.complete&&img.naturalWidth>0;},{},{timeout:45000});
  assert.equal(await table.locator('.ws-cell').count(),n*n);
  assert.equal(await table.locator('.ws-rack-tile,.ws-rack-empty').count(),BOARD_SPECS[n].rackSize);
  for(const selector of ['.ws-logo','.ws-board','.ws-rack','.ws-turn','.ws-player','.ws-bag','[data-ws-action="play-word"]','[data-ws-action="pass"]']){
+  await table.locator(selector).first().waitFor({state:'visible',timeout:15000});
   assert.ok(await table.locator(selector).first().isVisible(),'Missing '+selector);
  }
  const geometry=await table.evaluate(async el=>{

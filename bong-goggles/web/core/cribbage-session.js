@@ -164,6 +164,7 @@ this.emit({});
 }
 advance(){
 if(!this.state.session||!this.state.queue?.length)return;
+const id=this.state.session.id;
 const [item,...remaining]=this.state.queue;
 let pegs=this.state.pegs??[];
 if(item.total!==null&&item.total!==undefined)pegs=cribbageLeap(pegs,item.team,item.total);
@@ -171,6 +172,7 @@ this.emit({pegs,scoring:true,announcement:item.label,showing:item.show??null,que
 this.cancelTimer();
 this.timer=this.setTimer(()=>{
 this.timer=null;
+if(this.state.session?.id!==id)return;
 try{
 this.emit({pegs:cribbageSettlePegs(this.state.pegs),announcement:'',showing:null});
 if(this.state.queue?.length){this.advance();return;}
@@ -200,9 +202,9 @@ if(existing&&session.sequence===existing.sequence){
 if(this.state.status!=='ready'||this.state.error||this.state.scoring&&this.timer===null&&!this.state.queue?.length)return this.emit({status:'ready',session,submitting:false,error:null,notice:'',scoring:this.timer!==null||!!this.state.queue?.length});
 return this.state;
 }
-if(existing&&(this.timer!==null||this.state.queue?.length))return this.state;
-if(this.state.scoring)this.emit({scoring:false,announcement:'',showing:null});
-const replay=existing&&session.sequence===existing.sequence+1;
+if(existing&&this.timer!==null)return this.state;
+if(this.state.scoring)this.emit({scoring:false,queue:[],announcement:'',showing:null});
+const replay=!!existing&&session.sequence===existing.sequence+1;
 const queue=replay?cribbageAnnouncementQueue(existing,session):[];
 const pegs=existing&&replay&&queue.length?
 this.state.pegs:reconcilePegs(existing?this.state.pegs:null,session);

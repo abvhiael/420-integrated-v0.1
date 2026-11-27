@@ -1,0 +1,3947 @@
+{
+  "artwork_git_blob": "4c358c6cc77b2a6f6dd33865dbf7654de2b60cc0",
+  "artwork_sha256": "27c9895ed3632feaafc86e7ec8f0d9a6dac463287efd5482efc62e885b970979",
+  "dimensions": [
+    1448,
+    1086
+  ],
+  "source_commit": "dcf9d1307aea0410a2e800ada3530d66d81290f6",
+  "detected_holes": 245,
+  "expected_holes": 245,
+  "tracks": {
+    "green": [
+      {
+        "ordinal": 1,
+        "centre": [
+          704,
+          864
+        ],
+        "detected_centre": [
+          703.832,
+          864.097
+        ],
+        "previous": [
+          704,
+          864
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 2,
+        "centre": [
+          689,
+          833
+        ],
+        "detected_centre": [
+          688.832,
+          833.097
+        ],
+        "previous": [
+          689,
+          833
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 3,
+        "centre": [
+          666,
+          805
+        ],
+        "detected_centre": [
+          665.832,
+          805.097
+        ],
+        "previous": [
+          666,
+          805
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 4,
+        "centre": [
+          646,
+          780
+        ],
+        "detected_centre": [
+          645.832,
+          780.097
+        ],
+        "previous": [
+          646,
+          780
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 5,
+        "centre": [
+          621,
+          761
+        ],
+        "detected_centre": [
+          620.832,
+          761.097
+        ],
+        "previous": [
+          621,
+          761
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 6,
+        "centre": [
+          594,
+          745
+        ],
+        "detected_centre": [
+          593.832,
+          745.097
+        ],
+        "previous": [
+          594,
+          745
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 7,
+        "centre": [
+          568,
+          732
+        ],
+        "detected_centre": [
+          567.832,
+          732.097
+        ],
+        "previous": [
+          568,
+          732
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 8,
+        "centre": [
+          539,
+          723
+        ],
+        "detected_centre": [
+          538.832,
+          723.097
+        ],
+        "previous": [
+          539,
+          723
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 9,
+        "centre": [
+          510,
+          714
+        ],
+        "detected_centre": [
+          509.832,
+          714.097
+        ],
+        "previous": [
+          510,
+          714
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 10,
+        "centre": [
+          478,
+          708
+        ],
+        "detected_centre": [
+          477.832,
+          708.097
+        ],
+        "previous": [
+          478,
+          708
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 11,
+        "centre": [
+          398,
+          695
+        ],
+        "detected_centre": [
+          397.832,
+          695.097
+        ],
+        "previous": [
+          398,
+          695
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 12,
+        "centre": [
+          371,
+          689
+        ],
+        "detected_centre": [
+          370.832,
+          689.097
+        ],
+        "previous": [
+          371,
+          689
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 13,
+        "centre": [
+          344,
+          685
+        ],
+        "detected_centre": [
+          343.832,
+          685.097
+        ],
+        "previous": [
+          344,
+          685
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 14,
+        "centre": [
+          316,
+          678
+        ],
+        "detected_centre": [
+          315.832,
+          678.097
+        ],
+        "previous": [
+          316,
+          678
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 15,
+        "centre": [
+          292,
+          670
+        ],
+        "detected_centre": [
+          291.832,
+          670.097
+        ],
+        "previous": [
+          292,
+          670
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 16,
+        "centre": [
+          264,
+          664
+        ],
+        "detected_centre": [
+          263.832,
+          664.097
+        ],
+        "previous": [
+          264,
+          664
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 17,
+        "centre": [
+          240,
+          655
+        ],
+        "detected_centre": [
+          239.832,
+          655.097
+        ],
+        "previous": [
+          240,
+          655
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 18,
+        "centre": [
+          211,
+          644
+        ],
+        "detected_centre": [
+          210.832,
+          644.097
+        ],
+        "previous": [
+          211,
+          644
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 19,
+        "centre": [
+          186,
+          632
+        ],
+        "detected_centre": [
+          185.832,
+          632.097
+        ],
+        "previous": [
+          186,
+          632
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 20,
+        "centre": [
+          162,
+          612
+        ],
+        "detected_centre": [
+          161.832,
+          612.097
+        ],
+        "previous": [
+          162,
+          612
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 21,
+        "centre": [
+          197,
+          585
+        ],
+        "detected_centre": [
+          196.832,
+          585.097
+        ],
+        "previous": [
+          197,
+          585
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 22,
+        "centre": [
+          226,
+          589
+        ],
+        "detected_centre": [
+          225.832,
+          589.097
+        ],
+        "previous": [
+          226,
+          589
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 23,
+        "centre": [
+          253,
+          597
+        ],
+        "detected_centre": [
+          252.832,
+          597.097
+        ],
+        "previous": [
+          253,
+          597
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 24,
+        "centre": [
+          290,
+          605
+        ],
+        "detected_centre": [
+          289.832,
+          605.097
+        ],
+        "previous": [
+          290,
+          605
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 25,
+        "centre": [
+          329,
+          612
+        ],
+        "detected_centre": [
+          328.832,
+          612.097
+        ],
+        "previous": [
+          329,
+          612
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 26,
+        "centre": [
+          369,
+          608
+        ],
+        "detected_centre": [
+          368.832,
+          608.097
+        ],
+        "previous": [
+          369,
+          608
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 27,
+        "centre": [
+          407,
+          597
+        ],
+        "detected_centre": [
+          406.832,
+          597.097
+        ],
+        "previous": [
+          407,
+          597
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 28,
+        "centre": [
+          426,
+          572
+        ],
+        "detected_centre": [
+          425.832,
+          572.097
+        ],
+        "previous": [
+          426,
+          572
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 29,
+        "centre": [
+          425,
+          536
+        ],
+        "detected_centre": [
+          424.832,
+          536.097
+        ],
+        "previous": [
+          425,
+          536
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 30,
+        "centre": [
+          400,
+          497
+        ],
+        "detected_centre": [
+          399.832,
+          497.097
+        ],
+        "previous": [
+          400,
+          497
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 31,
+        "centre": [
+          346,
+          436
+        ],
+        "detected_centre": [
+          345.832,
+          436.097
+        ],
+        "previous": [
+          346,
+          436
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 32,
+        "centre": [
+          321,
+          407
+        ],
+        "detected_centre": [
+          320.832,
+          407.097
+        ],
+        "previous": [
+          321,
+          407
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 33,
+        "centre": [
+          299,
+          378
+        ],
+        "detected_centre": [
+          298.832,
+          378.097
+        ],
+        "previous": [
+          299,
+          378
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 34,
+        "centre": [
+          281,
+          356
+        ],
+        "detected_centre": [
+          280.832,
+          356.097
+        ],
+        "previous": [
+          281,
+          356
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 35,
+        "centre": [
+          268,
+          324
+        ],
+        "detected_centre": [
+          267.832,
+          324.097
+        ],
+        "previous": [
+          268,
+          324
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 36,
+        "centre": [
+          290,
+          306
+        ],
+        "detected_centre": [
+          289.832,
+          306.097
+        ],
+        "previous": [
+          290,
+          306
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 37,
+        "centre": [
+          324,
+          324
+        ],
+        "detected_centre": [
+          323.832,
+          324.097
+        ],
+        "previous": [
+          324,
+          324
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 38,
+        "centre": [
+          346,
+          343
+        ],
+        "detected_centre": [
+          345.832,
+          343.097
+        ],
+        "previous": [
+          346,
+          343
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 39,
+        "centre": [
+          367,
+          371
+        ],
+        "detected_centre": [
+          366.832,
+          371.097
+        ],
+        "previous": [
+          367,
+          371
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 40,
+        "centre": [
+          389,
+          400
+        ],
+        "detected_centre": [
+          388.832,
+          400.097
+        ],
+        "previous": [
+          389,
+          400
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 41,
+        "centre": [
+          439,
+          474
+        ],
+        "detected_centre": [
+          438.832,
+          474.097
+        ],
+        "previous": [
+          439,
+          474
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 42,
+        "centre": [
+          467,
+          501
+        ],
+        "detected_centre": [
+          466.832,
+          501.097
+        ],
+        "previous": [
+          467,
+          501
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 43,
+        "centre": [
+          490,
+          524
+        ],
+        "detected_centre": [
+          489.832,
+          524.097
+        ],
+        "previous": [
+          490,
+          524
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 44,
+        "centre": [
+          516,
+          537
+        ],
+        "detected_centre": [
+          515.832,
+          537.097
+        ],
+        "previous": [
+          516,
+          537
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 45,
+        "centre": [
+          542,
+          546
+        ],
+        "detected_centre": [
+          541.832,
+          546.097
+        ],
+        "previous": [
+          542,
+          546
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 46,
+        "centre": [
+          568,
+          546
+        ],
+        "detected_centre": [
+          567.832,
+          546.097
+        ],
+        "previous": [
+          568,
+          546
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 47,
+        "centre": [
+          596,
+          538
+        ],
+        "detected_centre": [
+          595.832,
+          538.097
+        ],
+        "previous": [
+          596,
+          538
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 48,
+        "centre": [
+          618,
+          524
+        ],
+        "detected_centre": [
+          617.832,
+          524.097
+        ],
+        "previous": [
+          618,
+          524
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 49,
+        "centre": [
+          637,
+          504
+        ],
+        "detected_centre": [
+          636.832,
+          504.097
+        ],
+        "previous": [
+          637,
+          504
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 50,
+        "centre": [
+          647,
+          478
+        ],
+        "detected_centre": [
+          646.832,
+          478.097
+        ],
+        "previous": [
+          647,
+          478
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 51,
+        "centre": [
+          649,
+          411
+        ],
+        "detected_centre": [
+          648.832,
+          411.097
+        ],
+        "previous": [
+          649,
+          411
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 52,
+        "centre": [
+          650,
+          377
+        ],
+        "detected_centre": [
+          649.832,
+          377.097
+        ],
+        "previous": [
+          650,
+          377
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 53,
+        "centre": [
+          649,
+          347
+        ],
+        "detected_centre": [
+          648.832,
+          347.097
+        ],
+        "previous": [
+          649,
+          347
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 54,
+        "centre": [
+          649,
+          317
+        ],
+        "detected_centre": [
+          648.832,
+          317.097
+        ],
+        "previous": [
+          649,
+          317
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 55,
+        "centre": [
+          651,
+          284
+        ],
+        "detected_centre": [
+          650.832,
+          284.097
+        ],
+        "previous": [
+          651,
+          284
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 56,
+        "centre": [
+          654,
+          255
+        ],
+        "detected_centre": [
+          653.832,
+          255.097
+        ],
+        "previous": [
+          654,
+          255
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 57,
+        "centre": [
+          659,
+          228
+        ],
+        "detected_centre": [
+          658.832,
+          228.097
+        ],
+        "previous": [
+          659,
+          228
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 58,
+        "centre": [
+          665,
+          202
+        ],
+        "detected_centre": [
+          664.832,
+          202.097
+        ],
+        "previous": [
+          665,
+          202
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 59,
+        "centre": [
+          678,
+          180
+        ],
+        "detected_centre": [
+          677.832,
+          180.097
+        ],
+        "previous": [
+          678,
+          180
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 60,
+        "centre": [
+          697,
+          159
+        ],
+        "detected_centre": [
+          696.832,
+          159.097
+        ],
+        "previous": [
+          697,
+          159
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 61,
+        "centre": [
+          747,
+          160
+        ],
+        "detected_centre": [
+          746.832,
+          160.097
+        ],
+        "previous": [
+          747,
+          160
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 62,
+        "centre": [
+          764,
+          182
+        ],
+        "detected_centre": [
+          763.832,
+          182.097
+        ],
+        "previous": [
+          764,
+          182
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 63,
+        "centre": [
+          780,
+          207
+        ],
+        "detected_centre": [
+          779.832,
+          207.097
+        ],
+        "previous": [
+          780,
+          207
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 64,
+        "centre": [
+          786,
+          237
+        ],
+        "detected_centre": [
+          785.832,
+          237.097
+        ],
+        "previous": [
+          786,
+          237
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 65,
+        "centre": [
+          792,
+          260
+        ],
+        "detected_centre": [
+          791.832,
+          260.097
+        ],
+        "previous": [
+          792,
+          260
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 66,
+        "centre": [
+          793,
+          286
+        ],
+        "detected_centre": [
+          792.832,
+          286.097
+        ],
+        "previous": [
+          793,
+          286
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 67,
+        "centre": [
+          793,
+          316
+        ],
+        "detected_centre": [
+          792.832,
+          316.097
+        ],
+        "previous": [
+          793,
+          316
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 68,
+        "centre": [
+          793,
+          346
+        ],
+        "detected_centre": [
+          792.832,
+          346.097
+        ],
+        "previous": [
+          793,
+          346
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 69,
+        "centre": [
+          791,
+          377
+        ],
+        "detected_centre": [
+          790.832,
+          377.097
+        ],
+        "previous": [
+          791,
+          377
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 70,
+        "centre": [
+          793,
+          407
+        ],
+        "detected_centre": [
+          792.832,
+          407.097
+        ],
+        "previous": [
+          793,
+          407
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 71,
+        "centre": [
+          797,
+          475
+        ],
+        "detected_centre": [
+          796.832,
+          475.097
+        ],
+        "previous": [
+          797,
+          475
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 72,
+        "centre": [
+          811,
+          501
+        ],
+        "detected_centre": [
+          810.832,
+          501.097
+        ],
+        "previous": [
+          811,
+          501
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 73,
+        "centre": [
+          833,
+          527
+        ],
+        "detected_centre": [
+          832.832,
+          527.097
+        ],
+        "previous": [
+          833,
+          527
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 74,
+        "centre": [
+          859,
+          540
+        ],
+        "detected_centre": [
+          858.832,
+          540.097
+        ],
+        "previous": [
+          859,
+          540
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 75,
+        "centre": [
+          895,
+          545
+        ],
+        "detected_centre": [
+          894.832,
+          545.097
+        ],
+        "previous": [
+          895,
+          545
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 76,
+        "centre": [
+          925,
+          539
+        ],
+        "detected_centre": [
+          924.832,
+          539.097
+        ],
+        "previous": [
+          925,
+          539
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 77,
+        "centre": [
+          953,
+          521
+        ],
+        "detected_centre": [
+          952.832,
+          521.097
+        ],
+        "previous": [
+          953,
+          521
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 78,
+        "centre": [
+          972,
+          504
+        ],
+        "detected_centre": [
+          971.832,
+          504.097
+        ],
+        "previous": [
+          972,
+          504
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 79,
+        "centre": [
+          991,
+          485
+        ],
+        "detected_centre": [
+          990.832,
+          485.097
+        ],
+        "previous": [
+          991,
+          485
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 80,
+        "centre": [
+          1015,
+          457
+        ],
+        "detected_centre": [
+          1014.832,
+          457.097
+        ],
+        "previous": [
+          1015,
+          457
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 81,
+        "centre": [
+          1062,
+          394
+        ],
+        "detected_centre": [
+          1061.832,
+          394.097
+        ],
+        "previous": [
+          1062,
+          394
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 82,
+        "centre": [
+          1084,
+          367
+        ],
+        "detected_centre": [
+          1083.832,
+          367.097
+        ],
+        "previous": [
+          1084,
+          367
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 83,
+        "centre": [
+          1108,
+          342
+        ],
+        "detected_centre": [
+          1107.832,
+          342.097
+        ],
+        "previous": [
+          1108,
+          342
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 84,
+        "centre": [
+          1131,
+          322
+        ],
+        "detected_centre": [
+          1130.832,
+          322.097
+        ],
+        "previous": [
+          1131,
+          322
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 85,
+        "centre": [
+          1153,
+          305
+        ],
+        "detected_centre": [
+          1152.832,
+          305.097
+        ],
+        "previous": [
+          1153,
+          305
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 86,
+        "centre": [
+          1177,
+          322
+        ],
+        "detected_centre": [
+          1176.832,
+          322.097
+        ],
+        "previous": [
+          1177,
+          322
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 87,
+        "centre": [
+          1164,
+          353
+        ],
+        "detected_centre": [
+          1163.832,
+          353.097
+        ],
+        "previous": [
+          1164,
+          353
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 88,
+        "centre": [
+          1145,
+          380
+        ],
+        "detected_centre": [
+          1144.832,
+          380.097
+        ],
+        "previous": [
+          1145,
+          380
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 89,
+        "centre": [
+          1128,
+          405
+        ],
+        "detected_centre": [
+          1127.832,
+          405.097
+        ],
+        "previous": [
+          1128,
+          405
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 90,
+        "centre": [
+          1105,
+          432
+        ],
+        "detected_centre": [
+          1104.832,
+          432.097
+        ],
+        "previous": [
+          1105,
+          432
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 91,
+        "centre": [
+          1042,
+          497
+        ],
+        "detected_centre": [
+          1041.832,
+          497.097
+        ],
+        "previous": [
+          1042,
+          497
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 92,
+        "centre": [
+          1023,
+          532
+        ],
+        "detected_centre": [
+          1022.832,
+          532.097
+        ],
+        "previous": [
+          1023,
+          532
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 93,
+        "centre": [
+          1013,
+          562
+        ],
+        "detected_centre": [
+          1012.832,
+          562.097
+        ],
+        "previous": [
+          1013,
+          562
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 94,
+        "centre": [
+          1031,
+          598
+        ],
+        "detected_centre": [
+          1030.832,
+          598.097
+        ],
+        "previous": [
+          1031,
+          598
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 95,
+        "centre": [
+          1070,
+          614
+        ],
+        "detected_centre": [
+          1069.832,
+          614.097
+        ],
+        "previous": [
+          1070,
+          614
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 96,
+        "centre": [
+          1105,
+          618
+        ],
+        "detected_centre": [
+          1104.832,
+          618.097
+        ],
+        "previous": [
+          1105,
+          618
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 97,
+        "centre": [
+          1137,
+          614
+        ],
+        "detected_centre": [
+          1136.832,
+          614.097
+        ],
+        "previous": [
+          1137,
+          614
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 98,
+        "centre": [
+          1168,
+          607
+        ],
+        "detected_centre": [
+          1167.832,
+          607.097
+        ],
+        "previous": [
+          1168,
+          607
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 99,
+        "centre": [
+          1203,
+          600
+        ],
+        "detected_centre": [
+          1202.832,
+          600.097
+        ],
+        "previous": [
+          1203,
+          600
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 100,
+        "centre": [
+          1240,
+          591
+        ],
+        "detected_centre": [
+          1239.832,
+          591.097
+        ],
+        "previous": [
+          1240,
+          591
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 101,
+        "centre": [
+          1271,
+          622
+        ],
+        "detected_centre": [
+          1270.832,
+          622.097
+        ],
+        "previous": [
+          1271,
+          622
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 102,
+        "centre": [
+          1245,
+          640
+        ],
+        "detected_centre": [
+          1244.832,
+          640.097
+        ],
+        "previous": [
+          1245,
+          640
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 103,
+        "centre": [
+          1219,
+          651
+        ],
+        "detected_centre": [
+          1218.832,
+          651.097
+        ],
+        "previous": [
+          1219,
+          651
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 104,
+        "centre": [
+          1189,
+          660
+        ],
+        "detected_centre": [
+          1188.832,
+          660.097
+        ],
+        "previous": [
+          1189,
+          660
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 105,
+        "centre": [
+          1164,
+          668
+        ],
+        "detected_centre": [
+          1163.832,
+          668.097
+        ],
+        "previous": [
+          1164,
+          668
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 106,
+        "centre": [
+          1138,
+          676
+        ],
+        "detected_centre": [
+          1137.832,
+          676.097
+        ],
+        "previous": [
+          1138,
+          676
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 107,
+        "centre": [
+          1112,
+          682
+        ],
+        "detected_centre": [
+          1111.832,
+          682.097
+        ],
+        "previous": [
+          1112,
+          682
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 108,
+        "centre": [
+          1081,
+          689
+        ],
+        "detected_centre": [
+          1080.832,
+          689.097
+        ],
+        "previous": [
+          1081,
+          689
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 109,
+        "centre": [
+          1054,
+          694
+        ],
+        "detected_centre": [
+          1053.832,
+          694.097
+        ],
+        "previous": [
+          1054,
+          694
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 110,
+        "centre": [
+          1024,
+          698
+        ],
+        "detected_centre": [
+          1023.832,
+          698.097
+        ],
+        "previous": [
+          1024,
+          698
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 111,
+        "centre": [
+          940,
+          710
+        ],
+        "detected_centre": [
+          939.832,
+          710.097
+        ],
+        "previous": [
+          940,
+          710
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 112,
+        "centre": [
+          910,
+          717
+        ],
+        "detected_centre": [
+          909.832,
+          717.097
+        ],
+        "previous": [
+          910,
+          717
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 113,
+        "centre": [
+          881,
+          727
+        ],
+        "detected_centre": [
+          880.832,
+          727.097
+        ],
+        "previous": [
+          881,
+          727
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 114,
+        "centre": [
+          856,
+          738
+        ],
+        "detected_centre": [
+          855.832,
+          738.097
+        ],
+        "previous": [
+          856,
+          738
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 115,
+        "centre": [
+          833,
+          751
+        ],
+        "detected_centre": [
+          832.832,
+          751.097
+        ],
+        "previous": [
+          833,
+          751
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 116,
+        "centre": [
+          805,
+          770
+        ],
+        "detected_centre": [
+          804.832,
+          770.097
+        ],
+        "previous": [
+          805,
+          770
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 117,
+        "centre": [
+          785,
+          790
+        ],
+        "detected_centre": [
+          784.832,
+          790.097
+        ],
+        "previous": [
+          785,
+          790
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 118,
+        "centre": [
+          768,
+          811
+        ],
+        "detected_centre": [
+          767.832,
+          811.097
+        ],
+        "previous": [
+          768,
+          811
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 119,
+        "centre": [
+          754,
+          834
+        ],
+        "detected_centre": [
+          753.832,
+          834.097
+        ],
+        "previous": [
+          754,
+          834
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 120,
+        "centre": [
+          739,
+          863
+        ],
+        "detected_centre": [
+          738.832,
+          863.097
+        ],
+        "previous": [
+          739,
+          863
+        ],
+        "offset_px": 0.194
+      }
+    ],
+    "ivory": [
+      {
+        "ordinal": 1,
+        "centre": [
+          679,
+          877
+        ],
+        "detected_centre": [
+          678.544,
+          876.621
+        ],
+        "previous": [
+          679,
+          877
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 2,
+        "centre": [
+          662,
+          850
+        ],
+        "detected_centre": [
+          661.544,
+          849.621
+        ],
+        "previous": [
+          662,
+          850
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 3,
+        "centre": [
+          644,
+          827
+        ],
+        "detected_centre": [
+          643.544,
+          826.621
+        ],
+        "previous": [
+          644,
+          827
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 4,
+        "centre": [
+          621,
+          805
+        ],
+        "detected_centre": [
+          620.544,
+          804.621
+        ],
+        "previous": [
+          621,
+          805
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 5,
+        "centre": [
+          595,
+          785
+        ],
+        "detected_centre": [
+          594.544,
+          784.621
+        ],
+        "previous": [
+          595,
+          785
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 6,
+        "centre": [
+          573,
+          774
+        ],
+        "detected_centre": [
+          572.544,
+          773.621
+        ],
+        "previous": [
+          573,
+          774
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 7,
+        "centre": [
+          548,
+          763
+        ],
+        "detected_centre": [
+          547.544,
+          762.621
+        ],
+        "previous": [
+          548,
+          763
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 8,
+        "centre": [
+          524,
+          755
+        ],
+        "detected_centre": [
+          523.544,
+          754.621
+        ],
+        "previous": [
+          524,
+          755
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 9,
+        "centre": [
+          499,
+          750
+        ],
+        "detected_centre": [
+          498.544,
+          749.621
+        ],
+        "previous": [
+          499,
+          750
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 10,
+        "centre": [
+          474,
+          745
+        ],
+        "detected_centre": [
+          473.544,
+          744.621
+        ],
+        "previous": [
+          474,
+          745
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 11,
+        "centre": [
+          391,
+          737
+        ],
+        "detected_centre": [
+          390.544,
+          736.621
+        ],
+        "previous": [
+          391,
+          737
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 12,
+        "centre": [
+          359,
+          731
+        ],
+        "detected_centre": [
+          358.544,
+          730.621
+        ],
+        "previous": [
+          359,
+          731
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 13,
+        "centre": [
+          327,
+          724
+        ],
+        "detected_centre": [
+          326.544,
+          723.621
+        ],
+        "previous": [
+          327,
+          724
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 14,
+        "centre": [
+          298,
+          718
+        ],
+        "detected_centre": [
+          297.544,
+          717.621
+        ],
+        "previous": [
+          298,
+          718
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 15,
+        "centre": [
+          259,
+          709
+        ],
+        "detected_centre": [
+          258.544,
+          708.621
+        ],
+        "previous": [
+          259,
+          709
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 16,
+        "centre": [
+          226,
+          696
+        ],
+        "detected_centre": [
+          225.544,
+          695.621
+        ],
+        "previous": [
+          226,
+          696
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 17,
+        "centre": [
+          199,
+          684
+        ],
+        "detected_centre": [
+          198.544,
+          683.621
+        ],
+        "previous": [
+          199,
+          684
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 18,
+        "centre": [
+          171,
+          668
+        ],
+        "detected_centre": [
+          170.544,
+          667.621
+        ],
+        "previous": [
+          171,
+          668
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 19,
+        "centre": [
+          144,
+          649
+        ],
+        "detected_centre": [
+          143.544,
+          648.621
+        ],
+        "previous": [
+          144,
+          649
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 20,
+        "centre": [
+          120,
+          626
+        ],
+        "detected_centre": [
+          119.544,
+          625.621
+        ],
+        "previous": [
+          120,
+          626
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 21,
+        "centre": [
+          143,
+          548
+        ],
+        "detected_centre": [
+          142.544,
+          547.621
+        ],
+        "previous": [
+          143,
+          548
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 22,
+        "centre": [
+          177,
+          546
+        ],
+        "detected_centre": [
+          176.544,
+          545.621
+        ],
+        "previous": [
+          177,
+          546
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 23,
+        "centre": [
+          207,
+          546
+        ],
+        "detected_centre": [
+          206.544,
+          545.621
+        ],
+        "previous": [
+          207,
+          546
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 24,
+        "centre": [
+          237,
+          553
+        ],
+        "detected_centre": [
+          236.544,
+          552.621
+        ],
+        "previous": [
+          237,
+          553
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 25,
+        "centre": [
+          263,
+          560
+        ],
+        "detected_centre": [
+          262.544,
+          559.621
+        ],
+        "previous": [
+          263,
+          560
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 26,
+        "centre": [
+          295,
+          567
+        ],
+        "detected_centre": [
+          294.544,
+          566.621
+        ],
+        "previous": [
+          295,
+          567
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 27,
+        "centre": [
+          321,
+          572
+        ],
+        "detected_centre": [
+          320.544,
+          571.621
+        ],
+        "previous": [
+          321,
+          572
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 28,
+        "centre": [
+          349,
+          572
+        ],
+        "detected_centre": [
+          348.544,
+          571.621
+        ],
+        "previous": [
+          349,
+          572
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 29,
+        "centre": [
+          374,
+          555
+        ],
+        "detected_centre": [
+          373.544,
+          554.621
+        ],
+        "previous": [
+          374,
+          555
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 30,
+        "centre": [
+          369,
+          526
+        ],
+        "detected_centre": [
+          368.544,
+          525.621
+        ],
+        "previous": [
+          369,
+          526
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 31,
+        "centre": [
+          319,
+          462
+        ],
+        "detected_centre": [
+          318.544,
+          461.621
+        ],
+        "previous": [
+          319,
+          462
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 32,
+        "centre": [
+          293,
+          431
+        ],
+        "detected_centre": [
+          292.544,
+          430.621
+        ],
+        "previous": [
+          293,
+          431
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 33,
+        "centre": [
+          267,
+          393
+        ],
+        "detected_centre": [
+          266.544,
+          392.621
+        ],
+        "previous": [
+          267,
+          393
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 34,
+        "centre": [
+          244,
+          355
+        ],
+        "detected_centre": [
+          243.544,
+          354.621
+        ],
+        "previous": [
+          244,
+          355
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 35,
+        "centre": [
+          231,
+          305
+        ],
+        "detected_centre": [
+          230.544,
+          304.621
+        ],
+        "previous": [
+          231,
+          305
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 36,
+        "centre": [
+          263,
+          271
+        ],
+        "detected_centre": [
+          262.544,
+          270.621
+        ],
+        "previous": [
+          263,
+          271
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 37,
+        "centre": [
+          309,
+          275
+        ],
+        "detected_centre": [
+          308.544,
+          274.621
+        ],
+        "previous": [
+          309,
+          275
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 38,
+        "centre": [
+          345,
+          297
+        ],
+        "detected_centre": [
+          344.544,
+          296.621
+        ],
+        "previous": [
+          345,
+          297
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 39,
+        "centre": [
+          381,
+          332
+        ],
+        "detected_centre": [
+          380.544,
+          331.621
+        ],
+        "previous": [
+          381,
+          332
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 40,
+        "centre": [
+          419,
+          376
+        ],
+        "detected_centre": [
+          418.544,
+          375.621
+        ],
+        "previous": [
+          419,
+          376
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 41,
+        "centre": [
+          461,
+          428
+        ],
+        "detected_centre": [
+          460.544,
+          427.621
+        ],
+        "previous": [
+          461,
+          428
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 42,
+        "centre": [
+          475,
+          446
+        ],
+        "detected_centre": [
+          474.544,
+          445.621
+        ],
+        "previous": [
+          475,
+          446
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 43,
+        "centre": [
+          490,
+          463
+        ],
+        "detected_centre": [
+          489.544,
+          462.621
+        ],
+        "previous": [
+          490,
+          463
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 44,
+        "centre": [
+          503,
+          480
+        ],
+        "detected_centre": [
+          503.424,
+          479.503
+        ],
+        "previous": [
+          503,
+          480
+        ],
+        "offset_px": 0.653
+      },
+      {
+        "ordinal": 45,
+        "centre": [
+          517,
+          493
+        ],
+        "detected_centre": [
+          517.337,
+          493.485
+        ],
+        "previous": [
+          517,
+          493
+        ],
+        "offset_px": 0.591
+      },
+      {
+        "ordinal": 46,
+        "centre": [
+          534,
+          505
+        ],
+        "detected_centre": [
+          533.544,
+          504.621
+        ],
+        "previous": [
+          534,
+          505
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 47,
+        "centre": [
+          558,
+          508
+        ],
+        "detected_centre": [
+          557.544,
+          507.621
+        ],
+        "previous": [
+          558,
+          508
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 48,
+        "centre": [
+          580,
+          499
+        ],
+        "detected_centre": [
+          579.544,
+          498.621
+        ],
+        "previous": [
+          580,
+          499
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 49,
+        "centre": [
+          595,
+          485
+        ],
+        "detected_centre": [
+          594.544,
+          484.621
+        ],
+        "previous": [
+          595,
+          485
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 50,
+        "centre": [
+          604,
+          464
+        ],
+        "detected_centre": [
+          603.544,
+          463.621
+        ],
+        "previous": [
+          604,
+          464
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 51,
+        "centre": [
+          604,
+          414
+        ],
+        "detected_centre": [
+          603.544,
+          413.621
+        ],
+        "previous": [
+          604,
+          414
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 52,
+        "centre": [
+          603,
+          380
+        ],
+        "detected_centre": [
+          602.544,
+          379.621
+        ],
+        "previous": [
+          603,
+          380
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 53,
+        "centre": [
+          601,
+          341
+        ],
+        "detected_centre": [
+          600.544,
+          340.621
+        ],
+        "previous": [
+          601,
+          341
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 54,
+        "centre": [
+          599,
+          307
+        ],
+        "detected_centre": [
+          598.544,
+          306.621
+        ],
+        "previous": [
+          599,
+          307
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 55,
+        "centre": [
+          603,
+          265
+        ],
+        "detected_centre": [
+          602.544,
+          264.621
+        ],
+        "previous": [
+          603,
+          265
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 56,
+        "centre": [
+          610,
+          235
+        ],
+        "detected_centre": [
+          609.544,
+          234.621
+        ],
+        "previous": [
+          610,
+          235
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 57,
+        "centre": [
+          621,
+          204
+        ],
+        "detected_centre": [
+          620.544,
+          203.621
+        ],
+        "previous": [
+          621,
+          204
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 58,
+        "centre": [
+          633,
+          177
+        ],
+        "detected_centre": [
+          632.544,
+          176.621
+        ],
+        "previous": [
+          633,
+          177
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 59,
+        "centre": [
+          652,
+          147
+        ],
+        "detected_centre": [
+          651.544,
+          146.621
+        ],
+        "previous": [
+          652,
+          147
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 60,
+        "centre": [
+          685,
+          121
+        ],
+        "detected_centre": [
+          684.544,
+          120.621
+        ],
+        "previous": [
+          685,
+          121
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 61,
+        "centre": [
+          762,
+          122
+        ],
+        "detected_centre": [
+          761.544,
+          121.621
+        ],
+        "previous": [
+          762,
+          122
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 62,
+        "centre": [
+          790,
+          148
+        ],
+        "detected_centre": [
+          789.544,
+          147.621
+        ],
+        "previous": [
+          790,
+          148
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 63,
+        "centre": [
+          812,
+          184
+        ],
+        "detected_centre": [
+          811.544,
+          183.621
+        ],
+        "previous": [
+          812,
+          184
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 64,
+        "centre": [
+          824,
+          214
+        ],
+        "detected_centre": [
+          823.544,
+          213.621
+        ],
+        "previous": [
+          824,
+          214
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 65,
+        "centre": [
+          834,
+          248
+        ],
+        "detected_centre": [
+          833.544,
+          247.621
+        ],
+        "previous": [
+          834,
+          248
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 66,
+        "centre": [
+          839,
+          281
+        ],
+        "detected_centre": [
+          838.544,
+          280.621
+        ],
+        "previous": [
+          839,
+          281
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 67,
+        "centre": [
+          838,
+          316
+        ],
+        "detected_centre": [
+          837.544,
+          315.621
+        ],
+        "previous": [
+          838,
+          316
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 68,
+        "centre": [
+          838,
+          346
+        ],
+        "detected_centre": [
+          837.544,
+          345.621
+        ],
+        "previous": [
+          838,
+          346
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 69,
+        "centre": [
+          835,
+          377
+        ],
+        "detected_centre": [
+          834.544,
+          376.621
+        ],
+        "previous": [
+          835,
+          377
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 70,
+        "centre": [
+          837,
+          409
+        ],
+        "detected_centre": [
+          836.544,
+          408.621
+        ],
+        "previous": [
+          837,
+          409
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 71,
+        "centre": [
+          840,
+          468
+        ],
+        "detected_centre": [
+          839.544,
+          467.621
+        ],
+        "previous": [
+          840,
+          468
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 72,
+        "centre": [
+          847,
+          489
+        ],
+        "detected_centre": [
+          846.544,
+          488.621
+        ],
+        "previous": [
+          847,
+          489
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 73,
+        "centre": [
+          865,
+          501
+        ],
+        "detected_centre": [
+          864.544,
+          500.621
+        ],
+        "previous": [
+          865,
+          501
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 74,
+        "centre": [
+          886,
+          507
+        ],
+        "detected_centre": [
+          885.544,
+          506.621
+        ],
+        "previous": [
+          886,
+          507
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 75,
+        "centre": [
+          906,
+          498
+        ],
+        "detected_centre": [
+          905.544,
+          497.621
+        ],
+        "previous": [
+          906,
+          498
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 76,
+        "centre": [
+          923,
+          487
+        ],
+        "detected_centre": [
+          923.485,
+          486.683
+        ],
+        "previous": [
+          923,
+          487
+        ],
+        "offset_px": 0.58
+      },
+      {
+        "ordinal": 77,
+        "centre": [
+          938,
+          473
+        ],
+        "detected_centre": [
+          937.544,
+          472.621
+        ],
+        "previous": [
+          938,
+          473
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 78,
+        "centre": [
+          954,
+          460
+        ],
+        "detected_centre": [
+          953.544,
+          459.621
+        ],
+        "previous": [
+          954,
+          460
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 79,
+        "centre": [
+          970,
+          443
+        ],
+        "detected_centre": [
+          969.544,
+          442.621
+        ],
+        "previous": [
+          970,
+          443
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 80,
+        "centre": [
+          983,
+          425
+        ],
+        "detected_centre": [
+          982.503,
+          424.623
+        ],
+        "previous": [
+          983,
+          425
+        ],
+        "offset_px": 0.624
+      },
+      {
+        "ordinal": 81,
+        "centre": [
+          1031,
+          357
+        ],
+        "detected_centre": [
+          1030.544,
+          356.621
+        ],
+        "previous": [
+          1031,
+          357
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 82,
+        "centre": [
+          1066,
+          322
+        ],
+        "detected_centre": [
+          1065.544,
+          321.621
+        ],
+        "previous": [
+          1066,
+          322
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 83,
+        "centre": [
+          1091,
+          300
+        ],
+        "detected_centre": [
+          1090.544,
+          299.621
+        ],
+        "previous": [
+          1091,
+          300
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 84,
+        "centre": [
+          1135,
+          273
+        ],
+        "detected_centre": [
+          1134.544,
+          272.621
+        ],
+        "previous": [
+          1135,
+          273
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 85,
+        "centre": [
+          1175,
+          268
+        ],
+        "detected_centre": [
+          1174.544,
+          267.621
+        ],
+        "previous": [
+          1175,
+          268
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 86,
+        "centre": [
+          1215,
+          304
+        ],
+        "detected_centre": [
+          1214.544,
+          303.621
+        ],
+        "previous": [
+          1215,
+          304
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 87,
+        "centre": [
+          1207,
+          351
+        ],
+        "detected_centre": [
+          1206.544,
+          350.621
+        ],
+        "previous": [
+          1207,
+          351
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 88,
+        "centre": [
+          1186,
+          391
+        ],
+        "detected_centre": [
+          1185.544,
+          390.621
+        ],
+        "previous": [
+          1186,
+          391
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 89,
+        "centre": [
+          1159,
+          426
+        ],
+        "detected_centre": [
+          1158.544,
+          425.621
+        ],
+        "previous": [
+          1159,
+          426
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 90,
+        "centre": [
+          1134,
+          457
+        ],
+        "detected_centre": [
+          1133.544,
+          456.621
+        ],
+        "previous": [
+          1134,
+          457
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 91,
+        "centre": [
+          1082,
+          518
+        ],
+        "detected_centre": [
+          1081.544,
+          517.621
+        ],
+        "previous": [
+          1082,
+          518
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 92,
+        "centre": [
+          1062,
+          547
+        ],
+        "detected_centre": [
+          1061.544,
+          546.621
+        ],
+        "previous": [
+          1062,
+          547
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 93,
+        "centre": [
+          1080,
+          570
+        ],
+        "detected_centre": [
+          1079.544,
+          569.621
+        ],
+        "previous": [
+          1080,
+          570
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 94,
+        "centre": [
+          1111,
+          578
+        ],
+        "detected_centre": [
+          1110.544,
+          577.621
+        ],
+        "previous": [
+          1111,
+          578
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 95,
+        "centre": [
+          1139,
+          575
+        ],
+        "detected_centre": [
+          1138.544,
+          574.621
+        ],
+        "previous": [
+          1139,
+          575
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 96,
+        "centre": [
+          1168,
+          569
+        ],
+        "detected_centre": [
+          1167.544,
+          568.621
+        ],
+        "previous": [
+          1168,
+          569
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 97,
+        "centre": [
+          1202,
+          561
+        ],
+        "detected_centre": [
+          1201.544,
+          560.621
+        ],
+        "previous": [
+          1202,
+          561
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 98,
+        "centre": [
+          1228,
+          554
+        ],
+        "detected_centre": [
+          1227.544,
+          553.621
+        ],
+        "previous": [
+          1228,
+          554
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 99,
+        "centre": [
+          1268,
+          547
+        ],
+        "detected_centre": [
+          1267.544,
+          546.621
+        ],
+        "previous": [
+          1268,
+          547
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 100,
+        "centre": [
+          1304,
+          550
+        ],
+        "detected_centre": [
+          1303.544,
+          549.621
+        ],
+        "previous": [
+          1304,
+          550
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 101,
+        "centre": [
+          1318,
+          631
+        ],
+        "detected_centre": [
+          1317.544,
+          630.621
+        ],
+        "previous": [
+          1318,
+          631
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 102,
+        "centre": [
+          1282,
+          663
+        ],
+        "detected_centre": [
+          1281.544,
+          662.621
+        ],
+        "previous": [
+          1282,
+          663
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 103,
+        "centre": [
+          1247,
+          682
+        ],
+        "detected_centre": [
+          1246.544,
+          681.621
+        ],
+        "previous": [
+          1247,
+          682
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 104,
+        "centre": [
+          1216,
+          695
+        ],
+        "detected_centre": [
+          1215.544,
+          694.621
+        ],
+        "previous": [
+          1216,
+          695
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 105,
+        "centre": [
+          1189,
+          706
+        ],
+        "detected_centre": [
+          1188.544,
+          705.621
+        ],
+        "previous": [
+          1189,
+          706
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 106,
+        "centre": [
+          1157,
+          715
+        ],
+        "detected_centre": [
+          1156.544,
+          714.621
+        ],
+        "previous": [
+          1157,
+          715
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 107,
+        "centre": [
+          1124,
+          722
+        ],
+        "detected_centre": [
+          1123.544,
+          721.621
+        ],
+        "previous": [
+          1124,
+          722
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 108,
+        "centre": [
+          1089,
+          730
+        ],
+        "detected_centre": [
+          1088.544,
+          729.621
+        ],
+        "previous": [
+          1089,
+          730
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 109,
+        "centre": [
+          1061,
+          734
+        ],
+        "detected_centre": [
+          1060.544,
+          733.621
+        ],
+        "previous": [
+          1061,
+          734
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 110,
+        "centre": [
+          1031,
+          740
+        ],
+        "detected_centre": [
+          1030.544,
+          739.621
+        ],
+        "previous": [
+          1031,
+          740
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 111,
+        "centre": [
+          949,
+          754
+        ],
+        "detected_centre": [
+          948.544,
+          753.621
+        ],
+        "previous": [
+          949,
+          754
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 112,
+        "centre": [
+          926,
+          759
+        ],
+        "detected_centre": [
+          925.544,
+          758.621
+        ],
+        "previous": [
+          926,
+          759
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 113,
+        "centre": [
+          901,
+          765
+        ],
+        "detected_centre": [
+          900.544,
+          764.621
+        ],
+        "previous": [
+          901,
+          765
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 114,
+        "centre": [
+          878,
+          773
+        ],
+        "detected_centre": [
+          877.544,
+          772.621
+        ],
+        "previous": [
+          878,
+          773
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 115,
+        "centre": [
+          853,
+          783
+        ],
+        "detected_centre": [
+          852.544,
+          782.621
+        ],
+        "previous": [
+          853,
+          783
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 116,
+        "centre": [
+          830,
+          797
+        ],
+        "detected_centre": [
+          829.544,
+          796.621
+        ],
+        "previous": [
+          830,
+          797
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 117,
+        "centre": [
+          811,
+          815
+        ],
+        "detected_centre": [
+          810.544,
+          814.621
+        ],
+        "previous": [
+          811,
+          815
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 118,
+        "centre": [
+          793,
+          834
+        ],
+        "detected_centre": [
+          792.544,
+          833.621
+        ],
+        "previous": [
+          793,
+          834
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 119,
+        "centre": [
+          777,
+          856
+        ],
+        "detected_centre": [
+          776.544,
+          855.621
+        ],
+        "previous": [
+          777,
+          856
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 120,
+        "centre": [
+          765,
+          879
+        ],
+        "detected_centre": [
+          764.544,
+          878.621
+        ],
+        "previous": [
+          765,
+          879
+        ],
+        "offset_px": 0.592
+      }
+    ],
+    "green-park": [
+      {
+        "ordinal": 1,
+        "centre": [
+          460,
+          804
+        ],
+        "detected_centre": [
+          459.832,
+          804.097
+        ],
+        "previous": [
+          460,
+          804
+        ],
+        "offset_px": 0.194
+      },
+      {
+        "ordinal": 2,
+        "centre": [
+          498,
+          804
+        ],
+        "detected_centre": [
+          498.204,
+          804.168
+        ],
+        "previous": [
+          498,
+          804
+        ],
+        "offset_px": 0.264
+      }
+    ],
+    "ivory-park": [
+      {
+        "ordinal": 1,
+        "centre": [
+          458,
+          843
+        ],
+        "detected_centre": [
+          457.544,
+          842.621
+        ],
+        "previous": [
+          458,
+          843
+        ],
+        "offset_px": 0.592
+      },
+      {
+        "ordinal": 2,
+        "centre": [
+          498,
+          843
+        ],
+        "detected_centre": [
+          497.661,
+          842.828
+        ],
+        "previous": [
+          498,
+          843
+        ],
+        "offset_px": 0.38
+      }
+    ],
+    "finish": [
+      {
+        "ordinal": 121,
+        "centre": [
+          723,
+          916
+        ],
+        "detected_centre": [
+          722.781,
+          915.851
+        ],
+        "previous": [
+          723,
+          916
+        ],
+        "offset_px": 0.265
+      }
+    ]
+  },
+  "errors": [],
+  "atlas_changed": false,
+  "geometry_pass": true,
+  "qualification_pass": true
+}

@@ -349,3 +349,17 @@ test('Last card must be submitted before final-card scoring and counting cannot 
  assert.ok(cribbageLegalMoves(controller.state.session).length>0);
  controller.destroy();
 });
+
+test('Verified same-sequence poll clears stranded scoring queue and restores legal controls',async()=>{
+ const response=snapshot(2,'peg',8);
+ const controller=new CribbageSessionController({enabled:true,fetchImpl:async path=>
+  path.endsWith('/v1/me')?http(200,{walletRequired:false,profile:{subject}}):http(200,response.data)});
+ await controller.open(id);
+ controller.emit({scoring:true,queue:[{label:'orphaned'}],announcement:'Counting points'});
+ await controller.open(id,{quiet:true});
+ assert.equal(controller.state.scoring,false);
+ assert.deepEqual(controller.state.queue,[]);
+ assert.equal(controller.state.announcement,'');
+ assert.ok(cribbageLegalMoves(controller.state.session).length);
+ controller.destroy();
+});

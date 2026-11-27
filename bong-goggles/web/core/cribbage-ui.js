@@ -1,5 +1,3 @@
-// BC-1.4: usable left-side hand/table, right-side approved leaf score board.
-// Reads only the verified 420ID seat projection. Never renders secret opponent cards.
 import {escapeHtml as esc} from './design-system.js';
 import {resignCribbageMatch} from './classic-cribbage-multiplayer.js';
 import {renderCribbageSocial} from './classic-cribbage-social.js';
@@ -91,7 +89,7 @@ const ready=discard&&selected.size===count&&cribbageCanSubmit(session,{
 type:'discard',cards:v.hand.filter(id=>selected.has(id))
 });
 const readyPlay=v.phase==='peg'&&selected.size===1&&validPlay.has([...selected][0])&&
- cribbageCanSubmit(session,{type:'play',card:[...selected][0]});
+cribbageCanSubmit(session,{type:'play',card:[...selected][0]});
 const interactive=state.status==='ready'&&!state.submitting&&!state.scoring;
 const cards=v.hand.map(id=>{
 const active=turn&&interactive&&(discard||validPlay.has(id));

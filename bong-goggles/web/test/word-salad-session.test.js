@@ -50,3 +50,21 @@ test('runtime invalidates on offline, hidden page, logout and destruction',async
 });
 
 test('temporary service failures suspend moves, retain session identity and recover without mutation',async()=>{const h=harness(),c=h.c;await c.refresh(id);for(const status of [429,503,504]){h.readStatus=status;await c.refresh(id);assert.equal(c.state.status,'reconnecting');assert.equal(c.state.session.id,id);assert.equal(c.canPlay(),false);await c.act({type:'pass'});assert.equal(h.posts.length,0);h.readStatus=200;await c.refresh(id);assert.equal(c.state.status,'ready');assert.equal(c.canPlay(),true);}h.readStatus=403;await c.refresh(id);assert.equal(c.state.session,null);});
+
+test('accepted move snapshot is published before follow-up read and stalled bot is recovered',async()=>{
+ const initial=snapshot();let s=structuredClone(initial),now=0,recoveries=0,reads=0,seen=[];
+ const clock=Date.now;Date.now=()=>now;
+ try{
+ const c=new SaladController({enabled:true,onChange:()=>seen.push([c.state.status,c.state.session?.sequence]),fetchImpl:async(url,opts)=>{
+  if(url.endsWith('/v1/me'))return response(200,{walletRequired:false,profile:{subject:actor}});
+  if(url.endsWith('/classic-rooms/'+roomId))return response(200,{...envelope,room:{id:roomId,gameId:'scrabble',seats:[{index:0,controller:'human',subject:actor},{index:1,controller:'bot',difficulty:'hard'}]}});
+  if(url.endsWith('/action')){s.sequence=2;s.turnSeat=1;s.privateView.turn=1;return response(200,{...envelope,session:s});}
+  if(url.endsWith('/recover-bot')){recoveries++;assert.deepEqual(JSON.parse(opts.body),{});s.sequence=3;s.turnSeat=0;s.privateView.turn=0;return response(200,{...envelope,session:s});}
+  reads++;if(reads===2)assert.ok(seen.some(x=>x[0]==='ready'&&x[1]===2),'acknowledgement discarded');return response(200,{...envelope,session:s});
+ }});
+ await c.refresh(id);await c.act({type:'pass'});assert.equal(c.state.session.sequence,2);assert.equal(c.canPlay(),false);
+ now=9000;await c.refresh(id);assert.equal(recoveries,0);
+ now=11000;await c.refresh(id);assert.equal(recoveries,1);assert.equal(c.state.session.sequence,3);assert.equal(c.canPlay(),true);
+ await c.refresh(id);assert.equal(recoveries,1);
+ }finally{Date.now=clock;}
+});

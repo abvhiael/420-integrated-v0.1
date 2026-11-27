@@ -1,6 +1,7 @@
 package social
 
 import (
+ "errors"
  "bytes"
  "crypto/rand"
  "crypto/sha256"
@@ -333,6 +334,7 @@ func (a *RulesAdapter)Apply(raw json.RawMessage,seat int,move json.RawMessage)(j
 func (a *RulesAdapter)ChooseMove(raw json.RawMessage,seat int,difficulty string,policy RuleDecisionPolicy)(json.RawMessage,error){
  return a.ChooseMoveBounded(raw,seat,difficulty,policy,100000,time.Time{})
 }
+var errBotDecisionDeadline=errors.New("bot decision deadline")
 func (a *RulesAdapter)ChooseMoveBounded(raw json.RawMessage,seat int,difficulty string,policy RuleDecisionPolicy,limit int,deadline time.Time)(json.RawMessage,error){
  if !map[string]bool{"easy":true,"medium":true,"hard":true}[difficulty]||policy==nil||
   limit<1||limit>100000{return nil,ErrUnavailable}
@@ -349,7 +351,7 @@ func (a *RulesAdapter)ChooseMoveBounded(raw json.RawMessage,seat int,difficulty 
   candidates:=make([]json.RawMessage,len(options))
   for i,item:=range options{candidates[i]=append(json.RawMessage(nil),item...)}
   selected,e:=policy.ChooseMove(private,difficulty,candidates,budget)
-  if budget.expired(){return nil,fmt.Errorf("%w: bot decision deadline",ErrUnavailable)}
+  if budget.expired(){return nil,fmt.Errorf("%w: %w",ErrUnavailable,errBotDecisionDeadline)}
   if e!=nil||budget.spent<1{return nil,fmt.Errorf("%w: bot policy rejected decision",ErrUnavailable)}
   canon,e:=canonicalRuleAction(selected);if e!=nil{return nil,e}
   // Word Salad uses the same submitted-action authority as human moves.
@@ -363,8 +365,23 @@ func (a *RulesAdapter)ChooseMoveBounded(raw json.RawMessage,seat int,difficulty 
   for _,legal:=range options{if bytes.Equal(legal,canon){return canon,nil}}
   return nil,ErrForbidden
  }
- one,e:=run();if e!=nil{return nil,e}
- two,e:=run();if e!=nil{return nil,e};if !bytes.Equal(one,two){return nil,fmt.Errorf("%w: bot deterministic decision mismatch",ErrUnavailable)}
+ // A bounded search can exhaust wall time under CPU contention. Only the
+ // registered Word Salad policy may recover through the canonical pass,
+ // and only when the search deadline actually elapsed. Invalid actions,
+ // unknown policies and deterministic mismatches remain fail-closed.
+ fallback:=func(e error)(json.RawMessage,error){
+  trusted,ok:=policy.(saladBotPolicy)
+  if !ok||trusted.lex==nil||trusted.level!=difficulty||a.definition.GameID!="scrabble"||deadline.IsZero()||time.Now().Before(deadline){return nil,e}
+  if !errors.Is(e,errBotDecisionDeadline){return nil,e}
+  pass:=json.RawMessage(`{"type":"pass"}`)
+  check:=NewRuleBudget(100000)
+  submitted,ok:=a.module.(wordSaladSubmittedAction)
+  if !ok{return nil,ErrUnavailable}
+  if err:=submitted.ValidateSubmitted(cloneRuleFrame(frame),seat,pass,check);err!=nil||check.spent<1{return nil,ErrUnavailable}
+  return pass,nil
+ }
+ one,e:=run();if e!=nil{return fallback(e)}
+ two,e:=run();if e!=nil{return fallback(e)};if !bytes.Equal(one,two){return nil,fmt.Errorf("%w: bot deterministic decision mismatch",ErrUnavailable)}
  return one,nil
 }
 func (a *RulesAdapter) replayLimit()int{

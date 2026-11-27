@@ -54,3 +54,49 @@ func TestBC42WordSaladBotPostgres(t *testing.T){
   if e=cold.VerifyRules(ctx,match.ID);e!=nil{t.Fatal("terminal replay",e)}
  })}
 }
+
+// Real production dictionary, persisted human commands and server AI turns.
+// The human test driver selects from its own seat projection through the
+// same qualified policy, not a fabricated score, board or opponent response.
+func TestBC42WordSaladAlternatingProductionTurns(t *testing.T){
+ a,p:=saladBotTestPolicies(t)
+ for i,level:=range []string{"easy","medium","hard"}{t.Run(level,func(t *testing.T){
+  store,h,_,_:=bc06Fixture(t,[]string{"198.51.100.241","198.51.100.242","198.51.100.243"}[i])
+  ctx:=context.Background()
+  resolve:=func(game string)ClassicRule{if game=="scrabble"{return a};return nil}
+  policies:=map[string]ClassicBotPolicies{"scrabble":p}
+  h.Sessions.Rules=resolve;if e:=h.Sessions.EnableBots(policies);e!=nil{t.Fatal(e)}
+  room,e:=h.Rooms.CreateWithFormat(ctx,memberA,"scrabble","private",2,"17:classic-salad:untimed");if e!=nil{t.Fatal(e)}
+  room,e=h.Rooms.Change(ctx,memberA,room.ID,RoomChange{Action:"bot",Seat:1,ExpectedRevision:room.Revision,Difficulty:level});if e!=nil{t.Fatal(e)}
+  match,e:=h.Sessions.startWithSeedSource(ctx,memberA,room.ID,"",func()([32]byte,error){return [32]byte{42},nil});if e!=nil{t.Fatal(e)}
+  human,computer,words:=0,0,0
+  svc:=h.Sessions
+  for j:=0;j<50&&match.Status=="active";j++{
+   before:=r6Record(t,store,match.ID)
+   if before.TurnSeat==nil{t.Fatal("missing turn")}
+   seat:=*before.TurnSeat
+   if seat==0{
+    move,e:=a.ChooseMove(before.State,seat,"hard",p.Hard);if e!=nil{t.Fatal(e)}
+    var m saladMove;if !strictRuleJSON(move,&m){t.Fatal("invalid decision")};if m.Type=="place"{words++}
+    cmd:=ClassicSessionAction{RequestID:bc06ActionID(t),Action:"move",ExpectedSequence:before.Sequence+1,Move:move}
+    match,e=svc.Act(ctx,memberA,match.ID,cmd);if e!=nil{t.Fatal("human action",e)}
+    human++
+    retry,e:=svc.Act(ctx,memberA,match.ID,cmd);if e!=nil||retry.Sequence!=match.Sequence{t.Fatal("idempotent acknowledgement",e)}
+   }else{
+    if j%2==0{match,e=svc.RecoverWordSaladBot(ctx,memberA,match.ID)}else{
+     var moved bool;moved,e=svc.RunBotTurn(ctx,match.ID);if e==nil&&!moved{t.Fatal("stalled computer")}
+     if e==nil{match,e=svc.Get(ctx,memberA,match.ID)}
+    }
+    if e!=nil{t.Fatal("computer action",e)}
+    computer++
+   }
+   if match.Sequence!=before.Sequence+1{t.Fatal("unexpected sequence",before.Sequence,match.Sequence)}
+   if match.Status=="active"&&(match.TurnSeat==nil||*match.TurnSeat==seat){t.Fatal("turn failed to advance")}
+   if j==5{svc,e=NewClassicSessions(store,h.Rooms,resolve);if e!=nil{t.Fatal(e)};if e=svc.EnableBots(policies);e!=nil{t.Fatal(e)}}
+  }
+  if human<2||computer<2||words<1{t.Fatal("insufficient genuine alternating play",human,computer,words)}
+  if e=svc.VerifyRules(ctx,match.ID);e!=nil{t.Fatal("cold journal replay",e)}
+  r6Counts(t,store,match.ID,[3]int{1+human+computer,human+computer,human})
+  t.Logf("production dictionary: human=%d computer=%d human placements=%d final sequence=%d",human,computer,words,match.Sequence)
+ })}
+}

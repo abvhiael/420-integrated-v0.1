@@ -128,6 +128,25 @@ func (c *ClassicRooms) Create(ctx context.Context,viewer,game,visibility string,
 }
 // Format is encoded once into immutable seat-team rows; session genesis
 // independently seals the corresponding rules variant for replay.
+// Reconcile only the host's stale rooms under the serialized quota lock.
+// Terminal sessions remain immutable; live sessions and human/invited seats
+// are never reclaimed. Old private solo setup attempts expire after 30 minutes.
+func reconcileClassicRoomCapacity(ctx context.Context,tx *sql.Tx,host string)error{
+ _,e:=tx.ExecContext(ctx,`UPDATE bg_account_social.classic_rooms r
+ SET status='completed',revision=revision+1,updated_at=clock_timestamp()
+ WHERE r.host=$1 AND r.status IN ('open','ready','in_game')
+ AND EXISTS (SELECT 1 FROM bg_account_social.classic_sessions s WHERE s.room_id=r.id AND s.status IN ('finished','resigned','timed_out','cancelled'))
+ AND NOT EXISTS (SELECT 1 FROM bg_account_social.classic_sessions s WHERE s.room_id=r.id AND s.status='active')`,host)
+ if e!=nil{return e}
+ _,e=tx.ExecContext(ctx,`UPDATE bg_account_social.classic_rooms r
+ SET status='cancelled',revision=revision+1,updated_at=clock_timestamp()
+ WHERE r.host=$1 AND r.game_id='cribbage' AND r.visibility='private' AND r.seat_count=2
+ AND r.status IN ('open','ready') AND r.updated_at<clock_timestamp()-interval '30 minutes'
+ AND NOT EXISTS (SELECT 1 FROM bg_account_social.classic_sessions s WHERE s.room_id=r.id)
+ AND NOT EXISTS (SELECT 1 FROM bg_account_social.classic_room_seats s WHERE s.room_id=r.id AND s.seat_index>0 AND s.controller NOT IN ('empty','bot'))
+ AND NOT EXISTS (SELECT 1 FROM bg_account_social.classic_room_invites i WHERE i.room_id=r.id AND i.status='pending' AND i.expires_at>clock_timestamp())`,host)
+ return e
+}
 func (c *ClassicRooms) CreateWithFormat(ctx context.Context,viewer,game,visibility string,count int,format string)(ClassicRoomView,error){
  var empty ClassicRoomView
  if game=="cribbage"&&count==3{return empty,ErrInvalid}
@@ -144,6 +163,7 @@ func (c *ClassicRooms) CreateWithFormat(ctx context.Context,viewer,game,visibili
  var host string
  e=tx.QueryRowContext(ctx,"SELECT subject FROM bg_account_social.members WHERE subject=$1 FOR UPDATE",viewer).Scan(&host)
  if errors.Is(e,sql.ErrNoRows){return empty,ErrNotFound};if e!=nil{return empty,e}
+ if e=reconcileClassicRoomCapacity(ctx,tx,viewer);e!=nil{return empty,e}
  var countActive int
  e=tx.QueryRowContext(ctx,"SELECT count(*) FROM bg_account_social.classic_rooms WHERE host=$1 AND status IN ('open','ready','in_game')",viewer).Scan(&countActive)
  if e!=nil{return empty,e};if countActive>=10{return empty,ErrConflict}

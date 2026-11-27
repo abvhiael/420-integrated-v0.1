@@ -385,7 +385,13 @@ contract ResourceGenesis420Test {
         _denyCollateralIdentity(BOB,address(c),abi.encodeCall(c.withdraw,(position)),ResourceProviderCollateral420.Unauthorized.selector);
         vm.prank(DELEGATE);
         e.sessions.cancelSession(session);
-        require(c.outstandingReservations(position)==0,"reservation not released");
+        require(c.outstandingReservations(position)==1,"cancellation released collateral without discharge");
+        _denyCollateralIdentity(BOB,address(c),abi.encodeCall(c.withdraw,(position)),ResourceProviderCollateral420.Unauthorized.selector);
+        e.sessions.bindEconomicSettlementController(address(this));
+        _denyCollateralIdentity(DELEGATE,address(e.sessions),abi.encodeCall(e.sessions.releaseDischargedSession,(session)),ResourceSessionRegistry420.Unauthorized.selector);
+        e.sessions.releaseDischargedSession(session);
+        require(c.outstandingReservations(position)==0,"authorized discharge did not release reservation");
+        _denyCollateralIdentity(address(this),address(e.sessions),abi.encodeCall(e.sessions.releaseDischargedSession,(session)),ResourceSessionRegistry420.Unauthorized.selector);
         _denyCollateralIdentity(DELEGATE,address(c),abi.encodeCall(c.withdraw,(position)),ResourceProviderCollateral420.Unauthorized.selector);
         _denyCollateralIdentity(ALICE,address(c),abi.encodeCall(c.withdraw,(position)),ResourceProviderCollateral420.Unauthorized.selector);
         uint256 beforeBalance = BOB.balance;

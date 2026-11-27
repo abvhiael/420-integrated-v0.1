@@ -70,6 +70,7 @@ func TestBC42WordSaladAlternatingProductionTurns(t *testing.T){
   room,e=h.Rooms.Change(ctx,memberA,room.ID,RoomChange{Action:"bot",Seat:1,ExpectedRevision:room.Revision,Difficulty:level});if e!=nil{t.Fatal(e)}
   match,e:=h.Sessions.startWithSeedSource(ctx,memberA,room.ID,"",func()([32]byte,error){return [32]byte{42},nil});if e!=nil{t.Fatal(e)}
   human,computer,words:=0,0,0
+  totals:=make([]int64,2)
   svc:=h.Sessions
   for j:=0;j<600&&match.Status=="active";j++{
    before:=r6Record(t,store,match.ID)
@@ -90,6 +91,10 @@ func TestBC42WordSaladAlternatingProductionTurns(t *testing.T){
     if e!=nil{t.Fatal("computer action",e)}
     computer++
    }
+   previous,e:=a.decode(before.State);if e!=nil{t.Fatal(e)}
+   persisted:=r6Record(t,store,match.ID)
+   current,e:=a.decode(persisted.State);if e!=nil{t.Fatal(e)}
+   ws1AuditScore(t,a,previous,current,seat,totals)
    if match.Sequence!=before.Sequence+1{t.Fatal("unexpected sequence",before.Sequence,match.Sequence)}
    if match.Status=="active"&&(match.TurnSeat==nil||*match.TurnSeat==seat){t.Fatal("turn failed to advance")}
    if j==5{svc,e=NewClassicSessions(store,h.Rooms,resolve);if e!=nil{t.Fatal(e)};if e=svc.EnableBots(policies);e!=nil{t.Fatal(e)}}
@@ -103,10 +108,56 @@ func TestBC42WordSaladAlternatingProductionTurns(t *testing.T){
   if len(data.Winners)!=len(expected){t.Fatal("winner count",data.Winners,frame.Scores)}
   for k,w:=range expected{if data.Winners[k]!=w{t.Fatal("winner mismatch",data.Winners,frame.Scores)}}
   if len(expected)==1{if final.WinnerSeat==nil||*final.WinnerSeat!=expected[0]{t.Fatal("persisted winner mismatch")}}else if final.WinnerSeat!=nil{t.Fatal("tie has sole winner")}
+  t.Logf("independent score audit: %v",totals)
   t.Logf("natural completion: %s scores=%v winners=%v",data.Ending,frame.Scores,data.Winners)
   if human<2||computer<2||words<1{t.Fatal("insufficient genuine alternating play",human,computer,words)}
   if e=svc.VerifyRules(ctx,match.ID);e!=nil{t.Fatal("cold journal replay",e)}
   r6Counts(t,store,match.ID,[3]int{1+human+computer,human+computer,human})
   t.Logf("production dictionary: human=%d computer=%d human placements=%d final sequence=%d",human,computer,words,match.Sequence)
  })}
+}
+
+// Independently enumerate every maximal horizontal/vertical word on the
+// resulting board, counting only runs touching newly occupied cells.
+// Do not call place, Step, bot scoring, saladFinish or saladRackValue.
+func ws1AuditScore(t *testing.T,a *RulesAdapter,before,after RuleFrame,actor int,totals []int64){
+ t.Helper()
+ p,mode,e:=saladVariant(before.Variant,before.SeatCount);if e!=nil{t.Fatal(e)}
+ old,e:=saladDecode(before);if e!=nil{t.Fatal(e)}
+ next,e:=saladDecode(after);if e!=nil{t.Fatal(e)}
+ pack:=saladPack(p);premium:=saladPremium(p)
+ rules:=a.module.(wordSaladRules)
+ fresh:=map[int]bool{}
+ for pos,c:=range old.Board{if next.Board[pos]!=c{t.Fatal("previous cell altered",pos)}}
+ for pos:=range next.Board{if _,ok:=old.Board[pos];!ok{fresh[pos]=true}}
+ var points int64
+ for axis:=0;axis<2;axis++{
+  for line:=0;line<p.size;line++{
+   var sum,mult int64=0,1
+   word:="";cells:=0;touch:=false
+   flush:=func(){if cells>=2&&touch{if mode!="straight-greens"&&rules.cannabis[word]{mult*=2};points+=sum*mult};sum=0;mult=1;word="";cells=0;touch=false}
+   for offset:=0;offset<p.size;offset++{
+    pos:=line*p.size+offset;if axis==1{pos=offset*p.size+line}
+    c,ok:=next.Board[pos];if !ok{flush();continue}
+    symbol:=saladSymbols[pack[c.ID]];if symbol=="?"{symbol=c.Blank}
+    word+=symbol;cells++
+    v:=saladValues[pack[c.ID]]
+    if fresh[pos]{touch=true;switch premium[pos]{case 1:v*=2;case 2:v*=3;case 3:v*=4;case 4,6:mult*=2;case 5:mult*=3}}
+    sum+=v
+   }
+   flush()
+  }
+ }
+ if len(fresh)==p.rack{if p.rack==7{points+=50}else{points+=60}}
+ totals[actor]+=points
+ if after.Terminal{
+  if next.Ending!="out"&&next.Ending!="scoreless"{t.Fatal("unexpected finish",next.Ending)}
+  for i,rack:=range next.Racks{
+   if next.Ending=="out"&&i==actor{if len(rack)!=0||len(next.Bag)!=0{t.Fatal("invalid out finish")};continue}
+   var deduction int64;for _,id:=range rack{deduction+=saladValues[pack[id]]}
+   totals[i]-=deduction
+   if next.Ending=="out"{totals[actor]+=deduction}
+  }
+ }
+ for i,want:=range totals{if after.Scores[i]!=want{t.Fatalf("independent score audit seat=%d round=%d expected=%d actual=%d",i,after.Round,want,after.Scores[i])}}
 }

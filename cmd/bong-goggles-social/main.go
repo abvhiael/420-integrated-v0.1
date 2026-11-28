@@ -170,6 +170,7 @@ func main(){
   done()
  }
  // Chess remains disabled by default and requires the existing restricted dependencies.
+ if err:=configureCheckers(os.Getenv("SOCIAL420_CHECKERS_MODE"));err!=nil{log.Fatal(err)}
  if err:=configureChess(os.Getenv("SOCIAL420_CHESS_MODE"),classicSessionWorker,
   os.Getenv("SOCIAL420_CLASSIC_ROOMS")=="restricted-acceptance",
   os.Getenv("SOCIAL420_CLASSIC_RULES")=="restricted-acceptance",

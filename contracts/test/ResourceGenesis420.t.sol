@@ -658,8 +658,16 @@ contract ResourceGenesis420Test {
         (bytes32 provider,) = registerRelayNode(e);
         bytes32 node = _a52Node(e,provider,ALICE,BOB,1);
         bytes32 sibling = _a52Node(e,provider,ALICE,ALICE,2);
-        bytes32 beforeProvider = _a44Snapshot(e,provider);
+        vm.prank(ALICE);
+        e.providers.setState(provider,ResourceProviderRegistry420.State.SUSPENDED);
         _a44RejectUpdate(e,BOB,provider);
+        // Positive control: metadata mutation is possible in this lifecycle state.
+        bytes32 stake = e.providers.getProvider(provider).stakeRef;
+        vm.prank(ALICE);
+        e.providers.updateProvider(provider,keccak256("A5.2 owner metadata"),stake);
+        vm.prank(ALICE);
+        e.providers.setState(provider,ResourceProviderRegistry420.State.ACTIVE);
+        bytes32 beforeProvider = _a44Snapshot(e,provider);
         _denyCollateralIdentity(BOB,address(e.providers),abi.encodeCall(e.providers.setState,(provider,ResourceProviderRegistry420.State.SUSPENDED)),ResourceProviderRegistry420.Unauthorized.selector);
         _denyCollateralIdentity(BOB,address(e.providers),abi.encodeCall(e.providers.setCollateralSponsor,(provider,BOB)),ResourceProviderRegistry420.Unauthorized.selector);
         bytes32 endpoint = keccak256("unapproved endpoint");
@@ -713,7 +721,11 @@ contract ResourceGenesis420Test {
         _a52RejectUpdate(e,sibling,DELEGATE);
         _a52RejectUpdate(e,foreignNode,DELEGATE);
         _a52RejectState(e,node,DELEGATE,ResourceNodeRegistry420.State.ACTIVE);
+        vm.prank(ALICE);
+        e.providers.setState(provider,ResourceProviderRegistry420.State.SUSPENDED);
         _a44RejectUpdate(e,DELEGATE,provider);
+        vm.prank(ALICE);
+        e.providers.setState(provider,ResourceProviderRegistry420.State.ACTIVE);
         vm.prank(DELEGATE);
         e.nodes.updateNode(node,keccak256("delegate endpoint"),keccak256("delegate capacity"));
         require(e.nodes.getNode(node).revision==2,"delegate update denied");
@@ -781,8 +793,10 @@ contract ResourceGenesis420Test {
         e.receipts.submitReceipt(receipt,session,1,usage);
         require(e.receipts.lastUnits(session)==1 && e.receipts.getReceipt(receipt).nodeId==node,"node receipt denied");
         bytes32 grant = _a52Grant(e,provider,node,ResourceIds420.ACTION_SUBMIT_RECEIPT,DELEGATE);
+        bytes32 secondReceipt = e.receipts.canonicalReceiptId(session,2,usage);
         vm.prank(DELEGATE);
-        e.receipts.submitReceipt(e.receipts.canonicalReceiptId(session,2,usage),session,2,usage);
+        e.receipts.submitReceipt(secondReceipt,session,2,usage);
+        require(e.receipts.getReceipt(secondReceipt).nodeId==node,"delegate receipt missing");
         e.caps.revokeGrant(grant);
         _denyCollateralIdentity(DELEGATE,address(e.receipts),abi.encodeCall(e.receipts.submitReceipt,(e.receipts.canonicalReceiptId(session,3,usage),session,uint128(3),usage)),ResourceReceiptRegistry420.Unauthorized.selector);
         require(e.receipts.lastUnits(session)==2,"revoked receipt advanced accounting");

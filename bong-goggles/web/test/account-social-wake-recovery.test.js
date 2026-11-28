@@ -17,13 +17,13 @@ const me=()=>good({profile,walletRequired:false});
 const feed=()=>good({posts:[post],nextCursor:null,source:'bonggoggles-account-social',onChain:false});
 const settle=()=>new Promise(resolve=>setImmediate(resolve));
 
-test('HTML 503 from Render is passed through only for read requests',async()=>{
+test('HTML 503 from Render retains transport status without retrying writes',async()=>{
  let calls=0;
  const fetchImpl=async()=>{calls++;return response(503,null,'text/html')};
  const client=createAccountSocialClient({enabled:true,fetchImpl});
  assert.deepEqual(await client.request('/v1/me'),{status:503,data:null});
  assert.equal(calls,1);
- await assert.rejects(client.request('/v1/posts',{method:'POST',body:{body:'One shot'}}),/Social service response unavailable/);
+ assert.deepEqual(await client.request('/v1/posts',{method:'POST',body:{body:'One shot'}}),{status:503,data:null});
  assert.equal(calls,2,'a mutation is never silently repeated');
 });
 
@@ -121,8 +121,9 @@ test('a failed write does not retry or fall back to a guessed publication',async
   }
  });
  assert.equal((await c.refresh()).status,'ready');
- await assert.rejects(c.act('post',{body:'Do not duplicate'}),/Social service response unavailable/);
+ await assert.rejects(c.act('post',{body:'Do not duplicate'}),/Activity was not confirmed by the social service/);
  assert.equal(writes,1);
  assert.equal(scheduled.length,0);
- assert.equal(c.state.status,'ready','uncertain write must not be promoted into a successful post');
+ assert.equal(c.state.status,'error','uncertain write must not be promoted into a successful post');
+ assert.doesNotMatch(renderHomeAccountSocial(c.state,{enabled:true}),/Restored sample post/);
 });

@@ -101,6 +101,20 @@ const bc02Files=Object.freeze({
  'styles.css':Object.freeze({baseline:14537,maxAdded:2197})
 });
 const regularSizes=new Map(regularFiles.map(f=>[normalize(f.path),f.size]));
+// Labyrinth start/recovery: independent, tightly scoped source allowance.
+// Preserve all historical byte ceilings, including BC-2.7 seat isolation.
+let labyrinthRecoveryBytes=0;
+const recoveryBaselines={"app.js":35592,"core/classic-rooms.js":21293,"core/classic-room-bindings.js":2719,"core/labyrinth-session.js":13199,"core/labyrinth-room-start.js":3148};
+for(const [name,baseline] of Object.entries(recoveryBaselines)){
+ const actual=regularSizes.get(name),delta=actual-baseline;
+ if(!Number.isSafeInteger(actual)||Math.abs(delta)>2048)throw Error('Labyrinth recovery per-file growth: '+name);
+ labyrinthRecoveryBytes+=delta;regularSizes.set(name,baseline);
+}
+const recoveryModule=regularSizes.get('core/labyrinth-room-resume.js');
+if(!Number.isSafeInteger(recoveryModule)||recoveryModule<1024||recoveryModule>3072)throw Error('Labyrinth room recovery module size');
+labyrinthRecoveryBytes+=recoveryModule;
+if(labyrinthRecoveryBytes>5*1024)throw Error('Labyrinth recovery exceeds independent 5 KiB allowance');
+console.log('Labyrinth recovery independently bounded bytes:',labyrinthRecoveryBytes);
 // BC-3.4 independently bounded additions over merged BC-3.3. Historical
 // allowances see the exact pre-Chess sizes, never a widened older ceiling.
 const chessBaselines={"app.js":34748,"core/app-shell.js":13025,"core/games-ui.js":10740,"core/classic-rooms.js":17765,"core/runtime-config.js":3856,"index.html":1569};
@@ -408,7 +422,7 @@ for(const [path,{baseline,maxAdded}] of Object.entries(bc02Files)){
  bc02Growth+=growth;
 }
 if(bc02Growth>8*1024)throw new Error('BC-0.2 menu exceeded 8 KiB scoped budget');
-if(baseTotal-saladCodeBytes-chessBytes-bc24Growth-bc25Growth-bc26Growth-bc27Growth-pinnedInheritedBytes-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024+CCC_PRACTICE_ALLOWANCE)
+if(baseTotal-labyrinthRecoveryBytes-saladCodeBytes-chessBytes-bc24Growth-bc25Growth-bc26Growth-bc27Growth-pinnedInheritedBytes-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024+CCC_PRACTICE_ALLOWANCE)
  throw new Error('BC-0.5 combined static asset budget exceeded: '+baseTotal);
 // CCC's account-only form wiring belongs to the separately approved roadboard/chat
 // allowance, not to the frozen BC-0.2 through BC-0.5 per-file limits.
@@ -425,7 +439,7 @@ if(!Number.isSafeInteger(gameKitLogicSize)||gameKitLogicSize<12*1024||gameKitLog
 // of the frozen BC-0.2 through BC-0.5 and original asset allowances.
 if(gameKitLogicSize+gameKitSize>24*1024)
  throw new Error('BC-0.9 combined tabletop allowance exceeded 24 KiB');
-const legacyBaseTotal=baseTotal-saladCodeBytes-chessBytes-bc24Growth-bc25Growth-bc26Growth-bc27Growth-pinnedInheritedBytes-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-cribbageViewBytes-cribbageResumeBytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
+const legacyBaseTotal=baseTotal-labyrinthRecoveryBytes-saladCodeBytes-chessBytes-bc24Growth-bc25Growth-bc26Growth-bc27Growth-pinnedInheritedBytes-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-cribbageViewBytes-cribbageResumeBytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
 if(legacyBaseTotal>limits.baseTotal+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
  throw new Error('Previously qualified base asset budget exceeded: '+legacyBaseTotal+' > '+limits.baseTotal);
 console.log('Inherited independent source-bound modules:',JSON.stringify({bytes:pinnedInheritedBytes,cap:44*1024,source:'main e4020bb + BC-2.1 v2'}));

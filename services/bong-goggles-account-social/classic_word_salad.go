@@ -11,7 +11,7 @@ import (
 
 // The constructor accepts operator-supplied immutable, licensed dictionary
 // snapshots. No client-supplied dictionary or score enters a move.
-type wordSaladRules struct { general, cannabis map[string]bool; identity string }
+type wordSaladRules struct { general, cannabis map[string]bool; identity string; passRound bool }
 type saladProfile struct { size,min,max,bag,rack int; hybrids []int; seeds [][3]int }
 var saladProfiles=[]saladProfile{
  {11,2,2,80,7,[]int{2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},[][3]int{{0,0,5},{0,5,4},{1,3,2},{2,2,4},{2,5,1},{3,4,3}}},
@@ -54,7 +54,8 @@ type saladData struct {
 type saladPlacement struct { Row *int `json:"row"`; Col *int `json:"col"`; ID *int `json:"id"`; Blank string `json:"blank,omitempty"` }
 type saladMove struct { Type string `json:"type"`; Tiles []saladPlacement `json:"tiles,omitempty"`; IDs []int `json:"ids,omitempty"` }
 func saladWordOK(w string)bool{if len(w)<2||len(w)>42{return false};for _,c:=range w{if c<'A'||c>'Z'{return false}};return true}
-func NewWordSaladRulesAdapter(general,cannabis []string)(*RulesAdapter,error){
+func NewWordSaladRulesAdapter(general,cannabis []string)(*RulesAdapter,error){return newWordSaladRulesAdapter(general,cannabis,false)}
+func newWordSaladRulesAdapter(general,cannabis []string,passRound bool)(*RulesAdapter,error){
  r:=wordSaladRules{general:map[string]bool{},cannabis:map[string]bool{}}
  h:=sha256.New()
  for i,words:=range [][]string{general,cannabis}{
@@ -64,10 +65,10 @@ func NewWordSaladRulesAdapter(general,cannabis []string)(*RulesAdapter,error){
   h.Write([]byte{byte(i)})
   for _,w:=range keys{if !saladWordOK(w)||target[w]{return nil,ErrInvalid};target[w]=true;h.Write([]byte(w+"\n"))}
  }
- r.identity=hex.EncodeToString(h.Sum(nil));return NewRulesAdapter(r)
+ r.identity=hex.EncodeToString(h.Sum(nil));r.passRound=passRound;return NewRulesAdapter(r)
 }
 func(r wordSaladRules)MaxReplayActions()int{return 8192}
-func(r wordSaladRules)Definition()RuleDefinition{return RuleDefinition{GameID:"scrabble",Version:"v1",Specification:"word-salad-v1;four-seat-cap;hybrid42;dictionary-sha256="+r.identity}}
+func(r wordSaladRules)Definition()RuleDefinition{spec:="word-salad-v1;four-seat-cap;hybrid42;dictionary-sha256="+r.identity;if r.passRound{spec+=";pass-round-v1"};return RuleDefinition{GameID:"scrabble",Version:"v1",Specification:spec}}
 func saladVariant(v string,n int)(saladProfile,string,error){
  parts:=strings.Split(v,":");if len(parts)!=2&&len(parts)!=3{return saladProfile{},"",ErrInvalid}
  size,e:=strconv.Atoi(parts[0]);if e!=nil||strconv.Itoa(size)!=parts[0]{return saladProfile{},"",ErrInvalid}
@@ -104,7 +105,8 @@ func(r wordSaladRules)Validate(f RuleFrame)error{
  seats:=map[int]bool{};for _,s:=range d.Order{if s<0||s>=f.SeatCount||seats[s]{return ErrInvalid};seats[s]=true}
  for i,rack:=range d.Racks{if len(rack)>p.rack||d.Forfeit[i]&&len(rack)!=0{return ErrInvalid};for _,id:=range rack{if !add(id){return ErrInvalid}}}
  for _,v:=range seen{if !v{return ErrInvalid}}
- if f.Terminal {if f.Phase!="finished"||d.Ending==""||f.Turn!=-1{return ErrInvalid}}else if f.Phase!="play"||d.Ending!=""||f.Turn<0||f.Turn>=f.SeatCount||d.Forfeit[f.Turn]||d.Streak>=6||len(d.Winners)!=0{return ErrInvalid}
+ limit:=6;if r.passRound{limit=saladActive(d)}
+ if f.Terminal {if f.Phase!="finished"||d.Ending==""||f.Turn!=-1{return ErrInvalid}}else if f.Phase!="play"||d.Ending!=""||f.Turn<0||f.Turn>=f.SeatCount||d.Forfeit[f.Turn]||d.Streak>=limit||len(d.Winners)!=0{return ErrInvalid}
  return nil
 }
 func saladRemove(rack []int,id int)([]int,bool){for i,v:=range rack{if v==id{return append(rack[:i:i],rack[i+1:]...),true}};return rack,false}
@@ -154,6 +156,7 @@ func(r wordSaladRules)Legal(f RuleFrame,seat int,b *RuleBudget)([]json.RawMessag
  return []json.RawMessage{json.RawMessage(`{"type":"pass"}`)},nil
 }
 func(r wordSaladRules)ValidateSubmitted(f RuleFrame,seat int,raw json.RawMessage,b *RuleBudget)error{_,e:=r.Step(f,seat,raw,b);return e}
+func saladActive(d saladData)int{n:=0;for _,out:=range d.Forfeit{if !out{n++}};return n}
 func saladRackValue(rack,pack []int)int64{var n int64;for _,id:=range rack{n+=saladValues[pack[id]]};return n}
 func saladFinish(f *RuleFrame,d *saladData,p saladProfile,ending string,finisher int){
  d.Ending=ending;f.Phase="finished";f.Terminal=true;f.Turn=-1;f.Winner=nil
@@ -186,7 +189,7 @@ func(r wordSaladRules)Step(f RuleFrame,seat int,raw json.RawMessage,b *RuleBudge
   active:=0;for _,v:=range d.Forfeit{if !v{active++}};if active<=1{saladFinish(&f,&d,p,"forfeit",-1)}
  default:return RuleFrame{},ErrInvalid
  }
- if !f.Terminal&&m.Type!="resign"{if points>0{d.Streak=0}else{d.Streak++};if d.Streak==6{saladFinish(&f,&d,p,"scoreless",-1)}}
+ if !f.Terminal{if r.passRound{switch m.Type{case "pass","timeout":d.Streak++;default:d.Streak=0};if d.Streak>=saladActive(d){saladFinish(&f,&d,p,"scoreless",-1)}}else if m.Type!="resign"{if points>0{d.Streak=0}else{d.Streak++};if d.Streak==6{saladFinish(&f,&d,p,"scoreless",-1)}}}
  if !f.Terminal&&f.Turn==seat{for i,s:=range d.Order{if s==seat{for offset:=1;offset<=len(d.Order);offset++{next:=d.Order[(i+offset)%len(d.Order)];if !d.Forfeit[next]{f.Turn=next;break}};break}}}
  f.Round++;f.Data,e=json.Marshal(d);return f,e
 }

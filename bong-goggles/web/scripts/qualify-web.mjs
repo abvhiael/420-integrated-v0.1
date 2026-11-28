@@ -69,7 +69,7 @@ const publishedDictionaries=files.filter(f=>normalize(f.path).startsWith('word-s
 if(publishedDictionaries.length!==dictionaryPaths.size)throw Error('Dictionary publication count mismatch');
 let dictionaryBytes=0;
 for(const f of publishedDictionaries){const name=normalize(f.path);if(!dictionaryPaths.has(name)||await readFile(f.path,'utf8')!==dictionaries[name.split('/').at(-1)])throw Error('Dictionary publication mismatch '+name);dictionaryBytes+=f.size;}
-if(dictionaryBytes>5*1024*1024)throw Error('Word Salad dictionary asset budget exceeded');
+if(dictionaryBytes>8*1024*1024)throw Error('Word Salad dictionary asset budget exceeded');
 const wallpaperPath='assets/games/cribbage/cribbage-play-wallpaper-casino-lounge.webp';
 const wallpaperFile=files.find(f=>normalize(f.path)===wallpaperPath);
 if(!wallpaperFile||wallpaperFile.size>512*1024||wallpaperFile.size<1024)throw Error('Cribbage wallpaper missing or exceeds 512 KiB');

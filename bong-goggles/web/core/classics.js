@@ -27,7 +27,7 @@ export const CLASSIC_COLLECTIONS=Object.freeze([
  Object.freeze({id:'board',title:'Boards & Tiles',games:Object.freeze([
   item('chess','Chess','2','playable','Orthodox chess; 420ID, human or computer opponents.'),
   item('scrabble','Word Salad','2–4','planned','Six board sizes, cannabis vocabulary bonuses and original premium squares; public Play remains gated pending release qualification.'),
-  item('checkers','Checkers','2','registry','Canonical two-player session registry only.'),
+  item('checkers','Checkers','2','registry','Standard North American Checkers; custom artwork and authenticated room foundation; gameplay not released.'),
   item('backgammon','Backgammon','2','registry','Canonical two-player session registry only.'),
   item('dominoes','Dominoes','2–4','registry','Canonical two-player session registry only.'),
   item('go','Go','2','planned','9×9, 13×13 and 19×19 board sizes proposed.'),

@@ -49,9 +49,11 @@ if(saladFlag!==undefined&&!['true','false'].includes(saladFlag))throw Error('Inv
 const saladOn=saladFlag==='true'||(saladFlag===undefined&&process.env.CF_PAGES==='1'&&process.env.CF_PAGES_BRANCH==='main'&&runtimeConfig.features.classicCommunications);
 if(saladOn&&!runtimeConfig.features.classicCommunications)throw Error('Word Salad requires authenticated Classic rooms and communications');
 runtimeConfig.features.wordSaladProduction=Boolean(saladOn);
+if(![undefined,'','disabled'].includes(process.env.BG_CHECKERS_ACTIVATION))throw Error('Checkers gameplay is not release-qualified');
+runtimeConfig.features.checkersProduction=false;
 validateRuntimeConfig(runtimeConfig);
 
-for(const item of ['index.html','app.js','styles.css','game-kit.css','classic-communications.css','settings.css','branding.css','feed-branding.css','dashboard.css','classics.css','ccc-tabletop.css','ccc-practice.css','cribbage.css','labyrinth.css','chess.css','word-salad.css','welcome-landscape.svg','core','_headers']){
+for(const item of ['index.html','app.js','styles.css','game-kit.css','classic-communications.css','settings.css','branding.css','feed-branding.css','dashboard.css','classics.css','ccc-tabletop.css','ccc-practice.css','cribbage.css','labyrinth.css','chess.css','checkers.css','word-salad.css','welcome-landscape.svg','core','_headers']){
   await cp(resolve(root,item),resolve(out,item),{recursive:true});
 }
 await publishDictionaries(out);

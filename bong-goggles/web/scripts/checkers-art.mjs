@@ -63,4 +63,5 @@ export async function verifyCheckersArt(out,files){
  }
  if(total>5*1024*1024)throw Error('Checkers independent 5 MiB budget exceeded');
  console.log('CK-1.1 verified optimized artwork:',actual.length,total);
+ return total;
 }

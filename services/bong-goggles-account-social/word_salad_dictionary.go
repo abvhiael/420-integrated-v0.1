@@ -6,6 +6,7 @@ import (
  "crypto/sha256"
  "encoding/hex"
  "regexp"
+ "sync"
 )
 
 //go:embed word_salad_lexicon/english.txt
@@ -37,10 +38,14 @@ func wordSaladPinnedCorpus(raw,expected string,count int,cannabis bool)([]string
  }
  return keys,nil
 }
-func NewLegacyProductionWordSaladRulesAdapter()(*RulesAdapter,error){
+var legacySaladOnce sync.Once
+var legacySaladAdapter *RulesAdapter
+var legacySaladError error
+func NewLegacyProductionWordSaladRulesAdapter()(*RulesAdapter,error){legacySaladOnce.Do(func(){legacySaladAdapter,legacySaladError=buildLegacyProductionWordSalad()});return legacySaladAdapter,legacySaladError}
+func buildLegacyProductionWordSalad()(*RulesAdapter,error){
  general,e:=wordSaladPinnedCorpus(wordSaladEnglish,wordSaladEnglishSHA256,wordSaladEnglishCount,false);if e!=nil{return nil,e}
  cannabis,e:=wordSaladPinnedCorpus(wordSaladCannabis,wordSaladCannabisSHA256,wordSaladCannabisCount,true);if e!=nil{return nil,e}
- return NewWordSaladRulesAdapter(general,cannabis)
+ a,e:=NewWordSaladRulesAdapter(general,cannabis);if e!=nil{return nil,e};r:=a.module.(wordSaladRules);r.production=true;return NewRulesAdapter(r)
 }
 func WordSaladDictionaryHashes()(string,string){
  return wordSaladRawHash(wordSaladEnglish),wordSaladRawHash(wordSaladCannabis)
@@ -53,10 +58,16 @@ func WordSaladDictionaryHashes()(string,string){
 const wordSaladColloquial = "ARSE ARSEHOLE ASS ASSHOLE ASSHOLES BADASS BALLSACK BASTARD BASTARDS BITCH BITCHES BOLLOCKS BONER BONERS BOOB BOOBS BOOBIE BOOBIES BULLSHIT BUTTHOLE BUTTPLUG BUTTPLUGS CHODE CHODES CLIT COCK COCKS COCKSUCKER COCKSUCKERS CRAP CUM CUMMING CUNT CUNTS DICK DICKS DICKHEAD DICKHEADS DILDO DILDOS DOUCHE DOUCHEBAG DOUCHEBAGS DUMBASS FART FARTED FARTING FARTS FUCK FUCKED FUCKER FUCKERS FUCKING FUCKS FUCKWIT GODDAMN HANDJOB HANDJOBS HELL HORNY JACKASS JACKOFF JERKOFF JIZZ MOTHERFUCKER MOTHERFUCKERS MOTHERFUCKING NUTSACK ORGASM ORGASMS PISS PISSED PISSER PISSING POOP POOPED POOPING PRICK PRICKS PUSSY PUSSIES QUEEF QUEEFED QUEEFING QUEEFS RIMJOB RIMJOBS SCROTUM SHAG SHAGGED SHAGGING SHIT SHITHEAD SHITHEADS SHITSHOW SHITTING SHITTY SKEET SLUT SLUTS SMUT TITTIES TITTY TOSSER TWAT TWATS WANK WANKED WANKER WANKERS WANKING WETDREAM WHORE WHORES"
 func NewProductionWordSaladRulesAdapter()(*RulesAdapter,error){return newProductionWordSaladRulesAdapter(true)}
 func NewPreviousProductionWordSaladRulesAdapter()(*RulesAdapter,error){return newProductionWordSaladRulesAdapter(false)}
+var currentSaladOnce sync.Once
+var currentSaladAdapter *RulesAdapter
+var currentSaladError error
 func newProductionWordSaladRulesAdapter(passRound bool)(*RulesAdapter,error){
+ currentSaladOnce.Do(func(){currentSaladAdapter,currentSaladError=buildProductionWordSalad()});if currentSaladError!=nil{return nil,currentSaladError};r:=currentSaladAdapter.module.(wordSaladRules);r.passRound=passRound;return NewRulesAdapter(r)
+}
+func buildProductionWordSalad()(*RulesAdapter,error){
  general,e:=wordSaladPinnedCorpus(wordSaladEnglish,wordSaladEnglishSHA256,wordSaladEnglishCount,false);if e!=nil{return nil,e}
  cannabis,e:=wordSaladPinnedCorpus(wordSaladCannabis,wordSaladCannabisSHA256,wordSaladCannabisCount,true);if e!=nil{return nil,e}
  seen:=make(map[string]bool,len(general));for _,w:=range general{seen[w]=true}
  for _,w:=range strings.Fields(wordSaladColloquial){if !saladWordOK(w){return nil,ErrUnavailable};if !seen[w]{general=append(general,w);seen[w]=true}}
- return newWordSaladRulesAdapter(general,cannabis,passRound)
+ a,e:=newWordSaladRulesAdapter(general,cannabis,true);if e!=nil{return nil,e};r:=a.module.(wordSaladRules);r.production=true;legacy,e:=NewLegacyProductionWordSaladRulesAdapter();if e!=nil{return nil,e};r.cannabis=legacy.module.(wordSaladRules).cannabis;return NewRulesAdapter(r)
 }

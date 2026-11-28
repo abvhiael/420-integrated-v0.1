@@ -23,7 +23,7 @@ function wakingResponse(request) {
  const auto = count < MAX_WAKE_CHECKS;
  const refresh = auto ? '<meta http-equiv="refresh" content="12;url=/social-api/auth/start">' : '';
  const message = auto ?
-  'The account service is waking up. This page will retry sign-in automatically.' :
+  'The account service is temporarily unavailable. This page will retry sign-in automatically.' :
   'The service is still unavailable. Return to BongGoggles and try sign-in again after it recovers.';
  const body = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'+
   refresh+'<title>Starting BongGoggles sign-in</title>'+

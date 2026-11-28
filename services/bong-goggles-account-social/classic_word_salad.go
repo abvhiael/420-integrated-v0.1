@@ -11,7 +11,7 @@ import (
 
 // The constructor accepts operator-supplied immutable, licensed dictionary
 // snapshots. No client-supplied dictionary or score enters a move.
-type wordSaladRules struct { general, cannabis map[string]bool; identity string; passRound bool }
+type wordSaladRules struct { general, cannabis map[string]bool; identity string; passRound bool; production bool }
 type saladProfile struct { size,min,max,bag,rack int; hybrids []int; seeds [][3]int }
 var saladProfiles=[]saladProfile{
  {11,2,2,80,7,[]int{2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},[][3]int{{0,0,5},{0,5,4},{1,3,2},{2,2,4},{2,5,1},{3,4,3}}},

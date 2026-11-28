@@ -49,7 +49,7 @@ export class AccountIdentityController{
    const response=await this.client.request('/v1/me');
    if(gen!==this.generation)return this.state;
    if(response.status===401){this.wakeAttempts=0;return this.emit({status:'guest'});}
-   if([502,503,504].includes(response.status))return this.temporary(gen);
+   if([429,502,503,504].includes(response.status))return this.temporary(gen);
    const profile=response.status===200?normalizeAccountIdentity(response.data):null;
    if(!profile)throw Error('Unverified 420ID profile');
    this.wakeAttempts=0;
@@ -87,6 +87,7 @@ export function renderAccountHeader(state,{enabled=false}={}){
  const profile=verifiedAccount(state);
  if(profile)return '<a class="account-auth-link account-auth-link--account" href="/social" data-route="social" aria-label="Open your 420ID account"><span aria-hidden="true" class="account-auth-link__icon">●</span><span>My account: '+escapeHtml(profile.displayName)+'</span></a>'+
   '<button type="button" class="account-logout" data-account-action="logout" aria-label="Sign out of 420ID">Sign Out</button>';
+ if(state?.temporary)return '<span class="account-auth-pending" role="status">Reconnecting to 420ID…</span><button type="button" class="account-auth-retry" data-account-action="retry">Retry 420ID check</button>';
  if(state?.status==='loading')return '<span class="account-auth-pending" role="status">Checking 420ID sign-in…</span>';
  return '<a class="account-auth-link account-auth-link--login" href="/social-api/auth/start" aria-label="Sign In with 420ID"><span aria-hidden="true" class="account-auth-link__icon">↪</span><span><strong>Sign In</strong> · Log in with 420ID</span></a>'+
   (state?.status==='error'?'<button type="button" class="account-auth-retry" data-account-action="retry">Retry 420ID check</button>':'');
@@ -98,6 +99,7 @@ export function renderGameAccountPanel(state,{enabled=false}={}){
  if(profile)return heading+'<p>Signed in as <strong>'+escapeHtml(profile.displayName)+'</strong> <small>(420ID account · wallet optional)</small></p>'+
   '<p>Profile and member settings are shared with BongGoggles Account Social. Match invitations must independently pass server-enforced membership, block and game policies.</p>'+
   '<div class="games-account__actions"><a href="/social" data-route="social">My 420ID profile</a><a href="/account/games" data-route="account-games">Existing account games</a></div></section>';
+ if(state?.temporary)return heading+'<p role="status">Reconnecting to your existing 420ID session. No new sign-in is required unless the session has expired.</p></section>';
  if(state?.status==='loading')return heading+'<p role="status">Checking your existing 420ID session…</p></section>';
  return heading+'<p>'+(state?.status==='error'?'Your 420ID session could not be verified. No personal profile or game data is displayed.':'Sign in to use your existing 420ID account for wallet-free games.')+'</p>'+
   '<div class="games-account__actions"><a class="account-auth-link account-auth-link--login" href="/social-api/auth/start">Sign In with 420ID</a>'+

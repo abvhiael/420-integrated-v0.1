@@ -8,15 +8,15 @@ export function createAccountSocialClient({enabled=false,fetchImpl=fetch}={}){
   if(!(path==='/auth/logout'||/^\/v1\/[a-z0-9/_-]+(?:\?cursor=[A-Za-z0-9_-]+)?$/.test(path)||
     /^\/v1\/classic-sessions\/[0-9a-f-]{36}\/events\?after=(0|[1-9][0-9]{0,17})$/.test(path))||
    path.startsWith('//')||path.includes('..'))throw new Error('Invalid account-social route');
-  const response=await fetchImpl('/social-api'+path,{
+  let response;try{response=await fetchImpl('/social-api'+path,{
    method,credentials:'same-origin',cache:'no-store',redirect:'error',signal,
    headers:{Accept:'application/json',...(body===undefined?{}:{'Content-Type':'application/json'})},
    body:body===undefined?undefined:JSON.stringify(body)
-  });
+  });}catch(e){if(signal?.aborted)throw e;if(e instanceof TypeError)return {status:503,data:null};throw e;}
   // Render Free can return an HTML 502/503/504 during cold start. Preserve
   // the transport status so only read-only session/feed checks can recover.
   // Never reissue the caller's POST/PUT/DELETE or one-use login callback.
-  if(method==='GET'&&[502,503,504].includes(response.status))
+  if([429,502,503,504].includes(response.status))
    return {status:response.status,data:null};
   const type=response.headers?.get?.('content-type')??'';
   if(!type.startsWith('application/json'))throw new Error('Social service response unavailable');
@@ -89,7 +89,7 @@ export function renderHomeAccountSocial(state,{enabled=false}={}){
   content=emptyState({title:'Sign in to see community posts',message:'The off-chain community feed is available to signed-in BongGoggles members.'})+
    '<a class="ui-button" href="/social-api/auth/start">Sign in with 420ID</a>';
  }else if(state.status!=='ready'){
-  content='<p role="status">'+(state.temporary?'The account service is starting; checking again automatically. ':'')+'Off-chain posts could not be verified. No cached or private content is shown.</p>'+
+  content='<p role="status">'+(state.temporary?'The account service is temporarily unavailable; checking again automatically. ':'')+'Off-chain posts could not be verified. No cached or private content is shown.</p>'+
    '<div class="actions"><a class="ui-button ui-button--primary" href="/social-api/auth/start">Sign in again with 420ID</a><button type="button" data-social-action="refresh">Retry community feed</button></div>';
  }else{
   const profile=state.profile??{};

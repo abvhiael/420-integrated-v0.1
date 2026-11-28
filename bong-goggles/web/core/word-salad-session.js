@@ -57,7 +57,7 @@ export class SaladController{
  if(old?.id===id&&old.sequence===s.sequence){if(JSON.stringify(old.privateView)!==JSON.stringify(s.privateView)||old.status!==s.status||old.deadline!==s.deadline)throw Error('Conflicting server revision');if(this.state.status==='ready')return;this.emit({status:'ready',session:s,seats,error:''});return;}
  const notice=old?.id===id?s.privateView.scores.map((x,i)=>x-old.privateView.scores[i]).map((x,i)=>x?'Player '+(i+1)+': '+(x>0?'+':'')+x:'').filter(Boolean).join(' · '):'';
  this.emit({status:'ready',session:s,seats,error:'',notice,...this.clear()});
- }catch(e){if(gen===this.gen){if(e instanceof TemporarySaladError)this.emit({status:'reconnecting',error:e.message});else this.emit({status:'unavailable',session:null,seats:[],matches:[],error:e.message,...this.clear()});}}finally{if(this.pollAbort===controller)this.pollAbort=null;if(gen===this.gen)this.busy=false;}}
+ }catch(e){if(gen===this.gen){if(e instanceof TemporarySaladError||e instanceof TypeError)this.emit({status:'reconnecting',error:e.message});else this.emit({status:'unavailable',session:null,seats:[],matches:[],error:e.message,...this.clear()});}}finally{if(this.pollAbort===controller)this.pollAbort=null;if(gen===this.gen)this.busy=false;}}
  canPlay(){const s=this.state.session;return this.state.status==='ready'&&s?.status==='active'&&s.viewerSeat===s.privateView.turn&&!s.privateView.forfeit[s.viewerSeat];}
  select(id){if(this.canPlay()&&this.state.session.privateView.rack.some(t=>t.id===id))this.emit({selected:id});}
  place(q,blank=this.state.blank){if(!this.canPlay())return;const s=this.state.session,v=s.privateView,id=this.state.selected,t=v.rack.find(x=>x.id===id),size=s.format.p.size;if(!t||!Number.isInteger(q)||q<0||q>=size*size||Object.hasOwn(v.board,q)||t.symbol==='?'&&!/^[A-Z]$/.test(blank))return;
@@ -89,5 +89,5 @@ export class SaladController{
  }
  if(r.status===400||r.status===409)this.emit({status:'idle',...(r.status===400?{}:this.clear())});
  }catch(e){error=e.message;if(gen===this.gen){if(e instanceof TemporarySaladError)this.emit({status:'reconnecting',error});else this.emit({status:'unavailable',session:null,...this.clear()});}}
- finally{if(gen===this.gen){this.busy=false;await this.refreshNow(s.id);if(error&&this.target===s.id&&this.actor===actor&&this.state.status!=='ready')this.emit({error});}}}
+ finally{if(gen===this.gen){this.busy=false;await this.refreshNow(s.id);if(error&&this.target===s.id&&this.actor===actor)this.emit({error});}}}
 }

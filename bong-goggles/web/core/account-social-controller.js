@@ -3,7 +3,7 @@ import {createAccountSocialClient,normalizeAccountSocialFeed,socialInput,isSubje
 // Render Free can suspend its web service. Retrying authenticated GETs while
 // waking is safe; repeating mutations, SSO callbacks or logout is not.
 const WAKE_RETRY_DELAYS_MS=Object.freeze([2000,4000,8000,12000,12000,12000,12000,12000]);
-const temporaryGateway=response=>[502,503,504].includes(response?.status);
+const temporaryGateway=response=>[429,502,503,504].includes(response?.status);
 function defaultWakeScheduler(callback,delay){
  const timer=setTimeout(callback,delay);
  timer?.unref?.(); // Do not leave a Node test worker alive just for a retry.

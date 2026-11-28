@@ -621,4 +621,170 @@ contract ResourceGenesis420Test {
         require(e.nodes.isActiveFor(id,ResourceIds420.SERVICE_STORE),"appointed operator denied");
         _denyCollateralIdentity(DELEGATE,address(e.nodes),data,ResourceNodeRegistry420.NodeExists.selector);
     }
+
+    // A5.2: independent provider, node and delegated principals.
+    function _a52Node(Env memory e, bytes32 provider, address owner, address operator, uint256 serial) internal returns (bytes32 id) {
+        bytes32 endpoint = keccak256(abi.encode("A5.2 endpoint",serial));
+        bytes32 capacity = keccak256(abi.encode("A5.2 capacity",serial));
+        id = e.nodes.canonicalNodeId(provider,ResourceIds420.SERVICE_RELAY,operator,endpoint,capacity);
+        vm.prank(owner);
+        e.nodes.registerNode(id,provider,ResourceIds420.SERVICE_RELAY,operator,endpoint,capacity);
+    }
+
+    function _a52Grant(Env memory e, bytes32 provider, bytes32 node, bytes32 action, address principal) internal returns (bytes32 id) {
+        id = keccak256(abi.encode("A5.2",provider,node,action,principal));
+        e.caps.createGrant(id,principal,ResourceIds420.COMPONENT_RESOURCE,action,e.auth.scopeNode(provider,node),0,0,0,0,0);
+        require(e.auth.isNodeAuthorized(principal,provider,node,action),"node grant missing");
+    }
+
+    function _a52Snapshot(Env memory e, bytes32 node) internal view returns (bytes32) {
+        return keccak256(abi.encode(e.nodes.getNode(node)));
+    }
+
+    function _a52RejectUpdate(Env memory e, bytes32 node, address actor) internal {
+        bytes32 beforeNode = _a52Snapshot(e,node);
+        _denyCollateralIdentity(actor,address(e.nodes),abi.encodeCall(e.nodes.updateNode,(node,keccak256("bad endpoint"),keccak256("bad capacity"))),ResourceNodeRegistry420.Unauthorized.selector);
+        require(_a52Snapshot(e,node)==beforeNode,"denied update mutated node");
+    }
+
+    function _a52RejectState(Env memory e, bytes32 node, address actor, ResourceNodeRegistry420.State next) internal {
+        bytes32 beforeNode = _a52Snapshot(e,node);
+        _denyCollateralIdentity(actor,address(e.nodes),abi.encodeCall(e.nodes.setState,(node,next)),ResourceNodeRegistry420.Unauthorized.selector);
+        require(_a52Snapshot(e,node)==beforeNode,"denied transition mutated node");
+    }
+
+    function testA52NodeOperatorCannotAdministerProviderOrRegisterSibling() public {
+        Env memory e = setup();
+        (bytes32 provider,) = registerRelayNode(e);
+        bytes32 node = _a52Node(e,provider,ALICE,BOB,1);
+        bytes32 sibling = _a52Node(e,provider,ALICE,ALICE,2);
+        bytes32 beforeProvider = _a44Snapshot(e,provider);
+        _a44RejectUpdate(e,BOB,provider);
+        _denyCollateralIdentity(BOB,address(e.providers),abi.encodeCall(e.providers.setState,(provider,ResourceProviderRegistry420.State.SUSPENDED)),ResourceProviderRegistry420.Unauthorized.selector);
+        _denyCollateralIdentity(BOB,address(e.providers),abi.encodeCall(e.providers.setCollateralSponsor,(provider,BOB)),ResourceProviderRegistry420.Unauthorized.selector);
+        bytes32 endpoint = keccak256("unapproved endpoint");
+        bytes32 capacity = keccak256("unapproved capacity");
+        bytes32 newId = e.nodes.canonicalNodeId(provider,ResourceIds420.SERVICE_RELAY,BOB,endpoint,capacity);
+        _denyCollateralIdentity(BOB,address(e.nodes),abi.encodeCall(e.nodes.registerNode,(newId,provider,ResourceIds420.SERVICE_RELAY,BOB,endpoint,capacity)),ResourceNodeRegistry420.Unauthorized.selector);
+        _denyCollateralIdentity(BOB,address(e.nodes),abi.encodeCall(e.nodes.setNodeRegistrationConsent,(provider,newId,BOB)),ResourceNodeRegistry420.Unauthorized.selector);
+        _a52RejectUpdate(e,sibling,BOB);
+        _a52RejectState(e,sibling,BOB,ResourceNodeRegistry420.State.ACTIVE);
+        vm.prank(BOB);
+        e.nodes.updateNode(node,endpoint,capacity);
+        require(e.nodes.getNode(node).endpointHash==endpoint && e.nodes.getNode(node).capacityHash==capacity,"own update denied");
+        require(_a44Snapshot(e,provider)==beforeProvider,"provider mutated");
+    }
+
+    function testA52DistinctOperatorsAndLifecycle() public {
+        Env memory e = setup();
+        (bytes32 provider,) = registerRelayNode(e);
+        bytes32 node = _a52Node(e,provider,ALICE,BOB,1);
+        vm.prank(BOB);
+        e.nodes.setState(node,ResourceNodeRegistry420.State.ACTIVE);
+        _denyCollateralIdentity(BOB,address(e.nodes),abi.encodeCall(e.nodes.updateNode,(node,keccak256("endpoint"),keccak256("capacity"))),ResourceNodeRegistry420.InvalidState.selector);
+        vm.prank(ALICE);
+        e.nodes.setState(node,ResourceNodeRegistry420.State.SUSPENDED);
+        vm.prank(ALICE);
+        e.nodes.updateNode(node,keccak256("provider endpoint"),keccak256("provider capacity"));
+        vm.prank(BOB);
+        e.nodes.setState(node,ResourceNodeRegistry420.State.ACTIVE);
+        vm.prank(BOB);
+        e.nodes.setState(node,ResourceNodeRegistry420.State.SUSPENDED);
+        vm.prank(ALICE);
+        e.nodes.setState(node,ResourceNodeRegistry420.State.ACTIVE);
+        vm.prank(BOB);
+        e.nodes.setState(node,ResourceNodeRegistry420.State.RETIRED);
+        bytes32 beforeNode = _a52Snapshot(e,node);
+        _denyCollateralIdentity(ALICE,address(e.nodes),abi.encodeCall(e.nodes.setState,(node,ResourceNodeRegistry420.State.ACTIVE)),ResourceNodeRegistry420.InvalidState.selector);
+        _denyCollateralIdentity(BOB,address(e.nodes),abi.encodeCall(e.nodes.updateNode,(node,keccak256("endpoint"),keccak256("capacity"))),ResourceNodeRegistry420.InvalidState.selector);
+        require(_a52Snapshot(e,node)==beforeNode && e.providers.isActive(provider),"retirement affected provider or node");
+    }
+
+    function testA52DelegateScopeActionAndRevocation() public {
+        Env memory e = setup();
+        (bytes32 provider,) = registerRelayNode(e);
+        bytes32 node = _a52Node(e,provider,ALICE,BOB,1);
+        bytes32 sibling = _a52Node(e,provider,ALICE,BOB,2);
+        bytes32 foreignProvider = _a44Provider(e,SETTLER,1);
+        vm.prank(SETTLER);
+        e.providers.setState(foreignProvider,ResourceProviderRegistry420.State.ACTIVE);
+        bytes32 foreignNode = _a52Node(e,foreignProvider,SETTLER,SETTLER,3);
+        bytes32 updateGrant = _a52Grant(e,provider,node,ResourceIds420.ACTION_UPDATE_NODE,DELEGATE);
+        _a52RejectUpdate(e,sibling,DELEGATE);
+        _a52RejectUpdate(e,foreignNode,DELEGATE);
+        _a52RejectState(e,node,DELEGATE,ResourceNodeRegistry420.State.ACTIVE);
+        _a44RejectUpdate(e,DELEGATE,provider);
+        vm.prank(DELEGATE);
+        e.nodes.updateNode(node,keccak256("delegate endpoint"),keccak256("delegate capacity"));
+        require(e.nodes.getNode(node).revision==2,"delegate update denied");
+        e.caps.revokeGrant(updateGrant);
+        _a52RejectUpdate(e,node,DELEGATE);
+        bytes32 stateGrant = _a52Grant(e,provider,node,ResourceIds420.ACTION_SET_NODE_STATE,DELEGATE);
+        _a52RejectUpdate(e,node,DELEGATE);
+        _a52RejectState(e,sibling,DELEGATE,ResourceNodeRegistry420.State.ACTIVE);
+        _a52RejectState(e,foreignNode,DELEGATE,ResourceNodeRegistry420.State.ACTIVE);
+        vm.prank(DELEGATE);
+        e.nodes.setState(node,ResourceNodeRegistry420.State.ACTIVE);
+        vm.prank(DELEGATE);
+        e.nodes.setState(node,ResourceNodeRegistry420.State.SUSPENDED);
+        e.caps.revokeGrant(stateGrant);
+        _a52RejectState(e,node,DELEGATE,ResourceNodeRegistry420.State.RETIRED);
+        vm.prank(ALICE);
+        e.nodes.setState(node,ResourceNodeRegistry420.State.RETIRED);
+        require(e.nodes.getNode(node).state==ResourceNodeRegistry420.State.RETIRED,"owner retirement denied");
+    }
+
+    function testA52OfferPublicationDoesNotFollowNodeOwnership() public {
+        Env memory e = setup();
+        (bytes32 provider,) = registerRelayNode(e);
+        bytes32 node = _a52Node(e,provider,ALICE,BOB,1);
+        vm.prank(BOB);
+        e.nodes.setState(node,ResourceNodeRegistry420.State.ACTIVE);
+        bytes32 offer = keccak256("A5.2 offer");
+        bytes memory data = abi.encodeCall(e.offers.publishOffer,(offer,node,uint128(2),uint128(100),keccak256("terms"),uint64(block.timestamp+100)));
+        _denyCollateralIdentity(BOB,address(e.offers),data,ResourceOfferRegistry420.Unauthorized.selector);
+        _a52Grant(e,provider,node,ResourceIds420.ACTION_UPDATE_NODE,DELEGATE);
+        _denyCollateralIdentity(DELEGATE,address(e.offers),data,ResourceOfferRegistry420.Unauthorized.selector);
+        bytes32 grant = _a52Grant(e,provider,node,ResourceIds420.ACTION_PUBLISH_OFFER,BOB);
+        vm.prank(BOB);
+        e.offers.publishOffer(offer,node,2,100,keccak256("terms"),uint64(block.timestamp+100));
+        require(e.offers.isEffective(offer),"explicit publication grant denied");
+        e.caps.revokeGrant(grant);
+        bytes32 second = keccak256("A5.2 second offer");
+        bytes memory secondData = abi.encodeCall(e.offers.publishOffer,(second,node,uint128(2),uint128(100),keccak256("terms"),uint64(block.timestamp+100)));
+        _denyCollateralIdentity(BOB,address(e.offers),secondData,ResourceOfferRegistry420.Unauthorized.selector);
+        vm.prank(ALICE);
+        e.offers.publishOffer(second,node,2,100,keccak256("terms"),uint64(block.timestamp+100));
+        require(e.offers.isEffective(second),"provider publication denied");
+    }
+
+    function testA52ReceiptAuthorityDoesNotFollowProviderOwnership() public {
+        Env memory e = setup();
+        (bytes32 provider,) = registerRelayNode(e);
+        bytes32 node = _a52Node(e,provider,ALICE,BOB,1);
+        vm.prank(BOB);
+        e.nodes.setState(node,ResourceNodeRegistry420.State.ACTIVE);
+        bytes32 offer = keccak256("A5.2 receipt offer");
+        vm.prank(ALICE);
+        e.offers.publishOffer(offer,node,2,100,keccak256("terms"),uint64(block.timestamp+100));
+        vm.prank(SETTLER);
+        bytes32 session = e.sessions.openCanonicalSession(offer,10,uint64(block.timestamp+90),1);
+        bytes32 usage = keccak256("A5.2 usage");
+        bytes32 receipt = e.receipts.canonicalReceiptId(session,1,usage);
+        bytes memory data = abi.encodeCall(e.receipts.submitReceipt,(receipt,session,uint128(1),usage));
+        _denyCollateralIdentity(ALICE,address(e.receipts),data,ResourceReceiptRegistry420.Unauthorized.selector);
+        _denyCollateralIdentity(SETTLER,address(e.receipts),data,ResourceReceiptRegistry420.Unauthorized.selector);
+        _a52Grant(e,provider,node,ResourceIds420.ACTION_PUBLISH_OFFER,DELEGATE);
+        _denyCollateralIdentity(DELEGATE,address(e.receipts),data,ResourceReceiptRegistry420.Unauthorized.selector);
+        require(e.receipts.lastUnits(session)==0,"denied receipt advanced accounting");
+        vm.prank(BOB);
+        e.receipts.submitReceipt(receipt,session,1,usage);
+        require(e.receipts.lastUnits(session)==1 && e.receipts.getReceipt(receipt).nodeId==node,"node receipt denied");
+        bytes32 grant = _a52Grant(e,provider,node,ResourceIds420.ACTION_SUBMIT_RECEIPT,DELEGATE);
+        vm.prank(DELEGATE);
+        e.receipts.submitReceipt(e.receipts.canonicalReceiptId(session,2,usage),session,2,usage);
+        e.caps.revokeGrant(grant);
+        _denyCollateralIdentity(DELEGATE,address(e.receipts),abi.encodeCall(e.receipts.submitReceipt,(e.receipts.canonicalReceiptId(session,3,usage),session,uint128(3),usage)),ResourceReceiptRegistry420.Unauthorized.selector);
+        require(e.receipts.lastUnits(session)==2,"revoked receipt advanced accounting");
+    }
 }

@@ -344,7 +344,7 @@
         "economicLimits": "No value transfer; current capability amount 0",
         "governanceEmergency": "No direct governance override",
         "lifecycle": "Active provider; canonical hash of provider, service, operator and initial nonzero commitments; unique ID; consume consent",
-        "openFinding": "A5.1 qualification pending"
+        "openFinding": "none"
       },
       {
         "operation": "updateNode",
@@ -371,7 +371,7 @@
         "service": "All canonical service classes",
         "economicLimits": "Activation requires eligible provider",
         "governanceEmergency": "No direct governance override",
-        "lifecycle": "Same allowed state transitions as provider; no reactivation of retired node",
+        "lifecycle": "REGISTERED to ACTIVE or RETIRED; ACTIVE to SUSPENDED or RETIRED; SUSPENDED to ACTIVE or RETIRED; activation requires eligible provider; retirement terminal",
         "openFinding": "none"
       },
       {

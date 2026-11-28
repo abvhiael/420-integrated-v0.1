@@ -1,3 +1,4 @@
+import {publishCheckersArt} from './checkers-art.mjs';
 import {publishDictionaries} from './word-salad-dictionaries.mjs';
 import {SALAD_ART} from '../core/word-salad-ui.js';
 import {cp,mkdir,rm,readFile,writeFile,stat} from 'node:fs/promises';
@@ -54,6 +55,7 @@ for(const item of ['index.html','app.js','styles.css','game-kit.css','classic-co
   await cp(resolve(root,item),resolve(out,item),{recursive:true});
 }
 await publishDictionaries(out);
+await publishCheckersArt(root,out);
 // Word Salad: publish only explicit, validated approved PNG artwork.
 for(const asset of SALAD_ART){
  const relative='assets/games/word-salad/'+asset;

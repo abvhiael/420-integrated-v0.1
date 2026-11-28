@@ -37,8 +37,8 @@ type saladBotLexicon struct{general,union saladTrie; rules wordSaladRules}
 type saladBotPolicy struct{level string; lex *saladBotLexicon}
 func NewWordSaladBotPolicies(a *RulesAdapter)(ClassicBotPolicies,error){
  if a==nil{return ClassicBotPolicies{},ErrInvalid};r,ok:=a.module.(wordSaladRules);if !ok{return ClassicBotPolicies{},ErrInvalid}
- idx:=buildSaladIndex(r)
- if r.production{cached,_:=saladIndexCache.LoadOrStore(r.identity,idx);idx=cached.(saladPrefixIndex)}
+ var idx saladPrefixIndex
+ if r.production{if cached,ok:=saladIndexCache.Load(r.identity);ok{idx=cached.(saladPrefixIndex)}else{cached,_:=saladIndexCache.LoadOrStore(r.identity,buildSaladIndex(r));idx=cached.(saladPrefixIndex)}}else{idx=buildSaladIndex(r)}
  l:=&saladBotLexicon{general:idx.general,union:idx.union,rules:r}
  return ClassicBotPolicies{saladBotPolicy{"easy",l},saladBotPolicy{"medium",l},saladBotPolicy{"hard",l}},nil
 }

@@ -77,8 +77,26 @@ if(!wallpaperFile||wallpaperFile.size>512*1024||wallpaperFile.size<1024)throw Er
 const checkersBytes=await verifyCheckersArt(root,files.map(f=>normalize(f.path)));
 const checkersModule=files.find(f=>normalize(f.path)==='core/checkers-art.js');
 if(!checkersModule||checkersModule.size>4096)throw Error('Checkers runtime artwork module missing or oversized');
-const regularFiles=files.filter(f=>!checkersPaths.has(normalize(f.path))&&normalize(f.path)!=='core/checkers-art.js'&&normalize(f.path)!==wallpaperPath&&!dictionaryPaths.has(normalize(f.path))&&!chessArtPaths.has(normalize(f.path))&&!normalize(f.path).startsWith(saladPrefix)&&!normalize(f.path).startsWith(artPrefix)&&!normalize(f.path).startsWith(mapPrefix)&&!normalize(f.path).startsWith(vehiclePrefix)&&!normalize(f.path).startsWith(labyrinthArtPrefix)&&normalize(f.path)!=='assets/games/cribbage/board-cannabis-leaf.png');
-const baseTotal=regularFiles.reduce((sum,f)=>sum+f.size,0);
+// CK-1.2 separately charge new modules and exact growth over CK-1.1.
+const ck12New={'core/checkers-protocol.js':4096,'core/checkers-ui.js':4096,'checkers.css':4096};
+const ck12Baseline={"core/games-ui.js":11076,"core/classics.js":4145,"index.html":1638,"core/runtime-config.js":4168};
+let ck12Bytes=0;
+for(const [name,cap] of Object.entries(ck12New)){
+ const file=files.find(f=>normalize(f.path)===name);
+ if(!file||file.size<1||file.size>cap)throw Error('CK-1.2 missing or oversized module '+name);
+ ck12Bytes+=file.size;
+}
+for(const [name,baseline] of Object.entries(ck12Baseline)){
+ const file=files.find(f=>normalize(f.path)===name);
+ const growth=file?.size-baseline;
+ if(!Number.isSafeInteger(growth)||growth<0||growth>1024)throw Error('CK-1.2 shared growth '+name);
+ ck12Bytes+=growth;
+}
+const cfg=JSON.parse(await readFile(resolve(root,'runtime-config.json'),'utf8'));
+if(cfg.features?.checkersProduction!==false)throw Error('Unqualified Checkers activation');
+if(ck12Bytes>12*1024)throw Error('CK-1.2 static allowance exceeded');
+const regularFiles=files.filter(f=>!Object.hasOwn(ck12New,normalize(f.path))&&!checkersPaths.has(normalize(f.path))&&normalize(f.path)!=='core/checkers-art.js'&&normalize(f.path)!==wallpaperPath&&!dictionaryPaths.has(normalize(f.path))&&!chessArtPaths.has(normalize(f.path))&&!normalize(f.path).startsWith(saladPrefix)&&!normalize(f.path).startsWith(artPrefix)&&!normalize(f.path).startsWith(mapPrefix)&&!normalize(f.path).startsWith(vehiclePrefix)&&!normalize(f.path).startsWith(labyrinthArtPrefix)&&normalize(f.path)!=='assets/games/cribbage/board-cannabis-leaf.png');
+const baseTotal=regularFiles.reduce((sum,f)=>sum+(ck12Baseline[normalize(f.path)]??f.size),0);
 const practiceJs=regularFiles.find(f=>normalize(f.path)==='core/chaos-practice-table.js')?.size;
 const practiceCss=regularFiles.find(f=>normalize(f.path)==='ccc-practice.css')?.size;
 if(!Number.isSafeInteger(practiceJs)||practiceJs<4000||practiceJs>12*1024||
@@ -104,7 +122,7 @@ const bc02Files=Object.freeze({
  'core/dashboard-ui.js':Object.freeze({baseline:5799,maxAdded:8}),
  'styles.css':Object.freeze({baseline:14537,maxAdded:2197})
 });
-const regularSizes=new Map(regularFiles.map(f=>[normalize(f.path),f.size]));
+const regularSizes=new Map(regularFiles.map(f=>[normalize(f.path),ck12Baseline[normalize(f.path)]??f.size]));
 // BC-3.4 independently bounded additions over merged BC-3.3. Historical
 // allowances see the exact pre-Chess sizes, never a widened older ceiling.
 const chessBaselines={"app.js":34748,"core/app-shell.js":13025,"core/games-ui.js":10740,"core/classic-rooms.js":17765,"core/runtime-config.js":3856,"index.html":1569};
@@ -481,7 +499,7 @@ for(const f of vehicleFiles){
  const gitSha=createHash('sha1').update(Buffer.from('blob '+raw.length+'\0')).update(raw).digest('hex');
  if(gitSha!==CHAOS_VEHICLE_SOURCE_SHA[id])throw new Error('Published vehicle token differs from approved source: '+name);
 }
-const total=checkersBytes+checkersModule.size+dictionaryBytes+baseTotal+cardTotal+mapTotal+vehicleTotal+saladArtBytes+chessArtBytes;
+const total=ck12Bytes+checkersBytes+checkersModule.size+dictionaryBytes+baseTotal+cardTotal+mapTotal+vehicleTotal+saladArtBytes+chessArtBytes;
 for(const file of files){const name=relative(root,file.path);if(name.endsWith('.js')&&file.size>limits.singleJs)throw new Error(`JavaScript asset budget exceeded: ${name}`);if(name.endsWith('.css')&&file.size>limits.singleCss)throw new Error(`CSS asset budget exceeded: ${name}`);}
 const html=await readFile(resolve(root,'index.html'),'utf8');const app=await readFile(resolve(root,'app.js'),'utf8');const css=await readFile(resolve(root,'styles.css'),'utf8');const branding=await readFile(resolve(root,'branding.css'),'utf8');
 const tabletopCss=await readFile(resolve(root,'ccc-tabletop.css'),'utf8');

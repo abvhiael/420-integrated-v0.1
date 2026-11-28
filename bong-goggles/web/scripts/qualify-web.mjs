@@ -1,3 +1,4 @@
+import {verifyCheckersArt,paths as checkersPaths} from './checkers-art.mjs';
 import {dictionaryFiles} from './word-salad-dictionaries.mjs';
 import {WORD_SALAD_ART} from './word-salad-art-manifest.mjs';
 import {SALAD_ART} from '../core/word-salad-ui.js';
@@ -73,7 +74,8 @@ if(dictionaryBytes>8*1024*1024)throw Error('Word Salad dictionary asset budget e
 const wallpaperPath='assets/games/cribbage/cribbage-play-wallpaper-casino-lounge.webp';
 const wallpaperFile=files.find(f=>normalize(f.path)===wallpaperPath);
 if(!wallpaperFile||wallpaperFile.size>512*1024||wallpaperFile.size<1024)throw Error('Cribbage wallpaper missing or exceeds 512 KiB');
-const regularFiles=files.filter(f=>normalize(f.path)!==wallpaperPath&&!dictionaryPaths.has(normalize(f.path))&&!chessArtPaths.has(normalize(f.path))&&!normalize(f.path).startsWith(saladPrefix)&&!normalize(f.path).startsWith(artPrefix)&&!normalize(f.path).startsWith(mapPrefix)&&!normalize(f.path).startsWith(vehiclePrefix)&&!normalize(f.path).startsWith(labyrinthArtPrefix)&&normalize(f.path)!=='assets/games/cribbage/board-cannabis-leaf.png');
+await verifyCheckersArt(root,files.map(f=>normalize(f.path)));
+const regularFiles=files.filter(f=>!checkersPaths.has(normalize(f.path))&&normalize(f.path)!==wallpaperPath&&!dictionaryPaths.has(normalize(f.path))&&!chessArtPaths.has(normalize(f.path))&&!normalize(f.path).startsWith(saladPrefix)&&!normalize(f.path).startsWith(artPrefix)&&!normalize(f.path).startsWith(mapPrefix)&&!normalize(f.path).startsWith(vehiclePrefix)&&!normalize(f.path).startsWith(labyrinthArtPrefix)&&normalize(f.path)!=='assets/games/cribbage/board-cannabis-leaf.png');
 const baseTotal=regularFiles.reduce((sum,f)=>sum+f.size,0);
 const practiceJs=regularFiles.find(f=>normalize(f.path)==='core/chaos-practice-table.js')?.size;
 const practiceCss=regularFiles.find(f=>normalize(f.path)==='ccc-practice.css')?.size;

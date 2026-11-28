@@ -1,3 +1,4 @@
+import {renderCheckersFoundation} from './checkers-ui.js';
 import {renderChessScreen} from './chess-ui.js';
 import {card,emptyState,escapeHtml,button} from './design-system.js';
 import {GAME_TYPES,normalizeGameHub,normalizeGameDetail,gameActions,gameLink} from './games.js';
@@ -26,6 +27,7 @@ renderGameAccountPanel(accountIdentityState,{enabled:accountIdentityEnabled})+
 export function renderClassicGamePage(gameId,{screen='intro',view=null,cribbageState=null,labyrinthState=null,chessState=null,accountIdentityState=null,accountIdentityEnabled=false}={}){
 const game=classicGameById(gameId);
 if(!game)return card({title:'Game unavailable',body:emptyState({title:'Game not found',message:'Choose a title from the Games catalogue.'})});
+if(game.id==='checkers')return renderCheckersFoundation({screen,accountIdentityState,accountIdentityEnabled});
 if(game.id==='chess'&&chessState&&chessState.status!=='disabled')return renderChessScreen(screen,chessState);
 if(game.id==='cribbage')return renderCribbageRoute({screen,state:cribbageState,identity:[accountIdentityState,accountIdentityEnabled]});
 const step=CLASSIC_ROADMAP.find(item=>item.id===gameId);

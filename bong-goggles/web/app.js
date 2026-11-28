@@ -84,7 +84,7 @@ if(control.dataset.accountAction==='logout')void signOut420ID();
 function roomRoute(){return resolveRoute(window.location.pathname);}
 function isClassicRoomSurface(){return ['classic-rooms','classic-room'].includes(roomRoute().id);}
 function refreshClassicRooms(){return classicLive?.refresh(roomRoute().roomId??null)??classicRoomsController?.refresh(roomRoute().roomId??null);}
-function bindClassicRooms(){bindClassicRoomsDom(root,classicRoomsController,{isSurface:isClassicRoomSurface(),onRefresh:refreshClassicRooms,onRouteChange,history:window.history});}
+function bindClassicRooms(){bindClassicRoomsDom(root,classicRoomsController,{isSurface:isClassicRoomSurface(),onRefresh:refreshClassicRooms,onRouteChange,history:window.history,isCurrentRoom:id=>roomRoute().roomId===id});}
 function currentAccountExtra(){
 if(window.location.pathname==='/account/messages')return accountExtras?.messages;
 if(window.location.pathname==='/account/games')return accountExtras?.games;

@@ -6,6 +6,8 @@ import {LABYRINTH_RULES_VERSION,LABYRINTH_MANIFEST_SHA,verifyLabyrinthProjection
 export const LABYRINTH_RULES_HASH='9eed3af244d95dd1757b2ce82c1f66d85581a9b0656e0f36eba825cf8ddbc791';
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const statuses=new Set(['active','finished','resigned','timed_out','cancelled']);
+const temporary=s=>[429,502,503,504].includes(s);
+class TemporaryLabyrinthError extends Error{}
 const terminal=new Set(['finished','resigned','timed_out']);
 const arrays=['scores','hand','cardCounts','discarded','pegPile','pegged','saidGo','lastShow','lastAwards','losers'];
 const allowed=['gameId','variant','round','phase','dealer','turn','seat','scores','hand',
@@ -60,6 +62,7 @@ export class LabyrinthSessionController{
  async principal(){
   const me=await this.client.request('/v1/me');
   if(me.status===401)return null;
+  if(temporary(me.status))throw new TemporaryLabyrinthError('420ID temporarily unavailable; reconnecting.');
   if(me.status!==200||me.data?.walletRequired!==false||
     !isSubjectID(me.data?.profile?.subject))throw Error('420ID authentication unavailable');
   return me.data.profile.subject;
@@ -79,23 +82,25 @@ export class LabyrinthSessionController{
    if(this.actor&&!sameActor)this.emit({status:'loading',session:null,view:null,selection:[],recoverable:[]});
    const result=await this.client.request('/v1/classic-sessions/'+id);
    if(generation!==this.generation)return this.state;
+   if(temporary(result.status))throw new TemporaryLabyrinthError('Labyrinth service temporarily unavailable; reconnecting.');
    if([401,403,404].includes(result.status)){this.actor=null;return this.emit({status:'unavailable',session:null,view:null,
     error:'Session access denied or revoked.'});}
    const validated=canonicalSession(result,principal);
    if(!validated||validated.session.id!==id||old&&validated.session.sequence<old.sequence)
     throw Error('Unverified or stale Labyrinth session');
    if(old&&sameActor&&validated.session.viewerSeat===old.viewerSeat&&
-      validated.session.sequence===old.sequence)return this.state;
+      validated.session.sequence===old.sequence&&this.state.status==='ready')return this.state;
    this.actor=principal;
    return this.emit({status:'ready',...validated,selection:[],submitting:false,error:null});
   }catch(e){
+   if(generation===this.generation&&(e instanceof TemporaryLabyrinthError||e instanceof TypeError))return this.emit({status:'reconnecting',session:old??null,view:null,selection:[],error:'Connection interrupted; recovering your existing match.'});
    if(generation===this.generation){this.actor=null;return this.emit({status:'unavailable',session:null,view:null,
     selection:[],error:e.message||'Session unavailable'});}
    return this.state;
   }finally{if(generation===this.generation)this.busy=false;}
  }
  select(selection){
-  if(!this.state.view||!Array.isArray(selection)||selection.length>3||
+  if(this.state.status!=='ready'||!this.state.view||!Array.isArray(selection)||selection.length>3||
     selection.some(c=>!Number.isSafeInteger(c)||!this.state.view.hand.includes(c))||
     new Set(selection).size!==selection.length)return;
   this.emit({selection:[...selection]});
@@ -118,6 +123,7 @@ export class LabyrinthSessionController{
     this.emit({status:'unavailable',session:null,view:null,submitting:false});
     throw Error('Session permission changed');
    }
+   if(temporary(response.status)){this.emit({status:'reconnecting',view:null,submitting:false,error:'Move confirmation unavailable; recovering authoritative match.'});this.busy=false;return await this.open(session.id,{quiet:true});}
    if(response.status===409){
     this.busy=false;this.emit({submitting:false,notice:'Turn changed; refreshing authoritative state'});
     return await this.open(session.id,{quiet:true});

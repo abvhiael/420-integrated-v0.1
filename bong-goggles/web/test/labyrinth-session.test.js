@@ -143,3 +143,33 @@ test('BC-2.4 does not navigate after unverified or unavailable host start',async
   assert.equal(form.dataset.busy,undefined);
  }
 });
+
+test('Labyrinth start survives detached form, background room refresh and bot advancement',async()=>{
+ const gameRoom={id:room,host:member,gameId:'labyrinth-cribbage',status:'ready',seatCount:2,variantId:'labyrinth-2p',seats:[{index:0,controller:'human',subject:member},{index:1,controller:'bot'}]};
+ for(const outcome of [201,409,503]){
+ let handler,duplicate,posts=0,nav=[],release;
+ const gate=new Promise(r=>release=r);
+ const advanced=wire({...view(),discarded:[false,true],cardCounts:[9,6],cribCount:3},2);
+ const ctrl={state:{status:'ready',viewer:member,selected:gameRoom},emit(s){this.state=s;},client:{enabled:true,async request(path,opts){
+ if(path==='/v1/me')return {status:200,data:{walletRequired:false,profile:{subject:member}}};
+ if(path==='/v1/classic-sessions'&&opts?.method==='POST'){posts++;await gate;return outcome===201?{...advanced,status:201}:{status:outcome,data:null};}
+ if(path==='/v1/classic-sessions')return {status:200,data:{onChain:false,wager:false,rewards:false,sessions:[{id,roomId:room,gameId:'labyrinth-cribbage'}]}};
+ if(path==='/v1/classic-sessions/'+id)return advanced;
+ throw Error(path);
+ }}};
+ const bind=save=>bindLabyrinthRoomStart({querySelector:()=>({dataset:{},querySelector:()=>null,addEventListener:(_,fn)=>save(fn)})},ctrl,{history:{pushState:(_,__,path)=>nav.push(path)},isCurrentRoom:x=>x===room});
+ bind(fn=>handler=fn);bind(fn=>duplicate=fn);
+ const pending=handler({preventDefault(){}});await Promise.resolve();await duplicate({preventDefault(){}});ctrl.state={status:'loading'};release();await pending;
+ assert.equal(posts,1);assert.deepEqual(nav,['/games/labyrinth-cribbage/play?session='+id]);
+ }
+});
+test('Labyrinth reconnects at same revision without exposing stale cards or sending moves',async()=>{
+ let down=false,posts=0;
+ const c=new LabyrinthSessionController({enabled:true,fetchImpl:async(url,opts)=>{
+ if(opts?.method==='POST')posts++;
+ if(down)return new Response('unavailable',{status:503});
+ const dto=url.endsWith('/v1/me')?{walletRequired:false,profile:{subject:member}}:wire().data;
+ return new Response(JSON.stringify(dto),{headers:{'Content-Type':'application/json'}});
+ }});
+ await c.open(id);down=true;await c.open(id,{quiet:true});assert.equal(c.state.status,'reconnecting');assert.equal(c.state.session.id,id);assert.equal(c.state.view,null);await assert.rejects(c.act({type:'discard',cards:[0,1,2]}));assert.equal(posts,0);down=false;await c.open(id,{quiet:true});assert.equal(c.state.status,'ready');assert.equal(c.state.view.hand.length,9);
+});

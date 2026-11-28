@@ -4,6 +4,7 @@ import {createAccountSocialClient,isSubjectID} from './account-social.js';
 import {CLASSIC_ROADMAP} from './classics.js';
 import {escapeHtml as esc} from './design-system.js';
 import {renderClassicRoomLive} from './classic-communications-ui.js';
+import {findLabyrinthRoomMatch,labyrinthRoomEntry} from './labyrinth-room-resume.js';
 import {findCribbageRoomMatch,cribbageRoomEntry} from './cribbage-room-resume.js';
 
 export const ROOM_LIMITS=Object.freeze({
@@ -121,7 +122,7 @@ selected=normalizedRoom(verifiedEnvelope(detail,'room'),true);
 if(!selected||selected.id!==roomId)throw Error('Unverified room detail');
 }
 }
-const found=await findCribbageRoomMatch(this.client,selected);
+const found=selected?.gameId==='labyrinth-cribbage'?await findLabyrinthRoomMatch(this.client,selected,me.data.profile.subject):await findCribbageRoomMatch(this.client,selected);
 if(gen!==this.generation)return this.state;
 if(found.status===401)return this.emit({status:'guest'});
 const gameSession=found.session;
@@ -240,11 +241,7 @@ const invites=isHost&&r.invites.length?'<details><summary>Invitation history</su
 ' · '+esc(i.status)+'</li>').join('')+'</ul></details>':'';
 const roomLive=renderClassicRoomLive(r,live);
 const cribbageLink=cribbageRoomEntry(r,state.gameSession,live);
-const labyrinthLink=r.gameId==='labyrinth-cribbage'&&live?.status==='connected'&&
- live.session?.gameId===r.gameId&&live.session?.id&&live.session?.roomId===r.id&&
- ['active','finished'].includes(live.session.status)?
- '<p><a class="ui-button" href="/games/labyrinth-cribbage/play?session='+
- esc(live.session.id)+'" data-route="classic-game">Resume your private Labyrinth table</a></p>':'';
+const labyrinthLink=labyrinthRoomEntry(r,state.gameSession,live,state.viewer);
 const chessLink=chessEnabled&&r.gameId==='chess'&&r.seats.some(s=>s.controller==='human'&&s.subject===state.viewer)&&live?.status==='connected'&&live?.session?.gameId==='chess'&&live.session.roomId===r.id&&/^[0-9a-f-]{36}$/.test(live.session.id)?'<p><a class="ui-button" data-route="classic-game" href="/games/chess/play?session='+esc(live.session.id)+'">Resume Chess</a></p>':'';
 const chessStart=chessEnabled&&r.gameId==='chess'&&isHost&&r.status==='ready'?'<form data-chess-room-start><label>Clock <select name="clockProfile">'+['untimed','1+0','2+1','3+0','3+2','5+0','5+3','10+0','15+10','30+0','30+30','60+0'].map(x=>'<option>'+x+'</option>').join('')+'</select></label><button type="submit">Start Chess</button></form>':'';
 const saladStart=saladEnabled&&r.gameId==='scrabble'&&isHost&&r.status==='ready'?'<form data-salad-room-start><button type="submit">Start Word Salad</button></form>':'';

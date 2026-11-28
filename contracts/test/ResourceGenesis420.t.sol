@@ -27,7 +27,7 @@ contract ResourceGenesis420Test {
     address constant ALICE=address(0xA11CE); address constant BOB=address(0xB0B); address constant SETTLER=address(0x420); address constant DELEGATE=address(0xD311);
     struct Env { CapabilityRegistry420 caps; ResourceAuthorization420 auth; ResourcePolicyRegistry420 policy; ResourceProviderRegistry420 providers; ResourceNodeRegistry420 nodes; ResourceOfferRegistry420 offers; ResourceSessionRegistry420 sessions; ResourceReceiptRegistry420 receipts; ResourceRouter420 router; }
     function setup() internal returns(Env memory e){e.caps=new CapabilityRegistry420();e.caps.registerProtocolComponent(ResourceIds420.COMPONENT_RESOURCE,address(this));e.caps.registerProtocolComponent(VaultIds420.COMPONENT_VAULT,address(this));e.auth=new ResourceAuthorization420(address(e.caps));e.policy=new ResourcePolicyRegistry420(address(this));e.providers=new ResourceProviderRegistry420(address(e.auth),address(this));ResourceCollateralFixture420.deployWithRegistry(e.providers,e.caps);e.nodes=new ResourceNodeRegistry420(address(e.auth),address(e.providers));e.offers=new ResourceOfferRegistry420(address(e.nodes),address(e.providers),address(e.policy),address(e.auth));e.sessions=new ResourceSessionRegistry420(address(e.offers),address(e.auth));ResourceCollateralFixture420.enable(e.providers,address(e.sessions));e.receipts=new ResourceReceiptRegistry420(address(e.sessions),address(e.offers),address(e.nodes));e.router=new ResourceRouter420(address(e.policy),address(e.nodes),address(e.offers));e.policy.setPolicy(ResourceIds420.SERVICE_RELAY,keccak256("relay-policy"),3600,1_000_000,true);e.policy.setPolicy(ResourceIds420.SERVICE_STORE,keccak256("store-policy"),86400,1_000_000,true);}
-    function registerRelayNode(Env memory e) internal returns(bytes32 providerId,bytes32 nodeId){providerId=e.providers.canonicalProviderId(ALICE,1);nodeId=keccak256("node");vm.prank(ALICE);e.providers.registerProvider(providerId,ALICE,keccak256("meta"),keccak256("stake"));ResourceCollateralFixture420.fund(e.providers,providerId,ALICE);vm.prank(ALICE);e.providers.setState(providerId,ResourceProviderRegistry420.State.ACTIVE);vm.prank(ALICE);e.nodes.registerNode(nodeId,providerId,ResourceIds420.SERVICE_RELAY,ALICE,keccak256("endpoint"),keccak256("capacity"));}
+    function registerRelayNode(Env memory e) internal returns(bytes32 providerId,bytes32 nodeId){providerId=e.providers.canonicalProviderId(ALICE,1);nodeId=e.nodes.canonicalNodeId(providerId,ResourceIds420.SERVICE_RELAY,ALICE,keccak256("endpoint"),keccak256("capacity"));vm.prank(ALICE);e.providers.registerProvider(providerId,ALICE,keccak256("meta"),keccak256("stake"));ResourceCollateralFixture420.fund(e.providers,providerId,ALICE);vm.prank(ALICE);e.providers.setState(providerId,ResourceProviderRegistry420.State.ACTIVE);vm.prank(ALICE);e.nodes.registerNode(nodeId,providerId,ResourceIds420.SERVICE_RELAY,ALICE,keccak256("endpoint"),keccak256("capacity"));}
     function activateRelay(Env memory e) internal returns(bytes32 providerId,bytes32 nodeId,bytes32 offerId){(providerId,nodeId)=registerRelayNode(e);offerId=keccak256("offer");vm.prank(ALICE);e.nodes.setState(nodeId,ResourceNodeRegistry420.State.ACTIVE);vm.prank(ALICE);e.offers.publishOffer(offerId,nodeId,2,1000,keccak256("terms"),uint64(block.timestamp+1000));}
     function testProviderNeedsStakeAndDefaultDeny() public {Env memory e=setup();bytes32 p=e.providers.canonicalProviderId(ALICE,1);vm.prank(BOB);(bool bad,)=address(e.providers).call(abi.encodeWithSelector(e.providers.registerProvider.selector,p,ALICE,bytes32(0),bytes32(0)));require(!bad,"third party register");vm.prank(ALICE);e.providers.registerProvider(p,ALICE,bytes32(0),bytes32(0));vm.prank(ALICE);(bool active,)=address(e.providers).call(abi.encodeWithSelector(e.providers.setState.selector,p,ResourceProviderRegistry420.State.ACTIVE));require(!active,"stake bypass");}
     function testFourServiceClassesAreDistinct() public {require(ResourceIds420.SERVICE_RELAY!=ResourceIds420.SERVICE_STORE&&ResourceIds420.SERVICE_STORE!=ResourceIds420.SERVICE_CACHE&&ResourceIds420.SERVICE_CACHE!=ResourceIds420.SERVICE_GATEWAY,"service collision");}
@@ -356,7 +356,7 @@ contract ResourceGenesis420Test {
         _grantCollateralIdentityDelegate(e,id);
         vm.prank(DELEGATE);
         e.providers.setState(id,ResourceProviderRegistry420.State.ACTIVE);
-        bytes32 node = keccak256("sponsored node");
+        bytes32 node = e.nodes.canonicalNodeId(id,ResourceIds420.SERVICE_RELAY,ALICE,keccak256("endpoint"),keccak256("capacity"));
         vm.prank(ALICE);
         e.nodes.registerNode(node,id,ResourceIds420.SERVICE_RELAY,ALICE,keccak256("endpoint"),keccak256("capacity"));
         vm.prank(ALICE);
@@ -559,5 +559,66 @@ contract ResourceGenesis420Test {
         vm.prank(ALICE);
         e.providers.updateProvider(id,keccak256("owner after revocation"),stake);
         require(e.providers.getProvider(id).metadataHash==keccak256("owner after revocation"),"owner update denied");
+    }
+
+    function testA51NodeIdentityPreemptionAndSubstitution() public {
+        Env memory e = setup();
+        (bytes32 a,) = registerRelayNode(e);
+        bytes32 b = _a44Provider(e,BOB,1);
+        vm.prank(BOB);
+        e.providers.setState(b,ResourceProviderRegistry420.State.ACTIVE);
+        bytes32 endpoint = keccak256("A5.1 endpoint");
+        bytes32 capacity = keccak256("A5.1 capacity");
+        bytes32 id = e.nodes.canonicalNodeId(a,ResourceIds420.SERVICE_STORE,ALICE,endpoint,capacity);
+        _denyCollateralIdentity(BOB,address(e.nodes),abi.encodeCall(e.nodes.registerNode,(id,b,ResourceIds420.SERVICE_STORE,BOB,endpoint,capacity)),ResourceNodeRegistry420.InvalidNode.selector);
+        _denyCollateralIdentity(BOB,address(e.nodes),abi.encodeCall(e.nodes.registerNode,(id,a,ResourceIds420.SERVICE_STORE,ALICE,endpoint,capacity)),ResourceNodeRegistry420.Unauthorized.selector);
+        _denyCollateralIdentity(ALICE,address(e.nodes),abi.encodeCall(e.nodes.registerNode,(id,a,ResourceIds420.SERVICE_RELAY,ALICE,endpoint,capacity)),ResourceNodeRegistry420.InvalidNode.selector);
+        _denyCollateralIdentity(ALICE,address(e.nodes),abi.encodeCall(e.nodes.registerNode,(id,a,ResourceIds420.SERVICE_STORE,BOB,endpoint,capacity)),ResourceNodeRegistry420.InvalidNode.selector);
+        _denyCollateralIdentity(ALICE,address(e.nodes),abi.encodeCall(e.nodes.registerNode,(id,a,ResourceIds420.SERVICE_STORE,ALICE,capacity,capacity)),ResourceNodeRegistry420.InvalidNode.selector);
+        _denyCollateralIdentity(ALICE,address(e.nodes),abi.encodeCall(e.nodes.registerNode,(id,a,ResourceIds420.SERVICE_STORE,ALICE,endpoint,endpoint)),ResourceNodeRegistry420.InvalidNode.selector);
+        vm.prank(ALICE);
+        e.nodes.registerNode(id,a,ResourceIds420.SERVICE_STORE,ALICE,endpoint,capacity);
+        _denyCollateralIdentity(ALICE,address(e.nodes),abi.encodeCall(e.nodes.registerNode,(id,a,ResourceIds420.SERVICE_STORE,ALICE,endpoint,capacity)),ResourceNodeRegistry420.NodeExists.selector);
+        vm.prank(ALICE);
+        e.nodes.updateNode(id,capacity,endpoint);
+        vm.prank(ALICE);
+        e.nodes.setState(id,ResourceNodeRegistry420.State.ACTIVE);
+        ResourceNodeRegistry420.Node memory n = e.nodes.getNode(id);
+        require(n.providerId==a && n.serviceId==ResourceIds420.SERVICE_STORE && n.operatorAccount==ALICE && n.endpointHash==capacity && n.capacityHash==endpoint,"identity changed");
+        require(e.nodes.isActiveFor(id,ResourceIds420.SERVICE_STORE) && !e.nodes.isActiveFor(id,ResourceIds420.SERVICE_RELAY),"service substitution");
+        vm.prank(ALICE);
+        e.nodes.setState(id,ResourceNodeRegistry420.State.RETIRED);
+        _denyCollateralIdentity(ALICE,address(e.nodes),abi.encodeCall(e.nodes.registerNode,(id,a,ResourceIds420.SERVICE_STORE,ALICE,endpoint,capacity)),ResourceNodeRegistry420.NodeExists.selector);
+    }
+
+    function testA51DelegatedRegistrationRequiresExactConsentAndGrant() public {
+        Env memory e = setup();
+        (bytes32 a,) = registerRelayNode(e);
+        bytes32 endpoint = keccak256("delegate endpoint");
+        bytes32 capacity = keccak256("delegate capacity");
+        bytes32 id = e.nodes.canonicalNodeId(a,ResourceIds420.SERVICE_STORE,BOB,endpoint,capacity);
+        bytes memory data = abi.encodeCall(e.nodes.registerNode,(id,a,ResourceIds420.SERVICE_STORE,BOB,endpoint,capacity));
+        bytes32 grantId = keccak256("A5.1 registration grant");
+        e.caps.createGrant(grantId,DELEGATE,ResourceIds420.COMPONENT_RESOURCE,ResourceIds420.ACTION_REGISTER_NODE,e.auth.scopeNode(a,id),0,0,0,0,0);
+        _denyCollateralIdentity(DELEGATE,address(e.nodes),data,ResourceNodeRegistry420.Unauthorized.selector);
+        _denyCollateralIdentity(DELEGATE,address(e.nodes),abi.encodeCall(e.nodes.setNodeRegistrationConsent,(a,id,DELEGATE)),ResourceNodeRegistry420.Unauthorized.selector);
+        vm.prank(ALICE);
+        e.nodes.setNodeRegistrationConsent(a,id,DELEGATE);
+        vm.prank(ALICE);
+        e.nodes.setNodeRegistrationConsent(a,id,address(0));
+        _denyCollateralIdentity(DELEGATE,address(e.nodes),data,ResourceNodeRegistry420.Unauthorized.selector);
+        vm.prank(ALICE);
+        e.nodes.setNodeRegistrationConsent(a,id,DELEGATE);
+        e.caps.revokeGrant(grantId);
+        _denyCollateralIdentity(DELEGATE,address(e.nodes),data,ResourceNodeRegistry420.Unauthorized.selector);
+        e.caps.createGrant(keccak256("A5.1 replacement grant"),DELEGATE,ResourceIds420.COMPONENT_RESOURCE,ResourceIds420.ACTION_REGISTER_NODE,e.auth.scopeNode(a,id),0,0,0,0,0);
+        vm.prank(DELEGATE);
+        e.nodes.registerNode(id,a,ResourceIds420.SERVICE_STORE,BOB,endpoint,capacity);
+        ResourceNodeRegistry420.Node memory n = e.nodes.getNode(id);
+        require(n.providerId==a && n.operatorAccount==BOB && n.serviceId==ResourceIds420.SERVICE_STORE && n.endpointHash==endpoint && n.capacityHash==capacity,"delegated payload mismatch");
+        vm.prank(BOB);
+        e.nodes.setState(id,ResourceNodeRegistry420.State.ACTIVE);
+        require(e.nodes.isActiveFor(id,ResourceIds420.SERVICE_STORE),"appointed operator denied");
+        _denyCollateralIdentity(DELEGATE,address(e.nodes),data,ResourceNodeRegistry420.NodeExists.selector);
     }
 }

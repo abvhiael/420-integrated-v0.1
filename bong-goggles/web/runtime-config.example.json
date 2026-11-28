@@ -25,6 +25,7 @@
     "accountXP": false,
     "accountMonetization": false,
     "chessRestricted": false,
+    "checkersProduction": false,
     "wordSaladProduction": false
   }
 }

@@ -10,7 +10,7 @@ const wrap=s=>({status:200,data:{...envelope,session:s}});
 function harness(){
  let s=snapshot(),subject=actor,mode=400,posts=[],down=false,hold=null,readHold=null,readStatus=200;
  const fetchImpl=async(url,opts)=>{
- if(down)throw Error('offline');
+ if(down)throw new TypeError('offline');
  if(url.endsWith('/v1/me'))return subject?response(200,{walletRequired:false,profile:{subject}}):response(401,{});
  if(url.endsWith('/action')){posts.push(JSON.parse(opts.body));if(hold)await hold;if(posts.at(-1).expectedSequence!==s.sequence+1)return response(409,{...envelope,session:s});if(mode===200){s.sequence++;s.turnSeat=1;s.privateView.turn=1;}return response(mode,{...envelope,session:s});}
  if(url.endsWith('/classic-sessions'))return response(200,{...envelope,sessions:[s]});
@@ -41,7 +41,7 @@ test('expired authentication and changed account clear draft and private project
  h.subject=actor;await c.refresh(id);h.subject=other;await c.refresh(id);assert.equal(c.state.session,null);assert.equal(c.state.status,'unavailable');
 });
 test('transport failure hides rack; fresh controller recovers completed shared victory',async()=>{
- const h=harness(),c=h.c;await c.refresh(id);h.down=true;await c.refresh(id);assert.equal(c.state.session,null);h.down=false;await c.refresh(id);assert.equal(c.state.status,'ready');
+ const h=harness(),c=h.c;await c.refresh(id);h.down=true;await c.refresh(id);assert.equal(c.state.session.id,id);assert.equal(c.state.status,'reconnecting');assert.equal(c.canPlay(),false);h.down=false;await c.refresh(id);assert.equal(c.state.status,'ready');
  h.s.status='finished';h.s.sequence++;h.s.turnSeat=null;Object.assign(h.s.privateView,{turn:-1,terminal:true,winners:[0,1],ending:'scoreless'});const next=new SaladController({enabled:true,fetchImpl:h.fetchImpl});await next.refresh(null);assert.equal(next.state.matches[0].status,'finished');assert.equal(Object.hasOwn(next.state.matches[0],'privateView'),false);await next.refresh(id);assert.equal(next.state.status,'ready');assert.deepEqual(next.state.session.privateView.winners,[0,1]);assert.equal(next.canPlay(),false);
 });
 test('runtime invalidates on offline, hidden page, logout and destruction',async()=>{

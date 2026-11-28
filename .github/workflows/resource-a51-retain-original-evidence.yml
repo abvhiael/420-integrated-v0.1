@@ -1,0 +1,49 @@
+name: Resource A5.1 retain original evidence
+on:
+  push:
+    branches: [audit/resource-8a3-a51-node-identity]
+    paths: ['.github/workflows/resource-a51-retain-original-evidence.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  retain:
+    if: github.ref == 'refs/heads/audit/resource-8a3-a51-node-identity'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Retain and verify original qualification evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          archive=docs/audit/420RESOURCE-8A3-A5.1-original-evidence
+          mkdir -p "$archive"
+          for run in 46080188784 46080189048 46080188773 46080188771; do
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run" > "$archive/run-$run.json"
+            jq -e '.head_sha == "bf4ad285cf16113960b4b7b047d3583c81cce735" and .conclusion == "success"' "$archive/run-$run.json"
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run/logs" > "$archive/logs-$run.zip"
+            unzip -t "$archive/logs-$run.zip"
+          done
+          for entry in "15237121023 resource-8a2-compiler-evidence 2d9fc6153d97d7ccd1f14d50f6ecd6396e0ef219624e11920676576f10f611ba" "15237061183 resource-8a3-compiler-evidence 6fad6151fd291a6ad889d44df30e9fe3da0ce2204870906f28c16e3c5d7b0fb2" "15237271125 resource-8a2-indexer-qualification 0071430962bafee32b6d2a7157e66b159cd2c72852b0c21be23a7457c3dfbafe"; do
+            read -r id name digest <<< "$entry"
+            gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$id" > "$archive/artifact-$id.json"
+            jq -e '.workflow_run.head_sha == "bf4ad285cf16113960b4b7b047d3583c81cce735" and .expired == false' "$archive/artifact-$id.json"
+            gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$id/zip" > "$archive/$name.zip"
+            echo "$digest  $archive/$name.zip" | sha256sum -c -
+            unzip -t "$archive/$name.zip"
+          done
+          (cd "$archive"; sha256sum *.zip *.json > SHA256SUMS; sha256sum -c SHA256SUMS)
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f -- "$archive"
+          if git diff --cached --quiet; then exit 0; fi
+          test "$(git ls-remote origin refs/heads/audit/resource-8a3-a51-node-identity | cut -f1)" = "$EXPECTED_HEAD"
+          git commit -m "Retain verified original A5.1 qualification evidence"
+          git push origin HEAD:refs/heads/audit/resource-8a3-a51-node-identity

@@ -1,0 +1,28 @@
+name: BongGoggles 512 MiB Memory Qualification
+on:
+  pull_request:
+    paths:
+      - 'services/bong-goggles-account-social/**'
+      - 'cmd/bong-goggles-social/**'
+      - 'bong-goggles/**'
+      - '.github/workflows/bonggoggles-memory-qualification.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  memory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build actual production dictionary and bot qualification executable
+        run: go test -c -o /tmp/salad-memory.test ./services/bong-goggles-account-social
+      - name: Run under enforced cgroup memory and CPU limits
+        run: |
+          docker run --name salad-memory --memory=512m --memory-swap=512m --cpus=0.5 -e GOMEMLIMIT=384MiB -e GOMAXPROCS=2 -v /tmp/salad-memory.test:/salad-memory.test:ro ubuntu:24.04 /salad-memory.test -test.run '^TestWordSaladMemoryQualification$' -test.v -test.timeout=15m
+          docker inspect salad-memory --format '{{.State.OOMKilled}} {{.State.ExitCode}}' | grep -Fx 'false 0'

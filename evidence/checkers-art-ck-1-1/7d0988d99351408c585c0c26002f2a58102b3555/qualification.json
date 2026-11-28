@@ -1,0 +1,252 @@
+{
+  "schema": 1,
+  "repository": "abvhiael/420-integrated-v0.1",
+  "pr": 1462,
+  "qualifiedHead": "7d0988d99351408c585c0c26002f2a58102b3555",
+  "scope": "CK-1.1",
+  "evidenceType": "GitHub Actions workflow metadata and frontend job/step results",
+  "workflows": [
+    {
+      "id": 46094041744,
+      "name": "BC-4.2 Word Salad Backend Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 126,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041744/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041744/logs",
+      "workflow_id": 430631799
+    },
+    {
+      "id": 46094041705,
+      "name": "BC-3.7 Chess Automated and Adversarial Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 138,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041705/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041705/logs",
+      "workflow_id": 429612951
+    },
+    {
+      "id": 46094041787,
+      "name": "BC-3.4 Chess Player Interface",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 144,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041787/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041787/logs",
+      "workflow_id": 429470329
+    },
+    {
+      "id": 46094041673,
+      "name": "BC-3.6 Chess History and Social Integration",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 141,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041673/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041673/logs",
+      "workflow_id": 429558163
+    },
+    {
+      "id": 46094041806,
+      "name": "BongGoggles 512 MiB Memory Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 8,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041806/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041806/logs",
+      "workflow_id": 433284932
+    },
+    {
+      "id": 46094041684,
+      "name": "BC-2.6 Labyrinth History and Social Integration",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 61,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041684/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041684/logs",
+      "workflow_id": 428422280
+    },
+    {
+      "id": 46094041786,
+      "name": "BC-1.4 Cribbage Player Frontend",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 261,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041786/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041786/logs",
+      "workflow_id": 427102744
+    },
+    {
+      "id": 46094041675,
+      "name": "BC-4.4.2-B Word Salad Browser Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 100,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041675/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041675/logs",
+      "workflow_id": 432046175
+    },
+    {
+      "id": 46094041850,
+      "name": "BC-2.7 Labyrinth Final Repository Qualification",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 54,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041850/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041850/logs",
+      "workflow_id": 428468850
+    },
+    {
+      "id": 46094041847,
+      "name": "AUTH-8/9/10/11 Wallet-Independent BongGoggles Social",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 615,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041847/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041847/logs",
+      "workflow_id": 425547946
+    },
+    {
+      "id": 46094041841,
+      "name": "BC-3.5 Chess Player Interface",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 142,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041841/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041841/logs",
+      "workflow_id": 429517307
+    },
+    {
+      "id": 46094041711,
+      "name": "BC-2.4 Labyrinth 325-Point Interface and Source Art Gate",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 177,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041711/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041711/logs",
+      "workflow_id": 428167912
+    },
+    {
+      "id": 46094041739,
+      "name": "Bong Goggles Web Verification",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 1746,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041739/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041739/logs",
+      "workflow_id": 361846473
+    },
+    {
+      "id": 46094041671,
+      "name": "BC-1.5 Cribbage Authenticated Multiplayer and Recovery",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 278,
+      "jobs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041671/jobs",
+      "logs_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/runs/46094041671/logs",
+      "workflow_id": 427133283
+    }
+  ],
+  "frontendJobs": [
+    {
+      "id": 140821230638,
+      "name": "verify-bong-goggles-web",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 46094041739,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Install web build dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Static web checks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Web unit tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Public social feed HTTP route regression tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Default web build keeps account features disabled",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Explicit Cloudflare account-social activation build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Main-branch Pages production activation build (dashboard variables absent)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "BG-19.13 static asset and accessibility qualification",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Frontend secret scan",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25
+        }
+      ]
+    }
+  ]
+}
